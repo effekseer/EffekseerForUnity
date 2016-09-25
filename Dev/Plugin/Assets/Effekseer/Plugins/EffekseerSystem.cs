@@ -22,12 +22,12 @@ public class EffekseerSystem : MonoBehaviour
 	/// <summary>
 	/// エフェクトインスタンスの最大数
 	/// </summary>
-	public int effectInstances	= 800;
+	public int effectInstances	= 1600;
 
 	/// <summary>
 	/// 描画できる四角形の最大数
 	/// </summary>
-	public int maxSquares		= 1200;
+	public int maxSquares		= 8192;
 	
 	/// <summary>
 	/// サウンドインスタンスの最大数
@@ -191,8 +191,10 @@ public class EffekseerSystem : MonoBehaviour
 		// サポート外グラフィックスAPIのチェック
 		switch (SystemInfo.graphicsDeviceType) {
 		case GraphicsDeviceType.Metal:
-		case GraphicsDeviceType.Vulkan:
+#if UNITY_5_4_OR_NEWER
 		case GraphicsDeviceType.Direct3D12:
+		case GraphicsDeviceType.Vulkan:
+#endif
 			Debug.LogError("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported.");
 			return;
 		}
@@ -227,6 +229,8 @@ public class EffekseerSystem : MonoBehaviour
 		effectList = null;
 		// Effekseerライブラリの終了処理
 		Plugin.EffekseerTerm();
+		// レンダリングスレッドで解放する環境向けにレンダリング命令を投げる
+		GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
 	}
 
 	void OnEnable() {

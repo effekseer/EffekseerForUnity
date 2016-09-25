@@ -22,7 +22,50 @@ namespace EffekseerPlugin
 
 	Effekseer::Manager*				g_EffekseerManager = NULL;
 	EffekseerRendererGL::Renderer*	g_EffekseerRenderer = NULL;
+	int g_maxSquares = 8000;
 
+	void InitRenderer()
+	{
+		using namespace EffekseerRendererGL;
+		OpenGLDeviceType openglDeviceType = OpenGLDeviceType::OpenGL2;
+		switch (g_UnityRendererType) {
+			case kUnityGfxRendererOpenGL:
+				openglDeviceType = OpenGLDeviceType::OpenGL2;
+				break;
+			case kUnityGfxRendererOpenGLES20:
+				openglDeviceType = OpenGLDeviceType::OpenGLES2;
+				break;
+			case kUnityGfxRendererOpenGLES30:
+				openglDeviceType = OpenGLDeviceType::OpenGLES3;
+				break;
+			case kUnityGfxRendererOpenGLCore:
+				openglDeviceType = OpenGLDeviceType::OpenGL3;
+				break;
+			default:
+				return;
+		}
+		
+		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(g_maxSquares, openglDeviceType);
+		if (g_EffekseerRenderer == nullptr) {
+			return;
+		}
+		
+		g_EffekseerRenderer->SetDistortingCallback(new DistortingCallbackGL(g_EffekseerRenderer));
+		g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
+		g_EffekseerManager->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
+		g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
+		g_EffekseerManager->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
+		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+	}
+	
+	void TermRenderer()
+	{
+		if (g_EffekseerRenderer != NULL) {
+			g_EffekseerRenderer->Destory();
+			g_EffekseerRenderer = NULL;
+		}
+	}
+	
 	void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
 	{
 		switch (eventType) {
@@ -63,8 +106,23 @@ extern "C"
 
 	void UNITY_API EffekseerRender(int renderId)
 	{
-		if (g_EffekseerManager == NULL) return;
-		if (g_EffekseerRenderer == NULL) return;
+		if (g_EffekseerManager == NULL) {
+			if (g_EffekseerRenderer != NULL) {
+				// OpenGLコンテキストの都合上ここで終了処理する
+				TermRenderer();
+			}
+			return;
+		}
+		if (g_EffekseerRenderer == NULL) {
+			// OpenGLコンテキストの都合上ここで初期化する
+			InitRenderer();
+			
+			if (g_EffekseerRenderer == NULL) {
+				// 失敗したら終了処理
+				g_EffekseerManager->Destroy();
+				g_EffekseerManager = NULL;
+			}
+		}
 
 		const RenderSettings& settings = renderSettings[renderId];
 
@@ -87,14 +145,9 @@ extern "C"
 	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
-
-		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares);
-		g_EffekseerRenderer->SetDistortingCallback(new DistortingCallbackGL(g_EffekseerRenderer));
-		g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
-		g_EffekseerManager->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
-		g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
-		g_EffekseerManager->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
-		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+		if (g_EffekseerManager == nullptr) {
+			return;
+		}
 	}
 
 	DLLEXPORT void UNITY_API EffekseerTerm()
@@ -102,10 +155,6 @@ extern "C"
 		if (g_EffekseerManager != NULL) {
 			g_EffekseerManager->Destroy();
 			g_EffekseerManager = NULL;
-		}
-		if (g_EffekseerRenderer != NULL) {
-			g_EffekseerRenderer->Destory();
-			g_EffekseerRenderer = NULL;
 		}
 	}
 }
