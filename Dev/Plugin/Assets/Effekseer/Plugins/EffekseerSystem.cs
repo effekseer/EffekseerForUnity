@@ -188,13 +188,28 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	void Awake() {
-#if UNITY_IOS
-		if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal) {
-			Debug.LogError("[Effekseer] Metal is not supported.");
+		// サポート外グラフィックスAPIのチェック
+		switch (SystemInfo.graphicsDeviceType) {
+		case GraphicsDeviceType.Metal:
+		case GraphicsDeviceType.Vulkan:
+		case GraphicsDeviceType.Direct3D12:
+			Debug.LogError("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported.");
+			return;
+		}
+
+		// Zのnearとfarの反転対応
+		bool reversedDepth = false;
+#if UNITY_5_5_OR_NEWER
+		switch (SystemInfo.graphicsDeviceType) {
+		case GraphicsDeviceType.Direct3D11:
+		case GraphicsDeviceType.Direct3D12:
+		case GraphicsDeviceType.Metal:
+			reversedDepth = true;
+			break;
 		}
 #endif
 		// Effekseerライブラリの初期化
-		Plugin.EffekseerInit(effectInstances, maxSquares);
+		Plugin.EffekseerInit(effectInstances, maxSquares, reversedDepth);
 
 		// サウンドインスタンスを作る
 		for (int i = 0; i < soundInstances; i++) {

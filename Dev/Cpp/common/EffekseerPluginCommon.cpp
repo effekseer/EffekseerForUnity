@@ -214,6 +214,10 @@ extern "C"
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
 	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
 		g_EffekseerManager->SetTextureLoader(EffekseerPlugin::TextureLoader::Create(load, unload));
 	}
 
@@ -221,6 +225,10 @@ extern "C"
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload)
 	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
 		g_EffekseerManager->SetModelLoader(EffekseerPlugin::ModelLoader::Create(load, unload));
 	}
 
@@ -228,6 +236,10 @@ extern "C"
 		SoundLoaderLoad load,
 		SoundLoaderUnload unload)
 	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
 		g_EffekseerManager->SetSoundLoader(EffekseerPlugin::SoundLoader::Create(load, unload));
 	}
 
@@ -238,6 +250,10 @@ extern "C"
 		SoundPlayerCheckPlayingTag checkPlayingTag,
 		SoundPlayerStopAll stopAll)
 	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
 		g_EffekseerManager->SetSoundPlayer(EffekseerPlugin::SoundPlayer::Create(play, stopTag, pauseTag, checkPlayingTag, stopAll ));
 	}
 }

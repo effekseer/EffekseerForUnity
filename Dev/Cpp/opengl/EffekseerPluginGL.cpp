@@ -84,7 +84,7 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares)
+	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 

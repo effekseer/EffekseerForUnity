@@ -237,7 +237,7 @@ namespace EffekseerPlugin
 	}
 
 	// DirectX11のEffekseerレンダラを作成
-	EffekseerRenderer::Renderer* CreateRendererDX11(int squareMaxCount)
+	EffekseerRenderer::Renderer* CreateRendererDX11(int squareMaxCount, bool reversedDepth)
 	{
 		class DistortingCallback : public EffekseerRenderer::DistortingCallback
 		{
@@ -371,8 +371,12 @@ namespace EffekseerPlugin
 				renderer->SetBackground( backGroundTextureSRV );
 			}
 		};
+
+		// 深度テストの方法を切り替え
+		const D3D11_COMPARISON_FUNC depthFunc = ( reversedDepth ) ? D3D11_COMPARISON_GREATER : D3D11_COMPARISON_LESS;
 		
-		auto renderer = EffekseerRendererDX11::Renderer::Create( g_D3d11Device, g_D3d11Context, squareMaxCount );
+		auto renderer = EffekseerRendererDX11::Renderer::Create( 
+			g_D3d11Device, g_D3d11Context, squareMaxCount, depthFunc );
 		renderer->SetDistortingCallback( new DistortingCallback( renderer ) );
 		return renderer;
 	}
@@ -442,7 +446,7 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares)
+	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
 	{
 		g_maxInstances = maxInstances;
 		g_maxSquares = maxSquares;
@@ -452,7 +456,7 @@ extern "C"
 			g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX9( maxSquares );
 			break;
 		case kUnityGfxRendererD3D11:
-			g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX11( maxSquares );
+			g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX11( maxSquares, reversedDepth );
 			break;
 		case kUnityGfxRendererOpenGLCore:
 			assert(g_EffekseerRenderer != nullptr);
