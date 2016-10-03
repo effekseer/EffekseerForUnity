@@ -22,6 +22,12 @@
     <ClCompile Include="..\opengl\EffekseerPluginGL.cpp">
       <Filter>opengl</Filter>
     </ClCompile>
+    <ClCompile Include="..\Device\EffekseerPluginDX9.cpp">
+      <Filter>Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Device\EffekseerPluginDX11.cpp">
+      <Filter>Device</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -32,6 +38,9 @@
     </Filter>
     <Filter Include="opengl">
       <UniqueIdentifier>{b1942cf8-d895-48b7-8ab9-e05dfd8f39f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Device">
+      <UniqueIdentifier>{a72ba44a-556a-4468-a388-37707e35bb7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +64,12 @@
     </ClInclude>
     <ClInclude Include="..\opengl\EffekseerPluginGL.h">
       <Filter>opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Device\EffekseerPluginDX9.h">
+      <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Device\EffekseerPluginDX11.h">
+      <Filter>Device</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
