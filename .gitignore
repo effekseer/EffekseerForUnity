@@ -31,7 +31,10 @@ Debug/
 Release/
 Library/
 Temp/
+project.xcworkspace/
+xcuserdata/
 
+Dev/Cpp/macosx/build/
 Dev/Cpp/webgl/CMakeFiles/
 Dev/Cpp/webgl/CMakeCache.txt
 Dev/Cpp/webgl/*.cmake
