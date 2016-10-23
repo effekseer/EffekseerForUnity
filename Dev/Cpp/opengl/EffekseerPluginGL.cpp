@@ -18,7 +18,7 @@ namespace EffekseerPlugin
 {
 	IUnityInterfaces*		g_UnityInterfaces = NULL;
 	IUnityGraphics*			g_UnityGraphics = NULL;
-	UnityGfxRenderer		g_UnityRendererType = kUnityGfxRendererNull;
+	UnityGfxRenderer		g_UnityRendererType = kUnityGfxRendererOpenGLES20;
 
 	Effekseer::Manager*				g_EffekseerManager = NULL;
 	EffekseerRendererGL::Renderer*	g_EffekseerRenderer = NULL;
@@ -119,8 +119,11 @@ extern "C"
 			
 			if (g_EffekseerRenderer == NULL) {
 				// 失敗したら終了処理
-				g_EffekseerManager->Destroy();
-				g_EffekseerManager = NULL;
+				if (g_EffekseerManager) {
+					g_EffekseerManager->Destroy();
+					g_EffekseerManager = NULL;
+				}
+				return;
 			}
 		}
 
