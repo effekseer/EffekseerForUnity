@@ -1,0 +1,44 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+*.suo
+*.tlog
+*.obj
+*.ipch
+*.idb
+*.log
+*.cache
+*.user
+*.pdb
+*.illk
+*.exp
+*.sdf
+
+[Oo]bj/
+
+Debug/
+Release/
+Library/
+Temp/
+
+Dev/Cpp/webgl/CMakeFiles/
+Dev/Cpp/webgl/CMakeCache.txt
+Dev/Cpp/webgl/*.cmake
+Dev/Cpp/webgl/MakeFile
+
+Sample/*/Build/
+Sample/*/Assets/Plugins/
+Sample/*/Temp/
+Sample/*/*.sln
+Sample/*/*.csproj

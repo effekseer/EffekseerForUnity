@@ -22,12 +22,12 @@ public class EffekseerSystem : MonoBehaviour
 	/// <summary>
 	/// エフェクトインスタンスの最大数
 	/// </summary>
-	public int effectInstances	= 800;
+	public int effectInstances	= 1600;
 
 	/// <summary>
 	/// 描画できる四角形の最大数
 	/// </summary>
-	public int maxSquares		= 1200;
+	public int maxSquares		= 8192;
 	
 	/// <summary>
 	/// サウンドインスタンスの最大数
@@ -188,13 +188,31 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	void Awake() {
-#if UNITY_IOS
-		if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal) {
-			Debug.LogError("[Effekseer] Metal is not supported.");
+		// サポート外グラフィックスAPIのチェック
+		switch (SystemInfo.graphicsDeviceType) {
+		case GraphicsDeviceType.Metal:
+#if UNITY_5_4_OR_NEWER
+		case GraphicsDeviceType.Direct3D12:
+#elif UNITY_5_5_OR_NEWER
+		case GraphicsDeviceType.Vulkan:
+#endif
+			Debug.LogError("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported.");
+			return;
+		}
+
+		// Zのnearとfarの反転対応
+		bool reversedDepth = false;
+#if UNITY_5_5_OR_NEWER
+		switch (SystemInfo.graphicsDeviceType) {
+		case GraphicsDeviceType.Direct3D11:
+		case GraphicsDeviceType.Direct3D12:
+		case GraphicsDeviceType.Metal:
+			reversedDepth = true;
+			break;
 		}
 #endif
 		// Effekseerライブラリの初期化
-		Plugin.EffekseerInit(effectInstances, maxSquares);
+		Plugin.EffekseerInit(effectInstances, maxSquares, reversedDepth);
 
 		// サウンドインスタンスを作る
 		for (int i = 0; i < soundInstances; i++) {
@@ -212,6 +230,8 @@ public class EffekseerSystem : MonoBehaviour
 		effectList = null;
 		// Effekseerライブラリの終了処理
 		Plugin.EffekseerTerm();
+		// レンダリングスレッドで解放する環境向けにレンダリング命令を投げる
+		GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
 	}
 
 	void OnEnable() {

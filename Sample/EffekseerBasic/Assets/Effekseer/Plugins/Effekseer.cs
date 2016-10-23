@@ -136,7 +136,7 @@ namespace Effekseer
 		#endif
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerInit(int maxInstances, int maxSquares);
+		public static extern void EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth);
 		
 		[DllImport(pluginName)]
 		public static extern void EffekseerTerm();

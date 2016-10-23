@@ -1,9 +1,17 @@
 fileFormatVersion: 2
-guid: 06b5570e0d3cfc541960572c9ece4739
+guid: 1c680c14711536140beb7280c79c3495
 folderAsset: yes
-timeCreated: 1471744156
+timeCreated: 1457525902
 licenseType: Free
-DefaultImporter:
+PluginImporter:
+  serializedVersion: 1
+  iconMap: {}
+  executionOrder: {}
+  isPreloaded: 0
+  platformData:
+    Any:
+      enabled: 1
+      settings: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 

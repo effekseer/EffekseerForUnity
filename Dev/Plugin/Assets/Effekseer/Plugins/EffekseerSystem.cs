@@ -193,6 +193,7 @@ public class EffekseerSystem : MonoBehaviour
 		case GraphicsDeviceType.Metal:
 #if UNITY_5_4_OR_NEWER
 		case GraphicsDeviceType.Direct3D12:
+#elif UNITY_5_5_OR_NEWER
 		case GraphicsDeviceType.Vulkan:
 #endif
 			Debug.LogError("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported.");

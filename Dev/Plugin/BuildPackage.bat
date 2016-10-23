@@ -15,4 +15,3 @@ set LOG_FILE=log.txt
  -quit
 
 copy %PACKAGE_NAME% ..\..\
-xcopy /Y /R /E Assets ..\..\SampleProject\Assets\
