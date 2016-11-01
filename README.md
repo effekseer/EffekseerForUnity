@@ -124,4 +124,3 @@ Uses Xcode, to open the following project file.
 
 # Todo
 - iOS Metal support
-- Android Vulkan support
