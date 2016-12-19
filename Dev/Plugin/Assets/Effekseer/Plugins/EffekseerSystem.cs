@@ -14,37 +14,58 @@ using UnityEditor;
 
 public class EffekseerSystem : MonoBehaviour
 {
-	/// <summary>
-	/// シーンビューに描画するかどうか
+	/// <summary xml:lang="en">
+	/// Whether it does draw in scene view for editor.
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// エディタのシーンビューに描画するかどうか
 	/// </summary>
 	public bool drawInSceneView = true;
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Maximum number of effect instances.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトインスタンスの最大数
 	/// </summary>
 	public int effectInstances	= 1600;
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Maximum number of quads that can be drawn.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// 描画できる四角形の最大数
 	/// </summary>
 	public int maxSquares		= 8192;
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Maximum number of sound instances.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// サウンドインスタンスの最大数
 	/// </summary>
 	public int soundInstances	= 16;
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// A CameraEvent to draw all effects.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトの描画するタイミング
 	/// </summary>
 	const CameraEvent cameraEvent	= CameraEvent.BeforeImageEffects;
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Plays the effect.
+	/// </summary>
+	/// <param name="name" xml:lang="en">Effect name</param>
+	/// <param name="location" xml:lang="en">Location in world space</param>
+	/// <returns>Played effect instance</returns>
+	/// <summary xml:lang="ja">
 	/// エフェクトの再生
 	/// </summary>
-	/// <param name="name">エフェクト名</param>
-	/// <param name="location">再生開始する位置</param>
-	/// <returns>再生したエフェクトのハンドル</returns>
+	/// <param name="name" xml:lang="ja">エフェクト名</param>
+	/// <param name="location" xml:lang="ja">再生開始する位置</param>
+	/// <returns>再生したエフェクトインスタンス</returns>
 	public static EffekseerHandle PlayEffect(string name, Vector3 location)
 	{
 		IntPtr effect = Instance._GetEffect(name);
@@ -55,7 +76,10 @@ public class EffekseerSystem : MonoBehaviour
 		return new EffekseerHandle(-1);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Stops all effects
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// 全エフェクトの再生停止
 	/// </summary>
 	public static void StopAllEffects()
@@ -63,28 +87,42 @@ public class EffekseerSystem : MonoBehaviour
 		Plugin.EffekseerStopAllEffects();
 	}
 
-	/// <summary>
-	/// エフェクトのロード(Resourcesから)
+	/// <summary xml:lang="en">
+	/// Loads the effect from "Resources/Effekseer/"
 	/// </summary>
-	/// <param name="name">エフェクト名(efkファイルの名前から".efk"を取り除いたもの)</param>
+	/// <param name="name" xml:lang="en">Effect name (that resolved extensions from efk file name)</param>
+	/// <summary xml:lang="ja">
+	/// エフェクトのロード (Resources/Effekseer/から)
+	/// </summary>
+	/// <param name="name" xml:lang="ja">エフェクト名 (efkファイルの名前から".efk"を取り除いたもの)</param>
 	public static void LoadEffect(string name)
 	{
 		Instance._LoadEffect(name, null);
 	}
 	
-	/// <summary>
-	/// エフェクトのロード(AssetBundleから)
+	/// <summary xml:lang="en">
+	/// Loads the effect from AssetBundle
 	/// </summary>
-	/// <param name="name">エフェクト名(efkファイルの名前から".efk"を取り除いたもの)</param>
+	/// <param name="name" xml:lang="en">Effect name (that resolved extensions from efk file name)</param>
+	/// <param name="assetBundle" xml:lang="en">Source AssetBundle</param>
+	/// <summary xml:lang="ja">
+	/// エフェクトのロード (AssetBundleから)
+	/// </summary>
+	/// <param name="name" xml:lang="ja">エフェクト名 (efkファイルの名前から".efk"を取り除いたもの)</param>
+	/// <param name="assetBundle" xml:lang="ja">ロード元のAssetBundle</param>
 	public static void LoadEffect(string name, AssetBundle assetBundle)
 	{
 		Instance._LoadEffect(name, assetBundle);
 	}
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Releases the effect
+	/// </summary>
+	/// <param name="name" xml:lang="en">Effect name (that resolved extensions from efk file name)</param>
+	/// <summary xml:lang="ja">
 	/// エフェクトの解放
 	/// </summary>
-	/// <param name="name">エフェクト名(efkファイルの名前から".efk"を取り除いたもの)</param>
+	/// <param name="name" xml:lang="ja">エフェクト名 (efkファイルの名前から".efk"を取り除いたもの)</param>
 	public static void ReleaseEffect(string name)
 	{
 		Instance._ReleaseEffect(name);
@@ -92,19 +130,19 @@ public class EffekseerSystem : MonoBehaviour
 
 	#region Internal Implimentation
 	
-	// シングルトンのインスタンス
+	// Singleton instance
 	private static EffekseerSystem instance = null;
 	public static EffekseerSystem Instance
 	{
 		get {
 			if (instance == null) {
-				// staticに無ければ探す
+				// Find instance when is not set static variable
 				var system = GameObject.FindObjectOfType<EffekseerSystem>();
 				if (system != null) {
-					// 有ればstaticにセット
+					// Sets static variable when instance is found
 					instance = system;
 				} else {
-					// 無ければ新しく作成
+					// Create instance when instance is not found
 					var go = GameObject.Find("Effekseer");
 					if (go == null) {
 						go = new GameObject("Effekseer");
@@ -116,15 +154,15 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 	
-	// ロードしたエフェクト
+	// Loaded effects
 	private Dictionary<string, IntPtr> effectList = new Dictionary<string, IntPtr>();
-	// ロードしたリソース
+	// Loaded effect resources
 	private List<TextureResource> textureList = new List<TextureResource>();
 	private List<ModelResource> modelList = new List<ModelResource>();
 	private List<SoundResource> soundList = new List<SoundResource>();
 	private List<SoundInstance> soundInstanceList = new List<SoundInstance>();
 	
-	// 現在のロード中のアセットバンドル
+	// A AssetBundle that current loading
 	private AssetBundle assetBundle;
 
 #if UNITY_EDITOR
@@ -492,7 +530,10 @@ public class EffekseerSystem : MonoBehaviour
 	#endregion
 }
 
-/// <summary>
+/// <summary xml:lang="ja">
+/// A instance handle of played effect
+/// </summary>
+/// <summary xml:lang="ja">
 /// 再生したエフェクトのインスタンスハンドル
 /// </summary>
 public struct EffekseerHandle
@@ -508,7 +549,11 @@ public struct EffekseerHandle
 		m_shown = false;
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Stops the played effect.
+	/// All nodes will be destroyed.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトを停止する
 	/// 全てのエフェクトが瞬時に消える
 	/// </summary>
@@ -517,7 +562,11 @@ public struct EffekseerHandle
 		Plugin.EffekseerStopEffect(m_handle);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Stops the root node of the played effect.
+	/// The root node will be destroyed. Then children also will be destroyed by their lifetime.
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// 再生中のエフェクトのルートノードだけを停止
 	/// ルートノードを削除したことで子ノード生成が停止され寿命で徐々に消える
 	/// </summary>
@@ -526,7 +575,10 @@ public struct EffekseerHandle
 		Plugin.EffekseerStopRoot(m_handle);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Sets the effect location
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトの位置を設定
 	/// </summary>
 	/// <param name="location">位置</param>
@@ -535,7 +587,10 @@ public struct EffekseerHandle
 		Plugin.EffekseerSetLocation(m_handle, location.x, location.y, location.z);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Sets the effect rotation
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトの回転を設定
 	/// </summary>
 	/// <param name="rotation">回転</param>
@@ -547,7 +602,10 @@ public struct EffekseerHandle
 		Plugin.EffekseerSetRotation(m_handle, axis.x, axis.y, axis.z, angle * Mathf.Deg2Rad);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Sets the effect scale
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトの拡縮を設定
 	/// </summary>
 	/// <param name="scale">拡縮</param>
@@ -556,7 +614,10 @@ public struct EffekseerHandle
 		Plugin.EffekseerSetScale(m_handle, scale.x, scale.y, scale.z);
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Sets the effect target location
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトのターゲット位置を設定
 	/// </summary>
 	/// <param name="targetLocation">ターゲット位置</param>
@@ -565,7 +626,12 @@ public struct EffekseerHandle
 		Plugin.EffekseerSetTargetLocation(m_handle, targetLocation.x, targetLocation.y, targetLocation.z);
 	}
 
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Pausing the effect
+	/// <para>true:  It will update on Update()</para>
+	/// <para>false: It will not update on Update()</para>
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// ポーズ設定
 	/// <para>true:  停止中。Updateで更新しない</para>
 	/// <para>false: 再生中。Updateで更新する</para>
@@ -581,7 +647,12 @@ public struct EffekseerHandle
 		}
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Showing the effect
+	/// <para>true:  It will be rendering.</para>
+	/// <para>false: It will not be rendering.</para>
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// 表示設定
 	/// <para>true:  表示ON。Drawで描画する</para>
 	/// <para>false: 表示OFF。Drawで描画しない</para>
@@ -597,19 +668,29 @@ public struct EffekseerHandle
 		}
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="ja">
+	/// Whether the effect instance is enabled<br/>
+	/// <para>true:  enabled</para>
+	/// <para>false: disabled</para>
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// インスタンスハンドルが有効かどうか<br/>
 	/// <para>true:  有効</para>
 	/// <para>false: 無効</para>
 	/// </summary>
-	public bool enable
+	public bool enabled
 	{
 		get {
 			return m_handle >= 0;
 		}
 	}
 	
-	/// <summary>
+	/// <summary xml:lang="en">
+	/// Existing state
+	/// <para>true:  It's existed.</para>
+	/// <para>false: It isn't existed or stopped.</para>
+	/// </summary>
+	/// <summary xml:lang="ja">
 	/// エフェクトのインスタンスが存在しているかどうか
 	/// <para>true:  存在している</para>
 	/// <para>false: 再生終了で破棄。もしくはStopで停止された</para>
