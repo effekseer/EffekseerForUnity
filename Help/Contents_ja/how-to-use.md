@@ -6,7 +6,7 @@
 
 - GameEngine/Unity/SampleProject.zip
 
-![](img/unity_example.png)
+![](../img/unity_example.png)
 
 ## リソースファイルについて {#resource_files}
 
@@ -16,7 +16,7 @@ Resources/Effekseer/ 以下に出力済エフェクト(*.efk)やテクスチャ�
 \*.efkファイルをインポートすると、*.bytesにリネームされます。  
 上手くいかないときは、Reimportを試してください。  
 
-![](img/unity_resource.png)
+![](../img/unity_resource.png)
 
 ## エミッタを使って再生する方法 {#emitter_playback}
 
@@ -27,7 +27,7 @@ GameObjectに連動したエフェクトの再生を行うことができます�
 
 Plugin/Effekseer/EffekseerEmitter.csをGameObjectに追加します。
 
-![](img/unity_emitter.png)
+![](../img/unity_emitter.png)
 
 ### インスペクタのプロパティ
 

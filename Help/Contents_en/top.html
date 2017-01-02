@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="../base.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<section class="level1">
+<h1>Effekseer UnityPlugin Manual</h1>
+<figure>
+<img src="../img/plugin_logo.png" />
+</figure>
+<section id="overview" class="level2">
+<h2>Overview</h2>
+<p>It is explanation about cooperation with game engine Unity. As this tool with Unity Technologies is not particularly tied up, Depending on the version and circumstances it may not work well.</p>
+<p>Because Effekseer's playback program is written in C ++, it is handled as a native plugin on Unity.</p>
+</section>
+<section id="environment" class="level2">
+<h2>Environment</h2>
+<section class="level3">
+<h3>Unity version</h3>
+<p>Unity 5.2 or later.<br />
+Personal, Plus and Pro.</p>
+</section>
+<section class="level3">
+<h3>Supported Platform</h3>
+<table>
+<thead>
+<tr class="header">
+<th>
+Platforms
+</th>
+<th style="text-align: center;">
+Graphics API
+</th>
+<th style="text-align: center;">
+Condition
+</th>
+<th width="350px">
+Notes
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="4">
+Windows
+</td>
+<td style="text-align: center;">
+DirectX9
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="4">
+If DirectX 12 is used by default, it must be checked off from Player Settings.
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DirectX11
+</td>
+<td style="text-align: center;">
+○
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DirectX12
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+OpenGLCore
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td rowspan="3">
+macOS
+</td>
+<td style="text-align: center;">
+OpenGLCore
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="3">
+If Metal is used by default, it must be checked off from Player Settings.
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+OpenGL2
+</td>
+<td style="text-align: center;">
+○
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Metal
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td rowspan="3">
+Android
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="3">
+If Vulkan is used by default, it must be checked off from Player Settings.
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+OpenGL ES 3.0
+</td>
+<td style="text-align: center;">
+○
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Vulkan
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td rowspan="3">
+iOS
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="3">
+If Metal is used by default, it must be checked off from Player Settings.
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+OpenGL ES 3.0
+</td>
+<td style="text-align: center;">
+○
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Metal
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td rowspan="2">
+WebGL
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0 (WebGL 1.0)
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="2">
+</td>
+</tr>
+<td style="text-align: center;">
+OpenGL ES 3.0 (WebGL 2.0)
+</td>
+<td style="text-align: center;">
+？
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="how-to-import" class="level2">
+<h2>How to import</h2>
+<p>Open Effekseer.unitypackage and import it into the your Unity project.</p>
+<figure>
+<img src="../img/unity_import.png" />
+</figure>
+</section>
+<section id="issues" class="level2">
+<h2>Known issues</h2>
+<ul>
+<li>Even on supported platforms, effect graphics are not rendered correctly in Graphics API which is not supported.<br>Please check the table of &quot;Supported Platform&quot;.</li>
+</ul>
+</section>
+<section id="todo" class="level2">
+<h2>Todo</h2>
+<ul>
+<li>Support some new Graphics API (Metal, Vulkan)</li>
+<li>Controll point lights</li>
+<li>Collision to particles</li>
+</ul>
+</section>
+</section>
+</body>
+</html>

@@ -50,107 +50,103 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </head>
 <body>
 <section class="level1">
-<h1>使い方</h1>
+<h1>How to use</h1>
 <section id="example_program" class="level2">
-<h2>サンプルプロジェクト</h2>
-<p>下記の場所にEffekseerプラグインを使用したサンプルプロジェクトがあります。</p>
+<h2>Sample Project</h2>
+<p>There is a sample project using the Effekseer plugin in the following places.</p>
 <ul>
 <li>GameEngine/Unity/SampleProject.zip</li>
 </ul>
 <figure>
-<img src="img/unity_example.png" />
+<img src="../img/unity_example.png" />
 </figure>
 </section>
 <section id="resource_files" class="level2">
-<h2>リソースファイルについて</h2>
-<p><font color="red">1.10から変更になりました。</font></p>
-<p>Resources/Effekseer/ 以下に出力済エフェクト(<em>.efk)やテクスチャ、サウンドを配置します。<br />
-*.efkファイルをインポートすると、</em>.bytesにリネームされます。<br />
-上手くいかないときは、Reimportを試してください。</p>
+<h2>About resource files</h2>
+<p>Place the output effect (<em>.efk), texture, sound in Resources/Effekseer/.<br />
+When importing the </em>.efk file, it is renamed *.bytes.<br />
+If it does not work, please try Reimport.</p>
 <figure>
-<img src="img/unity_resource.png" />
+<img src="../img/unity_resource.png" />
 </figure>
 </section>
 <section id="emitter_playback" class="level2">
-<h2>エミッタを使って再生する方法</h2>
+<h2>Play by Emitter</h2>
 <section class="level3">
-<h3>準備</h3>
-<p>エフェクトのエミッタコンポーネントをGameObjectにAddすることで、<br />
-GameObjectに連動したエフェクトの再生を行うことができます。</p>
-<p>Plugin/Effekseer/EffekseerEmitter.csをGameObjectに追加します。</p>
+<h3>Introduction</h3>
+<p>Add EffekseerEmitter to GameObject.<br />
+In that case will play the effect linked to GameObject.</p>
 <figure>
-<img src="img/unity_emitter.png" />
+<img src="../img/unity_emitter.png" />
 </figure>
 </section>
 <section class="level3">
-<h3>インスペクタのプロパティ</h3>
+<h3>Properties</h3>
 <ul>
-<li>Effect Name: エフェクト名を指定します。<br />
-（エフェクト名はエフェクトファイル名(*.efk)から拡張子を除いた文字列です）</li>
-<li>Play On Start: チェックを入れると、シーン開始時(Start()のタイミング)に自動的に再生します。</li>
-<li>Loop: 再生終了したら自動的に再生をリクエストします。</li>
+<li>Effect Name: Specifies the effect name.<br>(The effect name is a character string excluding the extension from the file name (*.efk))</li>
+<li>Play On Start: Plays on Start() when it is checked.</li>
+<li>Loop: When playback ends, it will automatically request playback.</li>
 </ul>
 </section>
 <section class="level3">
-<h3>特徴</h3>
-<p>設置するエフェクトやキャラクターに追従するようなエフェクトに適しています。</p>
+<h3>Notes</h3>
+<p>It is suitable for effects that follow the installed effects and characters.</p>
 </section>
 </section>
 <section id="direct_playback" class="level2">
-<h2>スクリプトから直接再生する方法</h2>
+<h2>Play by Script</h2>
 <section class="level3">
-<h3>スクリプト</h3>
-<p>EffekseerSystem.PlayEffect()を使うことで、スクリプトからエフェクトを再生することができます。</p>
-<p>以下サンプルコードです。</p>
+<h3>Introduction</h3>
+<p>Using EffekseerSystem.PlayEffect(), you can play effects from scripts.</p>
+<p>The sample code is as follows.</p>
 <div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
 {
-    <span class="co">// transformの位置でエフェクトを再生する</span>
+    <span class="co">// Plays effect in transform.position</span>
     EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(<span class="st">&quot;Laser01&quot;</span>, transform.<span class="fu">position</span>);
-    <span class="co">// transformの回転を設定する。</span>
+    <span class="co">// Sets the rotation of the effect</span>
     handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);
 }</code></pre></div>
 </section>
 <section class="level3">
-<h3>特徴</h3>
-<p>PlayEffect()で再生した場合は自動で位置回転は変わりません。<br />
-もし動かしたいときは手動で設定してやる必要があります。</p>
-<p>ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。</p>
+<h3>Note</h3>
+<p>When playing with PlayEffect(), the position rotation does not change automatically. If you want to move it you need to set it manually.</p>
+<p>Suitable for simple use, such as hit effects and explosion effects.</p>
 </section>
 </section>
 <section id="preload" class="level2">
-<h2>事前にリソースをロードする</h2>
+<h2>Preload from Resources</h2>
 <section class="level3">
-<h3>自動でロードされるタイミング</h3>
-<p>エフェクトに必要なリソースファイルがロードされるのは以下のタイミングです。</p>
+<h3>Automatic loading</h3>
+<p>The resource file necessary for the effect is loaded in the following time.</p>
 <ul>
 <li>EffekseerEmitter.Start()</li>
 <li>EffekseerSystem.PlayEffect()</li>
 </ul>
-<p>いずれも指定されたエフェクトのリソースのみがロードされます。<br />
-ロードされたエフェクトは保持され、次回の再生タイミングではロードされません。</p>
-<p>自動ロードはお手軽ですが、ロードするタイミングによってはゲームがフレーム落ちする可能性があります。</p>
+<p>In both cases, only resources of the specified effect are loaded.<br />
+The loaded effect will be retained and will not be loaded the next time it is played.</p>
+<p>Automatic loading is easy, but depending on the moment of loading, the game may fall.</p>
 </section>
 <section class="level3">
-<h3>事前に明示的にロードする</h3>
-<p>事前にLoadEffect()することで、ロードの負荷でフレーム落ちすることを防ぐことができます。</p>
+<h3>Manual preloading</h3>
+<p>By LoadEffect() beforehand, you can prevent frame dropping.</p>
 <div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
 {
-    <span class="co">// エフェクト&quot;Laser01&quot;をロードする。</span>
+    <span class="co">// Loads effect &quot;Laser01.efk&quot;</span>
     EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
 }</code></pre></div>
-<p>ロードされたエフェクトはEffekseerSystemのDestroy時に自動解放されますが、<br />
-不要になったエフェクトをReleaseEffect()で明示的に解放することもできます。</p>
+<p>Loaded effects are automatically released at EffekseerSystem's OnDestroy().<br />
+It is also possible to explicitly release an unnecessary effect with ReleaseEffect().</p>
 <div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">OnDestroy</span>()
 {
-    <span class="co">// エフェクト&quot;Laser01&quot;を解放する</span>
+    <span class="co">// Releases effect &quot;Laser01.efk&quot;</span>
     EffekseerSystem.<span class="fu">ReleaseEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
 }</code></pre></div>
 </section>
 </section>
 <section id="assetbundle" class="level2">
-<h2>アセットバンドルからロードする</h2>
-<p>アセットバンドルからエフェクトリソースをロードすることができます。<br />
-なお、アセットバンドルを使う場合は自動ロードすることはできません。</p>
+<h2>Preload from AssetBundle</h2>
+<p>You can load effect resources from asset bundles.<br />
+If you use asset bundle, you can not auto load.</p>
 <div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs">IEnumerator <span class="fu">Load</span>() {
     <span class="dt">string</span> url = <span class="st">&quot;file:///&quot;</span> + Application.<span class="fu">streamingAssetsPath</span> + <span class="st">&quot;/effects&quot;</span>;
     WWW www = <span class="kw">new</span> <span class="fu">WWW</span>(url);
@@ -158,8 +154,8 @@ GameObjectに連動したエフェクトの再生を行うことができます�
     <span class="dt">var</span> assetBundle = www.<span class="fu">assetBundle</span>;
     EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>, assetBundle);
 }</code></pre></div>
-<p>通常のロードと同じようにReleaseEffect()してください。</p>
-<p>全てのエフェクトのリリースが終わる前にAssetBundleのリリースを行わないでください。</p>
+<p>Please ReleaseEffect() like loading from Resources.</p>
+<p>Please do not release AssetBundle before all effects are released.</p>
 </section>
 </section>
 </body>

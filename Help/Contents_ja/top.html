@@ -15,7 +15,7 @@
 <section class="level1">
 <h1>Effekseer UnityPlugin Manual</h1>
 <figure>
-<img src="img/plugin_logo.png" />
+<img src="../img/plugin_logo.png" />
 </figure>
 <section id="overview" class="level2">
 <h2>概要</h2>
@@ -28,115 +28,191 @@
 <h2>動作環境</h2>
 <section class="level3">
 <h3>Unityバージョン</h3>
-<p>Unity 5.2 以降。 Personal, Plus, Pro<br/>
-Unity 5.3, 5.4, 5.5 で動作確認。
-</p>
+<p>Unity 5.2 以降。 Personal, Plus, Pro Unity 5.3, 5.4, 5.5 で動作確認。</p>
 </section>
 <section class="level3">
-<h3>対応プラットフォーム</h3>
+<h3>プラットフォーム</h3>
 <table>
 <thead>
 <tr class="header">
-<th>プラットフォーム</th>
-<th style="text-align: center;">Graphics API</th>
-<th style="text-align: center;">対応状況</th>
-<th width="350px">備考</th>
+<th>
+プラットフォーム
+</th>
+<th style="text-align: center;">
+Graphics API
+</th>
+<th style="text-align: center;">
+対応状況
+</th>
+<th width="350px">
+備考
+</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td rowspan="4">Windows</td>
-<td style="text-align: center;">DirectX9</td>
-<td style="text-align: center;">○</td>
+<td rowspan="4">
+Windows
+</td>
+<td style="text-align: center;">
+DirectX9
+</td>
+<td style="text-align: center;">
+○
+</td>
 <td rowspan="4">
 Unity 5.5.0 時点で DirectX12 は標準APIに含まれていないので Player Settings の変更は不要。
 </td>
 </tr>
 <tr>
-<td style="text-align: center;">DirectX11</td>
-<td style="text-align: center;">○</td>
-</tr>
-<tr>
-<td style="text-align: center;">DirectX12</td>
-<td style="text-align: center;">×</td>
-</tr>
-<tr>
-<td style="text-align: center;">OpenGLCore</td>
-<td style="text-align: center;">×</td>
-</tr>
-<tr>
-<td rowspan="3">macOS</td>
-<td style="text-align: center;">OpenGLCore</td>
-<td style="text-align: center;">○</td>
-<td rowspan="3">
-Unity 5.5.0 時点で Metal は標準APIに含まれていないので Player Settings の変更は不要。	
+<td style="text-align: center;">
+DirectX11
+</td>
+<td style="text-align: center;">
+○
 </td>
 </tr>
 <tr>
-<td style="text-align: center;">OpenGL2</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;">
+DirectX12
+</td>
+<td style="text-align: center;">
+×
+</td>
 </tr>
 <tr>
-<td style="text-align: center;">Metal</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">
+OpenGLCore
+</td>
+<td style="text-align: center;">
+×
+</td>
 </tr>
 <tr>
-<td rowspan="3">Android</td>
-<td style="text-align: center;">OpenGL ES 2.0</td>
-<td style="text-align: center;">○</td>
+<td rowspan="3">
+macOS
+</td>
+<td style="text-align: center;">
+OpenGLCore
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="3">
+Unity 5.5.0 時点で Metal は標準APIに含まれていないので Player Settings の変更は不要。
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+OpenGL2
+</td>
+<td style="text-align: center;">
+○
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Metal
+</td>
+<td style="text-align: center;">
+×
+</td>
+</tr>
+<tr>
+<td rowspan="3">
+Android
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0
+</td>
+<td style="text-align: center;">
+○
+</td>
 <td rowspan="3">
 Unity 5.5.0 時点で Vulkan は標準APIに含まれていないので Player Settings の変更は不要。
 </td>
 </tr>
 <tr>
-<td style="text-align: center;">OpenGL ES 3.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;">
+OpenGL ES 3.0
+</td>
+<td style="text-align: center;">
+○
+</td>
 </tr>
 <tr>
-<td style="text-align: center;">Vulkan</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">
+Vulkan
+</td>
+<td style="text-align: center;">
+×
+</td>
 </tr>
 <tr>
-<td rowspan="3">iOS</td>
-<td style="text-align: center;">OpenGL ES 2.0</td>
-<td style="text-align: center;">○</td>
+<td rowspan="3">
+iOS
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0
+</td>
+<td style="text-align: center;">
+○
+</td>
 <td rowspan="3">
 Build Settings -&gt; Player Settings -&gt; Other Settings -&gt; Auto Graphics API のチェックを外し、Metalを削除する必要があります。
 </td>
 </tr>
 <tr>
-<td style="text-align: center;">OpenGL ES 3.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;">
+OpenGL ES 3.0
+</td>
+<td style="text-align: center;">
+○
+</td>
 </tr>
 <tr>
-<td style="text-align: center;">Metal</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">
+Metal
+</td>
+<td style="text-align: center;">
+×
+</td>
 </tr>
 <tr>
-<td rowspan="2">WebGL</td>
-<td style="text-align: center;">OpenGL ES 2.0 (WebGL 1.0)</td>
-<td style="text-align: center;">○</td>
-<td rowspan="2"></td>
+<td rowspan="2">
+WebGL
+</td>
+<td style="text-align: center;">
+OpenGL ES 2.0 (WebGL 1.0)
+</td>
+<td style="text-align: center;">
+○
+</td>
+<td rowspan="2">
+</td>
 </tr>
-<td style="text-align: center;">OpenGL ES 3.0 (WebGL 2.0)</td>
-<td style="text-align: center;">？</td>
+<td style="text-align: center;">
+OpenGL ES 3.0 (WebGL 2.0)
+</td>
+<td style="text-align: center;">
+？
+</td>
 </tr>
 </tbody>
 </table>
 </section>
 </section>
-<section id="how_to_install" class="level2">
-<h2>インポート方法</h2>
+<section id="how-to-import" class="level2">
+<h2>導入方法</h2>
 <p>Effekseer.unitypackage を開いてUnityプロジェクトにインポートします。</p>
 <figure>
-<img src="img/unity_import.png" />
+<img src="../img/unity_import.png" />
 </figure>
 </section>
 <section id="issues" class="level2">
 <h2>既知の問題</h2>
 <ul>
-<li>対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>
-上記の"対応プラットフォーム"の表を確認をしてください。</li>
+<li>対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の&quot;対応プラットフォーム&quot;の表を確認をしてください。</li>
 </ul>
 </section>
 <section id="todo" class="level2">

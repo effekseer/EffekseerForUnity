@@ -1,1 +1,0 @@
-pandoc -s %1 -f markdown-auto_identifiers -t html5 --section-divs -c ../base.css -o %~n1.html
