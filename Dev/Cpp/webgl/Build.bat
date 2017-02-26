@@ -4,7 +4,7 @@ rem Enable Visual Studio 2013 environment
 call "%VS120COMNTOOLS% \VsDevCmd.bat"
 
 rem emscripten configuration
-call emcmake cmake
+call emcmake cmake -G "MinGW Makefiles"
 
 rem build
 nmake
