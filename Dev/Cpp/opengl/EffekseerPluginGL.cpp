@@ -61,7 +61,7 @@ namespace EffekseerPlugin
 	void TermRenderer()
 	{
 		if (g_EffekseerRenderer != NULL) {
-			g_EffekseerRenderer->Destory();
+			g_EffekseerRenderer->Destroy();
 			g_EffekseerRenderer = NULL;
 		}
 	}
