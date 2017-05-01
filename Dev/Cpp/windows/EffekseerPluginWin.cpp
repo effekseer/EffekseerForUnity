@@ -128,7 +128,7 @@ namespace EffekseerPlugin
 	{
 		if (g_EffekseerRenderer != NULL)
 		{
-			g_EffekseerRenderer->Destory();
+			g_EffekseerRenderer->Destroy();
 			g_EffekseerRenderer = NULL;
 		}
 	}
@@ -269,7 +269,7 @@ extern "C"
 		{
 			if (g_EffekseerRenderer != NULL)
 			{
-				g_EffekseerRenderer->Destory();
+				g_EffekseerRenderer->Destroy();
 				g_EffekseerRenderer = NULL;
 			}
 		}

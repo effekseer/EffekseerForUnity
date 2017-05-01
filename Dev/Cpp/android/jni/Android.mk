@@ -78,12 +78,8 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.RenderState.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.RibbonRenderer.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.RingRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Shader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.SpriteRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.TextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.TrackRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexArray.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp
 
