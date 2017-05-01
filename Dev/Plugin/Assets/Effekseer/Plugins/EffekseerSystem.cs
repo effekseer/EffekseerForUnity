@@ -336,8 +336,11 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	void LateUpdate() {
-		// 1フレーム更新
-		Plugin.EffekseerUpdate(Time.deltaTime * 60.0f);
+		float deltaFrames = Time.deltaTime * 60.0f;
+		int updateCount = Mathf.Max(1, Mathf.RoundToInt(deltaFrames));
+		for (int i = 0; i < updateCount; i++) {
+			Plugin.EffekseerUpdate(deltaFrames / updateCount);
+		}
 	}
 	
 	void OnPreCullEvent(Camera camera) {
