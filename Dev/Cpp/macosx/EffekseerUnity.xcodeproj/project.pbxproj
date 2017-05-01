@@ -75,11 +75,7 @@
 		48DA217B1C8C5C2C00CAA811 /* EffekseerRendererGL.ModelRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3819F6106D00E32FEC /* EffekseerRendererGL.ModelRenderer.cpp */; };
 		48DA217C1C8C5C2C00CAA811 /* EffekseerRendererGL.Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3A19F6106D00E32FEC /* EffekseerRendererGL.Renderer.cpp */; };
 		48DA217D1C8C5C2C00CAA811 /* EffekseerRendererGL.RenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3D19F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp */; };
-		48DA217E1C8C5C2C00CAA811 /* EffekseerRendererGL.RibbonRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3F19F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp */; };
-		48DA217F1C8C5C2C00CAA811 /* EffekseerRendererGL.RingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4119F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp */; };
 		48DA21801C8C5C2C00CAA811 /* EffekseerRendererGL.Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4319F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp */; };
-		48DA21811C8C5C2C00CAA811 /* EffekseerRendererGL.SpriteRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4519F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp */; };
-		48DA21831C8C5C2C00CAA811 /* EffekseerRendererGL.TrackRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4919F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp */; };
 		48DA21841C8C5C2C00CAA811 /* EffekseerRendererGL.VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF46DA1B3EF9B2005AD8C4 /* EffekseerRendererGL.VertexArray.cpp */; };
 		48DA21851C8C5C2C00CAA811 /* EffekseerRendererGL.VertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4B19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp */; };
 		48DA21871C8C5C4200CAA811 /* EffekseerRenderer.IndexBufferBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4861A334182F847100A8217D /* EffekseerRenderer.IndexBufferBase.cpp */; };
@@ -127,11 +123,7 @@
 		684C1F6619F6106D00E32FEC /* EffekseerRendererGL.ModelRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3819F6106D00E32FEC /* EffekseerRendererGL.ModelRenderer.cpp */; };
 		684C1F6719F6106D00E32FEC /* EffekseerRendererGL.Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3A19F6106D00E32FEC /* EffekseerRendererGL.Renderer.cpp */; };
 		684C1F6819F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3D19F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp */; };
-		684C1F6919F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3F19F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp */; };
-		684C1F6A19F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4119F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp */; };
 		684C1F6B19F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4319F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp */; };
-		684C1F6C19F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4519F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp */; };
-		684C1F6E19F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4919F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp */; };
 		684C1F6F19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4B19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp */; };
 		684C1F7319F610BE00E32FEC /* EffekseerRendererGL.Base.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F2E19F6106D00E32FEC /* EffekseerRendererGL.Base.h */; };
 		684C1F7419F610BE00E32FEC /* EffekseerRendererGL.Base.Pre.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F2F19F6106D00E32FEC /* EffekseerRendererGL.Base.Pre.h */; };
@@ -143,11 +135,7 @@
 		684C1F7A19F610BE00E32FEC /* EffekseerRendererGL.Renderer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3B19F6106D00E32FEC /* EffekseerRendererGL.Renderer.h */; };
 		684C1F7B19F610BE00E32FEC /* EffekseerRendererGL.RendererImplemented.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3C19F6106D00E32FEC /* EffekseerRendererGL.RendererImplemented.h */; };
 		684C1F7C19F610BE00E32FEC /* EffekseerRendererGL.RenderState.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F3E19F6106D00E32FEC /* EffekseerRendererGL.RenderState.h */; };
-		684C1F7D19F610BE00E32FEC /* EffekseerRendererGL.RibbonRenderer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4019F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.h */; };
-		684C1F7E19F610BE00E32FEC /* EffekseerRendererGL.RingRenderer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4219F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.h */; };
 		684C1F7F19F610BE00E32FEC /* EffekseerRendererGL.Shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4419F6106D00E32FEC /* EffekseerRendererGL.Shader.h */; };
-		684C1F8019F610BE00E32FEC /* EffekseerRendererGL.SpriteRenderer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4619F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.h */; };
-		684C1F8219F610BE00E32FEC /* EffekseerRendererGL.TrackRenderer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4A19F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.h */; };
 		684C1F8319F610BE00E32FEC /* EffekseerRendererGL.VertexBuffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 684C1F4C19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.h */; };
 /* End PBXBuildFile section */
 
@@ -308,16 +296,8 @@
 		684C1F3C19F6106D00E32FEC /* EffekseerRendererGL.RendererImplemented.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.RendererImplemented.h; sourceTree = "<group>"; };
 		684C1F3D19F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.RenderState.cpp; sourceTree = "<group>"; };
 		684C1F3E19F6106D00E32FEC /* EffekseerRendererGL.RenderState.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.RenderState.h; sourceTree = "<group>"; };
-		684C1F3F19F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.RibbonRenderer.cpp; sourceTree = "<group>"; };
-		684C1F4019F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.RibbonRenderer.h; sourceTree = "<group>"; };
-		684C1F4119F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.RingRenderer.cpp; sourceTree = "<group>"; };
-		684C1F4219F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.RingRenderer.h; sourceTree = "<group>"; };
 		684C1F4319F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.Shader.cpp; sourceTree = "<group>"; };
 		684C1F4419F6106D00E32FEC /* EffekseerRendererGL.Shader.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.Shader.h; sourceTree = "<group>"; };
-		684C1F4519F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.SpriteRenderer.cpp; sourceTree = "<group>"; };
-		684C1F4619F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.SpriteRenderer.h; sourceTree = "<group>"; };
-		684C1F4919F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.TrackRenderer.cpp; sourceTree = "<group>"; };
-		684C1F4A19F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.TrackRenderer.h; sourceTree = "<group>"; };
 		684C1F4B19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.VertexBuffer.cpp; sourceTree = "<group>"; };
 		684C1F4C19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.VertexBuffer.h; sourceTree = "<group>"; };
 		684C1F4D19F6106D00E32FEC /* EffekseerRendererGL.h */ = {isa = PBXFileReference; fileEncoding = 2147486209; lastKnownFileType = sourcecode.c.h; name = EffekseerRendererGL.h; path = /Users/nalto/work/Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRendererGL.h; sourceTree = "<absolute>"; };
@@ -578,16 +558,8 @@
 				684C1F3C19F6106D00E32FEC /* EffekseerRendererGL.RendererImplemented.h */,
 				684C1F3D19F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp */,
 				684C1F3E19F6106D00E32FEC /* EffekseerRendererGL.RenderState.h */,
-				684C1F3F19F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp */,
-				684C1F4019F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.h */,
-				684C1F4119F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp */,
-				684C1F4219F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.h */,
 				684C1F4319F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp */,
 				684C1F4419F6106D00E32FEC /* EffekseerRendererGL.Shader.h */,
-				684C1F4519F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp */,
-				684C1F4619F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.h */,
-				684C1F4919F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp */,
-				684C1F4A19F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.h */,
 				48CF46DA1B3EF9B2005AD8C4 /* EffekseerRendererGL.VertexArray.cpp */,
 				48CF46DB1B3EF9B2005AD8C4 /* EffekseerRendererGL.VertexArray.h */,
 				684C1F4B19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp */,
@@ -705,17 +677,9 @@
 				684C1F7B19F610BE00E32FEC /* EffekseerRendererGL.RendererImplemented.h in Sources */,
 				684C1F6819F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp in Sources */,
 				684C1F7C19F610BE00E32FEC /* EffekseerRendererGL.RenderState.h in Sources */,
-				684C1F6919F6106D00E32FEC /* EffekseerRendererGL.RibbonRenderer.cpp in Sources */,
-				684C1F7D19F610BE00E32FEC /* EffekseerRendererGL.RibbonRenderer.h in Sources */,
-				684C1F6A19F6106D00E32FEC /* EffekseerRendererGL.RingRenderer.cpp in Sources */,
 				48CF46F41B3EFACB005AD8C4 /* Culling3D.WorldInternal.cpp in Sources */,
-				684C1F7E19F610BE00E32FEC /* EffekseerRendererGL.RingRenderer.h in Sources */,
 				684C1F6B19F6106D00E32FEC /* EffekseerRendererGL.Shader.cpp in Sources */,
 				684C1F7F19F610BE00E32FEC /* EffekseerRendererGL.Shader.h in Sources */,
-				684C1F6C19F6106D00E32FEC /* EffekseerRendererGL.SpriteRenderer.cpp in Sources */,
-				684C1F8019F610BE00E32FEC /* EffekseerRendererGL.SpriteRenderer.h in Sources */,
-				684C1F6E19F6106D00E32FEC /* EffekseerRendererGL.TrackRenderer.cpp in Sources */,
-				684C1F8219F610BE00E32FEC /* EffekseerRendererGL.TrackRenderer.h in Sources */,
 				684C1F6F19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp in Sources */,
 				684C1F8319F610BE00E32FEC /* EffekseerRendererGL.VertexBuffer.h in Sources */,
 				48CF46F01B3EFACB005AD8C4 /* Culling3D.Matrix44.cpp in Sources */,
@@ -772,7 +736,6 @@
 				48DA219C1C8C5C6B00CAA811 /* Effekseer.FCurves.cpp in Sources */,
 				48DA21801C8C5C2C00CAA811 /* EffekseerRendererGL.Shader.cpp in Sources */,
 				48DA217A1C8C5C2C00CAA811 /* EffekseerRendererGL.ModelLoader.cpp in Sources */,
-				48DA217F1C8C5C2C00CAA811 /* EffekseerRendererGL.RingRenderer.cpp in Sources */,
 				48DA21781C8C5C2C00CAA811 /* EffekseerRendererGL.GLExtension.cpp in Sources */,
 				48DA21911C8C5C6B00CAA811 /* Effekseer.CriticalSection.cpp in Sources */,
 				48DA21881C8C5C4200CAA811 /* EffekseerRenderer.ModelRendererBase.cpp in Sources */,
@@ -782,10 +745,8 @@
 				48DA21981C8C5C6B00CAA811 /* Effekseer.EffectNodeRing.cpp in Sources */,
 				4847B9291C8C6A79002723AE /* Culling3D.Matrix44.cpp in Sources */,
 				48DA21A91C8C5C6B00CAA811 /* Effekseer.Vector2D.cpp in Sources */,
-				48DA217E1C8C5C2C00CAA811 /* EffekseerRendererGL.RibbonRenderer.cpp in Sources */,
 				48DA21851C8C5C2C00CAA811 /* EffekseerRendererGL.VertexBuffer.cpp in Sources */,
 				48DA218E1C8C5C4200CAA811 /* EffekseerRenderer.VertexBufferBase.cpp in Sources */,
-				48DA21831C8C5C2C00CAA811 /* EffekseerRendererGL.TrackRenderer.cpp in Sources */,
 				48DA219A1C8C5C6B00CAA811 /* Effekseer.EffectNodeSprite.cpp in Sources */,
 				48DA21931C8C5C6B00CAA811 /* Effekseer.DefaultFile.cpp in Sources */,
 				48A0F71A1C9058F30085466E /* EffekseerPluginGL.cpp in Sources */,
@@ -816,7 +777,6 @@
 				4847B92A1C8C6A79002723AE /* Culling3D.ObjectInternal.cpp in Sources */,
 				48DA21991C8C5C6B00CAA811 /* Effekseer.EffectNodeRoot.cpp in Sources */,
 				48DA21941C8C5C6B00CAA811 /* Effekseer.Effect.cpp in Sources */,
-				48DA21811C8C5C2C00CAA811 /* EffekseerRendererGL.SpriteRenderer.cpp in Sources */,
 				48A0F71C1C9058F30085466E /* EffekseerPluginLoaderGL.cpp in Sources */,
 				48DA21871C8C5C4200CAA811 /* EffekseerRenderer.IndexBufferBase.cpp in Sources */,
 				48DA21A31C8C5C6B00CAA811 /* Effekseer.Matrix44.cpp in Sources */,
