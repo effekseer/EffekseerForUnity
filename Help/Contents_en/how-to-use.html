@@ -6,47 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title></title>
   <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
   <style type="text/css">
-div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
   </style>
   <link rel="stylesheet" href="../base.css">
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <section class="level1">
@@ -63,9 +45,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </section>
 <section id="resource_files" class="level2">
 <h2>About resource files</h2>
-<p>Place the output effect (<em>.efk), texture, sound in Resources/Effekseer/.<br />
-When importing the </em>.efk file, it is renamed *.bytes.<br />
-If it does not work, please try Reimport.</p>
+<p>Place the output effect (<em>.efk), texture, sound in Resources/Effekseer/.<br />When importing the </em>.efk file, it is renamed *.bytes.<br />If it does not work, please try Reimport.</p>
 <figure>
 <img src="../img/unity_resource.png" />
 </figure>
@@ -74,8 +54,7 @@ If it does not work, please try Reimport.</p>
 <h2>Play by Emitter</h2>
 <section class="level3">
 <h3>Introduction</h3>
-<p>Add EffekseerEmitter to GameObject.<br />
-In that case will play the effect linked to GameObject.</p>
+<p>Add EffekseerEmitter to GameObject.<br />In that case will play the effect linked to GameObject.</p>
 <figure>
 <img src="../img/unity_emitter.png" />
 </figure>
@@ -99,13 +78,13 @@ In that case will play the effect linked to GameObject.</p>
 <h3>Introduction</h3>
 <p>Using EffekseerSystem.PlayEffect(), you can play effects from scripts.</p>
 <p>The sample code is as follows.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
+<pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
 {
     <span class="co">// Plays effect in transform.position</span>
     EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(<span class="st">&quot;Laser01&quot;</span>, transform.<span class="fu">position</span>);
     <span class="co">// Sets the rotation of the effect</span>
     handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);
-}</code></pre></div>
+}</code></pre>
 </section>
 <section class="level3">
 <h3>Note</h3>
@@ -122,38 +101,35 @@ In that case will play the effect linked to GameObject.</p>
 <li>EffekseerEmitter.Start()</li>
 <li>EffekseerSystem.PlayEffect()</li>
 </ul>
-<p>In both cases, only resources of the specified effect are loaded.<br />
-The loaded effect will be retained and will not be loaded the next time it is played.</p>
+<p>In both cases, only resources of the specified effect are loaded.<br />The loaded effect will be retained and will not be loaded the next time it is played.</p>
 <p>Automatic loading is easy, but depending on the moment of loading, the game may fall.</p>
 </section>
 <section class="level3">
 <h3>Manual preloading</h3>
 <p>By LoadEffect() beforehand, you can prevent frame dropping.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
+<pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
 {
     <span class="co">// Loads effect &quot;Laser01.efk&quot;</span>
     EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
-}</code></pre></div>
-<p>Loaded effects are automatically released at EffekseerSystem's OnDestroy().<br />
-It is also possible to explicitly release an unnecessary effect with ReleaseEffect().</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">OnDestroy</span>()
+}</code></pre>
+<p>Loaded effects are automatically released at EffekseerSystem's OnDestroy().<br />It is also possible to explicitly release an unnecessary effect with ReleaseEffect().</p>
+<pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">OnDestroy</span>()
 {
     <span class="co">// Releases effect &quot;Laser01.efk&quot;</span>
     EffekseerSystem.<span class="fu">ReleaseEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
-}</code></pre></div>
+}</code></pre>
 </section>
 </section>
 <section id="assetbundle" class="level2">
 <h2>Preload from AssetBundle</h2>
-<p>You can load effect resources from asset bundles.<br />
-If you use asset bundle, you can not auto load.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs">IEnumerator <span class="fu">Load</span>() {
+<p>You can load effect resources from asset bundles.<br />If you use asset bundle, you can not auto load.</p>
+<pre class="sourceCode cs"><code class="sourceCode cs">IEnumerator <span class="fu">Load</span>() {
     <span class="dt">string</span> url = <span class="st">&quot;file:///&quot;</span> + Application.<span class="fu">streamingAssetsPath</span> + <span class="st">&quot;/effects&quot;</span>;
     WWW www = <span class="kw">new</span> <span class="fu">WWW</span>(url);
     <span class="kw">yield</span> <span class="kw">return</span> www;
     <span class="dt">var</span> assetBundle = www.<span class="fu">assetBundle</span>;
     EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>, assetBundle);
-}</code></pre></div>
+}</code></pre>
 <p>Please ReleaseEffect() like loading from Resources.</p>
 <p>Please do not release AssetBundle before all effects are released.</p>
 </section>
