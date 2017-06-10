@@ -78,7 +78,7 @@ namespace EffekseerPlugin
 			}
 		}
 
-		virtual void OnDistorting()
+		virtual bool OnDistorting()
 		{
 			HRESULT hr = S_OK;
 
@@ -139,6 +139,8 @@ namespace EffekseerPlugin
 			ES_SAFE_RELEASE(renderTargetView);
 
 			renderer->SetBackground(backGroundTextureSRV);
+
+			return true;
 		}
 	};
 

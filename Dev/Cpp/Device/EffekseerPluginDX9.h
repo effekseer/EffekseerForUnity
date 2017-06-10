@@ -26,7 +26,7 @@ namespace EffekseerPlugin
 		// コピー先のテクスチャを準備
 		void PrepareTexture(uint32_t width, uint32_t height, D3DFORMAT format);
 
-		void OnDistorting() override;
+		bool OnDistorting() override;
 	};
 
 	EffekseerRenderer::Renderer* CreateRendererDX9(int squareMaxCount, IDirect3DDevice9* d3d9Device);

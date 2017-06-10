@@ -17,7 +17,7 @@ namespace EffekseerPlugin
 		struct TextureResource
 		{
 			int referenceCount = 1;
-			void* texture = nullptr;
+			Effekseer::TextureData texture = {};
 		};
 
 		std::map<std::u16string, TextureResource> resources;
@@ -29,8 +29,8 @@ namespace EffekseerPlugin
 
 		virtual ~TextureLoaderGL();
 
-		virtual void* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
+		virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
 
-		virtual void Unload(void* source);
+		virtual void Unload(Effekseer::TextureData* source);
 	};
 };

@@ -32,6 +32,6 @@ namespace EffekseerPlugin
 		// コピー先のテクスチャを準備
 		void PrepareTexture(uint32_t width, uint32_t height, GLint internalFormat);
 
-		virtual void OnDistorting();
+		virtual bool OnDistorting();
 	};
 }

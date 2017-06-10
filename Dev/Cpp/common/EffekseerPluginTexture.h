@@ -7,7 +7,7 @@
 
 namespace EffekseerPlugin
 {
-	using TextureLoaderLoad = void* (UNITY_API*)(const char16_t* path);
+	using TextureLoaderLoad = void* (UNITY_API*)(const char16_t* path, int32_t* width, int32_t* height, int32_t* format);
 	using TextureLoaderUnload = void (UNITY_API*)(const char16_t* path);
 
 	class TextureLoader : public Effekseer::TextureLoader
@@ -25,8 +25,8 @@ namespace EffekseerPlugin
 			TextureLoaderUnload unload) 
 			: load(load), unload(unload) {}
 		virtual ~TextureLoader() {}
-		virtual void* Load( const EFK_CHAR* path, Effekseer::TextureType textureType ) = 0;
-		virtual void Unload( void* source ) = 0;
+		virtual Effekseer::TextureData* Load( const EFK_CHAR* path, Effekseer::TextureType textureType ) = 0;
+		virtual void Unload( Effekseer::TextureData* source ) = 0;
 	};
 };
 

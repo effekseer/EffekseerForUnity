@@ -34,7 +34,7 @@ namespace EffekseerPlugin
 		}
 	}
 
-	void DistortingCallbackDX9::OnDistorting()
+	bool DistortingCallbackDX9::OnDistorting()
 	{
 		IDirect3DSurface9* targetSurface = nullptr;
 		IDirect3DSurface9* texSurface = nullptr;
@@ -43,7 +43,7 @@ namespace EffekseerPlugin
 		// レンダーターゲットを取得
 		hr = m_d3d9Device->GetRenderTarget(0, &targetSurface);
 		if (FAILED(hr)){
-			return;
+			return false;
 		}
 
 		// レンダーターゲットの情報を取得
@@ -71,13 +71,13 @@ namespace EffekseerPlugin
 		hr = backGroundTexture->GetSurfaceLevel(0, &texSurface);
 		if (FAILED(hr))
 		{
-			return;
+			return false;
 		}
 
 		// サーフェス間コピー
 		hr = m_d3d9Device->StretchRect(targetSurface, &scissorRect, texSurface, NULL, D3DTEXF_NONE);
 		if (FAILED(hr)){
-			return;
+			return false;
 		}
 
 		// 取得したサーフェスの参照カウンタを下げる
@@ -85,6 +85,8 @@ namespace EffekseerPlugin
 		ES_SAFE_RELEASE(targetSurface);
 
 		renderer->SetBackground(backGroundTexture);
+
+		return true;
 	}
 
 	EffekseerRenderer::Renderer* CreateRendererDX9(int squareMaxCount, IDirect3DDevice9* d3d9Device)

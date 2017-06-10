@@ -1,5 +1,3 @@
-
-
 #include "Effekseer.h"
 #include "EffekseerRendererGL.h"
 
@@ -11,6 +9,12 @@ using namespace Effekseer;
 
 namespace EffekseerPlugin
 {
+	extern UnityGfxRenderer					g_UnityRendererType;
+
+	bool IsPowerOfTwo(uint32_t x) {
+		return (x & (x - 1)) == 0;
+	}
+
 	TextureLoaderGL::TextureLoaderGL(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
@@ -20,38 +24,46 @@ namespace EffekseerPlugin
 	TextureLoaderGL::~TextureLoaderGL()
 	{}
 
-	void* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+	TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
 		// リソーステーブルを検索して存在したらそれを使う
 		auto it = resources.find((const char16_t*) path);
 		if (it != resources.end()) {
 			it->second.referenceCount++;
-			return it->second.texture;
+			return &it->second.texture;
 		}
 
 		// Unityでテクスチャをロード
-		TextureResource res;
-		res.texture = load((const char16_t*) path);
-		if (res.texture == nullptr)
+		int32_t width, height, format;
+		int64_t textureID = reinterpret_cast<int64_t>(load((const char16_t*) path, &width, &height, &format));
+		if (textureID == 0)
 		{
 			return nullptr;
 		}
 		// リソーステーブルに追加
-		resources.insert(std::make_pair((const char16_t*) path, res));
+		auto added = resources.insert(std::make_pair((const char16_t*) path, TextureResource()));
+		TextureResource& res = added.first->second;
 
+		res.texture.UserID = textureID;
+		res.texture.Width = width;
+		res.texture.Height = height;
+		res.texture.TextureFormat = (TextureFormatType)format;
+		
 #if !defined(_WIN32)
-		// テクスチャのミップマップを生成する
-		if (res.texture) {
-			glBindTexture(GL_TEXTURE_2D, (GLuint)(uintptr_t)res.texture);
+		if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
+			(IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
+		{
+			// テクスチャのミップマップを生成する
+			glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 #endif
 
-		return res.texture;
+		return &res.texture;
 	}
 
-	void TextureLoaderGL::Unload(void* source)
+	void TextureLoaderGL::Unload(TextureData* source)
 	{
 		if (source == nullptr) {
 			return;
@@ -60,7 +72,7 @@ namespace EffekseerPlugin
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(),
 			[source](const std::pair<std::u16string, TextureResource>& pair){
-			return pair.second.texture == source;
+			return &pair.second.texture == source;
 		});
 		if (it == resources.end()) {
 			return;

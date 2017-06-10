@@ -198,7 +198,7 @@ namespace EffekseerPlugin
 		backGroundTextureInternalFormat = internalFormat;
 	}
 	
-	void DistortingCallbackGL::OnDistorting()
+	bool DistortingCallbackGL::OnDistorting()
 	{
 		GLint viewport[4];
 		glGetIntegerv( GL_VIEWPORT, viewport );
@@ -246,6 +246,8 @@ namespace EffekseerPlugin
 #endif
 
 		renderer->SetBackground(backGroundTexture);
+
+		return true;
 	}
 	
 }
