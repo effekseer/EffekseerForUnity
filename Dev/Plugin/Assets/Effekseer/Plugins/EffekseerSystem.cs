@@ -400,13 +400,24 @@ public class EffekseerSystem : MonoBehaviour
 	}
 
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderLoad))]
-	private static IntPtr TextureLoaderLoad(IntPtr path) {
+	private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		var res = new TextureResource();
 		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle)) {
 			EffekseerSystem.Instance.textureList.Add(res);
+			width = res.texture.width;
+			height = res.texture.height;
+			switch (res.texture.format) {
+			case TextureFormat.DXT1: format = 1; break;
+			case TextureFormat.DXT5: format = 2; break;
+			default: format = 0; break;
+			}
+			
 			return res.GetNativePtr();
 		}
+		width = 0;
+		height = 0;
+		format = 0;
 		return IntPtr.Zero;
 	}
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderUnload))]
