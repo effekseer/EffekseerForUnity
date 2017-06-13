@@ -44,14 +44,14 @@ public class Example: MonoBehaviour {
 		Camera.main.transform.LookAt(Vector3.zero);
 
 		// Update Buttons Caption
-		var uiTextA = uiEmitterA.transform.FindChild("Text").GetComponent<Text>();
+		var uiTextA = uiEmitterA.transform.Find("Text").GetComponent<Text>();
 		if (emitterA.exists) {
 			uiTextA.text = "Stop EmitterA";
 		} else {
 			uiTextA.text = "Play At EmitterA";
 		}
 
-		var uiTextB = uiEmitterB.transform.FindChild("Text").GetComponent<Text>();
+		var uiTextB = uiEmitterB.transform.Find("Text").GetComponent<Text>();
 		if (emitterB.exists) {
 			uiTextB.text = "Stop EmitterB";
 		} else {

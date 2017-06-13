@@ -145,9 +145,9 @@ namespace Effekseer
 		public static extern void EffekseerUpdate(float deltaTime);
 		
 		[DllImport(pluginName)]
-		public static extern IntPtr EffekseerGetRenderFunc(int renderId = 0);
-		
-		[DllImport(pluginName)]
+        public static extern IntPtr EffekseerGetRenderFunc(int renderId = 0);
+
+        [DllImport(pluginName)]
 		public static extern void EffekseerSetProjectionMatrix(int renderId, float[] matrix);
 	
 		[DllImport(pluginName)]
@@ -202,7 +202,7 @@ namespace Effekseer
 		public static extern void EffekseerSetTextureLoaderEvent(
 			EffekseerTextureLoaderLoad load,
 			EffekseerTextureLoaderUnload unload);
-		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path);
+		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path, out int width, out int height, out int format);
 		public delegate void EffekseerTextureLoaderUnload(IntPtr path);
 		
 		[DllImport(pluginName)]
