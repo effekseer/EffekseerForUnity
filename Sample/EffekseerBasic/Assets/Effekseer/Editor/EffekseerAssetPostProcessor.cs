@@ -20,8 +20,13 @@ public class EffekseerAssetPostProcessor : AssetPostprocessor
 			if (Path.GetExtension(assetPath) == ".efkmodel") {
 				File.Move(assetPath, assetPath + ".bytes");
 			}
+            // 
+            if (assetPath.Contains("libEffekseerUnity.bc"))
+            {
+                EffekseerPluginSwitcher.Run();
+            }
 		}
-	}
+    }
 
 	static bool isInEffekseerDirectory(string path)
 	{
