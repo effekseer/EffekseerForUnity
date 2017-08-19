@@ -47,6 +47,16 @@ public class EffekseerSystem : MonoBehaviour
 	public int soundInstances	= 16;
 
 	/// <summary xml:lang="en">
+	/// Enables distortion effect.
+	/// When It has set false, rendering will be faster.
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// 歪みエフェクトを有効にする。
+	/// falseにすると描画処理が軽くなります。
+	/// </summary>
+	public bool enableDistortion	= true;
+
+	/// <summary xml:lang="en">
 	/// A CameraEvent to draw all effects.
 	/// </summary>
 	/// <summary xml:lang="ja">
@@ -171,10 +181,61 @@ public class EffekseerSystem : MonoBehaviour
 #endif
 
 	// カメラごとのレンダーパス
-	class RenderPath {
+	class RenderPath : IDisposable
+	{
+		public Camera camera;
 		public CommandBuffer commandBuffer;
 		public CameraEvent cameraEvent;
 		public int renderId;
+		public RenderTexture renderTexture;
+
+		public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId) {
+			this.camera = camera;
+			this.renderId = renderId;
+			this.cameraEvent = cameraEvent;
+		}
+		
+		public void Init(bool enableDistortion) {
+			// プラグイン描画するコマンドバッファを作成
+			this.commandBuffer = new CommandBuffer();
+			this.commandBuffer.name = "Effekseer Rendering";
+
+#if UNITY_5_6_OR_NEWER
+			if (enableDistortion) {
+				RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+#else
+			if (enableDistortion && camera.cameraType == CameraType.Game) {
+				RenderTextureFormat format = (camera.hdr) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+#endif
+				// 歪みテクスチャを作成
+				this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
+				this.renderTexture.Create();
+				// 歪みテクスチャへのコピーコマンドを追加
+				this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+			}
+
+			// プラグイン描画コマンドを追加
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
+			// コマンドバッファをカメラに登録
+			this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
+		}
+
+		public void Dispose() {
+			if (this.commandBuffer != null) {
+				this.camera.RemoveCommandBuffer(this.cameraEvent, this.commandBuffer);
+				this.commandBuffer.Dispose();
+				this.commandBuffer = null;
+			}
+		}
+
+		public bool IsValid() {
+			if (this.renderTexture != null) {
+				return this.camera.pixelWidth == this.renderTexture.width &&
+					this.camera.pixelHeight == this.renderTexture.height;
+			}
+			return true;
+		}
 	};
 	private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
 
@@ -328,9 +389,7 @@ public class EffekseerSystem : MonoBehaviour
 		foreach (var pair in renderPaths) {
 			var camera = pair.Key;
 			var path = pair.Value;
-			if (camera != null) {
-				camera.RemoveCommandBuffer(path.cameraEvent, path.commandBuffer);
-			}
+			path.Dispose();
 		}
 		renderPaths.Clear();
 	}
@@ -345,14 +404,11 @@ public class EffekseerSystem : MonoBehaviour
 	
 	void OnPreCullEvent(Camera camera) {
 #if UNITY_EDITOR
-		if (Array.IndexOf<Camera>(SceneView.GetAllSceneCameras(), camera) >= 0) {
+		if (camera.cameraType == CameraType.SceneView) {
 			// シーンビューのカメラはチェック
 			if (this.drawInSceneView == false) {
 				return;
 			}
-		} else if (Camera.current.isActiveAndEnabled == false) {
-			// シーンビュー以外のエディタカメラは除外
-			return;
 		}
 #endif
 		RenderPath path;
@@ -362,7 +418,7 @@ public class EffekseerSystem : MonoBehaviour
 			if (renderPaths.ContainsKey(camera)) {
 				// レンダーパスが存在すればコマンドバッファを解除
 				path = renderPaths[camera];
-				camera.RemoveCommandBuffer(path.cameraEvent, path.commandBuffer);
+				path.Dispose();
 				renderPaths.Remove(camera);
 			}
 			return;
@@ -372,18 +428,22 @@ public class EffekseerSystem : MonoBehaviour
 			// レンダーパスが有れば使う
 			path = renderPaths[camera];
 		} else {
-			// 無ければ作成
-			path = new RenderPath();
-			path.renderId = renderPaths.Count;
-			path.cameraEvent = cameraEvent;
-			// プラグイン描画するコマンドバッファを作成
-			path.commandBuffer = new CommandBuffer();
-			path.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), path.renderId);
-			// コマンドバッファをカメラに登録
-			camera.AddCommandBuffer(path.cameraEvent, path.commandBuffer);
+			// 無ければレンダーパスを作成
+			path = new RenderPath(camera, cameraEvent, renderPaths.Count);
+			path.Init(this.enableDistortion);
 			renderPaths.Add(camera, path);
 		}
-		
+
+		if (!path.IsValid()) {
+			path.Dispose();
+			path.Init(this.enableDistortion);
+		}
+
+		// 歪みテクスチャをセット
+		if (path.renderTexture) {
+			Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
+		}
+
 		// ビュー関連の行列を更新
 		Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 			GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
