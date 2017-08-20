@@ -19,6 +19,7 @@ namespace EffekseerPlugin
 		Effekseer::Matrix44		cameraMatrix;
 		Effekseer::Matrix44		projectionMatrix;
 		bool					renderIntoTexture;
+		void*					backgroundTexture;
 	};
 	extern RenderSettings renderSettings[MAX_RENDER_PATH];
 
