@@ -223,7 +223,9 @@ public class EffekseerSystem : MonoBehaviour
 
 		public void Dispose() {
 			if (this.commandBuffer != null) {
-				this.camera.RemoveCommandBuffer(this.cameraEvent, this.commandBuffer);
+				if (this.camera != null) {
+					this.camera.RemoveCommandBuffer(this.cameraEvent, this.commandBuffer);
+				}
 				this.commandBuffer.Dispose();
 				this.commandBuffer = null;
 			}
