@@ -8,9 +8,7 @@ public class EffekseerPluginSwitcher
 {
     static readonly string tempFilePath = "Temp/EffekseerPluginSwitcher";
 
-#if UNITY_5_6_OR_NEWER
-    static readonly string bcPath = "WebGL/1.37.2-64bit/libEffekseerUnity.bc";
-#elif UNITY_5_5_OR_NEWER
+#if UNITY_5_5_OR_NEWER
     static readonly string bcPath = "WebGL/1.36.7-64bit/libEffekseerUnity.bc";
 #else
     static readonly string bcPath = "WebGL/libEffekseerUnity.bc";
