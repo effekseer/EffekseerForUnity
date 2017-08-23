@@ -12,16 +12,19 @@ EXPORTS
   EffekseerReleaseEffect
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
+  EffekseerSetBackGroundTexture
   EffekseerSetRenderSettings
   EffekseerPlayEffect
   EffekseerStopAllEffects
   EffekseerStopEffect
+  EffekseerStopRoot
   EffekseerExists
   EffekseerSetPaused
   EffekseerSetShown
   EffekseerSetLocation
   EffekseerSetRotation
   EffekseerSetScale
+  EffekseerSetTargetLocation
   EffekseerSetTextureLoaderEvent
   EffekseerSetModelLoaderEvent
   EffekseerSetSoundLoaderEvent

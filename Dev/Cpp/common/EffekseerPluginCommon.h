@@ -6,7 +6,7 @@
 #include "Effekseer.h"
 #include "IUnityInterface.h"
 
-#define DLLEXPORT UNITY_INTERFACE_EXPORT
+//#define UNITY_INTERFACE_EXPORT	// Must export by .def!!
 #define UNITY_API UNITY_INTERFACE_API
 
 namespace EffekseerPlugin

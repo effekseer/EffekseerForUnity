@@ -91,7 +91,7 @@ namespace EffekseerPlugin
 extern "C"
 {
 	// Unity plugin load event
-	DLLEXPORT void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+	void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
 	{
 		g_UnityInterfaces = unityInterfaces;
 		g_UnityGraphics = g_UnityInterfaces->Get<IUnityGraphics>();
@@ -104,7 +104,7 @@ extern "C"
 	}
 
 	// Unity plugin unload event
-	DLLEXPORT void UNITY_API UnityPluginUnload()
+	void UNITY_API UnityPluginUnload()
 	{
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
@@ -151,12 +151,12 @@ extern "C"
 	}
 
 
-	DLLEXPORT UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
+	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
 	}
 
-	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 		if (g_EffekseerManager == nullptr) {
@@ -164,7 +164,7 @@ extern "C"
 		}
 	}
 
-	DLLEXPORT void UNITY_API EffekseerTerm()
+	void UNITY_API EffekseerTerm()
 	{
 		if (g_EffekseerManager != NULL) {
 			g_EffekseerManager->Destroy();
@@ -174,7 +174,7 @@ extern "C"
 
 	
 	// 歪み用テクスチャ設定
-	DLLEXPORT void UNITY_API EffekseerSetBackGroundTexture(int renderId, void* texture)
+	void UNITY_API EffekseerSetBackGroundTexture(int renderId, void* texture)
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			renderSettings[renderId].backgroundTexture = texture;

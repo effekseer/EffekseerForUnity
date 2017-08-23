@@ -14,7 +14,7 @@ EffekseerRenderer::Renderer*	g_EffekseerRenderer = NULL;
 static void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType);
 
 // Unity plugin load event
-extern "C" DLLEXPORT void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+extern "C" void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
 {
 	g_UnityInterfaces = unityInterfaces;
 	g_Graphics = unityInterfaces->Get<IUnityGraphics>();
@@ -27,7 +27,7 @@ extern "C" DLLEXPORT void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInter
 }
 
 // Unity plugin unload event
-extern "C" DLLEXPORT void UNITY_API UnityPluginUnload()
+extern "C" void UNITY_API UnityPluginUnload()
 {
 	g_Graphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 }
@@ -64,12 +64,12 @@ extern "C"
 	}
 	
 	
-	DLLEXPORT UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
+	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
 	}
 
-	DLLEXPORT void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 
@@ -80,7 +80,7 @@ extern "C"
 		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
 	}
 
-	DLLEXPORT void UNITY_API EffekseerTerm()
+	void UNITY_API EffekseerTerm()
 	{
 		if (g_EffekseerManager != NULL) {
 			g_EffekseerManager->Destroy();
