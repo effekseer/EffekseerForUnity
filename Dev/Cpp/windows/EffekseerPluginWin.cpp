@@ -30,6 +30,7 @@ namespace EffekseerPlugin
 	int32_t	g_maxInstances = 0;
 	int32_t	g_maxSquares = 0;
 	bool g_reversedDepth = false;
+	bool g_isRightHandedCoordinate = false;
 
 	IUnityInterfaces*		g_UnityInterfaces = NULL;
 	IUnityGraphics*			g_UnityGraphics = NULL;
@@ -272,7 +273,7 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth, bool isRightHandedCoordinate)
 	{
 		g_isInitialized = true;
 
@@ -280,8 +281,18 @@ extern "C"
 		g_maxSquares = maxSquares;
 		g_reversedDepth = reversedDepth;
 		g_isOpenGLMode = (g_UnityRendererType == kUnityGfxRendererOpenGLCore);
-		
+		g_isRightHandedCoordinate = isRightHandedCoordinate;
+
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
+
+		if (g_isRightHandedCoordinate)
+		{
+			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
+		}
+		else
+		{
+			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
+		}
 
 		if (!g_isOpenGLMode)
 		{

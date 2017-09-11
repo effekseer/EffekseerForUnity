@@ -7,6 +7,7 @@
 static IUnityInterfaces*	g_UnityInterfaces = NULL;
 static IUnityGraphics*		g_Graphics = NULL;
 static UnityGfxRenderer		g_RendererType = kUnityGfxRendererNull;
+static bool g_isRightHandedCoordinate = false;
 
 Effekseer::Manager*				g_EffekseerManager = NULL;
 EffekseerRenderer::Renderer*	g_EffekseerRenderer = NULL;
@@ -69,7 +70,7 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth, bool isRightHandedCoordinate)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 
@@ -78,6 +79,16 @@ extern "C"
 		g_EffekseerManager->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
 		g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
 		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+
+		g_isRightHandedCoordinate = isRightHandedCoordinate;
+		if (g_isRightHandedCoordinate)
+		{
+			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
+		}
+		else
+		{
+			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
+		}
 	}
 
 	void UNITY_API EffekseerTerm()

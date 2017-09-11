@@ -37,7 +37,19 @@ public class EffekseerSystem : MonoBehaviour
 	/// 描画できる四角形の最大数
 	/// </summary>
 	public int maxSquares		= 8192;
-	
+
+	/// <summary xml:lang="en">
+	/// The coordinate system of effects.
+	/// if it is true, effects is loaded as same as before version 1.3.
+	/// if it is false, effects is shown as same as the editor.
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// エフェクトの座標系
+	/// trueならば、version1.3以前と同じように読み込まれる。
+	/// falseならば、エディタと同じように表示される。
+	/// </summary>
+	public bool isRightHandledCoordinateSystem = false;
+
 	/// <summary xml:lang="en">
 	/// Maximum number of sound instances.
 	/// </summary>
@@ -312,8 +324,8 @@ public class EffekseerSystem : MonoBehaviour
 			break;
 		}
 #endif
-		// Effekseerライブラリの初期化
-		Plugin.EffekseerInit(effectInstances, maxSquares, reversedDepth);
+		// Init effekseer library
+		Plugin.EffekseerInit(effectInstances, maxSquares, reversedDepth, isRightHandledCoordinateSystem);
 
 		// サウンドインスタンスを作る
 		for (int i = 0; i < soundInstances; i++) {

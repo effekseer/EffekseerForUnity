@@ -7,4 +7,4 @@ msbuild EffekseerUnity.sln /t:rebuild /property:Configuration=Release /p:platfor
 msbuild EffekseerUnity.sln /t:rebuild /property:Configuration=Release /p:platform=x64
 
 copy Win32\Release\EffekseerUnity.dll ..\..\Plugin\Assets\Plugins\x86\
-copy x64\Release\EffekseerUnity.dll ..\..\Plugin\Assets\Plugins\x64\
+copy x64\Release\EffekseerUnity.dll ..\..\Plugin\Assets\Plugins\x86_64\

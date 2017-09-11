@@ -85,8 +85,10 @@ namespace EffekseerPlugin
 
 		// 参照カウンタが0になったら実際にアンロード
 		it->second.referenceCount--;
-		if (it->second.referenceCount <= 0) {
-			unload( it->first.c_str() );
+		if (it->second.referenceCount <= 0)
+		{
+			internalLoader->Unload(it->second.internalData);
+			unload(it->first.c_str());
 			resources.erase(it);
 		}
 	}
