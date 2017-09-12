@@ -70,7 +70,7 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth, bool isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 
@@ -80,7 +80,7 @@ extern "C"
 		g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
 		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
 
-		g_isRightHandedCoordinate = isRightHandedCoordinate;
+		g_isRightHandedCoordinate = isRightHandedCoordinate != 0;
 		if (g_isRightHandedCoordinate)
 		{
 			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);

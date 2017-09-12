@@ -273,15 +273,15 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth, bool isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
 	{
 		g_isInitialized = true;
 
 		g_maxInstances = maxInstances;
 		g_maxSquares = maxSquares;
-		g_reversedDepth = reversedDepth;
+		g_reversedDepth = reversedDepth != 0;
 		g_isOpenGLMode = (g_UnityRendererType == kUnityGfxRendererOpenGLCore);
-		g_isRightHandedCoordinate = isRightHandedCoordinate;
+		g_isRightHandedCoordinate = isRightHandedCoordinate != 0;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 

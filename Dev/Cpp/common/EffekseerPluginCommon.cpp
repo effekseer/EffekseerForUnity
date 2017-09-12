@@ -114,7 +114,25 @@ extern "C"
 
 		g_EffekseerManager->StopAllEffects();
 	}
+
+	void UNITY_API EffekseerSetPausedToAllEffects(int paused)
+	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
+		g_EffekseerManager->SetPausedToAllEffects(paused != 0);
+	}
 	
+	int UNITY_API EffekseerGetShown(int handle)
+	{
+		if (g_EffekseerManager == NULL) {
+			return 0;
+		}
+
+		return g_EffekseerManager->GetShown(handle);
+	}
+
 	// エフェクト可視設定
 	void UNITY_API EffekseerSetShown(int handle, int shown)
 	{
@@ -124,7 +142,16 @@ extern "C"
 
 		g_EffekseerManager->SetShown(handle, shown != 0);
 	}
-	
+
+	int UNITY_API EffekseerGetPaused(int handle)
+	{
+		if (g_EffekseerManager == NULL) {
+			return 0;
+		}
+
+		return g_EffekseerManager->GetPaused(handle);
+	}
+
 	// エフェクト一時停止
 	void UNITY_API EffekseerSetPaused(int handle, int paused)
 	{

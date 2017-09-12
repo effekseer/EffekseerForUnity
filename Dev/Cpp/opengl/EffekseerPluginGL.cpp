@@ -156,14 +156,14 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, bool reversedDepth, bool isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 		if (g_EffekseerManager == nullptr) {
 			return;
 		}
 
-		if (isRightHandedCoordinate)
+		if (isRightHandedCoordinate != 0)
 		{
 			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
 		}

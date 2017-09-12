@@ -110,6 +110,17 @@ public class EffekseerSystem : MonoBehaviour
 	}
 
 	/// <summary xml:lang="en">
+	/// Pause or resume all effects
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// 全エフェクトの一時停止、もしくは再開
+	/// </summary>
+	public static void SetPausedToAllEffects(bool paused)
+	{
+		Plugin.EffekseerSetPausedToAllEffects(paused);
+	}
+
+	/// <summary xml:lang="en">
 	/// Loads the effect from "Resources/Effekseer/"
 	/// </summary>
 	/// <param name="name" xml:lang="en">Effect name (that resolved extensions from efk file name)</param>
@@ -627,14 +638,10 @@ public class EffekseerSystem : MonoBehaviour
 public struct EffekseerHandle
 {
 	private int m_handle;
-	private bool m_paused;
-	private bool m_shown;
 
 	public EffekseerHandle(int handle)
 	{
 		m_handle = handle;
-		m_paused = false;
-		m_shown = false;
 	}
 	
 	/// <summary xml:lang="en">
@@ -728,10 +735,9 @@ public struct EffekseerHandle
 	{
 		set {
 			Plugin.EffekseerSetPaused(m_handle, value);
-			m_paused = value;
 		}
 		get {
-			return m_paused;
+			return Plugin.EffekseerGetPaused(m_handle);
 		}
 	}
 	
@@ -749,10 +755,9 @@ public struct EffekseerHandle
 	{
 		set {
 			Plugin.EffekseerSetShown(m_handle, value);
-			m_shown = value;
 		}
 		get {
-			return m_shown;
+			return Plugin.EffekseerGetShown(m_handle);
 		}
 	}
 	

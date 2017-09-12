@@ -179,10 +179,19 @@ namespace Effekseer
 	
 		[DllImport(pluginName)]
 		public static extern void EffekseerStopAllEffects();
-	
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetPausedToAllEffects(bool paused);
+
+		[DllImport(pluginName)]
+		public static extern bool EffekseerGetShown(int handle);
+
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetShown(int handle, bool shown);
-	
+
+		[DllImport(pluginName)]
+		public static extern bool EffekseerGetPaused(int handle);
+
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetPaused(int handle, bool paused);
 	
