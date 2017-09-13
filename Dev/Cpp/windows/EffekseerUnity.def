@@ -16,10 +16,13 @@ EXPORTS
   EffekseerSetRenderSettings
   EffekseerPlayEffect
   EffekseerStopAllEffects
+  EffekseerSetPausedToAllEffects
   EffekseerStopEffect
   EffekseerStopRoot
   EffekseerExists
+  EffekseerGetPaused
   EffekseerSetPaused
+  EffekseerGetShown
   EffekseerSetShown
   EffekseerSetLocation
   EffekseerSetRotation
