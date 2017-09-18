@@ -85,6 +85,18 @@ extern "C"
 		return -1;
 	}
 	
+	// フレームの更新(ハンドル単位)
+	void UNITY_API EffekseerUpdateHandle(int handle, float deltaFrame)
+	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+		
+		g_EffekseerManager->BeginUpdate();
+		g_EffekseerManager->UpdateHandle(handle, deltaFrame);
+		g_EffekseerManager->EndUpdate();
+	}
+
 	// エフェクト停止
 	void UNITY_API EffekseerStopEffect(int handle)
 	{
