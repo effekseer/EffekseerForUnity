@@ -186,14 +186,16 @@ public class EffekseerSystem : MonoBehaviour
 			return instance;
 		}
 	}
-	
+
+	private int initedCount = 0;
+
 	// Loaded effects
-	private Dictionary<string, IntPtr> effectList = new Dictionary<string, IntPtr>();
+	private Dictionary<string, IntPtr> effectList;
 	// Loaded effect resources
-	private List<TextureResource> textureList = new List<TextureResource>();
-	private List<ModelResource> modelList = new List<ModelResource>();
-	private List<SoundResource> soundList = new List<SoundResource>();
-	private List<SoundInstance> soundInstanceList = new List<SoundInstance>();
+	private List<TextureResource> textureList;
+	private List<ModelResource> modelList;
+	private List<SoundResource> soundList;
+	private List<SoundInstance> soundInstanceList;
 	
 	// A AssetBundle that current loading
 	private AssetBundle assetBundle;
@@ -311,7 +313,11 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 	
-	void Awake() {
+	internal void Init() {
+		if (this.initedCount++ > 0) {
+			return;
+		}
+
 		// サポート外グラフィックスAPIのチェック
 		switch (SystemInfo.graphicsDeviceType) {
 		case GraphicsDeviceType.Metal:
@@ -338,30 +344,12 @@ public class EffekseerSystem : MonoBehaviour
 		// Init effekseer library
 		Plugin.EffekseerInit(effectInstances, maxSquares, reversedDepth, isRightHandledCoordinateSystem);
 
-		// サウンドインスタンスを作る
-		for (int i = 0; i < soundInstances; i++) {
-			GameObject go = new GameObject();
-			go.name = "Sound Instance";
-			go.transform.parent = transform;
-			soundInstanceList.Add(go.AddComponent<SoundInstance>());
-		}
-	}
-	
-	void OnDestroy() {
-		foreach (var pair in effectList) {
-			Plugin.EffekseerReleaseEffect(pair.Value);
-		}
-		effectList = null;
-		// Effekseerライブラリの終了処理
-		Plugin.EffekseerTerm();
-		// レンダリングスレッドで解放する環境向けにレンダリング命令を投げる
-		GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
-	}
-
-	void OnEnable() {
-#if UNITY_EDITOR
-		Resume();
-#endif
+		this.effectList = new Dictionary<string, IntPtr>();
+		this.textureList = new List<TextureResource>();
+		this.modelList = new List<ModelResource>();
+		this.soundList = new List<SoundResource>();
+		this.soundInstanceList = new List<SoundInstance>();
+		
 		Plugin.EffekseerSetTextureLoaderEvent(
 			TextureLoaderLoad, 
 			TextureLoaderUnload);
@@ -377,15 +365,58 @@ public class EffekseerSystem : MonoBehaviour
 			SoundPlayerPauseTag, 
 			SoundPlayerCheckPlayingTag, 
 			SoundPlayerStopAll);
-		CleanUp();
+
+		if (Application.isPlaying) {
+			// サウンドインスタンスを作る
+			for (int i = 0; i < soundInstances; i++) {
+				GameObject go = new GameObject();
+				go.name = "Sound Instance";
+				go.transform.parent = transform;
+				soundInstanceList.Add(go.AddComponent<SoundInstance>());
+			}
+		}
+		
 		Camera.onPreCull += OnPreCullEvent;
+	}
+
+	internal void Term() {
+		if (--this.initedCount > 0) {
+			return;
+		}
+		
+		Camera.onPreCull -= OnPreCullEvent;
+
+		if (this.effectList != null) {
+			foreach (var pair in this.effectList) {
+				Plugin.EffekseerReleaseEffect(pair.Value);
+			}
+			this.effectList = null;
+		}
+		// Effekseerライブラリの終了処理
+		Plugin.EffekseerTerm();
+		// レンダリングスレッドで解放する環境向けにレンダリング命令を投げる
+		GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
+	}
+	
+	void Awake() {
+		this.Init();
+	}
+	
+	void OnDestroy() {
+		this.Term();
+	}
+
+	void OnEnable() {
+#if UNITY_EDITOR
+		Resume();
+#endif
+		CleanUp();
 	}
 
 	void OnDisable() {
 #if UNITY_EDITOR
 		Suspend();
 #endif
-		Camera.onPreCull -= OnPreCullEvent;
 		CleanUp();
 	}
 	
@@ -639,9 +670,14 @@ public struct EffekseerHandle
 {
 	private int m_handle;
 
-	public EffekseerHandle(int handle)
+	public EffekseerHandle(int handle = -1)
 	{
 		m_handle = handle;
+	}
+
+	internal void UpdateHandle(float deltaFrame)
+	{
+		Plugin.EffekseerUpdateHandle(m_handle, deltaFrame);
 	}
 	
 	/// <summary xml:lang="en">

@@ -172,6 +172,9 @@ namespace Effekseer
 		public static extern int EffekseerPlayEffect(IntPtr effect, float x, float y, float z);
 	
 		[DllImport(pluginName)]
+		public static extern void EffekseerUpdateHandle(int handle, float deltaDrame);
+	
+		[DllImport(pluginName)]
 		public static extern void EffekseerStopEffect(int handle);
 	
 		[DllImport(pluginName)]
