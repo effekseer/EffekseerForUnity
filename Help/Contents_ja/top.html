@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title></title>
   <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
   <link rel="stylesheet" href="../base.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <section class="level1">
@@ -19,14 +19,16 @@
 </figure>
 <section id="overview" class="level2">
 <h2>概要</h2>
-<p>ゲームエンジンUnityとの連携について説明します。<br />なお、Unity Technologies社とこのツールは特に提携しているというわけではないため、<br />バージョンや状況によっては上手く動作しない可能性があります。</p>
+<p>ゲームエンジンUnityとの連携について説明します。<br />
+なお、Unity Technologies社とこのツールは特に提携しているというわけではないため、<br />
+バージョンや状況によっては上手く動作しない可能性があります。</p>
 <p>Effekseerの再生プログラムはC++で書かれているため、Unity上ではネイティブプラグイン扱いになります。<br></p>
 </section>
 <section id="environment" class="level2">
 <h2>動作環境</h2>
 <section class="level3">
 <h3>Unityバージョン</h3>
-<p>Unity 5.2 以降。 Personal, Plus, Pro Unity 5.3, 5.4, 5.5 で動作確認。</p>
+<p>Unity 5.2 以降。 Personal, Plus, Pro</p>
 </section>
 <section class="level3">
 <h3>プラットフォーム</h3>
@@ -97,7 +99,7 @@ OpenGLCore
 ○
 </td>
 <td rowspan="3">
-Unity 5.5.0 時点で Metal は標準APIに含まれていないので Player Settings の変更は不要。<br />
+Unity 5.5.0 時点で Metal は標準APIに含まれていないので Player Settings の変更は不要。
 </td>
 </tr>
 <tr>
@@ -186,7 +188,8 @@ OpenGL ES 2.0 (WebGL 1.0)
 <td style="text-align: center;">
 ○
 </td>
-<td rowspan="2"></td>
+<td rowspan="2">
+</td>
 </tr>
 <td style="text-align: center;">
 OpenGL ES 3.0 (WebGL 2.0)
@@ -197,7 +200,6 @@ OpenGL ES 3.0 (WebGL 2.0)
 </tr>
 </tbody>
 </table>
-
 </section>
 </section>
 <section id="how-to-import" class="level2">
@@ -206,6 +208,14 @@ OpenGL ES 3.0 (WebGL 2.0)
 <figure>
 <img src="../img/unity_import.png" />
 </figure>
+</section>
+<section class="level2">
+<h2>仕様変更</h2>
+<section class="level3">
+<h3>1.3</h3>
+<p>エフェクトの前後が入れ替わっています。 1.2以前の表示を行う場合、EffekseerSystemコンポーネントの <code>isRightHandledCoordinateSystem</code> をtrueにしてください。</p>
+<p>歪み方法が変更されました。Effekseerのエフェクトが歪みにより歪まなくなっています。 1.4以降に、歪みにより歪むエフェクトを追加する予定です。</p>
+</section>
 </section>
 <section id="issues" class="level2">
 <h2>既知の問題</h2>

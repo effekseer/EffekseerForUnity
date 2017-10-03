@@ -1,4 +1,4 @@
-# Effekseer UnityPlugin Manual
+﻿# Effekseer UnityPlugin Manual
 
 ![](../img/plugin_logo.png)
 
@@ -13,7 +13,6 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 
 ### Unityバージョン
 Unity 5.2 以降。 Personal, Plus, Pro
-Unity 5.3, 5.4, 5.5 で動作確認。
 
 ### プラットフォーム
 
@@ -111,6 +110,17 @@ Build Settings -&gt; Player Settings -&gt; Other Settings -&gt; Auto Graphics AP
 Effekseer.unitypackage を開いてUnityプロジェクトにインポートします。
 
 ![](../img/unity_import.png)
+
+## 仕様変更
+
+### 1.3
+
+エフェクトの前後が入れ替わっています。
+1.2以前の表示を行う場合、EffekseerSystemコンポーネントの ```isRightHandledCoordinateSystem``` をtrueにしてください。
+
+歪み方法が変更されました。Effekseerのエフェクトが歪みにより歪まなくなっています。
+1.4以降に、歪みにより歪むエフェクトを追加する予定です。
+
 
 ## 既知の問題 {#issues}
 - 対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の"対応プラットフォーム"の表を確認をしてください。
