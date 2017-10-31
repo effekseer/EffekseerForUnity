@@ -1,4 +1,8 @@
-# Release notes
+﻿# Release notes
+
+## 1.30
+- Distortion specification is changed.
+- Coordinate system specification is changed.
 
 ## 1.23
 - [Windows] Fixed to correctly draw with Unity 5.5β
