@@ -1,5 +1,5 @@
-==== English ====
-¡ Overview
+ï»¿==== English ====
+â–  Overview
 Thank you for downloading Effekseer.
 This package is Unity, which stores the plug-in that enables you to play effects.
 
@@ -7,7 +7,7 @@ Since tools and effects samples for creating effects for designers are not saved
 Those who need them please ask me to download the package of tools.
 
 
-¡ Directory structure
+â–  Directory structure
 -GameEngine
 Unity packages and samples are stored.
 
@@ -16,17 +16,17 @@ Help written about how to use is saved.
 
 
 ==== Japanese ====
-¡@ŠT—v
-Effekseer‚ğƒ_ƒEƒ“ƒ[ƒh‚µ‚Ä‚¢‚½‚¾‚«‚ ‚è‚ª‚Æ‚¤‚²‚´‚¢‚Ü‚·B
-–{ƒpƒbƒP[ƒW‚ÍUnity‚ÅAƒGƒtƒFƒNƒg‚ğÄ¶‚Å‚«‚é‚æ‚¤‚É‚·‚éƒvƒ‰ƒOƒCƒ“‚ª•Û‘¶‚³‚ê‚Ä‚¢‚Ü‚·B
+â– ã€€æ¦‚è¦
+Effekseerã‚’ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã—ã¦ã„ãŸã ãã‚ã‚ŠãŒã¨ã†ã”ã–ã„ã¾ã™ã€‚
+æœ¬ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã¯Unityã§ã€ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’å†ç”Ÿã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ãŒä¿å­˜ã•ã‚Œã¦ã„ã¾ã™ã€‚
 
-ƒfƒUƒCƒi[Œü‚¯‚ÌƒGƒtƒFƒNƒg‚ğì¬‚·‚é‚½‚ß‚Ìƒc[ƒ‹‚âƒGƒtƒFƒNƒg‚ÌƒTƒ“ƒvƒ‹‚Í•Û‘¶‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ‚Ì‚ÅA
-‚»‚ê‚ç‚ª•K—v‚È•û‚Íƒc[ƒ‹‚ÌƒpƒbƒP[ƒW‚ğƒ_ƒEƒ“ƒ[ƒh‚·‚é‚æ‚¤‚¨Šè‚¢‚µ‚Ü‚·B
+ãƒ‡ã‚¶ã‚¤ãƒŠãƒ¼å‘ã‘ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ä½œæˆã™ã‚‹ãŸã‚ã®ãƒ„ãƒ¼ãƒ«ã‚„ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚µãƒ³ãƒ—ãƒ«ã¯ä¿å­˜ã•ã‚Œã¦ã„ã¾ã›ã‚“ã®ã§ã€
+ãã‚Œã‚‰ãŒå¿…è¦ãªæ–¹ã¯ãƒ„ãƒ¼ãƒ«ã®ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã‚’ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ã‚ˆã†ãŠé¡˜ã„ã—ã¾ã™ã€‚
 
 
-¡@ƒfƒBƒŒƒNƒgƒŠ\¬
+â– ã€€ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªæ§‹æˆ
 -GameEngine
-Unity‚ÌƒpƒbƒP[ƒW‚ÆƒTƒ“ƒvƒ‹‚ª•Û‘¶‚³‚ê‚Ä‚¢‚Ü‚·B
+Unityã®ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã¨ã‚µãƒ³ãƒ—ãƒ«ãŒä¿å­˜ã•ã‚Œã¦ã„ã¾ã™ã€‚
 
 -Help
-g‚¢•û‚É‚Â‚¢‚Ä‹Lq‚³‚ê‚Ä‚¢‚éƒwƒ‹ƒv‚ª•Û‘¶‚³‚ê‚Ä‚¢‚Ü‚·B
+ä½¿ã„æ–¹ã«ã¤ã„ã¦è¨˜è¿°ã•ã‚Œã¦ã„ã‚‹ãƒ˜ãƒ«ãƒ—ãŒä¿å­˜ã•ã‚Œã¦ã„ã¾ã™ã€‚
