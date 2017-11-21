@@ -397,8 +397,8 @@ public class EffekseerSystem : MonoBehaviour
 		// レンダリングスレッドで解放する環境向けにレンダリング命令を投げる
 		GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
 	}
-	
-	void Awake() {
+
+	protected virtual void Awake() {
 		this.Init();
 	}
 	
