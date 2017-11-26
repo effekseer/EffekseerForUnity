@@ -162,7 +162,29 @@ public class EffekseerEmitter : MonoBehaviour
 			return handle.HasValue && handle.Value.shown;
 		}
 	}
-	
+
+	/// <summary xml:lang="en">
+	/// Playback speed
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// 再生速度
+	/// </summary>
+	public float speed
+	{
+		set
+		{
+			if (handle.HasValue)
+			{
+				var h = handle.Value;
+				h.speed = value;
+			}
+		}
+		get
+		{
+			return handle.HasValue ? handle.Value.speed : 0.0f;
+		}
+	}
+
 	/// <summary xml:lang="en">
 	/// Existing state
 	/// <para>true:  It's existed.</para>

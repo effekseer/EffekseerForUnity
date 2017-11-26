@@ -197,7 +197,13 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetPaused(int handle, bool paused);
-	
+
+		[DllImport(pluginName)]
+		public static extern float EffekseerGetSpeed(int handle);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetSpeed(int handle, float speed);
+
 		[DllImport(pluginName)]
 		public static extern bool EffekseerExists(int handle);
 

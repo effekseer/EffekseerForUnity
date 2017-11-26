@@ -25,6 +25,8 @@ EXPORTS
   EffekseerSetPaused
   EffekseerGetShown
   EffekseerSetShown
+  EffekseerGetSpeed
+  EffekseerSetSpeed
   EffekseerSetLocation
   EffekseerSetRotation
   EffekseerSetScale

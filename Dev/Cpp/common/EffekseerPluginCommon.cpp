@@ -173,6 +173,24 @@ extern "C"
 
 		g_EffekseerManager->SetPaused(handle, paused != 0);
 	}
+
+	float UNITY_API EffekseerGetSpeed(int handle)
+	{
+		if (g_EffekseerManager == NULL) {
+			return 0;
+		}
+
+		return g_EffekseerManager->GetSpeed(handle);
+	}
+
+	void UNITY_API EffekseerSetSpeed(int handle, float speed)
+	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
+		g_EffekseerManager->SetSpeed(handle, speed);
+	}
 	
 	// エフェクト存在状態
 	int UNITY_API EffekseerExists(int handle)

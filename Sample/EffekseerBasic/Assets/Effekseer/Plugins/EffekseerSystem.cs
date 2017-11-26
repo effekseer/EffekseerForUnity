@@ -796,6 +796,24 @@ public struct EffekseerHandle
 			return Plugin.EffekseerGetShown(m_handle);
 		}
 	}
+
+	/// <summary xml:lang="en">
+	/// Playback speed
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// 再生速度
+	/// </summary>
+	public float speed
+	{
+		set
+		{
+			Plugin.EffekseerSetSpeed(m_handle, value);
+		}
+		get
+		{
+			return Plugin.EffekseerGetSpeed(m_handle);
+		}
+	}
 	
 	/// <summary xml:lang="ja">
 	/// Whether the effect instance is enabled<br/>
