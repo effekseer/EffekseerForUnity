@@ -1,3 +1,5 @@
+﻿# This repository is for maintenance 1.3x
+
 # EffekseerForUnity
 
 This is the Effekseer's runtime plugin for Unity5.  
