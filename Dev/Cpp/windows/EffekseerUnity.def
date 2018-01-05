@@ -30,6 +30,7 @@ EXPORTS
   EffekseerSetLocation
   EffekseerSetRotation
   EffekseerSetScale
+  EffekseerSetAllColor
   EffekseerSetTargetLocation
   EffekseerSetTextureLoaderEvent
   EffekseerSetModelLoaderEvent

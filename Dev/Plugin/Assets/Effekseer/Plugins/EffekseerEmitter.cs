@@ -101,7 +101,22 @@ public class EffekseerEmitter : MonoBehaviour
 			handle = null;
 		}
 	}
-	
+
+	/// <summary xml:lang="en">
+	/// Specify the color of overall effect.
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// エフェクト全体の色を指定する。
+	/// </summary>
+	/// <param name="color">Color</param>
+	public void SetAllColor(Color color)
+	{
+		if (handle.HasValue)
+		{
+			handle.Value.SetAllColor(color);
+		}
+	}
+
 	/// <summary xml:lang="en">
 	/// Sets the target location of the played effects.
 	/// <param name="targetLocation" xml:lang="en">Target location</param>

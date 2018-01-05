@@ -232,6 +232,16 @@ extern "C"
 
 		g_EffekseerManager->SetScale(handle, x, y, z);
 	}
+
+	// Specify the color of overall effect.
+	void UNITY_API EffekseerSetAllColor(int handle, int r, int g, int b, int a)
+	{
+		if (g_EffekseerManager == NULL) {
+			return;
+		}
+
+		g_EffekseerManager->SetAllColor(handle, Effekseer::Color(r, g, b, a));
+	}
 	
 	// エフェクトのターゲット位置設定
 	void UNITY_API EffekseerSetTargetLocation(int handle, float x, float y, float z)

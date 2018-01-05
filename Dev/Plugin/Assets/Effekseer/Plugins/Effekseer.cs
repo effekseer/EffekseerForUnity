@@ -217,6 +217,9 @@ namespace Effekseer
 		public static extern void EffekseerSetScale(int handle, float x, float y, float z);
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerSetAllColor(int handle, int r, int g, int b, int a);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerSetTargetLocation(int handle, float x, float y, float z);
 
 		[DllImport(pluginName)]
