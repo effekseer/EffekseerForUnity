@@ -744,6 +744,18 @@ public struct EffekseerHandle
 	{
 		Plugin.EffekseerSetScale(m_handle, scale.x, scale.y, scale.z);
 	}
+
+	/// <summary xml:lang="en">
+	/// Specify the color of overall effect.
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// エフェクト全体の色を指定する。
+	/// </summary>
+	/// <param name="color">Color</param>
+	public void SetAllColor(Color color)
+	{
+		Plugin.EffekseerSetAllColor(m_handle, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
+	}
 	
 	/// <summary xml:lang="en">
 	/// Sets the effect target location
