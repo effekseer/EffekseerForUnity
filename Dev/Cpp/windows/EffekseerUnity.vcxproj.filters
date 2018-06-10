@@ -72,4 +72,7 @@
       <Filter>Device</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="EffekseerUnity.def" />
+  </ItemGroup>
 </Project>
