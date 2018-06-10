@@ -12,6 +12,7 @@ EXPORTS
   EffekseerReleaseEffect
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
+  EffekseerSetStereoRenderingMatrix
   EffekseerSetBackGroundTexture
   EffekseerSetRenderSettings
   EffekseerPlayEffect

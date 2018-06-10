@@ -20,6 +20,13 @@ namespace EffekseerPlugin
 		Effekseer::Matrix44		projectionMatrix;
 		bool					renderIntoTexture;
 		void*					backgroundTexture = nullptr;
+
+		bool					stereoEnabled;
+		int						stereoRenderCount;
+		Effekseer::Matrix44		leftCameraMatrix;
+		Effekseer::Matrix44		leftProjectionMatrix;
+		Effekseer::Matrix44		rightCameraMatrix;
+		Effekseer::Matrix44		rightProjectionMatrix;
 	};
 	extern RenderSettings renderSettings[MAX_RENDER_PATH];
 
