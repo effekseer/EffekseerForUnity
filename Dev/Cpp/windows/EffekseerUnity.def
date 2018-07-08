@@ -6,6 +6,8 @@ EXPORTS
   EffekseerInit
   EffekseerTerm
   EffekseerGetRenderFunc
+  EffekseerGetRenderFrontFunc
+  EffekseerGetRenderBackFunc
   EffekseerUpdate
   EffekseerLoadEffect
   EffekseerLoadEffectOnMemory

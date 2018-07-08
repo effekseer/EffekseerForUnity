@@ -282,10 +282,92 @@ extern "C"
 		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
 	}
+
+	void UNITY_API EffekseerRenderFront(int renderId)
+	{
+		if (g_EffekseerManager == nullptr) return;
+		if (g_EffekseerRenderer == nullptr) return;
+
+		g_EffekseerManager->DrawFront();
+		g_EffekseerRenderer->EndRendering();
+
+		// 背景テクスチャを解除
+		SetBackGroundTexture(nullptr);
+	}
+
+	void UNITY_API EffekseerRenderBack(int renderId)
+	{
+		if (g_isInitialized == false)
+		{
+			if (g_EffekseerRenderer != nullptr)
+			{
+				// 遅延終了処理
+				TermRenderer();
+			}
+			return;
+		}
+		else
+		{
+			if (g_EffekseerRenderer == nullptr)
+			{
+				// 遅延初期化処理
+				InitRenderer();
+			}
+		}
+
+		if (g_EffekseerManager == nullptr) return;
+		if (g_EffekseerRenderer == nullptr) return;
+
+		RenderSettings& settings = renderSettings[renderId];
+		Effekseer::Matrix44 projectionMatrix, cameraMatrix;
+
+		if (settings.stereoEnabled) {
+			if (settings.stereoRenderCount == 0) {
+				projectionMatrix = settings.leftProjectionMatrix;
+				cameraMatrix = settings.leftCameraMatrix;
+			}
+			else if (settings.stereoRenderCount == 1) {
+				projectionMatrix = settings.rightProjectionMatrix;
+				cameraMatrix = settings.rightCameraMatrix;
+			}
+			settings.stereoRenderCount++;
+		}
+		else {
+			projectionMatrix = settings.projectionMatrix;
+			cameraMatrix = settings.cameraMatrix;
+		}
+
+		if (settings.renderIntoTexture && !g_isOpenGLMode)
+		{
+			// テクスチャに対してレンダリングするときは上下反転させる
+			projectionMatrix.Values[1][1] = -projectionMatrix.Values[1][1];
+		}
+
+		// 行列をセット
+		g_EffekseerRenderer->SetProjectionMatrix(projectionMatrix);
+		g_EffekseerRenderer->SetCameraMatrix(cameraMatrix);
+
+		// 背景テクスチャをセット
+		SetBackGroundTexture(settings.backgroundTexture);
+
+		// 描画実行(全体)
+		g_EffekseerRenderer->BeginRendering();
+		g_EffekseerManager->DrawBack();
+	}
 	
 	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
+	}
+
+	UnityRenderingEvent UNITY_API EffekseerGetRenderFrontFunc(int renderId)
+	{
+		return EffekseerRenderFront;
+	}
+
+	UnityRenderingEvent UNITY_API EffekseerGetRenderBackFunc(int renderId)
+	{
+		return EffekseerRenderBack;
 	}
 
 	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)

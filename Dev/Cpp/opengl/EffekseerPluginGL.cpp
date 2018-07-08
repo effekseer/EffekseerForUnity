@@ -150,10 +150,68 @@ extern "C"
 		SetBackGroundTexture(nullptr);
 	}
 
+	void UNITY_API EffekseerRenderFront(int renderId)
+	{
+		if (g_EffekseerManager == nullptr) return;
+		if (g_EffekseerRenderer == nullptr) return;
+
+		g_EffekseerManager->DrawFront();
+		g_EffekseerRenderer->EndRendering();
+
+		// 背景テクスチャを解除
+		SetBackGroundTexture(nullptr);
+	}
+
+	void UNITY_API EffekseerRenderBack(int renderId)
+	{
+		if (g_EffekseerManager == NULL) {
+			if (g_EffekseerRenderer != NULL) {
+				// OpenGLコンテキストの都合上ここで終了処理する
+				TermRenderer();
+			}
+			return;
+		}
+		if (g_EffekseerRenderer == NULL) {
+			// OpenGLコンテキストの都合上ここで初期化する
+			InitRenderer();
+
+			if (g_EffekseerRenderer == NULL) {
+				// 失敗したら終了処理
+				if (g_EffekseerManager) {
+					g_EffekseerManager->Destroy();
+					g_EffekseerManager = NULL;
+				}
+				return;
+			}
+		}
+
+		const RenderSettings& settings = renderSettings[renderId];
+
+		// 行列をセット
+		g_EffekseerRenderer->SetProjectionMatrix(settings.projectionMatrix);
+		g_EffekseerRenderer->SetCameraMatrix(settings.cameraMatrix);
+
+		// 背景テクスチャをセット
+		SetBackGroundTexture(settings.backgroundTexture);
+
+		// 描画実行(全体)
+		g_EffekseerRenderer->BeginRendering();
+		g_EffekseerManager->DrawBack();
+	}
 
 	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
+	}
+
+	UnityRenderingEvent UNITY_API EffekseerGetRenderFrontFunc(int renderId)
+	{
+		return EffekseerRenderFront;
+	}
+
+	UnityRenderingEvent UNITY_API EffekseerGetRenderBackFunc(int renderId)
+	{
+		return EffekseerRenderBack;
 	}
 
 	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)

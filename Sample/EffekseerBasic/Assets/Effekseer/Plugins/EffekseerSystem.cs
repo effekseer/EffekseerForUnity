@@ -240,9 +240,21 @@ public class EffekseerSystem : MonoBehaviour
 				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 			}
 
-			// プラグイン描画コマンドを追加
-			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
-			// コマンドバッファをカメラに登録
+			// add a command to render effects.
+			//this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
+
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
+
+			if (enableDistortion)
+			{
+				this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+			}
+
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
+
+
+			// register the command to a camera
 			this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 		}
 

@@ -147,15 +147,18 @@ namespace Effekseer
 		[DllImport(pluginName)]
         public static extern IntPtr EffekseerGetRenderFunc(int renderId = 0);
 
-        [DllImport(pluginName)]
+		[DllImport(pluginName)]
+		public static extern IntPtr EffekseerGetRenderFrontFunc(int renderId = 0);
+
+		[DllImport(pluginName)]
+		public static extern IntPtr EffekseerGetRenderBackFunc(int renderId = 0);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerSetProjectionMatrix(int renderId, float[] matrix);
 	
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetCameraMatrix(int renderId, float[] matrix);
 		
-		[DllImport(pluginName)]
-		public static extern void EffekseerSetStereoRenderingMatrix(int renderId, float[] projMatL, float[] projMatR, float[] camMatL, float[] camMatR);
-
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetBackGroundTexture(int renderId, IntPtr background);
 		

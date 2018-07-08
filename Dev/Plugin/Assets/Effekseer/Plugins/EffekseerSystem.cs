@@ -240,9 +240,21 @@ public class EffekseerSystem : MonoBehaviour
 				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 			}
 
-			// プラグイン描画コマンドを追加
-			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
-			// コマンドバッファをカメラに登録
+			// add a command to render effects.
+			//this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
+
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
+
+			if (enableDistortion)
+			{
+				this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+			}
+
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
+
+
+			// register the command to a camera
 			this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 		}
 
@@ -500,24 +512,11 @@ public class EffekseerSystem : MonoBehaviour
 			Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 		}
 
-#if UNITY_5_4_OR_NEWER
-		// ステレオレンダリング(VR)用に左右目の行列を設定
-		if (camera.stereoEnabled) {
-			float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
-			float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
-			float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
-			float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
-			Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, projMatL, projMatR, camMatL, camMatR);
-		}
-		else
-#endif
-		{
-			// ビュー関連の行列を更新
-			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
-				GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
-			Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
-				camera.worldToCameraMatrix));
-		}
+		// ビュー関連の行列を更新
+		Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
+			GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
+		Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
+			camera.worldToCameraMatrix));
 	}
 	
 	void OnRenderObject() {
