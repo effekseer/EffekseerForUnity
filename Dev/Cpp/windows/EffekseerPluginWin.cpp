@@ -288,6 +288,7 @@ extern "C"
 		if (g_EffekseerManager == nullptr) return;
 		if (g_EffekseerRenderer == nullptr) return;
 
+		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront();
 		g_EffekseerRenderer->EndRendering();
 
@@ -353,6 +354,7 @@ extern "C"
 		// •`‰æŽÀs(‘S‘Ì)
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack();
+		g_EffekseerRenderer->EndRendering();
 	}
 	
 	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
