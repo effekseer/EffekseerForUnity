@@ -76,6 +76,7 @@ public class EffekseerSystem : MonoBehaviour
 	/// </summary>
 	const CameraEvent cameraEvent	= CameraEvent.BeforeImageEffects;
 
+	const CameraEvent cameraEvent	= CameraEvent.AfterForwardAlpha;
 	/// <summary xml:lang="en">
 	/// Plays the effect.
 	/// </summary>
