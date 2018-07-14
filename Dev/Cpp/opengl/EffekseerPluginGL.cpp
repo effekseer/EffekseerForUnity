@@ -44,8 +44,14 @@ namespace EffekseerPlugin
 			default:
 				return;
 		}
-		
-		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(g_maxSquares, openglDeviceType);
+
+		auto maxSquares = g_maxSquares;
+
+		// if it reserve large size buffer, a performance is very low on some Chips
+#ifdef __ANDROID__
+		maxSquares = 600;
+#endif
+		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares, openglDeviceType);
 		if (g_EffekseerRenderer == nullptr) {
 			return;
 		}
