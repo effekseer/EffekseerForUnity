@@ -270,6 +270,13 @@ extern "C"
 		// 行列をセット
 		g_EffekseerRenderer->SetProjectionMatrix(projectionMatrix);
 		g_EffekseerRenderer->SetCameraMatrix(cameraMatrix);
+
+		// convert a right hand into a left hand
+		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
+		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+
+		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 		
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
@@ -347,6 +354,13 @@ extern "C"
 		// 行列をセット
 		g_EffekseerRenderer->SetProjectionMatrix(projectionMatrix);
 		g_EffekseerRenderer->SetCameraMatrix(cameraMatrix);
+
+		// convert a right hand into a left hand
+		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
+		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+
+		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);

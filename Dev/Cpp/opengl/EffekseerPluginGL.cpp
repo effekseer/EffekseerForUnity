@@ -138,6 +138,13 @@ extern "C"
 		g_EffekseerRenderer->SetProjectionMatrix(settings.projectionMatrix);
 		g_EffekseerRenderer->SetCameraMatrix(settings.cameraMatrix);
 		
+		// convert a right hand into a left hand
+		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
+		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+
+		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
+
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 		
@@ -155,6 +162,7 @@ extern "C"
 		if (g_EffekseerManager == nullptr) return;
 		if (g_EffekseerRenderer == nullptr) return;
 
+		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront();
 		g_EffekseerRenderer->EndRendering();
 
@@ -191,12 +199,20 @@ extern "C"
 		g_EffekseerRenderer->SetProjectionMatrix(settings.projectionMatrix);
 		g_EffekseerRenderer->SetCameraMatrix(settings.cameraMatrix);
 
+		// convert a right hand into a left hand
+		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
+		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+
+		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
+
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// 描画実行(全体)
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack();
+		g_EffekseerRenderer->EndRendering();
 	}
 
 	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
