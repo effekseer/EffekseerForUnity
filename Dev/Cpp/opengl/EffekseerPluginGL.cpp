@@ -151,7 +151,7 @@ extern "C"
 
 		//if (!g_isRightHandedCoordinate)
 		{
-			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+			cameraFrontDirection = -cameraFrontDirection;
 		}
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
@@ -218,7 +218,7 @@ extern "C"
 
 		//if (!g_isRightHandedCoordinate)
 		{
-			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+			cameraFrontDirection = -cameraFrontDirection;
 		}
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);

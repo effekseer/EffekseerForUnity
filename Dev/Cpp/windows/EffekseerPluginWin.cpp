@@ -278,7 +278,7 @@ extern "C"
 		
 		//if (!g_isRightHandedCoordinate)
 		{
-			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+			cameraFrontDirection = -cameraFrontDirection;
 			//cameraPosition.Z = -cameraPosition.Z;
 		}
 
@@ -366,9 +366,9 @@ extern "C"
 		::Effekseer::Vector3D cameraFrontDirection;
 		CalculateCameraDirectionAndPosition(cameraMatrix, cameraFrontDirection, cameraPosition);
 
-		if (!g_isRightHandedCoordinate)
+		//if (!g_isRightHandedCoordinate)
 		{
-			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+			cameraFrontDirection = -cameraFrontDirection;
 		}
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
