@@ -31,6 +31,8 @@ namespace EffekseerPlugin
 	extern RenderSettings renderSettings[MAX_RENDER_PATH];
 
 	void Array2Matrix(Effekseer::Matrix44& matrix, float matrixArray[]);
+
+	void CalculateCameraDirectionAndPosition(const Effekseer::Matrix44& matrix, Effekseer::Vector3D& direction, Effekseer::Vector3D& position);
 }
 
 #endif

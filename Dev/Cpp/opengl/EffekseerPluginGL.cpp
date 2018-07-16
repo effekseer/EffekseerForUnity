@@ -145,10 +145,15 @@ extern "C"
 		g_EffekseerRenderer->SetCameraMatrix(settings.cameraMatrix);
 		
 		// convert a right hand into a left hand
-		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
-		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+		::Effekseer::Vector3D cameraPosition;
+		::Effekseer::Vector3D cameraFrontDirection;
+		CalculateCameraDirectionAndPosition(settings.cameraMatrix, cameraFrontDirection, cameraPosition);
 
-		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		//if (!g_isRightHandedCoordinate)
+		{
+			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		}
+
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// 背景テクスチャをセット
@@ -206,10 +211,16 @@ extern "C"
 		g_EffekseerRenderer->SetCameraMatrix(settings.cameraMatrix);
 
 		// convert a right hand into a left hand
-		auto cameraFrontDirection = ::Effekseer::Vector3D(cameraMatrix.Values[0][2], cameraMatrix.Values[1][2], cameraMatrix.Values[2][2]);
-		auto cameraPosition = ::Effekseer::Vector3D(cameraMatrix.Values[3][0], cameraMatrix.Values[3][1], cameraMatrix.Values[3][2]);
+		::Effekseer::Vector3D cameraPosition;
+		::Effekseer::Vector3D cameraFrontDirection;
+		CalculateCameraDirectionAndPosition(settings.cameraMatrix, cameraFrontDirection, cameraPosition);
 
-		cameraFrontDirection.Z = -cameraFrontDirection.Z;
+
+		//if (!g_isRightHandedCoordinate)
+		{
+			//cameraFrontDirection.Z = -cameraFrontDirection.Z;
+		}
+
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// 背景テクスチャをセット
