@@ -21,10 +21,20 @@ namespace Effekseer
 		protected T LoadAsset<T>(string path, bool removeExtension, AssetBundle assetBundle) where T : UnityEngine.Object {
 			this.path = path;
 			this.assetBundle = assetBundle;
-			if (assetBundle != null) {
-				return assetBundle.LoadAsset<T>(
-					Utility.ResourcePath(path, removeExtension));
-			} else {
+			if (assetBundle != null)
+			{
+				// TODO refactoring
+				var assetPath = path;
+				if (!removeExtension) assetPath += ".bytes";
+				assetPath = "Assets/Bundles/effects/Effekseer/" + assetPath;
+				var assetPath2 = System.IO.Path.GetFileNameWithoutExtension(path);
+
+				var ret = assetBundle.LoadAsset<T>(assetPath);
+				if (ret != null) return ret;
+
+				return assetBundle.LoadAsset<T>(assetPath2);
+			}
+			else {
 				return Resources.Load<T>(
 					Utility.ResourcePath(path, removeExtension));
 			}
