@@ -44,7 +44,7 @@ public class EffekseerAssetPostProcessor : AssetPostprocessor
 		TextureImporter ti = assetImporter as TextureImporter;
 		//ti.maxTextureSize = 4096;
 		ti.isReadable = true;
-		ti.mipmapEnabled = false;
+		ti.mipmapEnabled = true;
 		ti.textureFormat = TextureImporterFormat.ARGB32;
 	}
 
