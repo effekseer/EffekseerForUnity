@@ -301,6 +301,8 @@ extern "C"
 		if (g_EffekseerManager == nullptr) return;
 		if (g_EffekseerRenderer == nullptr) return;
 
+		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
+
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront();
 		g_EffekseerRenderer->EndRendering();
