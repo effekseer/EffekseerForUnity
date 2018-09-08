@@ -1,47 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>how-to-use</title>
   <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="../base.css">
   <!--[if lt IE 9]>
@@ -57,18 +90,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul>
 <li>GameEngine/Unity/SampleProject.zip</li>
 </ul>
-<figure>
-<img src="../img/unity_example.png" />
-</figure>
+<p><img src="../img/unity_example.png" /></p>
 </section>
 <section id="resource_files" class="level2">
 <h2>About resource files</h2>
 <p>Place the output effect (<em>.efk), texture, sound in Resources/Effekseer/.<br />
 When importing the </em>.efk file, it is renamed *.bytes.<br />
 If it does not work, please try Reimport.</p>
-<figure>
-<img src="../img/unity_resource.png" />
-</figure>
+<p><img src="../img/unity_resource.png" /></p>
 </section>
 <section id="emitter_playback" class="level2">
 <h2>Play by Emitter</h2>
@@ -76,9 +105,7 @@ If it does not work, please try Reimport.</p>
 <h3>Introduction</h3>
 <p>Add EffekseerEmitter to GameObject.<br />
 In that case will play the effect linked to GameObject.</p>
-<figure>
-<img src="../img/unity_emitter.png" />
-</figure>
+<p><img src="../img/unity_emitter.png" /></p>
 </section>
 <section class="level3">
 <h3>Properties</h3>
@@ -99,13 +126,13 @@ In that case will play the effect linked to GameObject.</p>
 <h3>Introduction</h3>
 <p>Using EffekseerSystem.PlayEffect(), you can play effects from scripts.</p>
 <p>The sample code is as follows.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
-{
-    <span class="co">// Plays effect in transform.position</span>
-    EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(<span class="st">&quot;Laser01&quot;</span>, transform.<span class="fu">position</span>);
-    <span class="co">// Sets the rotation of the effect</span>
-    handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);
-}</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="dt">void</span> <span class="fu">Start</span>()</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">    <span class="co">// Plays effect in transform.position</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">    EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(<span class="st">&quot;Laser01&quot;</span>, transform.<span class="fu">position</span>);</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="co">// Sets the rotation of the effect</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">    handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">}</a></code></pre></div>
 </section>
 <section class="level3">
 <h3>Note</h3>
@@ -129,31 +156,31 @@ The loaded effect will be retained and will not be loaded the next time it is pl
 <section class="level3">
 <h3>Manual preloading</h3>
 <p>By LoadEffect() beforehand, you can prevent frame dropping.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">Start</span>()
-{
-    <span class="co">// Loads effect &quot;Laser01.efk&quot;</span>
-    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
-}</code></pre></div>
-<p>Loaded effects are automatically released at EffekseerSystem's OnDestroy().<br />
+<div class="sourceCode" id="cb2"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="dt">void</span> <span class="fu">Start</span>()</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="co">// Loads effect &quot;Laser01.efk&quot;</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>);</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">}</a></code></pre></div>
+<p>Loaded effects are automatically released at EffekseerSystem’s OnDestroy().<br />
 It is also possible to explicitly release an unnecessary effect with ReleaseEffect().</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs"><span class="dt">void</span> <span class="fu">OnDestroy</span>()
-{
-    <span class="co">// Releases effect &quot;Laser01.efk&quot;</span>
-    EffekseerSystem.<span class="fu">ReleaseEffect</span>(<span class="st">&quot;Laser01&quot;</span>);
-}</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="dt">void</span> <span class="fu">OnDestroy</span>()</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="co">// Releases effect &quot;Laser01.efk&quot;</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">    EffekseerSystem.<span class="fu">ReleaseEffect</span>(<span class="st">&quot;Laser01&quot;</span>);</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">}</a></code></pre></div>
 </section>
 </section>
 <section id="assetbundle" class="level2">
 <h2>Preload from AssetBundle</h2>
 <p>You can load effect resources from asset bundles.<br />
 If you use asset bundle, you can not auto load.</p>
-<div class="sourceCode"><pre class="sourceCode cs"><code class="sourceCode cs">IEnumerator <span class="fu">Load</span>() {
-    <span class="dt">string</span> url = <span class="st">&quot;file:///&quot;</span> + Application.<span class="fu">streamingAssetsPath</span> + <span class="st">&quot;/effects&quot;</span>;
-    WWW www = <span class="kw">new</span> <span class="fu">WWW</span>(url);
-    <span class="kw">yield</span> <span class="kw">return</span> www;
-    <span class="dt">var</span> assetBundle = www.<span class="fu">assetBundle</span>;
-    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>, assetBundle);
-}</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb4-1" data-line-number="1">IEnumerator <span class="fu">Load</span>() {</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="dt">string</span> url = <span class="st">&quot;file:///&quot;</span> + Application.<span class="fu">streamingAssetsPath</span> + <span class="st">&quot;/effects&quot;</span>;</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    WWW www = <span class="kw">new</span> <span class="fu">WWW</span>(url);</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    <span class="kw">yield</span> <span class="kw">return</span> www;</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">    <span class="dt">var</span> assetBundle = www.<span class="fu">assetBundle</span>;</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>, assetBundle);</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">}</a></code></pre></div>
 <p>Please ReleaseEffect() like loading from Resources.</p>
 <p>Please do not release AssetBundle before all effects are released.</p>
 </section>

@@ -12,7 +12,7 @@ Because Effekseer's playback program is written in C ++, it is handled as a nati
 ## Environment {#environment}
 
 ### Unity version
-Unity 5.2 or later.  
+Unity 5.5 or later.  
 Personal, Plus and Pro.
 
 ### Supported Platform
@@ -113,6 +113,10 @@ Open Effekseer.unitypackage and import it into the your Unity project.
 ![](../img/unity_import.png)
 
 ## Specification change
+
+### 1.4
+
+Distortion functions has been added. Part of Effekseer's effects are distorted due to distortion.
 
 ### 1.3
 

@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>top</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
   <link rel="stylesheet" href="../base.css">
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
@@ -14,9 +19,7 @@
 <body>
 <section class="level1">
 <h1>Effekseer UnityPlugin Manual</h1>
-<figure>
-<img src="../img/plugin_logo.png" />
-</figure>
+<p><img src="../img/plugin_logo.png" /></p>
 <section id="overview" class="level2">
 <h2>概要</h2>
 <p>ゲームエンジンUnityとの連携について説明します。<br />
@@ -28,7 +31,7 @@
 <h2>動作環境</h2>
 <section class="level3">
 <h3>Unityバージョン</h3>
-<p>Unity 5.2 以降。 Personal, Plus, Pro</p>
+<p>Unity 5.5 以降。 Personal, Plus, Pro</p>
 </section>
 <section class="level3">
 <h3>プラットフォーム</h3>
@@ -205,12 +208,14 @@ OpenGL ES 3.0 (WebGL 2.0)
 <section id="how-to-import" class="level2">
 <h2>導入方法</h2>
 <p>Effekseer.unitypackage を開いてUnityプロジェクトにインポートします。</p>
-<figure>
-<img src="../img/unity_import.png" />
-</figure>
+<p><img src="../img/unity_import.png" /></p>
 </section>
 <section class="level2">
 <h2>仕様変更</h2>
+<section class="level3">
+<h3>1.4</h3>
+<p>歪みに機能が追加されました。Effekseerのエフェクトが歪みにより一部歪むようになりました。</p>
+</section>
 <section class="level3">
 <h3>1.3</h3>
 <p>エフェクトの前後が入れ替わっています。 1.2以前の表示を行う場合、EffekseerSystemコンポーネントの <code>isRightHandledCoordinateSystem</code> をtrueにしてください。</p>
@@ -220,7 +225,7 @@ OpenGL ES 3.0 (WebGL 2.0)
 <section id="issues" class="level2">
 <h2>既知の問題</h2>
 <ul>
-<li>対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の&quot;対応プラットフォーム&quot;の表を確認をしてください。</li>
+<li>対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の“対応プラットフォーム”の表を確認をしてください。</li>
 </ul>
 </section>
 <section id="todo" class="level2">

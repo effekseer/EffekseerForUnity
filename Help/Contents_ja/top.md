@@ -12,7 +12,7 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 ## 動作環境 {#environment}
 
 ### Unityバージョン
-Unity 5.2 以降。 Personal, Plus, Pro
+Unity 5.5 以降。 Personal, Plus, Pro
 
 ### プラットフォーム
 
@@ -112,6 +112,10 @@ Effekseer.unitypackage を開いてUnityプロジェクトにインポートし�
 ![](../img/unity_import.png)
 
 ## 仕様変更
+
+### 1.4
+
+歪みに機能が追加されました。Effekseerのエフェクトが歪みにより一部歪むようになりました。
 
 ### 1.3
 

@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>top</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
   <link rel="stylesheet" href="../base.css">
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
@@ -14,19 +19,17 @@
 <body>
 <section class="level1">
 <h1>Effekseer UnityPlugin Manual</h1>
-<figure>
-<img src="../img/plugin_logo.png" />
-</figure>
+<p><img src="../img/plugin_logo.png" /></p>
 <section id="overview" class="level2">
 <h2>Overview</h2>
 <p>It is explanation about cooperation with game engine Unity. As this tool with Unity Technologies is not particularly tied up, Depending on the version and circumstances it may not work well.</p>
-<p>Because Effekseer's playback program is written in C ++, it is handled as a native plugin on Unity.</p>
+<p>Because Effekseer’s playback program is written in C ++, it is handled as a native plugin on Unity.</p>
 </section>
 <section id="environment" class="level2">
 <h2>Environment</h2>
 <section class="level3">
 <h3>Unity version</h3>
-<p>Unity 5.2 or later.<br />
+<p>Unity 5.5 or later.<br />
 Personal, Plus and Pro.</p>
 </section>
 <section class="level3">
@@ -204,22 +207,24 @@ OpenGL ES 3.0 (WebGL 2.0)
 <section id="how-to-import" class="level2">
 <h2>How to import</h2>
 <p>Open Effekseer.unitypackage and import it into the your Unity project.</p>
-<figure>
-<img src="../img/unity_import.png" />
-</figure>
+<p><img src="../img/unity_import.png" /></p>
 </section>
 <section class="level2">
 <h2>Specification change</h2>
 <section class="level3">
+<h3>1.4</h3>
+<p>Distortion functions has been added. Part of Effekseer’s effects are distorted due to distortion.</p>
+</section>
+<section class="level3">
 <h3>1.3</h3>
 <p>Before and after the effect are swapped. When doing display before 1.2, set <code>isRightHandledCoordinateSystem</code> of EffekseerSystem component to true.</p>
-<p>Distortion method has been changed. Effekseer's effect is not distorted due to distortion. From 1.4 onwards, we plan to add effects distorted by distortion.</p>
+<p>Distortion method has been changed. Effekseer’s effect is not distorted due to distortion. From 1.4 onwards, we plan to add effects distorted by distortion.</p>
 </section>
 </section>
 <section id="issues" class="level2">
 <h2>Known issues</h2>
 <ul>
-<li>Even on supported platforms, effect graphics are not rendered correctly in Graphics API which is not supported.<br>Please check the table of &quot;Supported Platform&quot;.</li>
+<li>Even on supported platforms, effect graphics are not rendered correctly in Graphics API which is not supported.<br>Please check the table of “Supported Platform”.</li>
 </ul>
 </section>
 <section id="todo" class="level2">

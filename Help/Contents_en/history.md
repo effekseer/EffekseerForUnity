@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.40
+- Distortion specification is changed.
+- Added functions
+
 ## 1.30
 - Distortion specification is changed.
 - Coordinate system specification is changed.
