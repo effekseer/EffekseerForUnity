@@ -23,7 +23,6 @@ LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
-	$(LIB_SRC_PATH)/Effekseer.CriticalSection.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultFile.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Effect.cpp \
@@ -46,7 +45,6 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Server.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Setting.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Socket.cpp \
-	$(LIB_SRC_PATH)/Effekseer.Thread.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Grid.cpp \

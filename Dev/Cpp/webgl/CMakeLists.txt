@@ -1,4 +1,4 @@
-# =========================
+﻿# =========================
 # Effekseer UnityPlugin for WebGL
 # 
 # ■ Emscripten と CMake のセットアップ＆ビルド方法について
@@ -10,6 +10,15 @@
 # ■ 適用方法
 # ビルドした EffekseerUnity.bc ファイルを "Assets\Plugins\WebGL" に追加する
 # =========================
+# Effekseer1.4では1.37.3でコンパイル
+# Windowsでコンパイルできなかった場合...
+# emsdk activate する
+# cmdで実行する
+# cmakeのコマンドを直接入力する
+# Build.batをPowerShellで実行するとコマンドが表示される。MinGWをNMakeに差し替える
+# cmake -DCMAKE_CROSSCOMPILING_EMULATOR="C:/Program Files/emsdk/node/8.9.1_64bit/bin/node.exe" -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:\Program Files\emsdk\emscripten\1.38.8\cmake\Modules\Platform\Emscripten.cmake"
+# そしてBuildを実行する
+# =========================
 
 # プロジェクト名
 project(Effekseer)
@@ -17,7 +26,7 @@ project(Effekseer)
 # CMake バージョンチェック
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_FLAGS "-std=c++11" ${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS "-std=c++11 -Oz" ${CMAKE_CXX_FLAGS})
 
 # include 一覧を指定する
 set(
