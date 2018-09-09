@@ -74,8 +74,8 @@ public class EffekseerSystem : MonoBehaviour
 	/// <summary xml:lang="ja">
 	/// エフェクトの描画するタイミング
 	/// </summary>
-	const CameraEvent cameraEvent	= CameraEvent.BeforeImageEffects;
-
+	const CameraEvent cameraEvent	= CameraEvent.AfterForwardAlpha;
+	
 	/// <summary xml:lang="en">
 	/// Plays the effect.
 	/// </summary>
@@ -221,10 +221,13 @@ public class EffekseerSystem : MonoBehaviour
 		}
 		
 		public void Init(bool enableDistortion) {
-			// プラグイン描画するコマンドバッファを作成
+			// Create a command buffer that is effekseer renderer
 			this.commandBuffer = new CommandBuffer();
 			this.commandBuffer.name = "Effekseer Rendering";
 
+			// add a command to render effects.
+			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
+			
 #if UNITY_5_6_OR_NEWER
 			if (enableDistortion) {
 				RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
@@ -232,28 +235,18 @@ public class EffekseerSystem : MonoBehaviour
 			if (enableDistortion && camera.cameraType == CameraType.Game) {
 				RenderTextureFormat format = (camera.hdr) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-				// 歪みテクスチャを作成
+				
+				// Create a distortion texture
 				this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
 				this.renderTexture.Create();
-				// 歪みテクスチャへのコピーコマンドを追加
+				// Add a blit command that copy to the distortion texture
 				this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
 				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+
 			}
-
-			// add a command to render effects.
-			//this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), this.renderId);
-
-			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
-
-			if (enableDistortion)
-			{
-				this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
-				this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-			}
-
+			
 			this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
-
-
+			
 			// register the command to a camera
 			this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 		}

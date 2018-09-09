@@ -23,7 +23,7 @@ public class EffekseerAssetPostProcessor : AssetPostprocessor
             // 
             if (assetPath.Contains("libEffekseerUnity.bc"))
             {
-                EffekseerPluginSwitcher.Run();
+                //EffekseerPluginSwitcher.Run();
             }
 		}
     }
