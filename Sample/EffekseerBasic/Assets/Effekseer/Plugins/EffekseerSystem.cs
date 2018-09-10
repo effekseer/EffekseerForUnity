@@ -555,12 +555,19 @@ public class EffekseerSystem : MonoBehaviour
 	private static int ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		var res = new ModelResource();
-		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle) && res.Copy(buffer, bufferSize)) {
+
+		if(!res.Load(pathstr, EffekseerSystem.Instance.assetBundle))
+		{
+			return 0;
+		}
+		if (res.Copy(buffer, bufferSize))
+		{
 			EffekseerSystem.Instance.modelList.Add(res);
 			return res.modelData.bytes.Length;
 		}
-		return 0;
+		return -res.modelData.bytes.Length;
 	}
+
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerModelLoaderUnload))]
 	private static void ModelLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);

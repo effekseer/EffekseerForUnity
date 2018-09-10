@@ -86,7 +86,7 @@ namespace Effekseer
 			modelData = null;
 		}
 		public bool Copy(IntPtr buffer, int bufferSize) {
-			if (modelData.bytes.Length < bufferSize) {
+			if (modelData.bytes.Length <= bufferSize) {
 				Marshal.Copy(modelData.bytes, 0, buffer, modelData.bytes.Length);
 				return true;
 			}
