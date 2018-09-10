@@ -35,6 +35,7 @@ namespace EffekseerPlugin
 			std::vector<uint8_t> loadbuffer;
 			size_t loadsize = 0;
 			explicit MemoryFile( size_t bufferSize );
+			void Resize(size_t bufferSize);
 			Effekseer::FileReader* OpenRead( const EFK_CHAR* path );
 			Effekseer::FileWriter* OpenWrite( const EFK_CHAR* path );
 		};
