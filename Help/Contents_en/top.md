@@ -128,6 +128,7 @@ From 1.4 onwards, we plan to add effects distorted by distortion.
 
 ## Known issues {#issues}
 - Even on supported platforms, effect graphics are not rendered correctly in Graphics API which is not supported.<br>Please check the table of "Supported Platform".
+- In the Forward renderer of DirectX 11, only the GameView on the Editor, the front and back of the 3D model are reversed. Please change the Culling setting on Effekseer.
 
 ## Todo {#todo}
 - Support some new Graphics API (Metal, Vulkan)

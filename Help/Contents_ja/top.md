@@ -128,6 +128,7 @@ Effekseer.unitypackage を開いてUnityプロジェクトにインポートし�
 
 ## 既知の問題 {#issues}
 - 対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の"対応プラットフォーム"の表を確認をしてください。
+- DirectX11のForwardレンダラーで、Editor上のGameViewのみ、3Dモデルの表裏が逆になります。Effekseer上でカリングの設定を変更してください。
 
 ## Todo {#todo}
 - 未対応の Graphics API (Metal, Vulkan) の対応
