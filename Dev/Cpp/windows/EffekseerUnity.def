@@ -12,6 +12,8 @@ EXPORTS
   EffekseerLoadEffect
   EffekseerLoadEffectOnMemory
   EffekseerReleaseEffect
+  EffekseerReloadResources
+  EffekseerUnloadResources
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
   EffekseerSetStereoRenderingMatrix

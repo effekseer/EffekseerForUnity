@@ -12,7 +12,7 @@ namespace EffekseerPlugin
 	using SoundTag = Effekseer::SoundTag;
 	using SoundHandle = Effekseer::SoundHandle;
 
-	using SoundLoaderLoad = int (UNITY_API*)(const char16_t* path);
+	using SoundLoaderLoad = uintptr_t (UNITY_API*)(const char16_t* path);
 	using SoundLoaderUnload = void (UNITY_API*)(const char16_t* path);
 
 	class SoundLoader : public Effekseer::SoundLoader
@@ -40,7 +40,7 @@ namespace EffekseerPlugin
 	};
 
 	using SoundPlayerPlay = void (UNITY_API*)( SoundTag tag, 
-		int Data, float Volume, float Pan, float Pitch, 
+		uintptr_t Data, float Volume, float Pan, float Pitch, 
 		bool Mode3D, float x, float y, float z, float Distance );
 	using SoundPlayerStopTag = void (UNITY_API*)( SoundTag tag );
 	using SoundPlayerPauseTag = void (UNITY_API*)( SoundTag tag, bool pause );
@@ -72,7 +72,7 @@ namespace EffekseerPlugin
 			checkPlayingTag(checkPlayingTag), stopAll(stopAll) {}
 		virtual ~SoundPlayer() {}
 		virtual SoundHandle Play( SoundTag tag, const InstanceParameter& parameter ){
-			play( tag, (int)(uintptr_t)parameter.Data, parameter.Volume, parameter.Pan, parameter.Pitch, 
+			play( tag, (uintptr_t)parameter.Data, parameter.Volume, parameter.Pan, parameter.Pitch, 
 				parameter.Mode3D, parameter.Position.X, parameter.Position.Y, 
 				parameter.Position.Z, parameter.Distance );
 			return 0;

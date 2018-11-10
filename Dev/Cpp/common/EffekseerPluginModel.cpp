@@ -105,6 +105,9 @@ namespace EffekseerPlugin
 			[source](const std::pair<std::u16string, ModelResource>& pair){
 				return pair.second.internalData == source;
 			});
+		if (it == resources.end()) {
+			return;
+		}
 
 		// 参照カウンタが0になったら実際にアンロード
 		it->second.referenceCount--;

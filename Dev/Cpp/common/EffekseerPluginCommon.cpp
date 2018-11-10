@@ -93,6 +93,22 @@ extern "C"
 		}
 	}
 
+	// エフェクトのリソースのリロード
+	void UNITY_API EffekseerReloadResources(Effect* effect)
+	{
+		if (effect != NULL) {
+			effect->ReloadResources();
+		}
+	}
+
+	// エフェクトのリソースのリロード
+	void UNITY_API EffekseerUnloadResources(Effect* effect)
+	{
+		if (effect != NULL) {
+			effect->UnloadResources();
+		}
+	}
+
 	// エフェクト再生
 	int UNITY_API EffekseerPlayEffect(Effect* effect, float x, float y, float z)
 	{
@@ -355,6 +371,10 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetSoundPlayer(EffekseerPlugin::SoundPlayer::Create(play, stopTag, pauseTag, checkPlayingTag, stopAll ));
+		if (play && stopTag && pauseTag && checkPlayingTag && stopAll) {
+			g_EffekseerManager->SetSoundPlayer(EffekseerPlugin::SoundPlayer::Create(play, stopTag, pauseTag, checkPlayingTag, stopAll ));
+		} else {
+			g_EffekseerManager->SetSoundPlayer(nullptr);
+		}
 	}
 }
