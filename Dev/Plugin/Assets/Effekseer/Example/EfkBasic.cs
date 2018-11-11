@@ -15,8 +15,8 @@ public class EfkBasic : MonoBehaviour
 	EffekseerEffectAsset currentEffect = null;
 	float cameraAngle = 0.0f;
 	
-	void Start () {
-		
+	void Start()
+	{
 		emitterA = GameObject.Find("EffectEmitterA").GetComponent<EffekseerEmitter>();
 		emitterB = GameObject.Find("EffectEmitterB").GetComponent<EffekseerEmitter>();
 		uiEffectList = GameObject.Find("uiEffectList").GetComponent<Dropdown>();
@@ -32,8 +32,13 @@ public class EfkBasic : MonoBehaviour
 		SetEffect(3);
 		uiEffectList.value = 3;
 	}
-	
-	void Update () {
+
+	void OnEnable()
+	{
+	}
+
+	void Update()
+	{
 		const float distance = 20.0f;
 		const float height = 15.0f;
 		cameraAngle += 30 * Mathf.Deg2Rad * Time.deltaTime;
@@ -63,10 +68,13 @@ public class EfkBasic : MonoBehaviour
 		}
 	}
 
-	public void PlayAtZero() {
+	public void PlayAtZero()
+	{
 		EffekseerSystem.PlayEffect(currentEffect, Vector3.zero);
 	}
-	public void PlayAtRandom() {
+
+	public void PlayAtRandom()
+	{
 		Vector3 position = new Vector3(
 			Random.Range(-10.0f, 10.0f),
 			Random.Range(  0.0f,  3.0f),
@@ -78,27 +86,37 @@ public class EfkBasic : MonoBehaviour
 		var handle = EffekseerSystem.PlayEffect(currentEffect, position);
 		handle.SetRotation(rotation);
 	}
-	public void PlayAtEmitterA() {
+
+	public void PlayAtEmitterA()
+	{
 		if (emitterA.exists) {
 			emitterA.StopRoot();
 		} else {
 			emitterA.Play(currentEffect);
 		}
 	}
-	public void PlayAtEmitterB() {
+
+	public void PlayAtEmitterB()
+	{
 		if (emitterB.exists) {
 			emitterB.StopRoot();
 		} else {
 			emitterB.Play(currentEffect);
 		}
 	}
-	public void StopAll() {
+
+	public void StopAll()
+	{
 		EffekseerSystem.StopAllEffects();
 	}
-	public void OnValueChanged() {
+
+	public void OnValueChanged()
+	{
 		SetEffect(uiEffectList.value);
 	}
-	public void SetEffect(int index) {
+
+	public void SetEffect(int index)
+	{
 		currentEffect = effectAssets[index];
 	}
 }

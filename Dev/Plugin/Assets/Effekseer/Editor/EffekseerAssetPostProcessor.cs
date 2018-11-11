@@ -16,7 +16,6 @@ namespace Effekseer.Editor
 		{
 			foreach(string assetPath in importedAssets) {
 				if (Path.GetExtension(assetPath) == ".efk") {
-					Debug.Log(assetPath);
 					EffekseerEffectAsset.CreateAsset(assetPath);
 				}
 				/*if (Path.GetExtension(assetPath) == ".efkmodel") {

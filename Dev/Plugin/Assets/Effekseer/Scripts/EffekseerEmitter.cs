@@ -42,7 +42,7 @@ namespace Effekseer
 		/// <summary xml:lang="ja">
 		/// 最後にPlayされたハンドル
 		/// </summary>
-		private List<EffekseerHandle> handles = new List<EffekseerHandle>();
+		internal List<EffekseerHandle> handles = new List<EffekseerHandle>();
 	
 		/// <summary xml:lang="en">
 		/// Plays the effect.
@@ -57,6 +57,9 @@ namespace Effekseer
 			var h = EffekseerSystem.PlayEffect(effectAsset, transform.position);
 			h.SetRotation(transform.rotation);
 			h.SetScale(transform.localScale);
+			if (speed != 1.0f) h.speed = speed;
+			if (paused) h.paused = paused;
+			if (shown) h.shown = shown;
 			handles.Add(h);
 			return h;
 		}
@@ -84,6 +87,14 @@ namespace Effekseer
 		{
 			foreach (var handle in handles) {
 				handle.Stop();
+			}
+			handles.Clear();
+		}
+		internal void StopImmediate()
+		{
+			foreach (var handle in handles) {
+				handle.Stop();
+				handle.UpdateHandle(1);
 			}
 			handles.Clear();
 		}
@@ -236,12 +247,8 @@ namespace Effekseer
 			Stop();
 		}
 	
-		void Update()
+		internal void Update()
 		{
-			if (handles.Count >= 2) {
-				Debug.Log("break");
-			}
-
 			for (int i = 0; i < handles.Count; ) {
 				var handle = handles[i];
 				if (handle.exists) {

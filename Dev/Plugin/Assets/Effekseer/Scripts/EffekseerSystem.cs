@@ -1,11 +1,8 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,7 +12,8 @@ namespace Effekseer
 {
 	using Internal;
 
-	public class EffekseerSystem : MonoBehaviour
+	[Serializable]
+	public class EffekseerSystem
 	{
 		/// <summary xml:lang="en">
 		/// Plays the effect.
@@ -31,6 +29,10 @@ namespace Effekseer
 		/// <returns>再生したエフェクトインスタンス</returns>
 		public static EffekseerHandle PlayEffect(EffekseerEffectAsset effectAsset, Vector3 location)
 		{
+			if (Instance == null) {
+				Debug.LogError("[Effekseer] System is not initialized.");
+				return new EffekseerHandle(-1);
+			}
 			if (effectAsset == null) {
 				Debug.LogError("[Effekseer] Specified effect is null.");
 				return new EffekseerHandle(-1);
@@ -68,33 +70,17 @@ namespace Effekseer
 		
 		#region Internal Implimentation
 		
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		static void RuntimeInitializeOnLoad()
-		{
-			if (Instance != null) {
-				return;
-			}
-
-			// Find instance if is not set static variable
-			var instance = GameObject.FindObjectOfType<EffekseerSystem>();
-			if (instance == null) {
-				// Create instance if instance not found
-				var go = new GameObject("Effekseer");
-				go.AddComponent<EffekseerSystem>();
-				DontDestroyOnLoad(go);
-			}
-		}
 		
 		// Singleton instance
 		public static EffekseerSystem Instance { get; private set; }
-		public static bool IsValid { get { return Instance != null; } }
+		public static bool IsValid { get { return Instance != null && Instance.enabled; } }
 
-		private new EffekseerRenderer renderer;
+		internal bool enabled;
+		private EffekseerRenderer renderer;
 
 		// Loaded native effects
+		[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
 		private Dictionary<int, IntPtr> nativeEffects = new Dictionary<int, IntPtr>();
-		// Loaded effect resources
-		private List<EffekseerSoundInstance> soundInstances = new List<EffekseerSoundInstance>();
 
 #if UNITY_EDITOR
 		// For hot reloading
@@ -105,6 +91,19 @@ namespace Effekseer
 		// A AssetBundle that current loading
 		private EffekseerEffectAsset effectAssetInLoading;
 		
+		private void ReloadEffects()
+		{
+			foreach (var effectAsset in loadedEffects) {
+				effectAssetInLoading = effectAsset;
+				int id = effectAsset.GetInstanceID();
+				IntPtr nativeEffect;
+				if (nativeEffects.TryGetValue(id, out nativeEffect)) {
+					Plugin.EffekseerReloadResources(nativeEffect);
+				}
+				effectAssetInLoading = null;
+			}
+		}
+
 		internal void LoadEffect(EffekseerEffectAsset effectAsset) {
 			effectAssetInLoading = effectAsset;
 			int id = effectAsset.GetInstanceID();
@@ -113,8 +112,7 @@ namespace Effekseer
 				byte[] bytes = effectAsset.efkBytes;
 				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length);
 				nativeEffects.Add(id, nativeEffect);
-			} else {
-				Plugin.EffekseerReloadResources(nativeEffect);
+				loadedEffects.Add(effectAsset);
 			}
 			effectAssetInLoading = null;
 		}
@@ -125,10 +123,17 @@ namespace Effekseer
 			if (nativeEffects.TryGetValue(id, out nativeEffect)) {
 				Plugin.EffekseerReleaseEffect(nativeEffect);
 				nativeEffects.Remove(id);
+				loadedEffects.Remove(effectAsset);
 			}
 		}
-
-		internal static void InitPlugin() {
+		
+		internal void InitPlugin() {
+			//Debug.Log("EffekseerSystem.InitPlugin");
+			if (Instance != null) {
+				Debug.LogError("[Effekseer] EffekseerSystem instance is already found.");
+			}
+			Instance = this;
+			
 			var settings = EffekseerSettings.Instance;
 
 			// サポート外グラフィックスAPIのチェック
@@ -159,14 +164,34 @@ namespace Effekseer
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth, settings.isRightEffekseerHandledCoordinateSystem);
 		}
 
-		internal static void TermPlugin() {
+		internal void TermPlugin() {
+			//Debug.Log("EffekseerSystem.TermPlugin");
+			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
+				ReleaseEffect(effectAsset);
+			}
+			nativeEffects.Clear();
+			
+	#if UNITY_EDITOR
+			nativeEffectsKeys.Clear();
+			nativeEffectsValues.Clear();
+	#endif
+
 			// Finalize Effekseer library
 			Plugin.EffekseerTerm();
 			// For a platform that is releasing in render thread
 			GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
+			
+			Instance = null;
 		}
 
-		private void EnableCallbacks() {
+		internal void OnEnable() {
+			if (Instance == null) {
+				Instance = this;
+			}
+			renderer = new EffekseerRenderer();
+			renderer.SetVisible(true);
+
+			// Enable all loading functions
 			Plugin.EffekseerSetTextureLoaderEvent(
 				TextureLoaderLoad, 
 				TextureLoaderUnload);
@@ -176,96 +201,44 @@ namespace Effekseer
 			Plugin.EffekseerSetSoundLoaderEvent(
 				SoundLoaderLoad, 
 				SoundLoaderUnload);
-			Plugin.EffekseerSetSoundPlayerEvent(
-				SoundPlayerPlay,
-				SoundPlayerStopTag, 
-				SoundPlayerPauseTag, 
-				SoundPlayerCheckPlayingTag, 
-				SoundPlayerStopAll);
-		}
-
-		private void DisableCallbacks() {
-			Plugin.EffekseerSetTextureLoaderEvent(null, null);
-			Plugin.EffekseerSetModelLoaderEvent(null, null);
-			Plugin.EffekseerSetSoundLoaderEvent(null, null);
-			Plugin.EffekseerSetSoundPlayerEvent(null,null, null, null, null);
-		}
-
-		void Awake() {
-			Instance = this;
-			InitPlugin();
-			
-			if (Application.isPlaying) {
-				var settings = EffekseerSettings.Instance;
-				// サウンドインスタンスを作る
-				for (int i = 0; i < settings.soundInstances; i++) {
-					GameObject go = new GameObject();
-					go.name = "Sound Instance";
-					go.transform.parent = transform;
-					soundInstances.Add(go.AddComponent<EffekseerSoundInstance>());
-				}
-			}
-		}
-
-		void OnDestroy() {
-			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
-				ReleaseEffect(effectAsset);
-			}
-
-			TermPlugin();
-		}
-
-		void OnEnable() {
-			if (Instance == null) {
-				Instance = this;
-			}
-			renderer = new EffekseerRenderer();
-			renderer.SetVisible(true);
-
-			// Enable all loading functions
-			EnableCallbacks();
 			
 	#if UNITY_EDITOR
-			Resume();
-	#endif
-			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
-				LoadEffect(effectAsset);
-			}
-		}
-
-		void OnDisable() {
-	#if UNITY_EDITOR
-			Suspend();
-	#endif
-			renderer.CleanUp();
-			renderer.SetVisible(false);
-			renderer = null;
-			
-			// Disable all loading functions
-			DisableCallbacks();
-		}
-	
-	#if UNITY_EDITOR
-		void Suspend() {
-			foreach (var pair in nativeEffects) {
-				nativeEffectsKeys.Add(pair.Key);
-				nativeEffectsValues.Add(pair.Value.ToString());
-				Plugin.EffekseerUnloadResources(pair.Value);
-			}
-			nativeEffects.Clear();
-		}
-		void Resume() {
 			for (int i = 0; i < nativeEffectsKeys.Count; i++) {
 				IntPtr nativeEffect = new IntPtr((long)ulong.Parse(nativeEffectsValues[i]));
 				nativeEffects.Add(nativeEffectsKeys[i], nativeEffect);
 			}
 			nativeEffectsKeys.Clear();
 			nativeEffectsValues.Clear();
-		}
 	#endif
+
+			ReloadEffects();
+
+			enabled = true;
+		}
+
+		internal void OnDisable() {
+			enabled = false;
+
+	#if UNITY_EDITOR
+			foreach (var pair in nativeEffects) {
+				nativeEffectsKeys.Add(pair.Key);
+				nativeEffectsValues.Add(pair.Value.ToString());
+				Plugin.EffekseerUnloadResources(pair.Value);
+			}
+			nativeEffects.Clear();
+	#endif
+			renderer.CleanUp();
+			renderer.SetVisible(false);
+			renderer = null;
+			
+			// Disable all loading functions
+			Plugin.EffekseerSetTextureLoaderEvent(null, null);
+			Plugin.EffekseerSetModelLoaderEvent(null, null);
+			Plugin.EffekseerSetSoundLoaderEvent(null, null);
+		}
 		
-		void LateUpdate() {
-			float deltaFrames = Time.deltaTime * 60.0f;
+		internal void Update(float deltaTime) {
+			float deltaFrames = Utility.TimeToFrames(deltaTime);
 			int updateCount = Mathf.Max(1, Mathf.RoundToInt(deltaFrames));
 			for (int i = 0; i < updateCount; i++) {
 				Plugin.EffekseerUpdate(deltaFrames / updateCount);
@@ -330,76 +303,6 @@ namespace Effekseer
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundLoaderUnload))]
 		private static void SoundLoaderUnload(IntPtr path) {
-		}
-	
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPlay))]
-		private static void SoundPlayerPlay(IntPtr tag, 
-				IntPtr data, float volume, float pan, float pitch, 
-				bool mode3D, float x, float y, float z, float distance) {
-			Instance.PlaySound(tag, data, volume, pan, pitch, mode3D, x, y, z, distance);
-		}
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopTag))]
-		private static void SoundPlayerStopTag(IntPtr tag) {
-			Instance.StopSound(tag);
-		}
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPauseTag))]
-		private static void SoundPlayerPauseTag(IntPtr tag, bool pause) {
-			Instance.PauseSound(tag, pause);
-		}
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerCheckPlayingTag))]
-		private static bool SoundPlayerCheckPlayingTag(IntPtr tag) {
-			return Instance.CheckSound(tag);
-		}
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopAll))]
-		private static void SoundPlayerStopAll() {
-			Instance.StopAllSounds();
-		}
-
-		private void PlaySound(IntPtr tag, 
-			IntPtr data, float volume, float pan, float pitch, 
-			bool mode3D, float x, float y, float z, float distance)
-		{
-			if (data == IntPtr.Zero) {
-				return;
-			}
-			var resource = EffekseerSoundResource.FromIntPtr(data);
-			if (resource == null) {
-				return;
-			}
-			foreach (var instance in soundInstances) {
-				if (!instance.CheckPlaying()) {
-					instance.Play(tag.ToString(), resource, volume, pan, pitch, mode3D, x, y, z, distance);
-					break;
-				}
-			}
-		}
-		private void StopSound(IntPtr tag) {
-			foreach (var sound in soundInstances) {
-				if (sound.AudioTag == tag.ToString()) {
-					sound.Stop();
-				}
-			}
-		}
-		private void PauseSound(IntPtr tag, bool paused) {
-			foreach (var sound in soundInstances) {
-				if (sound.AudioTag == tag.ToString()) {
-					sound.Pause(paused);
-				}
-			}
-		}
-		private bool CheckSound(IntPtr tag) {
-			bool playing = false;
-			foreach (var sound in soundInstances) {
-				if (sound.AudioTag == tag.ToString()) {
-					playing |= sound.CheckPlaying();
-				}
-			}
-			return playing;
-		}
-		private void StopAllSounds() {
-			foreach (var sound in soundInstances) {
-				sound.Stop();
-			}
 		}
 
 		#endregion

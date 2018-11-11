@@ -20,19 +20,9 @@ namespace Effekseer
 		private double lastFrameTime;
 
 		public override void OnPlayableCreate(Playable playable) {
-#if UNITY_EDITOR
-			if (!Application.isPlaying) {
-				//EffekseerSystem.InitPlugin();
-			}
-#endif
 		}
 	
 		public override void OnPlayableDestroy(Playable playable) {
-#if UNITY_EDITOR
-			if (!Application.isPlaying) {
-				//EffekseerSystem.TermPlugin();
-			}
-#endif
 		}
 	
 		// Called when the owning graph starts playing

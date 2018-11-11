@@ -16,6 +16,10 @@ namespace Effekseer
 			res[12] = mat.m30; res[13] = mat.m31; res[14] = mat.m32; res[15] = mat.m33;
 			return res;
 		}
+
+		public static float TimeToFrames(float time) {
+			return time * 60.0f;
+		}
 	}
 	
 	internal static class Plugin
