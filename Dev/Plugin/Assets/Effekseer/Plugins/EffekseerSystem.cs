@@ -315,7 +315,7 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	private void _ReleaseEffect(string name) {
-		if (effectList.ContainsKey(name) == false) {
+		if (effectList.ContainsKey(name)) {
 			var effect = effectList[name];
 			Plugin.EffekseerReleaseEffect(effect);
 			effectList.Remove(name);
