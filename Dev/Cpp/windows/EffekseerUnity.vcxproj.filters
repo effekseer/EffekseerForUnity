@@ -28,6 +28,21 @@
     <ClCompile Include="..\Device\EffekseerPluginDX11.cpp">
       <Filter>Device</Filter>
     </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererIndexBuffer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererRenderState.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererShader.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererVertexBuffer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererImplemented.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -41,6 +56,9 @@
     </Filter>
     <Filter Include="Device">
       <UniqueIdentifier>{a72ba44a-556a-4468-a388-37707e35bb7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{e6858b00-366a-44ec-b559-d3b8886038cc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +88,21 @@
     </ClInclude>
     <ClInclude Include="..\Device\EffekseerPluginDX11.h">
       <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererImplemented.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererIndexBuffer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererRenderState.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererShader.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererVertexBuffer.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

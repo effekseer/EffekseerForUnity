@@ -22,7 +22,7 @@ namespace Effekseer
 		}
 	}
 	
-	internal static class Plugin
+	internal static unsafe class Plugin
 	{
 		#if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_WEBGL)
 			public const string pluginName = "__Internal";
@@ -31,7 +31,7 @@ namespace Effekseer
 		#endif
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerInit(int maxInstances, int maxSquares, bool isRightHandedCoordinate, bool reversedDepth);
+		public static extern void EffekseerInit(int maxInstances, int maxSquares, bool isRightHandedCoordinate, bool reversedDepth, int rendererType);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerTerm();
@@ -47,6 +47,15 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern IntPtr EffekseerGetRenderBackFunc(int renderId = 0);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerRender(int renderId = 0);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerRenderFront(int renderId = 0);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerRenderBack(int renderId = 0);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetProjectionMatrix(int renderId, float[] matrix);
@@ -167,5 +176,45 @@ namespace Effekseer
 		public delegate void EffekseerSoundPlayerPauseTag(IntPtr tag, bool pause);
 		public delegate bool EffekseerSoundPlayerCheckPlayingTag(IntPtr tag);
 		public delegate void EffekseerSoundPlayerStopAll();
+
+		#region UnityRenderer
+
+		public struct UnityRenderParameter
+		{
+			//! 0 - procedual, 1 - model
+			public int RenderMode;
+
+			//! 0 - False, 1 - True 
+			public int IsDistortingMode;
+
+			//! VertexBuffer 
+			public int VertexBufferOffset;
+
+			//! Element count (Triangle) or instance
+			public int ElementCount;
+
+			//! Texture ptr
+			public IntPtr TexturePtrs0;
+			public IntPtr TexturePtrs1;
+			public IntPtr TexturePtrs2;
+			public IntPtr TexturePtrs3;
+
+			//! Material ptr
+			public IntPtr MaterialPtr;
+
+			//! Model ptri
+			public IntPtr ModelPtr;
+		};
+
+
+		[DllImport(pluginName)]
+		public static extern UnityRenderParameter* GetUnityRenderParameter();
+
+		[DllImport(pluginName)]
+		public static extern int GetUnityRenderCount();
+
+		[DllImport(pluginName)]
+		public static extern void SetMaterial(IntPtr material);
+		#endregion
 	}
 }

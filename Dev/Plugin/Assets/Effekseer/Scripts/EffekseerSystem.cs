@@ -76,7 +76,7 @@ namespace Effekseer
 		public static bool IsValid { get { return Instance != null && Instance.enabled; } }
 
 		internal bool enabled;
-		private EffekseerRenderer renderer;
+		private IEffekseerRenderer renderer;
 
 		// Loaded native effects
 		[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
@@ -155,13 +155,16 @@ namespace Effekseer
 			case GraphicsDeviceType.Direct3D11:
 			case GraphicsDeviceType.Direct3D12:
 			case GraphicsDeviceType.Metal:
-				reversedDepth = true;
+			case GraphicsDeviceType.PlayStation4:
+			case GraphicsDeviceType.Switch:
+
+					reversedDepth = true;
 				break;
 			}
 	#endif
 
 			// Initialize effekseer library
-			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth, settings.isRightEffekseerHandledCoordinateSystem);
+			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth, settings.isRightEffekseerHandledCoordinateSystem, (int)settings.RendererType);
 		}
 
 		internal void TermPlugin() {
@@ -188,7 +191,17 @@ namespace Effekseer
 			if (Instance == null) {
 				Instance = this;
 			}
-			renderer = new EffekseerRenderer();
+
+			var settings = EffekseerSettings.Instance;
+			if (settings.RendererType == EffekseerRendererType.Native)
+			{
+				renderer = new EffekseerRendererNative();
+			}
+			else
+			{
+				renderer = new EffekseerRendererUnity();
+			}
+
 			renderer.SetVisible(true);
 
 			// Enable all loading functions

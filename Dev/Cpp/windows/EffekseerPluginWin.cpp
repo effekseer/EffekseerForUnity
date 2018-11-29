@@ -20,6 +20,8 @@
 #include "../Device/EffekseerPluginDX9.h"
 #include "../Device/EffekseerPluginDX11.h"
 
+#include "../renderer/EffekseerRendererImplemented.h"
+
 #pragma comment(lib, "shlwapi.lib")
 
 using namespace Effekseer;
@@ -29,6 +31,8 @@ namespace EffekseerPlugin
 {
 	int32_t	g_maxInstances = 0;
 	int32_t	g_maxSquares = 0;
+	RendererType g_rendererType = RendererType::Native;
+
 	bool g_reversedDepth = false;
 	bool g_isRightHandedCoordinate = false;
 
@@ -44,7 +48,7 @@ namespace EffekseerPlugin
 
 	bool					g_isOpenGLMode = false;
 	bool					g_isInitialized = false;
-
+	
 	EffekseerRenderer::Renderer* CreateRendererOpenGL(int squareMaxCount)
 	{
 		auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
@@ -101,18 +105,33 @@ namespace EffekseerPlugin
 	{
 		if (g_EffekseerManager == nullptr) return;
 
-		switch (g_UnityRendererType) {
-		case kUnityGfxRendererD3D9:
-			g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX9( g_maxSquares, g_D3d9Device);
-			break;
-		case kUnityGfxRendererD3D11:
-			g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX11( g_maxSquares, g_reversedDepth, g_D3d11Device, g_D3d11Context );
-			break;
-		case kUnityGfxRendererOpenGLCore:
-			g_EffekseerRenderer = CreateRendererOpenGL(g_maxSquares);
-			break;
-		default:
-			return;
+		if (g_rendererType == RendererType::Native)
+		{
+			switch (g_UnityRendererType) {
+			case kUnityGfxRendererD3D9:
+				g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX9(g_maxSquares, g_D3d9Device);
+				break;
+			case kUnityGfxRendererD3D11:
+				g_EffekseerRenderer = EffekseerPlugin::CreateRendererDX11(g_maxSquares, g_reversedDepth, g_D3d11Device, g_D3d11Context);
+				break;
+			case kUnityGfxRendererOpenGLCore:
+				g_EffekseerRenderer = CreateRendererOpenGL(g_maxSquares);
+				break;
+			default:
+				return;
+			}
+		}
+		else if (g_rendererType == RendererType::Unity)
+		{
+			auto renderer = EffekseerRendererUnity::RendererImplemented::Create();
+			if (renderer->Initialize(g_maxSquares))
+			{
+				g_EffekseerRenderer = renderer;
+			}
+			else
+			{
+				ES_SAFE_RELEASE(renderer);
+			}
 		}
 
 		if (g_EffekseerRenderer == nullptr)
@@ -151,18 +170,21 @@ namespace EffekseerPlugin
 	void SetBackGroundTexture(void *backgroundTexture)
 	{
 		// 背景テクスチャをセット
-		switch (g_UnityRendererType) {
-		case kUnityGfxRendererD3D9:
-			((EffekseerRendererDX9::Renderer*)g_EffekseerRenderer)->SetBackground((IDirect3DTexture9*)backgroundTexture);
-			break;
-		case kUnityGfxRendererD3D11:
-			((EffekseerRendererDX11::Renderer*)g_EffekseerRenderer)->SetBackground((ID3D11ShaderResourceView*)backgroundTexture);
-			break;
-		case kUnityGfxRendererOpenGLCore:
-			((EffekseerRendererGL::Renderer*)g_EffekseerRenderer)->SetBackground(reinterpret_cast<GLuint>(backgroundTexture));
-			break;
-		default:
-			return;
+		if (g_rendererType == RendererType::Native)
+		{
+			switch (g_UnityRendererType) {
+			case kUnityGfxRendererD3D9:
+				((EffekseerRendererDX9::Renderer*)g_EffekseerRenderer)->SetBackground((IDirect3DTexture9*)backgroundTexture);
+				break;
+			case kUnityGfxRendererD3D11:
+				((EffekseerRendererDX11::Renderer*)g_EffekseerRenderer)->SetBackground((ID3D11ShaderResourceView*)backgroundTexture);
+				break;
+			case kUnityGfxRendererOpenGLCore:
+				((EffekseerRendererGL::Renderer*)g_EffekseerRenderer)->SetBackground(reinterpret_cast<GLuint>(backgroundTexture));
+				break;
+			default:
+				return;
+			}
 		}
 	}
 
@@ -399,7 +421,7 @@ extern "C"
 		return EffekseerRenderBack;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
 	{
 		g_isInitialized = true;
 
@@ -408,6 +430,7 @@ extern "C"
 		g_reversedDepth = reversedDepth != 0;
 		g_isOpenGLMode = (g_UnityRendererType == kUnityGfxRendererOpenGLCore);
 		g_isRightHandedCoordinate = isRightHandedCoordinate != 0;
+		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 

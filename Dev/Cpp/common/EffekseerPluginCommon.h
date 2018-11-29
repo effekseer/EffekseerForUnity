@@ -11,6 +11,12 @@
 
 namespace EffekseerPlugin
 {
+	enum class RendererType : int
+	{
+		Native = 0,
+		Unity = 1,
+	};
+
 	const int MAX_RENDER_PATH = 128;
 
 	extern Effekseer::Manager*	g_EffekseerManager;
