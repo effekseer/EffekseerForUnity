@@ -1,5 +1,8 @@
 ﻿# Release notes
 
+## 1.41b
+-Fixed a bug that 3D model is not shown in Mac
+
 ## 1.41
 - Fixed a bug that effects can not be played if .. is included in the file path
 - Fixed a bug that rendering became wrong when used with VR
