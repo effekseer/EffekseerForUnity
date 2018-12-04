@@ -8,8 +8,11 @@ Those who need them please ask me to download the package of tools.
 
 
 ■ Directory structure
--GameEngine
-Unity packages and samples are stored.
+-Effekseer.unitypackage
+Unity packages
+
+-Sample
+Samples are stored.
 
 -Help
 Help written about how to use is saved.
@@ -25,8 +28,11 @@ Effekseerをダウンロードしていただきありがとうございます�
 
 
 ■　ディレクトリ構成
--GameEngine
-Unityのパッケージとサンプルが保存されています。
+-Effekseer.unitypackage
+Unityのパッケージ
+
+-Sample
+サンプルが保存されています。
 
 -Help
 使い方について記述されているヘルプが保存されています。

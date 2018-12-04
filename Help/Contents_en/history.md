@@ -1,5 +1,10 @@
 ﻿# Release notes
 
+## 1.41
+- Fixed a bug that effects can not be played if .. is included in the file path
+- Fixed a bug that rendering became wrong when used with VR
+- Fixed a bug that the effect was not released actually when calling Release function
+
 ## 1.40
 - Distortion specification is changed.
 - Added functions

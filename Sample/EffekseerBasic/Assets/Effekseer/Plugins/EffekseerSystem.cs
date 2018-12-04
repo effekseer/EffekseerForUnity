@@ -301,7 +301,11 @@ public class EffekseerSystem : MonoBehaviour
 
 		this.assetBundle = assetBundle;
 		GCHandle ghc = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+
+		currentLoadingEffectPath = name;
 		IntPtr effect = Plugin.EffekseerLoadEffectOnMemory(ghc.AddrOfPinnedObject(), bytes.Length);
+		currentLoadingEffectPath = string.Empty;
+
 		ghc.Free();
 		this.assetBundle = null;
 		
@@ -311,7 +315,7 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	private void _ReleaseEffect(string name) {
-		if (effectList.ContainsKey(name) == false) {
+		if (effectList.ContainsKey(name)) {
 			var effect = effectList[name];
 			Plugin.EffekseerReleaseEffect(effect);
 			effectList.Remove(name);
@@ -505,11 +509,24 @@ public class EffekseerSystem : MonoBehaviour
 			Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 		}
 
-		// ビュー関連の行列を更新
-		Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
-			GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
-		Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
-			camera.worldToCameraMatrix));
+#if UNITY_5_4_OR_NEWER
+		// ステレオレンダリング(VR)用に左右目の行列を設定
+		if (camera.stereoEnabled) {
+			float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
+			float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
+			float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
+			float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
+			Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, projMatL, projMatR, camMatL, camMatR);
+		}
+		else
+#endif
+		{
+			// ビュー関連の行列を更新
+			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
+				GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
+			Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
+				camera.worldToCameraMatrix));
+		}
 	}
 	
 	void OnRenderObject() {
@@ -520,11 +537,20 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// HACK
+	/// </summary>
+	internal static string currentLoadingEffectPath = string.Empty;
+
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderLoad))]
 	private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format) {
 		var pathstr = Marshal.PtrToStringUni(path);
+
+		// HACK
+		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
+
 		var res = new TextureResource();
-		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle)) {
+		if (res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle)) {
 			EffekseerSystem.Instance.textureList.Add(res);
 			width = res.texture.width;
 			height = res.texture.height;
@@ -544,8 +570,9 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderUnload))]
 	private static void TextureLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
+
 		foreach (var res in EffekseerSystem.Instance.textureList) {
-			if (res.path == pathstr) {
+			if (res.keyPath == pathstr) {
 				EffekseerSystem.Instance.textureList.Remove(res);
 				return;
 			}
@@ -554,9 +581,13 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerModelLoaderLoad))]
 	private static int ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize) {
 		var pathstr = Marshal.PtrToStringUni(path);
+
+		// HACK
+		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
+
 		var res = new ModelResource();
 
-		if(!res.Load(pathstr, EffekseerSystem.Instance.assetBundle))
+		if(!res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle))
 		{
 			return 0;
 		}
@@ -572,7 +603,7 @@ public class EffekseerSystem : MonoBehaviour
 	private static void ModelLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		foreach (var res in EffekseerSystem.Instance.modelList) {
-			if (res.path == pathstr) {
+			if (res.keyPath == pathstr) {
 				EffekseerSystem.Instance.modelList.Remove(res);
 				return;
 			}
@@ -581,8 +612,12 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerSoundLoaderLoad))]
 	private static int SoundLoaderLoad(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
+
+		// HACK
+		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
+
 		var res = new SoundResource();
-		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle)) {
+		if (res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle)) {
 			EffekseerSystem.Instance.soundList.Add(res);
 			return EffekseerSystem.Instance.soundList.Count;
 		}
@@ -592,7 +627,7 @@ public class EffekseerSystem : MonoBehaviour
 	private static void SoundLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		foreach (var res in EffekseerSystem.Instance.soundList) {
-			if (res.path == pathstr) {
+			if (res.keyPath == pathstr) {
 				EffekseerSystem.Instance.soundList.Remove(res);
 				return;
 			}
@@ -669,6 +704,37 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// This is HACK
+	/// </summary>
+	/// <param name="effectName"></param>
+	/// <param name="resourcePath"></param>
+	/// <returns></returns>
+	private static string CombinePathForResource(string effectName, string resourcePath)
+	{
+		var directoryName = System.IO.Path.GetDirectoryName(currentLoadingEffectPath);
+		if (directoryName == string.Empty) return resourcePath;
+		return NormalizePath(directoryName + "/" + resourcePath);
+	}
+
+	private static string NormalizePath(string path)
+	{
+		var pathes = new List<string>(path.Split('\\', '/'));
+
+		for (int i = 0; i < pathes.Count - 1;)
+		{
+			if (pathes[i + 1] == "..")
+			{
+				pathes.RemoveRange(i, 2);
+			}
+			else
+			{
+				i++;
+			}
+		}
+
+		return string.Join("/", pathes.ToArray());
+	}
 	#endregion
 }
 
