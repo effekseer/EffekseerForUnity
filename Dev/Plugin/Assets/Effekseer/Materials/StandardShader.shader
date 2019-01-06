@@ -43,8 +43,8 @@
 	{
 		ps_input o;
 
-		int qind = (id + buf_offset) / 6;
-		int vind = (id + buf_offset) % 6;
+		int qind = (id) / 6;
+		int vind = (id) % 6;
 
 		int v_offset[6];
 		v_offset[0] = 2;
@@ -54,7 +54,7 @@
 		v_offset[4] = 2;
 		v_offset[5] = 3;
 
-		SimpleVertex v = buf_vertex[qind * 4 + v_offset[vind]];
+		SimpleVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
 		
 		float3 worldPos = v.Pos;
 		o.pos = mul(UNITY_MATRIX_VP, float4(worldPos,1.0f));
