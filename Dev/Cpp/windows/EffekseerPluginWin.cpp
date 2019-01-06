@@ -188,7 +188,7 @@ namespace EffekseerPlugin
 		}
 	}
 
-	void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
 	{
 		switch (eventType) {
 		case kUnityGfxDeviceEventInitialize:
@@ -224,7 +224,7 @@ namespace EffekseerPlugin
 extern "C"
 {
 	// Unity plugin load event
-	void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
 	{
 		g_UnityInterfaces = unityInterfaces;
 		g_UnityGraphics = g_UnityInterfaces->Get<IUnityGraphics>();
@@ -238,12 +238,12 @@ extern "C"
 	}
 
 	// Unity plugin unload event
-	void UNITY_API UnityPluginUnload()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
 	{
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
 
-	void UNITY_API EffekseerRender(int renderId)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRender(int renderId)
 	{
 		if (g_isInitialized == false)
 		{
@@ -318,7 +318,7 @@ extern "C"
 		SetBackGroundTexture(nullptr);
 	}
 
-	void UNITY_API EffekseerRenderFront(int renderId)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderFront(int renderId)
 	{
 		if (g_EffekseerManager == nullptr) return;
 		if (g_EffekseerRenderer == nullptr) return;
@@ -333,7 +333,7 @@ extern "C"
 		SetBackGroundTexture(nullptr);
 	}
 
-	void UNITY_API EffekseerRenderBack(int renderId)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderBack(int renderId)
 	{
 		if (g_isInitialized == false)
 		{
@@ -406,22 +406,22 @@ extern "C"
 		g_EffekseerRenderer->EndRendering();
 	}
 	
-	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
 	}
 
-	UnityRenderingEvent UNITY_API EffekseerGetRenderFrontFunc(int renderId)
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderFrontFunc(int renderId)
 	{
 		return EffekseerRenderFront;
 	}
 
-	UnityRenderingEvent UNITY_API EffekseerGetRenderBackFunc(int renderId)
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderBackFunc(int renderId)
 	{
 		return EffekseerRenderBack;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
 	{
 		g_isInitialized = true;
 
@@ -449,7 +449,7 @@ extern "C"
 		}
 	}
 
-	void UNITY_API EffekseerTerm()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerTerm()
 	{
 		if (g_EffekseerManager != NULL) {
 			g_EffekseerManager->Destroy();
@@ -465,7 +465,7 @@ extern "C"
 	}
 	
 	// 歪み用テクスチャ設定
-	void UNITY_API EffekseerSetBackGroundTexture(int renderId, void* texture)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetBackGroundTexture(int renderId, void* texture)
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			if (g_UnityRendererType == kUnityGfxRendererD3D11)

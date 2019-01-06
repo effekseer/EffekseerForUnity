@@ -7,7 +7,9 @@ namespace EffekseerRendererUnity
 	{
 		m_resource = new uint8_t[m_size];
 		memset(m_resource, 0, (size_t)m_size);
+		m_vertexRingStart = 0;
 		m_vertexRingOffset = 0;
+		m_ringBufferLock = false;
 	}
 
 	VertexBuffer::~VertexBuffer()

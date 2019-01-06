@@ -164,7 +164,7 @@ namespace Effekseer
 	#endif
 
 			// Initialize effekseer library
-			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth, settings.isRightEffekseerHandledCoordinateSystem, (int)settings.RendererType);
+			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)settings.RendererType);
 		}
 
 		internal void TermPlugin() {

@@ -62,9 +62,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\UnityPluginInterface.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\EffekseerPluginCommon.h">
       <Filter>common</Filter>
     </ClInclude>

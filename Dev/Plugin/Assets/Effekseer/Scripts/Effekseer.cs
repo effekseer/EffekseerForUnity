@@ -31,7 +31,7 @@ namespace Effekseer
 		#endif
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerInit(int maxInstances, int maxSquares, bool isRightHandedCoordinate, bool reversedDepth, int rendererType);
+		public static extern void EffekseerInit(int maxInstances, int maxSquares, int isRightHandedCoordinate, int reversedDepth, int rendererType);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerTerm();
@@ -211,7 +211,13 @@ namespace Effekseer
 		public static extern UnityRenderParameter* GetUnityRenderParameter();
 
 		[DllImport(pluginName)]
-		public static extern int GetUnityRenderCount();
+		public static extern int GetUnityRenderParameterCount();
+
+		[DllImport(pluginName)]
+		public static extern IntPtr GetUnityRenderVertexBuffer();
+
+		[DllImport(pluginName)]
+		public static extern int GetUnityRenderVertexBufferCount();
 
 		[DllImport(pluginName)]
 		public static extern void SetMaterial(IntPtr material);

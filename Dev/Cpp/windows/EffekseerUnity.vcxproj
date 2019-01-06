@@ -189,7 +189,6 @@
     <ClInclude Include="..\common\EffekseerPluginModel.h" />
     <ClInclude Include="..\common\EffekseerPluginSound.h" />
     <ClInclude Include="..\common\EffekseerPluginTexture.h" />
-    <ClInclude Include="..\common\UnityPluginInterface.h" />
     <ClInclude Include="..\Device\EffekseerPluginDX11.h" />
     <ClInclude Include="..\Device\EffekseerPluginDX9.h" />
     <ClInclude Include="..\opengl\EffekseerPluginGL.h" />

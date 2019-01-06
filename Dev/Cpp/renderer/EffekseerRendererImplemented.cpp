@@ -18,18 +18,25 @@ extern "C"
 		return renderer->GetRenderParameters().data();
 	}
 
-	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderCount()
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderParameterCount()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return 0;
 		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
 		return renderer->GetRenderParameters().size();
 	}
 
-	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityVertexBuffer()
+	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderVertexBuffer()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return nullptr;
 		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
 		return renderer->GetRenderVertexBuffer().data();
+	}
+
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderVertexBufferCount()
+	{
+		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return 0;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
+		return renderer->GetRenderVertexBuffer().size();
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetMaterial(void* material)
@@ -42,6 +49,14 @@ extern "C"
 
 namespace EffekseerRendererUnity
 {
+	struct UnityVertex
+	{
+		::Effekseer::Vector3D	Pos;
+		float		UV[2];
+		float		Col[4];
+
+	};
+
 	ModelRenderer::ModelRenderer(RendererImplemented* renderer)
 		: m_renderer(renderer)
 	{
@@ -495,6 +510,7 @@ namespace EffekseerRendererUnity
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
+				UnityVertex unity_v;
 
 				if (isSingleRing)
 				{
@@ -506,9 +522,17 @@ namespace EffekseerRendererUnity
 					v.Pos.Z = trans.Values[3][2];
 				}
 
+				unity_v.Pos = v.Pos;
+				unity_v.UV[0] = v.UV[0];
+				unity_v.UV[1] = v.UV[1];
+				unity_v.Col[0] = v.Col.R / 255.0f;
+				unity_v.Col[1] = v.Col.G / 255.0f;
+				unity_v.Col[2] = v.Col.B / 255.0f;
+				unity_v.Col[3] = v.Col.A / 255.0f;
+
 				auto targetOffset = vertexBuffer.size();
-				vertexBuffer.resize(vertexBuffer.size() + sizeof(Vertex));
-				memcpy(vertexBuffer.data() + targetOffset, &v, sizeof(Vertex));
+				vertexBuffer.resize(vertexBuffer.size() + sizeof(UnityVertex));
+				memcpy(vertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityVertex));
 			}
 
 			UnityRenderParameter rp;

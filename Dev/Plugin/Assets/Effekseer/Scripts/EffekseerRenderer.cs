@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
@@ -17,6 +18,46 @@ namespace Effekseer.Internal
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
+		const int VertexSize = 36;
+
+		public enum AlphaBlendType : int
+		{
+			Opacity = 0,
+			Blend = 1,
+			Add = 2,
+			Sub = 3,
+			Mul = 4,
+		}
+
+		class MaterialKey
+		{
+			public bool ZTest;
+			public bool ZWrite;
+			public AlphaBlendType Blend;
+		}
+
+		class MaterialPropCollection
+		{
+			List<MaterialPropertyBlock> materialPropBlocks = new List<MaterialPropertyBlock>();
+			int materialPropBlockOffset = 0;
+
+			public void Reset()
+			{
+				materialPropBlockOffset = 0;
+			}
+
+			public MaterialPropertyBlock GetNext()
+			{
+				if(materialPropBlockOffset >= materialPropBlocks.Count)
+				{
+					materialPropBlocks.Add(new MaterialPropertyBlock());
+				}
+
+				var ret = materialPropBlocks[materialPropBlockOffset];
+				materialPropBlockOffset++;
+				return ret;
+			}
+		}
 
 		private class RenderPath : IDisposable
 		{
@@ -30,8 +71,7 @@ namespace Effekseer.Internal
 			public ComputeBuffer computeBufferBack;
 			public byte[] computeBufferTemp;
 
-			public List<MaterialPropertyBlock> materialPropBlocks = new List<MaterialPropertyBlock>();
-			public int materialPropBlockOffset = 0;
+			public MaterialPropCollection materiaProps = new MaterialPropCollection();
 
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
@@ -56,9 +96,9 @@ namespace Effekseer.Internal
 					this.renderTexture.Create();
 				}
 
-				computeBufferFront = new ComputeBuffer(VertexMaxCount, 24, ComputeBufferType.Default);
-				computeBufferBack = new ComputeBuffer(VertexMaxCount, 24, ComputeBufferType.Default);
-				computeBufferTemp = new byte[VertexMaxCount * 24];
+				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
+				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
+				computeBufferTemp = new byte[VertexMaxCount * VertexSize];
 			}
 
 			public void Dispose()
@@ -88,6 +128,9 @@ namespace Effekseer.Internal
 		public EffekseerRendererUnity()
 		{
 			this.computeMaterial = new Material(EffekseerSettings.Instance.baseShader);
+			this.computeMaterial.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+			this.computeMaterial.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+
 		}
 
 		Material computeMaterial;
@@ -195,11 +238,11 @@ namespace Effekseer.Internal
 
 			// Reset command buffer
 			path.commandBuffer.Clear();
+			path.materiaProps.Reset();
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
-
-			// Render (TODO)
+			RenderInternal(path.commandBuffer, computeMaterial, path.computeBufferTemp, path.computeBufferBack, path.materiaProps);
 
 			// Distortion
 			if (settings.enableDistortion && path.renderTexture != null)
@@ -210,26 +253,66 @@ namespace Effekseer.Internal
 
 			}
 
-			Plugin.EffekseerRenderFront();
-
-			// TODO render
-			var vertexBuffer = (IntPtr)Plugin.GetUnityRenderParameter();
-			System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, path.computeBufferTemp, 0, Plugin.GetUnityRenderCount() * 24);
-			path.computeBufferFront.SetData(path.computeBufferTemp);
-			computeMaterial.SetBuffer("buf_vertex", path.computeBufferFront);
-
-			path.commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, Plugin.GetUnityRenderCount() / 4 * 6);
+			Plugin.EffekseerRenderFront(path.renderId);
+			RenderInternal(path.commandBuffer, computeMaterial, path.computeBufferTemp, path.computeBufferFront, path.materiaProps);
 		}
 
-		unsafe void RenderInternal()
+		
+	[StructLayout(LayoutKind.Sequential)]
+	struct SimpleVertex
 		{
-			var parameters = Plugin.GetUnityRenderParameter();
-			var renderCount = Plugin.GetUnityRenderCount();
+			public Vector3 Pos;
+			public Vector2 UV;
+			public Color VColor;
+		}
 
-			for (int i = 0; i < renderCount; i++)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, Material material, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
+		{
+			/*
 			{
-				
+				// Test
+				SimpleVertex[] vs = new SimpleVertex[4];
+
+				vs[0].Pos = new Vector3(-10, 0, -10);
+				vs[1].Pos = new Vector3(+10, 0, -10);
+				vs[2].Pos = new Vector3(+10, 0, +10);
+				vs[3].Pos = new Vector3(-10, 0, +10);
+
+				computeBuffer.SetData(vs, 0, 0, 4);
+
+				var prop = matPropCol.GetNext();
+
+				prop.SetBuffer("buf_vertex", computeBuffer);
+				prop.SetFloat("buf_offset", 0);
+				commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, 6, 1, prop);
 			}
+			*/
+
+			
+			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
+
+			if(renderParameterCount > 0)
+			{
+				var parameters = Plugin.GetUnityRenderParameter();
+
+				var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
+				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
+
+				System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, computeBufferTemp, 0, vertexBufferCount);
+				computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
+
+				for (int i = 0; i < renderParameterCount; i++)
+				{
+					var prop = matPropCol.GetNext();
+					var parameter = parameters[i];
+
+					prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
+					prop.SetBuffer("buf_vertex", computeBuffer);
+
+					commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+				}
+			}
+			
 		}
 
 		void OnPostRender(Camera camera)

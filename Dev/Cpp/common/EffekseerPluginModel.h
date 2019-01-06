@@ -7,11 +7,12 @@
 #include <memory>
 #include <Effekseer.h>
 #include "EffekseerPluginCommon.h"
+#include "IUnityInterface.h"
 
 namespace EffekseerPlugin
 {
-	using ModelLoaderLoad = int (UNITY_API*)(const char16_t* path, void* buffer, int bufferSize);
-	using ModelLoaderUnload = void (UNITY_API*)(const char16_t* path);
+	using ModelLoaderLoad = int (UNITY_INTERFACE_API*)(const char16_t* path, void* buffer, int bufferSize);
+	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path);
 
 	class ModelLoader : public Effekseer::ModelLoader
 	{

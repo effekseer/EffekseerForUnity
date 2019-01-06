@@ -17,7 +17,7 @@ namespace EffekseerRendererUnity
 	private:
 		uint32_t				m_vertexRingStart;
 		uint32_t				m_vertexRingOffset;
-		bool					m_ringBufferLock;
+		bool					m_ringBufferLock = false;
 	public:
 		VertexBuffer(int size, bool isDynamic);
 		virtual ~VertexBuffer();

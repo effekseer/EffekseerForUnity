@@ -6,9 +6,6 @@
 #include "Effekseer.h"
 #include "IUnityInterface.h"
 
-//#define UNITY_INTERFACE_EXPORT	// Must export by .def!!
-#define UNITY_API UNITY_INTERFACE_API
-
 namespace EffekseerPlugin
 {
 	enum class RendererType : int
