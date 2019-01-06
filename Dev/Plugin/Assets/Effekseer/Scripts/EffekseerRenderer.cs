@@ -308,6 +308,7 @@ namespace Effekseer.Internal
 
 					prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
 					prop.SetBuffer("buf_vertex", computeBuffer);
+					prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}

@@ -9,7 +9,7 @@
 namespace EffekseerPlugin
 {
 	using TextureLoaderLoad = void* (UNITY_INTERFACE_API*)(const char16_t* path, int32_t* width, int32_t* height, int32_t* format);
-	using TextureLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path);
+	using TextureLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path, void* nativePtr);
 
 	class TextureLoader : public Effekseer::TextureLoader
 	{

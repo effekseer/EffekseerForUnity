@@ -65,7 +65,7 @@
 
 	float4 frag(ps_input i) : COLOR
 	{
-		return i.color;
+		return tex2D(_ColorTex, i.uv) * i.color;
 	}
 
 	ENDCG

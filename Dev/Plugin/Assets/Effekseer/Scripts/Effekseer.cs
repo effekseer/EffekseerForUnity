@@ -146,7 +146,7 @@ namespace Effekseer
 			EffekseerTextureLoaderLoad load,
 			EffekseerTextureLoaderUnload unload);
 		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path, out int width, out int height, out int format);
-		public delegate void EffekseerTextureLoaderUnload(IntPtr path);
+		public delegate void EffekseerTextureLoaderUnload(IntPtr path, IntPtr nativePtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetModelLoaderEvent(

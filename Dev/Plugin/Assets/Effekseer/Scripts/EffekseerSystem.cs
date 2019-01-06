@@ -90,7 +90,9 @@ namespace Effekseer
 
 		// A AssetBundle that current loading
 		private EffekseerEffectAsset effectAssetInLoading;
-		
+
+		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
+
 		private void ReloadEffects()
 		{
 			foreach (var effectAsset in loadedEffects) {
@@ -257,32 +259,47 @@ namespace Effekseer
 				Plugin.EffekseerUpdate(deltaFrames / updateCount);
 			}
 		}
-		
+
+		internal static Texture GetCachedTexture(IntPtr key)
+		{
+			return cachedTextures[key];
+		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderLoad))]
-		private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format) {
+		private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format)
+		{
 			var pathstr = Marshal.PtrToStringUni(path);
 			var asset = Instance.effectAssetInLoading;
 			var res = asset.FindTexture(pathstr);
 			var texture = (res != null) ? res.texture : null;
 
-			if (texture != null) {
+			if (texture != null)
+			{
 				width = texture.width;
 				height = texture.height;
-				switch (texture.format) {
-				case TextureFormat.DXT1: format = 1; break;
-				case TextureFormat.DXT5: format = 2; break;
-				default: format = 0; break;
+				switch (texture.format)
+				{
+					case TextureFormat.DXT1: format = 1; break;
+					case TextureFormat.DXT5: format = 2; break;
+					default: format = 0; break;
 				}
-			
-				return texture.GetNativeTexturePtr();
+
+				var ptr = texture.GetNativeTexturePtr();
+
+				cachedTextures.Add(ptr, texture);
+
+				return ptr;
 			}
 			width = 0;
 			height = 0;
 			format = 0;
 			return IntPtr.Zero;
 		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderUnload))]
-		private static void TextureLoaderUnload(IntPtr path) {
+		private static void TextureLoaderUnload(IntPtr path, IntPtr nativePtr)
+		{
+			cachedTextures.Remove(nativePtr);
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderLoad))]
 		private static int ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize) {

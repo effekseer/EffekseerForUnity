@@ -24,6 +24,7 @@ namespace EffekseerPlugin
 	extern UnityGfxRenderer					g_UnityRendererType;
 	extern ID3D11Device*					g_D3d11Device;
 	extern EffekseerRenderer::Renderer*		g_EffekseerRenderer;
+	extern RendererType g_rendererType;
 
 	class TextureLoaderWin : public TextureLoader
 	{
@@ -32,6 +33,8 @@ namespace EffekseerPlugin
 			TextureData texture = {};
 		};
 		std::map<std::u16string, TextureResource> resources;
+		std::map<void*, void*> textureData2NativePtr;
+
 	public:
 		TextureLoaderWin(
 			TextureLoaderLoad load,
@@ -62,35 +65,45 @@ namespace EffekseerPlugin
 			res.texture.Height = height;
 			res.texture.TextureFormat = (TextureFormatType)format;
 
-			if (g_UnityRendererType == kUnityGfxRendererD3D11)
+			if (g_rendererType == RendererType::Native)
 			{
-				// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
-				// ID3D11ShaderResourceViewを作成する
-				HRESULT hr;
-				ID3D11Texture2D* textureDX11 = (ID3D11Texture2D*)texturePtr;
-				
-				D3D11_TEXTURE2D_DESC texDesc;
-				textureDX11->GetDesc(&texDesc);
-				
-				ID3D11ShaderResourceView* srv = nullptr;
-				D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-				ZeroMemory(&desc, sizeof(desc));
-				desc.Format = texDesc.Format;
-				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-				desc.Texture2D.MostDetailedMip = 0;
-				desc.Texture2D.MipLevels = texDesc.MipLevels;
-				hr = g_D3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
-				if (FAILED(hr))
+				if (g_UnityRendererType == kUnityGfxRendererD3D11)
 				{
-					return nullptr;
-				}
+					// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
+					// ID3D11ShaderResourceViewを作成する
+					HRESULT hr;
+					ID3D11Texture2D* textureDX11 = (ID3D11Texture2D*)texturePtr;
 
-				res.texture.UserPtr = srv;
-			} else if (g_UnityRendererType == kUnityGfxRendererD3D9)
-			{
-				IDirect3DTexture9* textureDX9 = (IDirect3DTexture9*)texturePtr;
-				res.texture.UserPtr = textureDX9;
+					D3D11_TEXTURE2D_DESC texDesc;
+					textureDX11->GetDesc(&texDesc);
+
+					ID3D11ShaderResourceView* srv = nullptr;
+					D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+					ZeroMemory(&desc, sizeof(desc));
+					desc.Format = texDesc.Format;
+					desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+					desc.Texture2D.MostDetailedMip = 0;
+					desc.Texture2D.MipLevels = texDesc.MipLevels;
+					hr = g_D3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
+					if (FAILED(hr))
+					{
+						return nullptr;
+					}
+
+					res.texture.UserPtr = srv;
+				}
+				else if (g_UnityRendererType == kUnityGfxRendererD3D9)
+				{
+					IDirect3DTexture9* textureDX9 = (IDirect3DTexture9*)texturePtr;
+					res.texture.UserPtr = textureDX9;
+				}
 			}
+			else
+			{
+				res.texture.UserPtr = texturePtr;
+			}
+
+			textureData2NativePtr[&res.texture] = texturePtr;
 
 			return &res.texture;
 		}
@@ -111,14 +124,20 @@ namespace EffekseerPlugin
 			// 参照カウンタが0になったら実際にアンロード
 			it->second.referenceCount--;
 			if (it->second.referenceCount <= 0) {
-				if (g_UnityRendererType == kUnityGfxRendererD3D11)
+
+				if (g_rendererType == RendererType::Native)
 				{
-					// 作成したID3D11ShaderResourceViewを解放する
-					ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)source->UserPtr;
-					srv->Release();
+					if (g_UnityRendererType == kUnityGfxRendererD3D11)
+					{
+						// 作成したID3D11ShaderResourceViewを解放する
+						ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)source->UserPtr;
+						srv->Release();
+					}
 				}
-				// Unity側でアンロード
-				unload(it->first.c_str());
+
+				// Unload from unity
+				unload(it->first.c_str(), textureData2NativePtr[source]);
+				textureData2NativePtr.erase(source);
 				resources.erase(it);
 			}
 		}
