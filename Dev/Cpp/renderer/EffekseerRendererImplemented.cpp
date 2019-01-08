@@ -536,6 +536,11 @@ namespace EffekseerRendererUnity
 			}
 
 			UnityRenderParameter rp;
+
+			rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
+			rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
+			rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
+
 			rp.RenderMode = 0;
 			rp.IsDistortingMode = 0;
 			rp.VertexBufferOffset = startOffset;

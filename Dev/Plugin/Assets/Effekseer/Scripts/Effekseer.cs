@@ -179,7 +179,9 @@ namespace Effekseer
 
 		#region UnityRenderer
 
-		public struct UnityRenderParameter
+		
+	[StructLayout(LayoutKind.Sequential)]
+	public struct UnityRenderParameter
 		{
 			//! 0 - procedual, 1 - model
 			public int RenderMode;
@@ -192,6 +194,12 @@ namespace Effekseer
 
 			//! Element count (Triangle) or instance
 			public int ElementCount;
+
+			public int ZTest;
+
+			public int ZWrite;
+
+			public int Blend;
 
 			//! Texture ptr
 			public IntPtr TexturePtrs0;

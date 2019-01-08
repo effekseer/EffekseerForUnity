@@ -29,11 +29,60 @@ namespace Effekseer.Internal
 			Mul = 4,
 		}
 
-		class MaterialKey
+		struct MaterialKey
 		{
 			public bool ZTest;
 			public bool ZWrite;
 			public AlphaBlendType Blend;
+
+			public int GetKey()
+			{
+				return (int)Blend +
+					(ZTest ? 1 : 0) << 4 +
+					(ZWrite ? 1 : 0) << 5;
+			}
+		}
+
+		class MaterialCollection
+		{
+			public Shader Shader;
+			Dictionary<int, Material> materials = new Dictionary<int, Material>();
+
+			public Material GetMaterial(ref MaterialKey key)
+			{
+				var id = key.GetKey();
+
+				if (materials.ContainsKey(id)) return materials[id];
+
+				var material = new Material(Shader);
+
+				if(key.Blend == AlphaBlendType.Opacity)
+				{
+					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.One);
+					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.Zero);
+				}
+				else if(key.Blend == AlphaBlendType.Blend)
+				{
+					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+				}
+				else if (key.Blend == AlphaBlendType.Add)
+				{
+					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.One);
+				}
+				else
+				{
+					throw new Exception();
+				}
+
+				material.SetFloat("_ZTest", key.ZTest ? (float)UnityEngine.Rendering.CompareFunction.LessEqual : (float)UnityEngine.Rendering.CompareFunction.Disabled);
+				material.SetFloat("_ZWrite", key.ZWrite ? 1.0f : 0.0f);
+
+				materials.Add(id, material);
+
+				return material;
+			}
 		}
 
 		class MaterialPropCollection
@@ -125,15 +174,12 @@ namespace Effekseer.Internal
 			}
 		};
 
+		MaterialCollection materials = new MaterialCollection();
+
 		public EffekseerRendererUnity()
 		{
-			this.computeMaterial = new Material(EffekseerSettings.Instance.baseShader);
-			this.computeMaterial.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-			this.computeMaterial.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-
+			materials.Shader = EffekseerSettings.Instance.baseShader;
 		}
-
-		Material computeMaterial;
 
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
@@ -242,7 +288,7 @@ namespace Effekseer.Internal
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
-			RenderInternal(path.commandBuffer, computeMaterial, path.computeBufferTemp, path.computeBufferBack, path.materiaProps);
+			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps);
 
 			// Distortion
 			if (settings.enableDistortion && path.renderTexture != null)
@@ -254,7 +300,7 @@ namespace Effekseer.Internal
 			}
 
 			Plugin.EffekseerRenderFront(path.renderId);
-			RenderInternal(path.commandBuffer, computeMaterial, path.computeBufferTemp, path.computeBufferFront, path.materiaProps);
+			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps);
 		}
 
 		
@@ -266,7 +312,7 @@ namespace Effekseer.Internal
 			public Color VColor;
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, Material material, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
 		{
 			/*
 			{
@@ -306,11 +352,17 @@ namespace Effekseer.Internal
 					var prop = matPropCol.GetNext();
 					var parameter = parameters[i];
 
+					MaterialKey key = new MaterialKey();
+					key.Blend = (AlphaBlendType)parameter.Blend;
+					key.ZTest = parameter.ZTest > 0;
+					key.ZWrite = parameter.ZWrite > 0;
+					var material = materials.GetMaterial(ref key);
+
 					prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
 					prop.SetBuffer("buf_vertex", computeBuffer);
 					prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
 
-					commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 			}
 			

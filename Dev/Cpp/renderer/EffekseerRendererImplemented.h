@@ -29,6 +29,12 @@ extern "C"
 		//! Element count (Triangle) or instance
 		int32_t ElementCount;
 
+		int ZTest = 0;
+
+		int ZWrite = 0;
+
+		int Blend = 0;
+
 		//! Texture ptr
 		void* TexturePtrs[4];
 
