@@ -346,7 +346,7 @@ namespace Effekseer.Internal
 						key.ZWrite = parameter.ZWrite > 0;
 						var material = materialsDistortion.GetMaterial(ref key);
 
-						prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
+						prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDistortionSize);
 						prop.SetBuffer("buf_vertex", computeBuffer);
 						prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
 
