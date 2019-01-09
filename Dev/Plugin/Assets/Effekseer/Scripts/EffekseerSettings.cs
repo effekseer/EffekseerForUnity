@@ -97,7 +97,10 @@ namespace Effekseer
 		}
 
 		[SerializeField]
-		public Shader baseShader;
+		public Shader standardShader;
+
+		[SerializeField]
+		public Shader standardDistortionShader;
 
 #if UNITY_EDITOR
 		[MenuItem("Edit/Project Settings/Effekseer")]

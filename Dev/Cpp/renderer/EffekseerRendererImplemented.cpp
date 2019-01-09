@@ -57,6 +57,20 @@ namespace EffekseerRendererUnity
 
 	};
 
+	struct UnityDistortionVertex
+	{
+		::Effekseer::Vector3D	Pos;
+		float		UV[2];
+		float		Col[4];
+		::Effekseer::Vector3D	Tangent;
+		::Effekseer::Vector3D	Binormal;
+	};
+
+	static int GetAlignedOffset(int offset, int size)
+	{
+		return ((offset + (size - 1)) / size) * size;
+	}
+
 	ModelRenderer::ModelRenderer(RendererImplemented* renderer)
 		: m_renderer(renderer)
 	{
@@ -471,9 +485,12 @@ namespace EffekseerRendererUnity
 
 			VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
+			exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDistortionVertex)));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
+				UnityDistortionVertex unity_v;
 
 				if (isSingleRing)
 				{
@@ -488,9 +505,19 @@ namespace EffekseerRendererUnity
 				Effekseer::Vector3D normal;
 				Effekseer::Vector3D::Cross(normal, v.Binormal, v.Tangent);
 
+				unity_v.Pos = v.Pos;
+				unity_v.UV[0] = v.UV[0];
+				unity_v.UV[1] = v.UV[1];
+				unity_v.Col[0] = v.Col.R / 255.0f;
+				unity_v.Col[1] = v.Col.G / 255.0f;
+				unity_v.Col[2] = v.Col.B / 255.0f;
+				unity_v.Col[3] = v.Col.A / 255.0f;
+				unity_v.Tangent = v.Tangent;
+				unity_v.Binormal = v.Binormal;
+
 				auto targetOffset = exportedVertexBuffer.size();
-				exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(VertexDistortion));
-				memcpy(exportedVertexBuffer.data() + targetOffset, &v, sizeof(VertexDistortion));
+				exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityDistortionVertex));
+				memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityDistortionVertex));
 			}
 
 			UnityRenderParameter rp;
@@ -498,6 +525,7 @@ namespace EffekseerRendererUnity
 			rp.IsDistortingMode = 1;
 			rp.VertexBufferOffset = startOffset;
 			rp.TexturePtrs[0] = m_textures[0];
+			rp.TexturePtrs[1] = m_textures[1];
 			rp.ModelPtr = nullptr;
 			rp.MaterialPtr = nullptr;
 			rp.ElementCount = spriteCount;
@@ -506,6 +534,8 @@ namespace EffekseerRendererUnity
 		else
 		{
 			Vertex* vs = (Vertex*)m_vertexBuffer->GetResource();
+
+			exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
 
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{

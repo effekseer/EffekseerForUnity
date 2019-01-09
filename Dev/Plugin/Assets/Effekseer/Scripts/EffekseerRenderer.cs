@@ -19,6 +19,7 @@ namespace Effekseer.Internal
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
 		const int VertexSize = 36;
+		const int VertexDistortionSize = 36 + 4 * 6;
 
 		public enum AlphaBlendType : int
 		{
@@ -161,6 +162,18 @@ namespace Effekseer.Internal
 					this.commandBuffer.Dispose();
 					this.commandBuffer = null;
 				}
+
+				if(this.computeBufferFront != null)
+				{
+					this.computeBufferFront.Dispose();
+					this.computeBufferFront = null;
+				}
+
+				if (this.computeBufferBack != null)
+				{
+					this.computeBufferBack.Dispose();
+					this.computeBufferBack = null;
+				}
 			}
 
 			public bool IsValid()
@@ -175,10 +188,12 @@ namespace Effekseer.Internal
 		};
 
 		MaterialCollection materials = new MaterialCollection();
+		MaterialCollection materialsDistortion = new MaterialCollection();
 
 		public EffekseerRendererUnity()
 		{
-			materials.Shader = EffekseerSettings.Instance.baseShader;
+			materials.Shader = EffekseerSettings.Instance.standardShader;
+			materialsDistortion.Shader = EffekseerSettings.Instance.standardDistortionShader;
 		}
 
 		// RenderPath per Camera
@@ -202,7 +217,7 @@ namespace Effekseer.Internal
 
 		public void CleanUp()
 		{
-			// レンダーパスの全破棄
+			// dispose all render pathes
 			foreach (var pair in renderPaths)
 			{
 				pair.Value.Dispose();
@@ -303,39 +318,10 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps);
 		}
 
-		
-	[StructLayout(LayoutKind.Sequential)]
-	struct SimpleVertex
-		{
-			public Vector3 Pos;
-			public Vector2 UV;
-			public Color VColor;
-		}
-
 		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
 		{
-			/*
-			{
-				// Test
-				SimpleVertex[] vs = new SimpleVertex[4];
-
-				vs[0].Pos = new Vector3(-10, 0, -10);
-				vs[1].Pos = new Vector3(+10, 0, -10);
-				vs[2].Pos = new Vector3(+10, 0, +10);
-				vs[3].Pos = new Vector3(-10, 0, +10);
-
-				computeBuffer.SetData(vs, 0, 0, 4);
-
-				var prop = matPropCol.GetNext();
-
-				prop.SetBuffer("buf_vertex", computeBuffer);
-				prop.SetFloat("buf_offset", 0);
-				commandBuffer.DrawProcedural(new Matrix4x4(), computeMaterial, 0, MeshTopology.Triangles, 6, 1, prop);
-			}
-			*/
-
-			
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
+			var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
 
 			if(renderParameterCount > 0)
 			{
@@ -352,17 +338,34 @@ namespace Effekseer.Internal
 					var prop = matPropCol.GetNext();
 					var parameter = parameters[i];
 
-					MaterialKey key = new MaterialKey();
-					key.Blend = (AlphaBlendType)parameter.Blend;
-					key.ZTest = parameter.ZTest > 0;
-					key.ZWrite = parameter.ZWrite > 0;
-					var material = materials.GetMaterial(ref key);
+					if(parameter.IsDistortingMode > 0)
+					{
+						MaterialKey key = new MaterialKey();
+						key.Blend = (AlphaBlendType)parameter.Blend;
+						key.ZTest = parameter.ZTest > 0;
+						key.ZWrite = parameter.ZWrite > 0;
+						var material = materialsDistortion.GetMaterial(ref key);
 
-					prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
-					prop.SetBuffer("buf_vertex", computeBuffer);
-					prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
+						prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
+						prop.SetBuffer("buf_vertex", computeBuffer);
+						prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
 
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					}
+					else
+					{
+						MaterialKey key = new MaterialKey();
+						key.Blend = (AlphaBlendType)parameter.Blend;
+						key.ZTest = parameter.ZTest > 0;
+						key.ZWrite = parameter.ZWrite > 0;
+						var material = materials.GetMaterial(ref key);
+
+						prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
+						prop.SetBuffer("buf_vertex", computeBuffer);
+						prop.SetTexture("_ColorTex", EffekseerSystem.GetCachedTexture(parameter.TexturePtrs0));
+
+						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					}
 				}
 			}
 			
