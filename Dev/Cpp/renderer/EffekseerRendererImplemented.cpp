@@ -209,7 +209,7 @@ namespace EffekseerRendererUnity
 
 		//GLCheckError();
 
-		vertexBuffer.resize(0);
+		exportedVertexBuffer.resize(0);
 		renderParameters.resize(0);
 		modelParameters.resize(0);
 		return true;
@@ -430,8 +430,8 @@ namespace EffekseerRendererUnity
 	{
 		SetIsLighting(false);
 
-		auto mat = FindMaterial();
-		if (mat == nullptr) return;
+		//auto mat = FindMaterial();
+		//if (mat == nullptr) return;
 
 		// is single ring?
 		auto stanMat = ((Effekseer::Matrix44*)m_stanShader->GetVertexConstantBuffer())[0];
@@ -462,7 +462,7 @@ namespace EffekseerRendererUnity
 		//auto triangles = vertexOffset / 4 * 2;
 		//glDrawElements(GL_TRIANGLES, spriteCount * 6, GL_UNSIGNED_SHORT, (void*)(triangles * 3 * sizeof(GLushort)));
 
-		int32_t startOffset = vertexBuffer.size();
+		int32_t startOffset = exportedVertexBuffer.size();
 
 		if (m_isDistorting)
 		{
@@ -488,9 +488,9 @@ namespace EffekseerRendererUnity
 				Effekseer::Vector3D normal;
 				Effekseer::Vector3D::Cross(normal, v.Binormal, v.Tangent);
 
-				auto targetOffset = vertexBuffer.size();
-				vertexBuffer.resize(vertexBuffer.size() + sizeof(VertexDistortion));
-				memcpy(vertexBuffer.data() + targetOffset, &v, sizeof(VertexDistortion));
+				auto targetOffset = exportedVertexBuffer.size();
+				exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(VertexDistortion));
+				memcpy(exportedVertexBuffer.data() + targetOffset, &v, sizeof(VertexDistortion));
 			}
 
 			UnityRenderParameter rp;
@@ -499,7 +499,7 @@ namespace EffekseerRendererUnity
 			rp.VertexBufferOffset = startOffset;
 			rp.TexturePtrs[0] = m_textures[0];
 			rp.ModelPtr = nullptr;
-			rp.MaterialPtr = mat;
+			rp.MaterialPtr = nullptr;
 			rp.ElementCount = spriteCount;
 			renderParameters.push_back(rp);
 		}
@@ -530,9 +530,9 @@ namespace EffekseerRendererUnity
 				unity_v.Col[2] = v.Col.B / 255.0f;
 				unity_v.Col[3] = v.Col.A / 255.0f;
 
-				auto targetOffset = vertexBuffer.size();
-				vertexBuffer.resize(vertexBuffer.size() + sizeof(UnityVertex));
-				memcpy(vertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityVertex));
+				auto targetOffset = exportedVertexBuffer.size();
+				exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityVertex));
+				memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityVertex));
 			}
 
 			UnityRenderParameter rp;
@@ -546,7 +546,7 @@ namespace EffekseerRendererUnity
 			rp.VertexBufferOffset = startOffset;
 			rp.TexturePtrs[0] = m_textures[0];
 			rp.ModelPtr = nullptr;
-			rp.MaterialPtr = mat;
+			rp.MaterialPtr = nullptr;
 			rp.ElementCount = spriteCount;
 			renderParameters.push_back(rp);
 		}

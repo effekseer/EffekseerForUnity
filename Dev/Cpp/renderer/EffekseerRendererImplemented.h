@@ -328,7 +328,7 @@ namespace EffekseerRendererUnity
 		bool					m_isLighting = false;
 
 		std::array<void*, 5> materials;
-		std::vector<uint8_t> vertexBuffer;
+		std::vector<uint8_t> exportedVertexBuffer;
 
 		EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>*	m_standardRenderer = nullptr;
 	public:
@@ -539,7 +539,7 @@ namespace EffekseerRendererUnity
 		void SetMaterial(void* material);
 
 		std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
-		std::vector<uint8_t>& GetRenderVertexBuffer() { return vertexBuffer; }
+		std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
 
 		virtual int GetRef() { return ::Effekseer::ReferenceObject::GetRef(); }
 		virtual int AddRef() { return ::Effekseer::ReferenceObject::AddRef(); }
