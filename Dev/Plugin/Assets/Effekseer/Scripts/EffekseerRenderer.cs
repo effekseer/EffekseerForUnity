@@ -13,6 +13,12 @@ namespace Effekseer.Internal
 		void SetVisible(bool visible);
 
 		void CleanUp();
+
+		CommandBuffer GetCameraCommandBuffer(Camera camera);
+		
+		void OnPreCullEvent(Camera camera);
+
+		void OnPostRender(Camera camera);
 	}
 
 	class UnityRendererModel : IDisposable
@@ -408,7 +414,16 @@ namespace Effekseer.Internal
 			renderPaths.Clear();
 		}
 
-		void OnPreCullEvent(Camera camera)
+		public CommandBuffer GetCameraCommandBuffer(Camera camera)
+		{
+			if (renderPaths.ContainsKey(camera))
+			{
+				return renderPaths[camera].commandBuffer;
+			}
+			return null;
+		}
+
+		public void OnPreCullEvent(Camera camera)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -554,7 +569,7 @@ namespace Effekseer.Internal
 
 		}
 
-		void OnPostRender(Camera camera)
+		public void OnPostRender(Camera camera)
 		{
 			if (renderPaths.ContainsKey(camera))
 			{
@@ -670,7 +685,16 @@ namespace Effekseer.Internal
 			renderPaths.Clear();
 		}
 
-		void OnPreCullEvent(Camera camera)
+		public CommandBuffer GetCameraCommandBuffer(Camera camera)
+		{
+			if (renderPaths.ContainsKey(camera))
+			{
+				return renderPaths[camera].commandBuffer;
+			}
+			return null;
+		}
+
+		public void OnPreCullEvent(Camera camera)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -745,7 +769,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		void OnPostRender(Camera camera)
+		public void OnPostRender(Camera camera)
 		{
 			if (renderPaths.ContainsKey(camera))
 			{
