@@ -106,13 +106,23 @@ namespace Effekseer
 		[MenuItem("Edit/Project Settings/Effekseer")]
 		public static void EditOrCreateAsset()
 		{
-			var asset = CreateInstance<EffekseerSettings>();
+			const string assetDir = "Assets/Effekseer";
+			const string materialDir = assetDir + "/Materials";
+			const string resourcesDir = assetDir + "/Resources";
+			const string assetPath = resourcesDir + "/EffekseerSettings.asset";
 
-			if (!AssetDatabase.IsValidFolder("Assets/Effekseer/Resources")) {
-				AssetDatabase.CreateFolder("Assets/Effekseer", "Resources");
+			if (!AssetDatabase.IsValidFolder(resourcesDir)) {
+				AssetDatabase.CreateFolder(assetDir, "Resources");
 			}
-			AssetDatabase.CreateAsset(asset, "Assets/Effekseer/Resources/EffekseerSettings.asset");
-			AssetDatabase.Refresh();
+			var asset = AssetDatabase.LoadAssetAtPath<EffekseerSettings>(assetPath);
+
+			if (asset == null) {
+				asset = CreateInstance<EffekseerSettings>();
+				asset.standardShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardShader.shader");
+				asset.standardDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardDistortionShader.shader");
+				AssetDatabase.CreateAsset(asset, assetPath);
+				AssetDatabase.Refresh();
+			}
 
 			EditorGUIUtility.PingObject(asset);
 			Selection.activeObject = asset;
