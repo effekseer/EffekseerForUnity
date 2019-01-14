@@ -160,9 +160,10 @@ namespace Effekseer
 			case GraphicsDeviceType.Direct3D12:
 			case GraphicsDeviceType.Metal:
 			case GraphicsDeviceType.PlayStation4:
+	#if UNITY_2017_4_OR_NEWER
 			case GraphicsDeviceType.Switch:
-
-					reversedDepth = true;
+	#endif
+				reversedDepth = true;
 				break;
 			}
 	#endif
