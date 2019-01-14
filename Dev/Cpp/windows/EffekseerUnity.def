@@ -8,6 +8,9 @@ EXPORTS
   EffekseerGetRenderFunc
   EffekseerGetRenderFrontFunc
   EffekseerGetRenderBackFunc
+  EffekseerRender
+  EffekseerRenderFront
+  EffekseerRenderBack
   EffekseerUpdate
   EffekseerLoadEffect
   EffekseerLoadEffectOnMemory
@@ -41,3 +44,9 @@ EXPORTS
   EffekseerSetModelLoaderEvent
   EffekseerSetSoundLoaderEvent
   EffekseerSetSoundPlayerEvent
+
+  GetUnityRenderParameter
+  GetUnityRenderParameterCount
+  GetUnityRenderVertexBuffer
+  GetUnityRenderVertexBufferCount
+  SetMaterial

@@ -6,14 +6,15 @@
 #include <map>
 #include <Effekseer.h>
 #include "EffekseerPluginCommon.h"
+#include "IUnityInterface.h"
 
 namespace EffekseerPlugin
 {
 	using SoundTag = Effekseer::SoundTag;
 	using SoundHandle = Effekseer::SoundHandle;
 
-	using SoundLoaderLoad = uintptr_t (UNITY_API*)(const char16_t* path);
-	using SoundLoaderUnload = void (UNITY_API*)(const char16_t* path);
+	using SoundLoaderLoad = uintptr_t (UNITY_INTERFACE_API*)(const char16_t* path);
+	using SoundLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path);
 
 	class SoundLoader : public Effekseer::SoundLoader
 	{
@@ -39,13 +40,13 @@ namespace EffekseerPlugin
 		virtual void Unload( void* source );
 	};
 
-	using SoundPlayerPlay = void (UNITY_API*)( SoundTag tag, 
+	using SoundPlayerPlay = void (UNITY_INTERFACE_API*)( SoundTag tag, 
 		uintptr_t Data, float Volume, float Pan, float Pitch, 
 		bool Mode3D, float x, float y, float z, float Distance );
-	using SoundPlayerStopTag = void (UNITY_API*)( SoundTag tag );
-	using SoundPlayerPauseTag = void (UNITY_API*)( SoundTag tag, bool pause );
-	using SoundPlayerCheckPlayingTag = bool (UNITY_API*)( SoundTag tag );
-	using SoundPlayerStopAll = void (UNITY_API*)();
+	using SoundPlayerStopTag = void (UNITY_INTERFACE_API*)( SoundTag tag );
+	using SoundPlayerPauseTag = void (UNITY_INTERFACE_API*)( SoundTag tag, bool pause );
+	using SoundPlayerCheckPlayingTag = bool (UNITY_INTERFACE_API*)( SoundTag tag );
+	using SoundPlayerStopAll = void (UNITY_INTERFACE_API*)();
 
 	class SoundPlayer : public Effekseer::SoundPlayer
 	{

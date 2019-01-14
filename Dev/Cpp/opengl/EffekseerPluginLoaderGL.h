@@ -21,6 +21,7 @@ namespace EffekseerPlugin
 		};
 
 		std::map<std::u16string, TextureResource> resources;
+		std::map<void*, void*> textureData2NativePtr;
 
 	public:
 		TextureLoaderGL(

@@ -8,6 +8,12 @@ using UnityEditor;
 
 namespace Effekseer
 {
+	public enum EffekseerRendererType
+	{
+		Native = 0,
+		Unity = 1,
+	}
+
 	public class EffekseerSettings : ScriptableObject
 	{
 		/// <summary xml:lang="en">
@@ -19,6 +25,12 @@ namespace Effekseer
 		[SerializeField]
 		public bool drawInSceneView = true;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		[SerializeField]
+		public EffekseerRendererType RendererType = EffekseerRendererType.Unity;
+
 		/// <summary xml:lang="en">
 		/// Maximum number of effect instances.
 		/// </summary>
@@ -26,7 +38,7 @@ namespace Effekseer
 		/// エフェクトインスタンスの最大数
 		/// </summary>
 		[SerializeField]
-		public int effectInstances	= 1600;
+		public int effectInstances	= 8192;
 
 		/// <summary xml:lang="en">
 		/// Maximum number of quads that can be drawn.
@@ -69,7 +81,13 @@ namespace Effekseer
 		/// </summary>
 		[SerializeField]
 		public bool enableDistortion	= true;
-		
+
+		[SerializeField]
+		public Shader standardShader = null;
+
+		[SerializeField]
+		public Shader standardDistortionShader = null;
+
 		private static EffekseerSettings instance;
 		public static EffekseerSettings Instance {
 			get {

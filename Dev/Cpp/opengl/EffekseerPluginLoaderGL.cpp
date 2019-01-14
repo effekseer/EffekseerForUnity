@@ -10,6 +10,7 @@ using namespace Effekseer;
 namespace EffekseerPlugin
 {
 	extern UnityGfxRenderer					g_UnityRendererType;
+	extern RendererType g_rendererType;
 
 	bool IsPowerOfTwo(uint32_t x) {
 		return (x & (x - 1)) == 0;
@@ -44,21 +45,30 @@ namespace EffekseerPlugin
 		auto added = resources.insert(std::make_pair((const char16_t*) path, TextureResource()));
 		TextureResource& res = added.first->second;
 
-		res.texture.UserID = textureID;
 		res.texture.Width = width;
 		res.texture.Height = height;
 		res.texture.TextureFormat = (TextureFormatType)format;
 		
-#if !defined(_WIN32)
-		if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
-			(IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
+		if (g_rendererType == RendererType::Native)
 		{
-			// テクスチャのミップマップを生成する
-			glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+			res.texture.UserID = textureID;
+#if !defined(_WIN32)
+			if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
+				(IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
+			{
+				// テクスチャのミップマップを生成する
+				glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
+				glGenerateMipmap(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 #endif
+		}
+		else
+		{
+			res.texture.UserPtr = (void*)textureID;
+		}
+
+		textureData2NativePtr[&res.texture] = (void*)textureID;
 
 		return &res.texture;
 	}
@@ -82,7 +92,8 @@ namespace EffekseerPlugin
 		it->second.referenceCount--;
 		if (it->second.referenceCount <= 0) {
 			// Unity側でアンロード
-			unload(it->first.c_str());
+			unload(it->first.c_str(), textureData2NativePtr[source]);
+			textureData2NativePtr.erase(source);
 			resources.erase(it);
 		}
 	}
