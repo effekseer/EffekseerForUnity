@@ -93,6 +93,8 @@ namespace Effekseer
 
 		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
 
+		private static Dictionary<IntPtr, UnityRendererModel> cachedModel = new Dictionary<IntPtr, UnityRendererModel>();
+
 		private void ReloadEffects()
 		{
 			foreach (var effectAsset in loadedEffects) {
@@ -301,25 +303,43 @@ namespace Effekseer
 		{
 			cachedTextures.Remove(nativePtr);
 		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderLoad))]
-		private static int ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize) {
+		private static IntPtr ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize) {
 			var pathstr = Marshal.PtrToStringUni(path);
 			var asset = Instance.effectAssetInLoading;
 			var res = asset.FindModel(pathstr);
 			var model = (res != null) ? res.asset : null;
 
 			if (model != null) {
+				requiredBufferSize = model.bytes.Length;
+
 				if (model.bytes.Length <= bufferSize) {
 					Marshal.Copy(model.bytes, 0, buffer, model.bytes.Length);
-					return model.bytes.Length;
+
+					if(EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+					{
+						var unityRendererModel = new UnityRendererModel();
+						unityRendererModel.Initialize(model.bytes);
+						cachedModel.Add(unityRendererModel.VertexBuffer.GetNativeBufferPtr(), unityRendererModel);
+						return unityRendererModel.VertexBuffer.GetNativeBufferPtr();
+					}
+
+					return new IntPtr(1);
 				}
 			}
-			return -1;
+
+			return IntPtr.Zero;
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderUnload))]
-		private static void ModelLoaderUnload(IntPtr path) {
+		private static void ModelLoaderUnload(IntPtr path, IntPtr modelPtr) {
+			if (EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+			{
+				cachedModel.Remove(modelPtr);
+			}
 		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundLoaderLoad))]
 		private static IntPtr SoundLoaderLoad(IntPtr path) {
 			var pathstr = Marshal.PtrToStringUni(path);

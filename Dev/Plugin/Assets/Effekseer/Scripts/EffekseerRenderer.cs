@@ -15,6 +15,186 @@ namespace Effekseer.Internal
 		void CleanUp();
 	}
 
+	class UnityRendererModel : IDisposable
+	{
+		public ComputeBuffer VertexBuffer;
+		public ComputeBuffer IndexBuffer;
+		public ComputeBuffer VertexOffsets;
+		public ComputeBuffer IndexOffsets;
+
+
+		public unsafe void Initialize(byte[] buffer)
+		{
+			List<int> vertexOffsets = new List<int>();
+			List<int> indexOffsets = new List<int>();
+
+			int version = 0;
+			int offset = 0;
+			version = BitConverter.ToInt32(buffer, offset);
+			offset += sizeof(int);
+
+			if (version == 2 || version >= 5)
+			{
+				float scale = BitConverter.ToSingle(buffer, offset);
+				offset += sizeof(float);
+			}
+
+			int modelCount = BitConverter.ToInt32(buffer, offset);
+			offset += sizeof(int);
+
+			int frameCount = 0;
+
+			if (version >= 5)
+			{
+				frameCount = BitConverter.ToInt32(buffer, offset);
+				frameCount += sizeof(int);
+			}
+			else
+			{
+				frameCount = 1;
+			}
+
+			var offsetBack = offset;
+
+			int vertexBufferCount = 0;
+			int indexBufferCount = 0;
+
+			for (int fi = 0; fi < frameCount; fi++)
+			{
+				vertexOffsets.Add(vertexBufferCount);
+				int vertexCount = BitConverter.ToInt32(buffer, offset);
+				offset += sizeof(int);
+
+				vertexBufferCount += vertexCount;
+				offset += sizeof(InternalVertex) * vertexCount;
+
+				indexOffsets.Add(indexBufferCount);
+
+				int faceCount = BitConverter.ToInt32(buffer, offset);
+
+				offset += sizeof(int);
+
+				indexBufferCount += 3 * faceCount;
+				offset += sizeof(int) * (3 * faceCount);
+			}
+
+			VertexBuffer = new ComputeBuffer(vertexBufferCount, sizeof(Vertex));
+			IndexBuffer = new ComputeBuffer(indexBufferCount, sizeof(int));
+			offset = offsetBack;
+
+			List<Vertex> vertex = new List<Vertex>();
+			List<int> index = new List<int>();
+
+			for (int fi = 0; fi < frameCount; fi++)
+			{
+				int vertexCount = BitConverter.ToInt32(buffer, offset);
+				offset += sizeof(int);
+
+				vertex.Clear();
+
+				fixed (byte* vs_ = &buffer[offset])
+				{
+					InternalVertex* vs = (InternalVertex*)vs_;
+
+					for (int vi = 0; vi < vertexCount; vi++)
+					{
+						Vertex v;
+						v.Position = vs[vi].Position;
+						v.UV = vs[vi].UV;
+						v.Normal = vs[vi].Normal;
+						v.Tangent = vs[vi].Tangent;
+						v.Binormal = vs[vi].Binormal;
+						v.VColor.r = vs[vi].VColor.r / 255.0f;
+						v.VColor.g = vs[vi].VColor.g / 255.0f;
+						v.VColor.b = vs[vi].VColor.b / 255.0f;
+						v.VColor.a = vs[vi].VColor.a / 255.0f;
+						vertex.Add(v);
+					}
+
+					VertexBuffer.SetData(vertex, 0, 0, vertex.Count);
+				}
+
+				offset += sizeof(InternalVertex) * vertexCount;
+
+				index.Clear();
+
+				int faceCount = BitConverter.ToInt32(buffer, offset);
+				offset += sizeof(int);
+
+				for (int ffi = 0; ffi < faceCount; ffi++)
+				{
+					int f1 = BitConverter.ToInt32(buffer, offset);
+					offset += sizeof(int);
+
+					int f2 = BitConverter.ToInt32(buffer, offset);
+					offset += sizeof(int);
+
+					int f3 = BitConverter.ToInt32(buffer, offset);
+					offset += sizeof(int);
+
+					index.Add(f1);
+					index.Add(f2);
+					index.Add(f3);
+
+				}
+
+				IndexBuffer.SetData(index, 0, 0, index.Count);
+			}
+
+			VertexOffsets = new ComputeBuffer(vertexOffsets.Count, sizeof(int));
+			IndexOffsets = new ComputeBuffer(indexOffsets.Count, sizeof(int));
+			VertexOffsets.SetData(vertexOffsets);
+			IndexOffsets.SetData(indexOffsets);
+		}
+
+		public void Dispose()
+		{
+			if (VertexBuffer != null)
+			{
+				VertexBuffer.Dispose();
+				VertexBuffer = null;
+			}
+
+			if (IndexBuffer != null)
+			{
+				IndexBuffer.Dispose();
+				IndexBuffer = null;
+			}
+
+			if (VertexOffsets != null)
+			{
+				VertexOffsets.Dispose();
+				VertexOffsets = null;
+			}
+
+			if (IndexOffsets != null)
+			{
+				IndexOffsets.Dispose();
+				IndexOffsets = null;
+			}
+		}
+	}
+
+	struct InternalVertex
+	{
+		public Vector3 Position;
+		public Vector3 Normal;
+		public Vector3 Binormal;
+		public Vector3 Tangent;
+		public Vector2 UV;
+		public Color32 VColor;
+	}
+
+	struct Vertex
+	{
+		public Vector3 Position;
+		public Vector3 Normal;
+		public Vector3 Binormal;
+		public Vector3 Tangent;
+		public Vector2 UV;
+		public Color VColor;
+	}
+
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
@@ -57,12 +237,12 @@ namespace Effekseer.Internal
 
 				var material = new Material(Shader);
 
-				if(key.Blend == AlphaBlendType.Opacity)
+				if (key.Blend == AlphaBlendType.Opacity)
 				{
 					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.One);
 					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.Zero);
 				}
-				else if(key.Blend == AlphaBlendType.Blend)
+				else if (key.Blend == AlphaBlendType.Blend)
 				{
 					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
 					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -98,7 +278,7 @@ namespace Effekseer.Internal
 
 			public MaterialPropertyBlock GetNext()
 			{
-				if(materialPropBlockOffset >= materialPropBlocks.Count)
+				if (materialPropBlockOffset >= materialPropBlocks.Count)
 				{
 					materialPropBlocks.Add(new MaterialPropertyBlock());
 				}
@@ -139,7 +319,7 @@ namespace Effekseer.Internal
 				// register the command to a camera
 				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 
-				if(enableDistortion)
+				if (enableDistortion)
 				{
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
@@ -163,7 +343,7 @@ namespace Effekseer.Internal
 					this.commandBuffer = null;
 				}
 
-				if(this.computeBufferFront != null)
+				if (this.computeBufferFront != null)
 				{
 					this.computeBufferFront.Dispose();
 					this.computeBufferFront = null;
@@ -323,7 +503,7 @@ namespace Effekseer.Internal
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
 
-			if(renderParameterCount > 0)
+			if (renderParameterCount > 0)
 			{
 				var parameters = Plugin.GetUnityRenderParameter();
 
@@ -338,7 +518,7 @@ namespace Effekseer.Internal
 					var prop = matPropCol.GetNext();
 					var parameter = parameters[i];
 
-					if(parameter.IsDistortingMode > 0)
+					if (parameter.IsDistortingMode > 0)
 					{
 						MaterialKey key = new MaterialKey();
 						key.Blend = (AlphaBlendType)parameter.Blend;
@@ -368,7 +548,7 @@ namespace Effekseer.Internal
 					}
 				}
 			}
-			
+
 		}
 
 		void OnPostRender(Camera camera)

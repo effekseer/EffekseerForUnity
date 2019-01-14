@@ -11,8 +11,8 @@
 
 namespace EffekseerPlugin
 {
-	using ModelLoaderLoad = int (UNITY_INTERFACE_API*)(const char16_t* path, void* buffer, int bufferSize);
-	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path);
+	using ModelLoaderLoad = void* (UNITY_INTERFACE_API*)(const char16_t* path, void* data, int dataSize, int& requiredDataSize);
+	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path, void* modelPointer);
 
 	class ModelLoader : public Effekseer::ModelLoader
 	{
@@ -55,7 +55,7 @@ namespace EffekseerPlugin
 			ModelLoaderUnload unload );
 		
 	public:
-		static ModelLoader* Create(
+		static Effekseer::ModelLoader* Create(
 			ModelLoaderLoad load,
 			ModelLoaderUnload unload);
 		

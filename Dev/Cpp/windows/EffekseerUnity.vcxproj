@@ -178,8 +178,10 @@
     <ClCompile Include="..\opengl\EffekseerPluginLoaderGL.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererImplemented.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererIndexBuffer.cpp" />
+    <ClCompile Include="..\renderer\EffekseerRendererModelLoader.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererRenderState.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererShader.cpp" />
+    <ClCompile Include="..\renderer\EffekseerRendererTextureLoader.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererVertexBuffer.cpp" />
     <ClCompile Include="EffekseerPluginLoaderWin.cpp" />
     <ClCompile Include="EffekseerPluginWin.cpp" />
@@ -195,8 +197,10 @@
     <ClInclude Include="..\opengl\EffekseerPluginLoaderGL.h" />
     <ClInclude Include="..\renderer\EffekseerRendererImplemented.h" />
     <ClInclude Include="..\renderer\EffekseerRendererIndexBuffer.h" />
+    <ClInclude Include="..\renderer\EffekseerRendererModelLoader.h" />
     <ClInclude Include="..\renderer\EffekseerRendererRenderState.h" />
     <ClInclude Include="..\renderer\EffekseerRendererShader.h" />
+    <ClInclude Include="..\renderer\EffekseerRendererTextureLoader.h" />
     <ClInclude Include="..\renderer\EffekseerRendererVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>

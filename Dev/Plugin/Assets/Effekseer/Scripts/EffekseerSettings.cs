@@ -81,7 +81,13 @@ namespace Effekseer
 		/// </summary>
 		[SerializeField]
 		public bool enableDistortion	= true;
-		
+
+		[SerializeField]
+		public Shader standardShader = null;
+
+		[SerializeField]
+		public Shader standardDistortionShader = null;
+
 		private static EffekseerSettings instance;
 		public static EffekseerSettings Instance {
 			get {
@@ -95,12 +101,6 @@ namespace Effekseer
 				return instance;
 			}
 		}
-
-		[SerializeField]
-		public Shader standardShader;
-
-		[SerializeField]
-		public Shader standardDistortionShader;
 
 #if UNITY_EDITOR
 		[MenuItem("Edit/Project Settings/Effekseer")]

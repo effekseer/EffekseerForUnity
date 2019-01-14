@@ -64,23 +64,24 @@ namespace EffekseerPlugin
 
 		// Load with unity
 		ModelResource res;
-		int size = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size() );
+		int requiredDataSize = 0;
+		auto modelPtr = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
 
-		if (size == 0)
+		if (requiredDataSize == 0)
 		{
 			// Failed to load
 			return nullptr;
 		}
 
-		if (size < 0)
+		if (modelPtr == nullptr)
 		{
 			// Lack of memory
-			memoryFile.Resize(-size);
+			memoryFile.Resize(requiredDataSize);
 
 			// Load with unity
-			size = load((const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size());
+			modelPtr = load((const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
 
-			if(size <= 0)
+			if(modelPtr <= 0)
 			{
 				// Failed to load
 				return nullptr;
@@ -88,7 +89,7 @@ namespace EffekseerPlugin
 		}
 
 		// 内部ローダに渡してロード処理する
-		memoryFile.loadsize = (size_t)size;
+		memoryFile.loadsize = (size_t)requiredDataSize;
 		res.internalData = internalLoader->Load( path );
 			
 		resources.insert( std::make_pair(
@@ -114,7 +115,7 @@ namespace EffekseerPlugin
 		if (it->second.referenceCount <= 0)
 		{
 			internalLoader->Unload(it->second.internalData);
-			unload(it->first.c_str());
+			unload(it->first.c_str(), nullptr);
 			resources.erase(it);
 		}
 	}

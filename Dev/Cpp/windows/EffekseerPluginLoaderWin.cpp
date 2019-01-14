@@ -16,6 +16,8 @@
 #include "../common/EffekseerPluginModel.h"
 
 #include "../opengl/EffekseerPluginLoaderGL.h"
+#include "../renderer/EffekseerRendererTextureLoader.h"
+#include "../renderer/EffekseerRendererModelLoader.h"
 
 using namespace Effekseer;
 
@@ -143,20 +145,34 @@ namespace EffekseerPlugin
 		}
 	};
 
-	TextureLoader* TextureLoader::Create(
+	Effekseer::TextureLoader* TextureLoader::Create(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
 	{
-		return new TextureLoaderWin( load, unload );
+		if (g_rendererType == RendererType::Native)
+		{
+			return new TextureLoaderWin(load, unload);
+		}
+		else
+		{
+			return new EffekseerRendererUnity::TextureLoader(load, unload);
+		}
 	}
 
-	ModelLoader* ModelLoader::Create(
+	Effekseer::ModelLoader* ModelLoader::Create(
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload)
 	{
-		auto loader = new ModelLoader( load, unload );
-		auto internalLoader = g_EffekseerRenderer->CreateModelLoader( loader->GetFileInterface() );
-		loader->SetInternalLoader( internalLoader );
-		return loader;
+		if (g_rendererType == RendererType::Native)
+		{
+			auto loader = new ModelLoader(load, unload);
+			auto internalLoader = g_EffekseerRenderer->CreateModelLoader(loader->GetFileInterface());
+			loader->SetInternalLoader(internalLoader);
+			return loader;
+		}
+		else
+		{
+			return new EffekseerRendererUnity::ModelLoader(load, unload);
+		}
 	}
 };

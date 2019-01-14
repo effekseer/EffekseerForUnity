@@ -152,8 +152,8 @@ namespace Effekseer
 		public static extern void EffekseerSetModelLoaderEvent(
 			EffekseerModelLoaderLoad load,
 			EffekseerModelLoaderUnload unload);
-		public delegate int EffekseerModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize);
-		public delegate void EffekseerModelLoaderUnload(IntPtr path);
+		public delegate IntPtr EffekseerModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize);
+		public delegate void EffekseerModelLoaderUnload(IntPtr path, IntPtr modelPtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundLoaderEvent(

@@ -60,6 +60,19 @@ namespace EffekseerRendererUnity
 	class IndexBuffer;
 	class Shader;
 
+	class Model : public Effekseer::Model
+	{
+	public:
+		Model(void* data, int32_t size)
+		 : Effekseer::Model(data,size)
+		{
+		}
+
+		virtual ~Model() = default;
+
+		void* InternalPtr = nullptr;
+	};
+
 	struct Vertex
 	{
 		::Effekseer::Vector3D	Pos;

@@ -18,9 +18,10 @@ namespace EffekseerPlugin
 		TextureLoaderUnload unload;
 
 	public:
-		static TextureLoader* Create(
+		static Effekseer::TextureLoader* Create(
 			TextureLoaderLoad load,
 			TextureLoaderUnload unload);
+
 		TextureLoader(
 			TextureLoaderLoad load,
 			TextureLoaderUnload unload) 
