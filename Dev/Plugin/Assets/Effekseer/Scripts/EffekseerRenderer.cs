@@ -425,7 +425,7 @@ namespace Effekseer.Internal
 			RenderPath path;
 
 			// カリングマスクをチェック
-			if ((Camera.current.cullingMask & (1 << layer)) == 0)
+			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
@@ -556,9 +556,9 @@ namespace Effekseer.Internal
 
 		void OnPostRender(Camera camera)
 		{
-			if (renderPaths.ContainsKey(Camera.current))
+			if (renderPaths.ContainsKey(camera))
 			{
-				RenderPath path = renderPaths[Camera.current];
+				RenderPath path = renderPaths[camera];
 				Plugin.EffekseerSetRenderSettings(path.renderId,
 					(camera.activeTexture != null));
 			}
@@ -687,7 +687,7 @@ namespace Effekseer.Internal
 			RenderPath path;
 
 			// カリングマスクをチェック
-			if ((Camera.current.cullingMask & (1 << layer)) == 0)
+			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
@@ -747,9 +747,9 @@ namespace Effekseer.Internal
 
 		void OnPostRender(Camera camera)
 		{
-			if (renderPaths.ContainsKey(Camera.current))
+			if (renderPaths.ContainsKey(camera))
 			{
-				RenderPath path = renderPaths[Camera.current];
+				RenderPath path = renderPaths[camera];
 				Plugin.EffekseerSetRenderSettings(path.renderId,
 					(camera.activeTexture != null));
 			}
