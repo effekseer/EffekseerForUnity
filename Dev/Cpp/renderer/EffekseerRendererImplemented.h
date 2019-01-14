@@ -45,7 +45,7 @@ extern "C"
 		void* ModelPtr = nullptr;
 	};
 
-	UNITY_INTERFACE_EXPORT UnityRenderParameter* UNITY_INTERFACE_API GetUnityRenderParameter();
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetUnityRenderParameter(UnityRenderParameter* dst, int index);
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderCount();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityVertexBuffer();
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetMaterial(void* material);

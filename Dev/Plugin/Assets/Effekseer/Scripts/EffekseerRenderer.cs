@@ -23,8 +23,10 @@ namespace Effekseer.Internal
 		public ComputeBuffer IndexOffsets;
 
 
-		public unsafe void Initialize(byte[] buffer)
+		public void Initialize(byte[] buffer)
 		{
+			// temporally
+			/*
 			List<int> vertexOffsets = new List<int>();
 			List<int> indexOffsets = new List<int>();
 
@@ -145,6 +147,7 @@ namespace Effekseer.Internal
 			IndexOffsets = new ComputeBuffer(indexOffsets.Count, sizeof(int));
 			VertexOffsets.SetData(vertexOffsets);
 			IndexOffsets.SetData(indexOffsets);
+			*/
 		}
 
 		public void Dispose()
@@ -405,7 +408,7 @@ namespace Effekseer.Internal
 			renderPaths.Clear();
 		}
 
-		unsafe void OnPreCullEvent(Camera camera)
+		void OnPreCullEvent(Camera camera)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -498,14 +501,14 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
+		void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
 
 			if (renderParameterCount > 0)
 			{
-				var parameters = Plugin.GetUnityRenderParameter();
+				Plugin.UnityRenderParameter parameter = new Plugin.UnityRenderParameter();
 
 				var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
 				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
@@ -516,7 +519,7 @@ namespace Effekseer.Internal
 				for (int i = 0; i < renderParameterCount; i++)
 				{
 					var prop = matPropCol.GetNext();
-					var parameter = parameters[i];
+					Plugin.GetUnityRenderParameter(ref parameter, i);
 
 					if (parameter.IsDistortingMode > 0)
 					{

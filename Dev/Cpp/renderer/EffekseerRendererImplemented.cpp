@@ -11,11 +11,11 @@ namespace EffekseerPlugin
 
 extern "C"
 {
-	UNITY_INTERFACE_EXPORT UnityRenderParameter* UNITY_INTERFACE_API GetUnityRenderParameter()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetUnityRenderParameter(UnityRenderParameter* dst, int index)
 	{
-		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return nullptr;
+		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return;
 		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
-		return renderer->GetRenderParameters().data();
+		*dst = renderer->GetRenderParameters()[index];
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderParameterCount()

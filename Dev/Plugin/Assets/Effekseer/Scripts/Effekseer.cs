@@ -22,7 +22,7 @@ namespace Effekseer
 		}
 	}
 	
-	internal static unsafe class Plugin
+	internal static class Plugin
 	{
 		#if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_WEBGL)
 			public const string pluginName = "__Internal";
@@ -216,7 +216,7 @@ namespace Effekseer
 
 
 		[DllImport(pluginName)]
-		public static extern UnityRenderParameter* GetUnityRenderParameter();
+		public static extern void GetUnityRenderParameter(ref UnityRenderParameter dst, int index);
 
 		[DllImport(pluginName)]
 		public static extern int GetUnityRenderParameterCount();
