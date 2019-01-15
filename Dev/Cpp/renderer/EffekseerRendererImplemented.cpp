@@ -620,7 +620,14 @@ namespace EffekseerRendererUnity
 	{
 		if (count > 0)
 		{
-			m_textures[0] = textures[0]->UserPtr;
+			if (textures[0] != nullptr)
+			{
+				m_textures[0] = textures[0]->UserPtr;
+			}
+			else
+			{
+				m_textures[0] = nullptr;
+			}
 		}
 		else
 		{
