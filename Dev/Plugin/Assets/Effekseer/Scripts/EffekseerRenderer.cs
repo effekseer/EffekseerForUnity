@@ -300,7 +300,7 @@ namespace Effekseer.Internal
 
 		private class RenderPath : IDisposable
 		{
-			const int VertexMaxCount = 8192;
+			const int VertexMaxCount = 8192 * 4;
 			public Camera camera;
 			public CommandBuffer commandBuffer;
 			public CameraEvent cameraEvent;

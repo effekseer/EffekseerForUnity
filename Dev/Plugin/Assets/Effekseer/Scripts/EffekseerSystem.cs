@@ -284,7 +284,11 @@ namespace Effekseer
 
 		internal static Texture GetCachedTexture(IntPtr key)
 		{
-			return cachedTextures[key];
+			if(cachedTextures.ContainsKey(key))
+			{
+				return cachedTextures[key];
+			}
+			return Texture2D.whiteTexture;
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderLoad))]
