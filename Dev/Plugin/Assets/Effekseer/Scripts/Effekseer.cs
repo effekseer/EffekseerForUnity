@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Effekseer
 {
-	internal static class Utility
+	public static class Utility
 	{
 		public static float[] Matrix2Array(Matrix4x4 mat) {
 			float[] res = new float[16];

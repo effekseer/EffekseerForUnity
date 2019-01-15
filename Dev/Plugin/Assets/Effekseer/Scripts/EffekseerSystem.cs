@@ -75,8 +75,12 @@ namespace Effekseer
 		public static EffekseerSystem Instance { get; private set; }
 		public static bool IsValid { get { return Instance != null && Instance.enabled; } }
 
-		internal bool enabled;
-		private IEffekseerRenderer renderer;
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public bool enabled;
+
+		public IEffekseerRenderer renderer { get; private set; }
 
 		// Loaded native effects
 		[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
@@ -108,7 +112,10 @@ namespace Effekseer
 			}
 		}
 
-		internal void LoadEffect(EffekseerEffectAsset effectAsset) {
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void LoadEffect(EffekseerEffectAsset effectAsset) {
 			effectAssetInLoading = effectAsset;
 			int id = effectAsset.GetInstanceID();
 			IntPtr nativeEffect;
@@ -130,8 +137,11 @@ namespace Effekseer
 				loadedEffects.Remove(effectAsset);
 			}
 		}
-		
-		internal void InitPlugin() {
+
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void InitPlugin() {
 			//Debug.Log("EffekseerSystem.InitPlugin");
 			if (Instance != null) {
 				Debug.LogError("[Effekseer] EffekseerSystem instance is already found.");
@@ -172,7 +182,10 @@ namespace Effekseer
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)settings.RendererType);
 		}
 
-		internal void TermPlugin() {
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void TermPlugin() {
 			//Debug.Log("EffekseerSystem.TermPlugin");
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
 				ReleaseEffect(effectAsset);
@@ -192,7 +205,10 @@ namespace Effekseer
 			Instance = null;
 		}
 
-		internal void OnEnable() {
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void OnEnable() {
 			if (Instance == null) {
 				Instance = this;
 			}
@@ -234,7 +250,10 @@ namespace Effekseer
 			enabled = true;
 		}
 
-		internal void OnDisable() {
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void OnDisable() {
 			enabled = false;
 
 	#if UNITY_EDITOR

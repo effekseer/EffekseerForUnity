@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
-	internal interface IEffekseerRenderer
+	public interface IEffekseerRenderer
 	{
 		int layer { get; set; }
 

@@ -17,7 +17,10 @@ namespace Effekseer
 			m_handle = handle;
 		}
 
-		internal void UpdateHandle(float deltaFrame)
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void UpdateHandle(float deltaFrame)
 		{
 			Plugin.EffekseerUpdateHandle(m_handle, deltaFrame);
 		}

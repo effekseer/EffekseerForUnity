@@ -38,11 +38,13 @@ namespace Effekseer
 		
 		/// <summary xml:lang="en">
 		/// The last played handle.
+		/// Don't touch it!!
 		/// </summary>
 		/// <summary xml:lang="ja">
 		/// 最後にPlayされたハンドル
+		/// Effekseer開発者以外は触ってはいけない
 		/// </summary>
-		internal List<EffekseerHandle> handles = new List<EffekseerHandle>();
+		public List<EffekseerHandle> handles = new List<EffekseerHandle>();
 	
 		/// <summary xml:lang="en">
 		/// Plays the effect.
@@ -90,7 +92,11 @@ namespace Effekseer
 			}
 			handles.Clear();
 		}
-		internal void StopImmediate()
+
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void StopImmediate()
 		{
 			foreach (var handle in handles) {
 				handle.Stop();
@@ -246,8 +252,11 @@ namespace Effekseer
 		{
 			Stop();
 		}
-	
-		internal void Update()
+
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void Update()
 		{
 			for (int i = 0; i < handles.Count; ) {
 				var handle = handles[i];
