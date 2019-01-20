@@ -49,4 +49,5 @@ EXPORTS
   GetUnityRenderParameterCount
   GetUnityRenderVertexBuffer
   GetUnityRenderVertexBufferCount
+  GetUnityRenderInfoBuffer
   SetMaterial

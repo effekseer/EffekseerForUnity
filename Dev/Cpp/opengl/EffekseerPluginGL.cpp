@@ -1,5 +1,4 @@
-
-
+﻿
 #include "../common/EffekseerPluginCommon.h"
 #include "../common/IUnityGraphics.h"
 

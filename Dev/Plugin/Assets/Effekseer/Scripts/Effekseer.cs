@@ -180,8 +180,8 @@ namespace Effekseer
 		#region UnityRenderer
 
 		
-	[StructLayout(LayoutKind.Sequential)]
-	public struct UnityRenderParameter
+		[StructLayout(LayoutKind.Sequential)]
+		public struct UnityRenderParameter
 		{
 			//! 0 - procedual, 1 - model
 			public int RenderMode;
@@ -201,6 +201,8 @@ namespace Effekseer
 
 			public int Blend;
 
+			public int Culling;
+
 			//! Texture ptr
 			public IntPtr TexturePtrs0;
 			public IntPtr TexturePtrs1;
@@ -214,6 +216,14 @@ namespace Effekseer
 			public IntPtr ModelPtr;
 		};
 
+		[StructLayout(LayoutKind.Sequential)]
+		public struct UnityRenderModelParameter
+		{
+			public Matrix4x4 Matrix;
+			public Vector4 UV;
+			public Color VColor;
+			public int Time;
+		};
 
 		[DllImport(pluginName)]
 		public static extern void GetUnityRenderParameter(ref UnityRenderParameter dst, int index);
@@ -226,6 +236,9 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern int GetUnityRenderVertexBufferCount();
+
+		[DllImport(pluginName)]
+		public static extern IntPtr GetUnityRenderInfoBuffer();
 
 		[DllImport(pluginName)]
 		public static extern void SetMaterial(IntPtr material);

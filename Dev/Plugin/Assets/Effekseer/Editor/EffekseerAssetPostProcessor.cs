@@ -15,12 +15,14 @@ namespace Effekseer.Editor
 			string[] movedFromPaths)
 		{
 			foreach(string assetPath in importedAssets) {
-				if (Path.GetExtension(assetPath) == ".efk") {
+				if (Path.GetExtension(assetPath) == ".efk")
+				{
 					EffekseerEffectAsset.CreateAsset(assetPath);
 				}
-				/*if (Path.GetExtension(assetPath) == ".efkmodel") {
-					File.Move(assetPath, assetPath + ".bytes");
-				}*/
+				if (Path.GetExtension(assetPath) == ".efkmodel")
+				{
+					EffekseerModelAsset.CreateAsset(assetPath);
+				}
 			}
 		}
 	}

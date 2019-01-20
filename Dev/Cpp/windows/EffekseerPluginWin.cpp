@@ -186,6 +186,10 @@ namespace EffekseerPlugin
 				return;
 			}
 		}
+		else
+		{
+			((EffekseerRendererUnity::RendererImplemented*)g_EffekseerRenderer)->SetBackground(backgroundTexture);
+		}
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)

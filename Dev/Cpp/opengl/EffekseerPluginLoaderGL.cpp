@@ -1,3 +1,7 @@
+﻿
+#include <map>
+#include <string>
+
 #include "Effekseer.h"
 #include "EffekseerRendererGL.h"
 

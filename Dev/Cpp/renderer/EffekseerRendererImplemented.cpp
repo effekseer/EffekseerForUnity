@@ -39,6 +39,13 @@ extern "C"
 		return renderer->GetRenderVertexBuffer().size();
 	}
 
+	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderInfoBuffer()
+	{
+		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return nullptr;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
+		return renderer->GetRenderInfoBuffer().data();
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetMaterial(void* material)
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr) return;
@@ -64,6 +71,14 @@ namespace EffekseerRendererUnity
 		float		Col[4];
 		::Effekseer::Vector3D	Tangent;
 		::Effekseer::Vector3D	Binormal;
+	};
+
+	struct UnityModelParameter
+	{
+		Effekseer::Matrix44 Matrix;
+		Effekseer::RectF UV;
+		float VColor[4];
+		int32_t Time;
 	};
 
 	static int GetAlignedOffset(int offset, int size)
@@ -105,8 +120,7 @@ namespace EffekseerRendererUnity
 		if (m_matrixes.size() == 0) return;
 		if (parameter.ModelIndex < 0) return;
 
-		//EffekseerInternalModel* model = (EffekseerInternalModel*)parameter.EffectPointer->GetModel(parameter.ModelIndex);
-		Effekseer::Model* model = nullptr;
+		auto model = parameter.EffectPointer->GetModel(parameter.ModelIndex);
 		if (model == nullptr) return;
 
 		::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
@@ -146,6 +160,12 @@ namespace EffekseerRendererUnity
 	RendererImplemented::RendererImplemented()
 	{
 		m_textures.fill(nullptr);
+
+		backgroundData.Width = 0;
+		backgroundData.Height = 0;
+		backgroundData.TextureFormat = Effekseer::TextureFormatType::ABGR8;
+		backgroundData.UserID = 0;
+		backgroundData.UserPtr = nullptr;
 	}
 	
 	RendererImplemented::~RendererImplemented()
@@ -224,6 +244,7 @@ namespace EffekseerRendererUnity
 		//GLCheckError();
 
 		exportedVertexBuffer.resize(0);
+		exportedInfoBuffer.resize(0);
 		renderParameters.resize(0);
 		modelParameters.resize(0);
 		return true;
@@ -235,6 +256,9 @@ namespace EffekseerRendererUnity
 
 		// レンダラーリセット
 		m_standardRenderer->ResetAndRenderingIfRequired();
+
+		// ForUnity
+		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
 
 //		// ステートを復元する
 //		if (m_restorationOfStates)
@@ -405,7 +429,12 @@ namespace EffekseerRendererUnity
 
 	Effekseer::TextureData* RendererImplemented::GetBackground()
 	{
-		return (Effekseer::TextureData*)1;
+		return (Effekseer::TextureData*)(&backgroundData);
+	}
+
+	void RendererImplemented::SetBackground(void* image)
+	{
+		backgroundData.UserPtr = image;
 	}
 
 	VertexBuffer* RendererImplemented::GetVertexBuffer()
@@ -448,7 +477,17 @@ namespace EffekseerRendererUnity
 		//if (mat == nullptr) return;
 
 		// is single ring?
-		auto stanMat = ((Effekseer::Matrix44*)m_stanShader->GetVertexConstantBuffer())[0];
+		Effekseer::Matrix44 stanMat;
+		
+		if (m_isDistorting)
+		{
+			stanMat = ((Effekseer::Matrix44*)m_distortionShader->GetVertexConstantBuffer())[0];
+		}
+		else
+		{
+			stanMat = ((Effekseer::Matrix44*)m_stanShader->GetVertexConstantBuffer())[0];
+		}
+
 		auto cameraMat = m_camera;
 		Effekseer::Matrix44 ringMat;
 
@@ -476,8 +515,7 @@ namespace EffekseerRendererUnity
 		//auto triangles = vertexOffset / 4 * 2;
 		//glDrawElements(GL_TRIANGLES, spriteCount * 6, GL_UNSIGNED_SHORT, (void*)(triangles * 3 * sizeof(GLushort)));
 
-		int32_t startOffset = exportedVertexBuffer.size();
-
+		
 		if (m_isDistorting)
 		{
 			auto intensity = ((float*)m_distortionShader->GetPixelConstantBuffer())[0];
@@ -486,6 +524,7 @@ namespace EffekseerRendererUnity
 			VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
 			exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDistortionVertex)));
+			int32_t startOffset = exportedVertexBuffer.size();
 
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
@@ -536,6 +575,7 @@ namespace EffekseerRendererUnity
 			Vertex* vs = (Vertex*)m_vertexBuffer->GetResource();
 
 			exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
+			int32_t startOffset = exportedVertexBuffer.size();
 
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
@@ -570,6 +610,7 @@ namespace EffekseerRendererUnity
 			rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
 			rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 			rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
+			rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
 
 			rp.RenderMode = 0;
 			rp.IsDistortingMode = 0;
@@ -584,7 +625,48 @@ namespace EffekseerRendererUnity
 
 	void RendererImplemented::DrawModel(void* model, std::vector<Effekseer::Matrix44>& matrixes, std::vector<Effekseer::RectF>& uvs, std::vector<Effekseer::Color>& colors, std::vector<int32_t>& times)
 	{
-		
+		UnityRenderParameter rp;
+		rp.RenderMode = 1;
+		rp.IsDistortingMode = 0;
+
+		if (model != nullptr)
+		{
+			auto model_ = (Model*)model;
+			rp.ModelPtr = model_->InternalPtr;
+		}
+		else
+		{
+			rp.ModelPtr = nullptr;
+		}
+
+		rp.TexturePtrs[0] = m_textures[0];
+		rp.ElementCount = matrixes.size();
+		rp.VertexBufferOffset = exportedInfoBuffer.size();
+
+		rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
+		rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
+		rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
+		rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
+
+		for (int i = 0; i < matrixes.size(); i++)
+		{
+			int offset = exportedInfoBuffer.size();
+
+			exportedInfoBuffer.resize(
+				exportedInfoBuffer.size() +
+				sizeof(UnityModelParameter));
+
+			UnityModelParameter modelParameter;
+			modelParameter.Matrix = matrixes[i];
+			modelParameter.UV = uvs[i];
+			modelParameter.VColor[0] = colors[i].R / 255.0f;
+			modelParameter.VColor[1] = colors[i].G / 255.0f;
+			modelParameter.VColor[2] = colors[i].B / 255.0f;
+			modelParameter.VColor[3] = colors[i].A / 255.0f;
+			*(UnityModelParameter*)(exportedInfoBuffer.data() + offset) = modelParameter;
+		}
+
+		renderParameters.push_back(rp);
 	}
 
 	Shader* RendererImplemented::GetShader(bool useTexture, bool useDistortion) const
@@ -620,28 +702,33 @@ namespace EffekseerRendererUnity
 	{
 		if (count > 0)
 		{
-			if (textures[0] != nullptr)
+			for (int i = 0; i < count; i++)
 			{
-				m_textures[0] = textures[0]->UserPtr;
-			}
-			else
-			{
-				m_textures[0] = nullptr;
+				if (textures[i] != nullptr)
+				{
+					m_textures[i] = textures[i]->UserPtr;
+				}
+				else
+				{
+					m_textures[i] = nullptr;
+				}
 			}
 		}
 		else
 		{
 			m_textures[0] = nullptr;
+			m_textures[1] = nullptr;
+			m_textures[2] = nullptr;
+			m_textures[3] = nullptr;
 		}
 	}
 
 	void* RendererImplemented::FindMaterial()
 	{
-		return materials[0];
+		return nullptr;
 	}
 
 	void RendererImplemented::SetMaterial(void* material)
 	{
-		materials[0] = material;
 	}
 }

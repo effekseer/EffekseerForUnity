@@ -48,6 +48,8 @@ namespace EffekseerRendererUnity
 			return nullptr;
 		}
 
+		internalBuffer.resize(requiredDataSize);
+
 		auto model = new Model(internalBuffer.data(), internalBuffer.size());
 		model->InternalPtr = modelPtr;
 		res.internalData = model;

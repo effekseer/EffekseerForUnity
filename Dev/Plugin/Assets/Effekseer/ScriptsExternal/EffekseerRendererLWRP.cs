@@ -21,17 +21,20 @@ namespace Effekseer
 		{
 			var cameraComponent = gameObject.GetComponent<Camera>();
 
-			return new EffekseerRenderPassLWRP(cameraComponent);
+			return new EffekseerRenderPassLWRP(cameraComponent, colorHandle.id);
 		}
 	}
 
 	class EffekseerRenderPassLWRP : ScriptableRenderPass
 	{
 		Camera cameraComponent = null;
+		int dstID = 0;
 
-		public EffekseerRenderPassLWRP(Camera cameraComponent)
+		public EffekseerRenderPassLWRP(Camera cameraComponent, int dstID)
 		{
 			this.cameraComponent = cameraComponent;
+			this.dstID = dstID;
+
 			RegisterShaderPassName("Effekseer");
 		}
 
@@ -39,7 +42,7 @@ namespace Effekseer
 		{
 			if (EffekseerSystem.Instance == null) return;
 
-			EffekseerSystem.Instance.renderer.OnPreCullEvent(cameraComponent);
+			EffekseerSystem.Instance.renderer.Render(cameraComponent, dstID);
 			var commandBuffer = EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(cameraComponent);
 
 			if (commandBuffer != null)

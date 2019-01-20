@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.IO;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -97,7 +98,7 @@ namespace Effekseer
 
 		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
 
-		private static Dictionary<IntPtr, UnityRendererModel> cachedModel = new Dictionary<IntPtr, UnityRendererModel>();
+		private static Dictionary<IntPtr, UnityRendererModel> cachedModels = new Dictionary<IntPtr, UnityRendererModel>();
 
 		private void ReloadEffects()
 		{
@@ -291,6 +292,15 @@ namespace Effekseer
 			return Texture2D.whiteTexture;
 		}
 
+		internal static UnityRendererModel GetCachedModel(IntPtr key)
+		{
+			if (cachedModels.ContainsKey(key))
+			{
+				return cachedModels[key];
+			}
+			return null;
+		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderLoad))]
 		private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format)
 		{
@@ -331,6 +341,7 @@ namespace Effekseer
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderLoad))]
 		private static IntPtr ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize) {
 			var pathstr = Marshal.PtrToStringUni(path);
+			pathstr = Path.ChangeExtension(pathstr, ".asset");
 			var asset = Instance.effectAssetInLoading;
 			var res = asset.FindModel(pathstr);
 			var model = (res != null) ? res.asset : null;
@@ -345,7 +356,7 @@ namespace Effekseer
 					{
 						var unityRendererModel = new UnityRendererModel();
 						unityRendererModel.Initialize(model.bytes);
-						cachedModel.Add(unityRendererModel.VertexBuffer.GetNativeBufferPtr(), unityRendererModel);
+						cachedModels.Add(unityRendererModel.VertexBuffer.GetNativeBufferPtr(), unityRendererModel);
 						return unityRendererModel.VertexBuffer.GetNativeBufferPtr();
 					}
 
@@ -360,7 +371,7 @@ namespace Effekseer
 		private static void ModelLoaderUnload(IntPtr path, IntPtr modelPtr) {
 			if (EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				cachedModel.Remove(modelPtr);
+				cachedModels.Remove(modelPtr);
 			}
 		}
 

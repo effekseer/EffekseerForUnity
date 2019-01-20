@@ -88,6 +88,12 @@ namespace Effekseer
 		[SerializeField]
 		public Shader standardDistortionShader = null;
 
+		[SerializeField]
+		public Shader standardModelShader = null;
+
+		[SerializeField]
+		public Shader standardModelDistortionShader = null;
+
 		private static EffekseerSettings instance;
 		public static EffekseerSettings Instance {
 			get {

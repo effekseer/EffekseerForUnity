@@ -10,7 +10,7 @@ using UnityEditor;
 namespace Effekseer.Internal
 {
 	[Serializable]
-	public class EffekseerModelResource : ScriptableObject
+	public class EffekseerModelResource
 	{
 		[SerializeField]
 		public string path;
@@ -19,6 +19,8 @@ namespace Effekseer.Internal
 			
 #if UNITY_EDITOR
 		public static EffekseerModelResource LoadAsset(string dirPath, string resPath) {
+			resPath = Path.ChangeExtension(resPath, ".asset");
+
 			EffekseerModelAsset asset = AssetDatabase.LoadAssetAtPath<EffekseerModelAsset>(dirPath + "/" + resPath);
 
 			var res = new EffekseerModelResource();
@@ -53,9 +55,10 @@ namespace Effekseer
 			if (data == null) {
 				return;
 			}
-			
-			string assetPath = path + ".asset";
-			
+
+			string assetPath = Path.ChangeExtension(path, ".asset");
+			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
+
 			var asset = CreateInstance<EffekseerModelAsset>();
 			asset.bytes = data;
 			
