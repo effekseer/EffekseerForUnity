@@ -35,7 +35,15 @@ namespace Effekseer
 		/// Start()時に再生開始するかどうか
 		/// </summary>
 		public bool playOnStart = false;
-		
+
+		/// <summary xml:lang="ja">
+		/// Whether it does loop playback when all effects are stopped
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 全てのエフェクトが停止した後に、ループ再生するかどうか
+		/// </summary>
+		public bool isLooping = false;
+
 		/// <summary xml:lang="en">
 		/// The last played handle.
 		/// Don't touch it!!
@@ -265,7 +273,12 @@ namespace Effekseer
 					handle.SetRotation(transform.rotation);
 					handle.SetScale(transform.localScale);
 					i++;
-				} else {
+				} else if(isLooping && handles.Count == 1)
+				{
+					handles.RemoveAt(i);
+					Play();
+				}
+				else {
 					handles.RemoveAt(i);
 				}
 			}
