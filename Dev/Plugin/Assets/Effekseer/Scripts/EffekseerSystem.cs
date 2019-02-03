@@ -327,8 +327,13 @@ namespace Effekseer
 				}
 
 				var ptr = texture.GetNativeTexturePtr();
-
-				cachedTextures.Add(ptr, texture);
+				
+				if(EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+				{
+					if (!cachedTextures.ContainsKey(ptr)) {
+						cachedTextures.Add(ptr, texture);
+					}
+				}
 
 				return ptr;
 			}
@@ -362,8 +367,12 @@ namespace Effekseer
 					{
 						var unityRendererModel = new UnityRendererModel();
 						unityRendererModel.Initialize(model.bytes);
-						cachedModels.Add(unityRendererModel.VertexBuffer.GetNativeBufferPtr(), unityRendererModel);
-						return unityRendererModel.VertexBuffer.GetNativeBufferPtr();
+
+						IntPtr ptr = unityRendererModel.VertexBuffer.GetNativeBufferPtr();
+						if (!cachedModels.ContainsKey(ptr)) {
+							cachedModels.Add(ptr, unityRendererModel);
+						}
+						return ptr;
 					}
 
 					return new IntPtr(1);
