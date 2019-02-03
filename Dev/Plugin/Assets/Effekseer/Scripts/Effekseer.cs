@@ -181,7 +181,7 @@ namespace Effekseer
 
 		
 		[StructLayout(LayoutKind.Sequential)]
-		public struct UnityRenderParameter
+		public unsafe struct UnityRenderParameter
 		{
 			//! 0 - procedual, 1 - model
 			public int RenderMode;
@@ -208,6 +208,10 @@ namespace Effekseer
 			public IntPtr TexturePtrs1;
 			public IntPtr TexturePtrs2;
 			public IntPtr TexturePtrs3;
+
+			public fixed int TextureFilterTypes[4];
+
+			public fixed int TextureWrapTypes[4];
 
 			//! Material ptr
 			public IntPtr MaterialPtr;

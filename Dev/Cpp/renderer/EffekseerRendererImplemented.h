@@ -40,6 +40,10 @@ extern "C"
 		//! Texture ptr
 		void* TexturePtrs[4];
 
+		int TextureFilterTypes[4];
+
+		int TextureWrapTypes[4];
+
 		//! Material ptr
 		void* MaterialPtr = nullptr;
 

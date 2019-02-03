@@ -128,12 +128,7 @@ namespace EffekseerRendererUnity
 		state.DepthWrite = parameter.ZWrite;
 		state.AlphaBlend = parameter.AlphaBlend;
 		state.CullingType = parameter.Culling;
-		
-		m_renderer->GetRenderState()->Update(false);
-		m_renderer->SetIsLighting(parameter.Lighting);
-		m_renderer->SetIsDistorting(parameter.Distortion);
-		m_renderer->SetDistortionIntensity(parameter.DistortionIntensity);
-
+				
 		Effekseer::TextureData* textures[1];
 
 		if (parameter.ColorTextureIndex >= 0)
@@ -146,6 +141,16 @@ namespace EffekseerRendererUnity
 		}
 
 		m_renderer->SetTextures(nullptr, textures, 1);
+
+		state.TextureFilterTypes[0] = parameter.TextureFilter;
+		state.TextureWrapTypes[0] = parameter.TextureWrap;
+		state.TextureFilterTypes[1] = parameter.TextureFilter;
+		state.TextureWrapTypes[1] = parameter.TextureWrap;
+
+		m_renderer->GetRenderState()->Update(false);
+		m_renderer->SetIsLighting(parameter.Lighting);
+		m_renderer->SetIsDistorting(parameter.Distortion);
+		m_renderer->SetDistortionIntensity(parameter.DistortionIntensity);
 
 		m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times);
 
@@ -560,11 +565,19 @@ namespace EffekseerRendererUnity
 			}
 
 			UnityRenderParameter rp;
+
+			rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
+			rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
+			rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
+			rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
+
 			rp.RenderMode = 0;
 			rp.IsDistortingMode = 1;
 			rp.VertexBufferOffset = startOffset;
 			rp.TexturePtrs[0] = m_textures[0];
 			rp.TexturePtrs[1] = m_textures[1];
+			rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
+			rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 			rp.ModelPtr = nullptr;
 			rp.MaterialPtr = nullptr;
 			rp.ElementCount = spriteCount;
@@ -616,6 +629,8 @@ namespace EffekseerRendererUnity
 			rp.IsDistortingMode = 0;
 			rp.VertexBufferOffset = startOffset;
 			rp.TexturePtrs[0] = m_textures[0];
+			rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
+			rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 			rp.ModelPtr = nullptr;
 			rp.MaterialPtr = nullptr;
 			rp.ElementCount = spriteCount;
@@ -640,6 +655,8 @@ namespace EffekseerRendererUnity
 		}
 
 		rp.TexturePtrs[0] = m_textures[0];
+		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
+		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 		rp.ElementCount = matrixes.size();
 		rp.VertexBufferOffset = exportedInfoBuffer.size();
 

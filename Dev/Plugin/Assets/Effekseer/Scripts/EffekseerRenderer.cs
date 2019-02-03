@@ -623,6 +623,7 @@ namespace Effekseer.Internal
 					
 					if(parameter.RenderMode == 1)
 					{
+						// Draw model
 						var infoBuffer = Plugin.GetUnityRenderInfoBuffer();
 						var modelParameters = ((Plugin.UnityRenderModelParameter*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
 
@@ -660,8 +661,29 @@ namespace Effekseer.Internal
 								prop.SetBuffer("buf_vertex", model.VertexBuffer);
 								prop.SetBuffer("buf_index", model.IndexBuffer);
 								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
+								prop.SetVector("buf_uv", modelParameters[mi].UV);
+								prop.SetVector("buf_color", modelParameters[mi].VColor);
 
-								prop.SetTexture("_ColorTex", GetCachedTexture(parameter.TexturePtrs0, background));
+								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
+								if (parameter.TextureWrapTypes[0] == 0)
+								{
+									colorTexture.wrapMode = TextureWrapMode.Repeat;
+								}
+								else
+								{
+									colorTexture.wrapMode = TextureWrapMode.Clamp;
+								}
+
+								if (parameter.TextureFilterTypes[0] == 0)
+								{
+									colorTexture.filterMode = FilterMode.Point;
+								}
+								else
+								{
+									colorTexture.filterMode = FilterMode.Bilinear;
+								}
+
+								prop.SetTexture("_ColorTex", colorTexture);
 								//prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
 								//Temp
 								prop.SetTexture("_BackTex", background);
@@ -675,6 +697,27 @@ namespace Effekseer.Internal
 								prop.SetBuffer("buf_vertex", model.VertexBuffer);
 								prop.SetBuffer("buf_index", model.IndexBuffer);
 								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
+								prop.SetVector("buf_uv", modelParameters[mi].UV);
+								prop.SetVector("buf_color", modelParameters[mi].VColor);
+
+								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
+								if(parameter.TextureWrapTypes[0] == 0)
+								{
+									colorTexture.wrapMode = TextureWrapMode.Repeat;
+								}
+								else
+								{
+									colorTexture.wrapMode = TextureWrapMode.Clamp;
+								}
+
+								if (parameter.TextureFilterTypes[0] == 0)
+								{
+									colorTexture.filterMode = FilterMode.Point;
+								}
+								else
+								{
+									colorTexture.filterMode = FilterMode.Bilinear;
+								}
 
 								prop.SetTexture("_ColorTex", GetCachedTexture(parameter.TexturePtrs0, background));
 
@@ -699,7 +742,27 @@ namespace Effekseer.Internal
 
 							prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDistortionSize);
 							prop.SetBuffer("buf_vertex", computeBuffer);
-							prop.SetTexture("_ColorTex", GetCachedTexture(parameter.TexturePtrs0, background));
+
+							var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
+							if (parameter.TextureWrapTypes[0] == 0)
+							{
+								colorTexture.wrapMode = TextureWrapMode.Repeat;
+							}
+							else
+							{
+								colorTexture.wrapMode = TextureWrapMode.Clamp;
+							}
+
+							if (parameter.TextureFilterTypes[0] == 0)
+							{
+								colorTexture.filterMode = FilterMode.Point;
+							}
+							else
+							{
+								colorTexture.filterMode = FilterMode.Bilinear;
+							}
+
+							prop.SetTexture("_ColorTex", colorTexture);
 							//prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
 							//Temp
 							prop.SetTexture("_BackTex", background);
@@ -712,7 +775,27 @@ namespace Effekseer.Internal
 
 							prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
 							prop.SetBuffer("buf_vertex", computeBuffer);
-							prop.SetTexture("_ColorTex", GetCachedTexture(parameter.TexturePtrs0, background));
+
+							var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
+							if (parameter.TextureWrapTypes[0] == 0)
+							{
+								colorTexture.wrapMode = TextureWrapMode.Repeat;
+							}
+							else
+							{
+								colorTexture.wrapMode = TextureWrapMode.Clamp;
+							}
+
+							if (parameter.TextureFilterTypes[0] == 0)
+							{
+								colorTexture.filterMode = FilterMode.Point;
+							}
+							else
+							{
+								colorTexture.filterMode = FilterMode.Bilinear;
+							}
+
+							prop.SetTexture("_ColorTex", colorTexture);
 
 							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 						}

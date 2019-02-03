@@ -96,6 +96,8 @@ namespace Effekseer
 		// A AssetBundle that current loading
 		private EffekseerEffectAsset effectAssetInLoading;
 
+		internal Effekseer.EffekseerRendererType RendererType { get; private set; }
+
 		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
 
 		private static Dictionary<IntPtr, UnityRendererModel> cachedModels = new Dictionary<IntPtr, UnityRendererModel>();
@@ -147,20 +149,25 @@ namespace Effekseer
 			if (Instance != null) {
 				Debug.LogError("[Effekseer] EffekseerSystem instance is already found.");
 			}
+
 			Instance = this;
 			
 			var settings = EffekseerSettings.Instance;
 
-			// サポート外グラフィックスAPIのチェック
+			RendererType = settings.RendererType;
+
+			// Check whether this api is supported
 			switch (SystemInfo.graphicsDeviceType) {
 			case GraphicsDeviceType.Metal:
-	#if UNITY_5_4_OR_NEWER
 			case GraphicsDeviceType.Direct3D12:
-	#elif UNITY_5_5_OR_NEWER
 			case GraphicsDeviceType.Vulkan:
-	#endif
-				Debug.LogError("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported.");
-				return;
+
+				if(RendererType == EffekseerRendererType.Native)
+				{
+					RendererType = EffekseerRendererType.Unity;
+				}
+				Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported. Renderer is changed into Unity.");
+				break;
 			}
 
 			// Zのnearとfarの反転対応
@@ -180,7 +187,7 @@ namespace Effekseer
 	#endif
 
 			// Initialize effekseer library
-			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)settings.RendererType);
+			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)RendererType);
 		}
 
 		/// <summary>
@@ -214,8 +221,7 @@ namespace Effekseer
 				Instance = this;
 			}
 
-			var settings = EffekseerSettings.Instance;
-			if (settings.RendererType == EffekseerRendererType.Native)
+			if (Instance.RendererType == EffekseerRendererType.Native)
 			{
 				renderer = new EffekseerRendererNative();
 			}
@@ -352,7 +358,7 @@ namespace Effekseer
 				if (model.bytes.Length <= bufferSize) {
 					Marshal.Copy(model.bytes, 0, buffer, model.bytes.Length);
 
-					if(EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+					if(Instance.RendererType == EffekseerRendererType.Unity)
 					{
 						var unityRendererModel = new UnityRendererModel();
 						unityRendererModel.Initialize(model.bytes);
@@ -369,7 +375,7 @@ namespace Effekseer
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderUnload))]
 		private static void ModelLoaderUnload(IntPtr path, IntPtr modelPtr) {
-			if (EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
 				cachedModels.Remove(modelPtr);
 			}

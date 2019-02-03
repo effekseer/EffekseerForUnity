@@ -100,8 +100,8 @@ Properties{
 			o.posU = mul(UNITY_MATRIX_P, localBinormal);
 
 			o.pos = mul(UNITY_MATRIX_VP, vPos);
-			o.uv = v.UV;
-			o.color = (float4)v.Color;
+			o.uv.xy = v.UV.xy * buf_uv.zw + buf_uv.xy;
+			o.color = (float4)v.Color * buf_color;
 			return o;
 		}
 

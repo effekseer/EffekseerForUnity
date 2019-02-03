@@ -78,8 +78,8 @@ SubShader{
 		float4 worldPos = mul(buf_matrix, float4(localPos, 1.0f));
 		//float4 worldPos = float4(localPos, 1.0f);
 		o.pos = mul(UNITY_MATRIX_VP, worldPos);
-		o.uv = v.UV;
-		o.color = (float4)v.Color;
+		o.uv.xy = v.UV.xy * buf_uv.zw + buf_uv.xy;
+		o.color = (float4)v.Color * buf_color;
 		return o;
 	}
 
