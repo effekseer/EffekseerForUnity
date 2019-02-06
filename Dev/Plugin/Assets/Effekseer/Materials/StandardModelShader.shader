@@ -65,14 +65,15 @@ SubShader{
 	float4x4 buf_matrix;
 	float4 buf_uv;
 	float4 buf_color;
-	float buf_time;
+	float buf_vertex_offset;
+	float buf_index_offset;
 
 	ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 	{
 		ps_input o;
 		uint v_id = id;
 
-		SimpleVertex v = buf_vertex[buf_index[v_id]];
+		SimpleVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
 		float3 localPos = v.Position;
 		float4 worldPos = mul(buf_matrix, float4(localPos, 1.0f));

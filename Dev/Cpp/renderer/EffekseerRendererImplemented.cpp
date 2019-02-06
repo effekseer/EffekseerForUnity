@@ -643,16 +643,18 @@ namespace EffekseerRendererUnity
 		UnityRenderParameter rp;
 		rp.RenderMode = 1;
 		rp.IsDistortingMode = 0;
+		auto model_ = (Model*)model;
 
 		if (model != nullptr)
 		{
-			auto model_ = (Model*)model;
 			rp.ModelPtr = model_->InternalPtr;
 		}
 		else
 		{
 			rp.ModelPtr = nullptr;
 		}
+
+		if (model == nullptr) return;
 
 		rp.TexturePtrs[0] = m_textures[0];
 		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
@@ -680,6 +682,8 @@ namespace EffekseerRendererUnity
 			modelParameter.VColor[1] = colors[i].G / 255.0f;
 			modelParameter.VColor[2] = colors[i].B / 255.0f;
 			modelParameter.VColor[3] = colors[i].A / 255.0f;
+			modelParameter.Time = times[i] % model_->GetFrameCount();
+
 			*(UnityModelParameter*)(exportedInfoBuffer.data() + offset) = modelParameter;
 		}
 

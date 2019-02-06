@@ -30,12 +30,13 @@ namespace Effekseer.Internal
 
 		public List<int> IndexCounts = new List<int>();
 
+		public List<int> vertexOffsets = new List<int>();
+		public List<int> indexOffsets = new List<int>();
+
+
 		public unsafe void Initialize(byte[] buffer)
 		{
 			int sizeEffekseerVertex = 4 * 15;
-
-			List<int> vertexOffsets = new List<int>();
-			List<int> indexOffsets = new List<int>();
 
 			int version = 0;
 			int offset = 0;
@@ -61,7 +62,7 @@ namespace Effekseer.Internal
 			if (version >= 5)
 			{
 				frameCount = BitConverter.ToInt32(buffer, offset);
-				frameCount += sizeof(int);
+				offset += sizeof(int);
 			}
 			else
 			{
@@ -106,8 +107,6 @@ namespace Effekseer.Internal
 				int vertexCount = BitConverter.ToInt32(buffer, offset);
 				offset += sizeof(int);
 
-				vertex.Clear();
-
 				if(version < 1)
 				{
 					fixed (byte* vs_ = &buffer[offset])
@@ -128,8 +127,6 @@ namespace Effekseer.Internal
 							v.VColor.a = 1.0f;
 							vertex.Add(v);
 						}
-
-						VertexBuffer.SetData(vertex, 0, 0, vertex.Count);
 					}
 				}
 				else
@@ -152,14 +149,10 @@ namespace Effekseer.Internal
 							v.VColor.a = vs[vi].VColor.a / 255.0f;
 							vertex.Add(v);
 						}
-
-						VertexBuffer.SetData(vertex, 0, 0, vertex.Count);
 					}
 				}
 
 				offset += sizeEffekseerVertex * vertexCount;
-
-				index.Clear();
 
 				int faceCount = BitConverter.ToInt32(buffer, offset);
 				offset += sizeof(int);
@@ -181,8 +174,11 @@ namespace Effekseer.Internal
 
 				}
 
-				IndexBuffer.SetData(index, 0, 0, index.Count);
+				
 			}
+
+			VertexBuffer.SetData(vertex, 0, 0, vertex.Count);
+			IndexBuffer.SetData(index, 0, 0, index.Count);
 
 			VertexOffsets = new ComputeBuffer(vertexOffsets.Count, sizeof(int));
 			IndexOffsets = new ComputeBuffer(indexOffsets.Count, sizeof(int));
@@ -663,7 +659,9 @@ namespace Effekseer.Internal
 								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
 								prop.SetVector("buf_uv", modelParameters[mi].UV);
 								prop.SetVector("buf_color", modelParameters[mi].VColor);
-
+								prop.SetFloat("buf_vertex_offset", model.vertexOffsets[modelParameters[mi].Time]);
+								prop.SetFloat("buf_index_offset", model.indexOffsets[modelParameters[mi].Time]);
+								
 								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 								if (parameter.TextureWrapTypes[0] == 0)
 								{
@@ -699,6 +697,10 @@ namespace Effekseer.Internal
 								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
 								prop.SetVector("buf_uv", modelParameters[mi].UV);
 								prop.SetVector("buf_color", modelParameters[mi].VColor);
+
+								int modelTime = modelParameters[mi].Time;
+								prop.SetFloat("buf_vertex_offset", model.vertexOffsets[modelTime]);
+								prop.SetFloat("buf_index_offset", model.indexOffsets[modelTime]);
 
 								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 								if(parameter.TextureWrapTypes[0] == 0)
