@@ -247,5 +247,17 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void SetMaterial(IntPtr material);
 		#endregion
+
+		#region Network
+		[DllImport(pluginName)]
+		public static extern int StartNetwork(int port);
+
+		[DllImport(pluginName)]
+		public static extern void StopNetwork();
+
+		[DllImport(pluginName)]
+		public static extern void UpdateNetwork();
+
+		#endregion
 	}
 }

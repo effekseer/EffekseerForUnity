@@ -49,6 +49,9 @@
     <ClCompile Include="..\renderer\EffekseerRendererTextureLoader.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\EffekseerPluginNetwork.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="..\renderer\EffekseerRendererTextureLoader.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EffekseerPluginNetwork.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

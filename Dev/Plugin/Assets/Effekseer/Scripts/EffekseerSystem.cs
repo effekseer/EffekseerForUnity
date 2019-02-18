@@ -68,10 +68,34 @@ namespace Effekseer
 		{
 			Plugin.EffekseerSetPausedToAllEffects(paused);
 		}
-		
+
+		#region Network
+		/// <summary xml:lang="en">
+		/// start a server to edit effects from remote
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// リモートでエフェクトを編集するためにサーバーを起動する。
+		/// </summary>
+		public static bool StartNetwork()
+		{
+			return Plugin.StartNetwork(EffekseerSettings.Instance.NetworkPort) > 0;
+		}
+
+		/// <summary xml:lang="en">
+		/// stop a server to edit effects from remote
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// リモートでエフェクトを編集するためにサーバーを停止する。
+		/// </summary>
+		public static void StopNetwork()
+		{
+			Plugin.StopNetwork();
+		}
+		#endregion
+
 		#region Internal Implimentation
-		
-		
+
+
 		// Singleton instance
 		public static EffekseerSystem Instance { get; private set; }
 		public static bool IsValid { get { return Instance != null && Instance.enabled; } }

@@ -94,6 +94,26 @@ namespace Effekseer
 		[SerializeField]
 		public Shader standardModelDistortionShader = null;
 
+		#region Network
+		/// <summary xml:lang="en">
+		/// A network port to edit effects from remote
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// リモートでエフェクトを編集するためのネットワークのポート
+		/// </summary>
+		[SerializeField]
+		public short NetworkPort = 0;
+
+		/// <summary xml:lang="en">
+		/// Does run a server automatically to edit effects from remote?
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// リモートでエフェクトを編集するためにサーバーを自動的に起動するか?
+		/// </summary>
+		[SerializeField]
+		public bool DoRunNetworkAutomatically = false;
+		#endregion
+
 		private static EffekseerSettings instance;
 		public static EffekseerSettings Instance {
 			get {

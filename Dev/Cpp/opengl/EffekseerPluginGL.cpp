@@ -18,6 +18,7 @@ namespace EffekseerPlugin
 	IUnityInterfaces*		g_UnityInterfaces = NULL;
 	IUnityGraphics*			g_UnityGraphics = NULL;
 	UnityGfxRenderer		g_UnityRendererType = kUnityGfxRendererOpenGLES20;
+	RendererType g_rendererType = RendererType::Native;
 
 	Effekseer::Manager*				g_EffekseerManager = NULL;
 	EffekseerRendererGL::Renderer*	g_EffekseerRenderer = NULL;
@@ -46,13 +47,31 @@ namespace EffekseerPlugin
 
 		auto maxSquares = g_maxSquares;
 
-		// if it reserve large size buffer, a performance is very low on some Chips
+		if (g_rendererType == RendererType::Native)
+		{
+			// if it reserve large size buffer, a performance is very low on some Chips
 #ifdef __ANDROID__
-		maxSquares = 600;
+			maxSquares = 600;
 #endif
-		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares, openglDeviceType);
-		if (g_EffekseerRenderer == nullptr) {
-			return;
+			g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares, openglDeviceType);
+			if (g_EffekseerRenderer == nullptr) {
+				return;
+			}
+
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+		}
+		else
+		{
+			auto renderer = EffekseerRendererUnity::RendererImplemented::Create();
+			if (renderer->Initialize(g_maxSquares))
+			{
+				g_EffekseerRenderer = renderer;
+			}
+			else
+			{
+				ES_SAFE_RELEASE(renderer);
+			}
 		}
 		
 		g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
@@ -248,9 +267,11 @@ extern "C"
 		return EffekseerRenderBack;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
+		g_rendererType = (RendererType)rendererType;
+
 		if (g_EffekseerManager == nullptr) {
 			return;
 		}

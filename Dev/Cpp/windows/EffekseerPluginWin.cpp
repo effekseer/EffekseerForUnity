@@ -120,6 +120,9 @@ namespace EffekseerPlugin
 			default:
 				return;
 			}
+
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
 		}
 		else if (g_rendererType == RendererType::Unity)
 		{

@@ -8,6 +8,7 @@ static IUnityInterfaces*	g_UnityInterfaces = NULL;
 static IUnityGraphics*		g_Graphics = NULL;
 static UnityGfxRenderer		g_RendererType = kUnityGfxRendererNull;
 static bool g_isRightHandedCoordinate = false;
+RendererType g_rendererType = RendererType::Native;
 
 Effekseer::Manager*				g_EffekseerManager = NULL;
 EffekseerRenderer::Renderer*	g_EffekseerRenderer = NULL;
@@ -70,9 +71,10 @@ extern "C"
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate)
+	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
+		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares);
 		g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());

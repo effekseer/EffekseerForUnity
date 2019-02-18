@@ -2,6 +2,7 @@
 #include "EffekseerPluginTexture.h"
 #include "EffekseerPluginModel.h"
 #include "EffekseerPluginSound.h"
+#include "EffekseerPluginNetwork.h"
 #include "Effekseer.h"
 
 using namespace Effekseer;
@@ -72,7 +73,14 @@ extern "C"
 			return NULL;
 		}
 		
-		return Effect::Create(g_EffekseerManager, path);
+		auto effect = Effect::Create(g_EffekseerManager, path);
+
+		if (Network::GetInstance()->IsRunning())
+		{
+			Network::GetInstance()->Register(effect->GetName(), effect);
+		}
+
+		return effect;
 	}
 	
 	// エフェクトのロード（メモリ指定）
@@ -89,6 +97,12 @@ extern "C"
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReleaseEffect(Effect* effect)
 	{
 		if (effect != NULL) {
+
+			if (Network::GetInstance()->IsRunning())
+			{
+				Network::GetInstance()->Unregister(effect);
+			}
+
 			effect->Release();
 		}
 	}
