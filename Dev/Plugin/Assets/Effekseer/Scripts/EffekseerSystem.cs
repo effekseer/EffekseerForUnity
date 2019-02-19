@@ -212,6 +212,11 @@ namespace Effekseer
 
 			// Initialize effekseer library
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)RendererType);
+
+			if (EffekseerSettings.Instance.DoRunNetworkAutomatically)
+			{
+				StartNetwork();
+			}
 		}
 
 		/// <summary>

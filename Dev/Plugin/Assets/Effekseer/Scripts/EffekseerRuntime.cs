@@ -57,6 +57,9 @@ namespace Effekseer
 		}
 		
 		void LateUpdate() {
+
+			Plugin.UpdateNetwork();
+
 			system.Update(Time.deltaTime);
 		}
 	}
