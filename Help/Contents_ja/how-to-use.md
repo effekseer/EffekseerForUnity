@@ -121,3 +121,11 @@ IEnumerator Load() {
 
 全てのエフェクトのリリースが終わる前にAssetBundleのリリースを行わないでください。
 
+## ネットワーク機能
+
+ネットワーク経由でUnityで再生しているエフェクトを外部からアプリケーションの起動中に編集することができます。
+
+Effekseer SettingsにEffekseerから接続するためのポートを指定します。DoStartNetworkAutomaticallyをOnにするか、EffekseerSystemのStartNetworkを実行します。
+そうすると、Effekseerからエフェクトを編集できるようになります。他のコンピューターからエフェクトを編集するためにはファイヤーウォールの設定でポート開放する必要があります。
+
+![](../img/network_ui.png)
