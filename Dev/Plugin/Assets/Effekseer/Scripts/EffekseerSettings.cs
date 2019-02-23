@@ -102,7 +102,7 @@ namespace Effekseer
 		/// リモートでエフェクトを編集するためのネットワークのポート
 		/// </summary>
 		[SerializeField]
-		public short NetworkPort = 0;
+		public uint NetworkPort = 60000;
 
 		/// <summary xml:lang="en">
 		/// Does run a server automatically to edit effects from remote?
@@ -111,7 +111,7 @@ namespace Effekseer
 		/// リモートでエフェクトを編集するためにサーバーを自動的に起動するか?
 		/// </summary>
 		[SerializeField]
-		public bool DoRunNetworkAutomatically = false;
+		public bool DoStartNetworkAutomatically = false;
 		#endregion
 
 		private static EffekseerSettings instance;

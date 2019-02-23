@@ -76,7 +76,7 @@ namespace Effekseer
 		public static extern IntPtr EffekseerLoadEffect(IntPtr path);
 
 		[DllImport(pluginName)]
-		public static extern IntPtr EffekseerLoadEffectOnMemory(byte[] data, int size);
+		public static extern IntPtr EffekseerLoadEffectOnMemory(byte[] data, int size, IntPtr path);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerReleaseEffect(IntPtr effect);

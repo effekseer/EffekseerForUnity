@@ -78,7 +78,7 @@ namespace Effekseer
 		/// </summary>
 		public static bool StartNetwork()
 		{
-			return Plugin.StartNetwork(EffekseerSettings.Instance.NetworkPort) > 0;
+			return Plugin.StartNetwork((int)EffekseerSettings.Instance.NetworkPort) > 0;
 		}
 
 		/// <summary xml:lang="en">
@@ -148,9 +148,11 @@ namespace Effekseer
 			IntPtr nativeEffect;
 			if (!nativeEffects.TryGetValue(id, out nativeEffect)) {
 				byte[] bytes = effectAsset.efkBytes;
-				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length);
+				var namePtr = Marshal.StringToCoTaskMemUni(effectAsset.name);
+				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length, namePtr);
 				nativeEffects.Add(id, nativeEffect);
 				loadedEffects.Add(effectAsset);
+				Marshal.FreeCoTaskMem(namePtr);
 			}
 			effectAssetInLoading = null;
 		}
@@ -213,7 +215,7 @@ namespace Effekseer
 			// Initialize effekseer library
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)RendererType);
 
-			if (EffekseerSettings.Instance.DoRunNetworkAutomatically)
+			if (EffekseerSettings.Instance.DoStartNetworkAutomatically)
 			{
 				StartNetwork();
 			}
@@ -223,6 +225,9 @@ namespace Effekseer
 		/// Don't touch it!!
 		/// </summary>
 		public void TermPlugin() {
+
+			StopNetwork();
+
 			//Debug.Log("EffekseerSystem.TermPlugin");
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
 				ReleaseEffect(effectAsset);

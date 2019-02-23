@@ -47,7 +47,7 @@ namespace EffekseerPlugin
 	{
 		if (server != nullptr && g_EffekseerManager != nullptr)
 		{
-			server->Update(&g_EffekseerManager, 1);
+			server->Update(nullptr, 0, Effekseer::ReloadingThreadType::Render);
 		}
 	}
 

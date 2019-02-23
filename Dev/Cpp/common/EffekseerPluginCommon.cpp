@@ -84,13 +84,25 @@ extern "C"
 	}
 	
 	// エフェクトのロード（メモリ指定）
-	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data, int32_t size)
+	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data, int32_t size, const EFK_CHAR* path)
 	{
 		if (g_EffekseerManager == NULL) {
 			return NULL;
 		}
 		
-		return Effect::Create(g_EffekseerManager, data, size);
+		auto effect = Effect::Create(g_EffekseerManager, data, size);
+		
+		if (effect != nullptr)
+		{
+			effect->SetName(path);
+
+			if (Network::GetInstance()->IsRunning())
+			{
+				Network::GetInstance()->Register(effect->GetName(), effect);
+			}
+		}
+		
+		return effect;
 	}
 	
 	// エフェクトのアンロード
