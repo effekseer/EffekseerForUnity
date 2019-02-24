@@ -28,6 +28,9 @@
     <ClCompile Include="..\Device\EffekseerPluginDX11.cpp">
       <Filter>Device</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\EffekseerPluginNetwork.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -70,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="..\Device\EffekseerPluginDX11.h">
       <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EffekseerPluginNetwork.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

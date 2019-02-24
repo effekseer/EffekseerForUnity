@@ -2,6 +2,7 @@
 #include "EffekseerPluginTexture.h"
 #include "EffekseerPluginModel.h"
 #include "EffekseerPluginSound.h"
+#include "EffekseerPluginNetwork.h"
 #include "Effekseer.h"
 
 using namespace Effekseer;
@@ -72,23 +73,48 @@ extern "C"
 			return NULL;
 		}
 		
-		return Effect::Create(g_EffekseerManager, path);
+		auto effect = Effect::Create(g_EffekseerManager, path);
+
+		if (Network::GetInstance()->IsRunning())
+		{
+			Network::GetInstance()->Register(effect->GetName(), effect);
+		}
+
+		return effect;
 	}
 	
 	// エフェクトのロード（メモリ指定）
-	Effect* UNITY_API EffekseerLoadEffectOnMemory(void* data, int32_t size)
+	Effect* UNITY_API EffekseerLoadEffectOnMemory(void* data, int32_t size, const EFK_CHAR* path)
 	{
 		if (g_EffekseerManager == NULL) {
 			return NULL;
 		}
 		
-		return Effect::Create(g_EffekseerManager, data, size);
+		auto effect = Effect::Create(g_EffekseerManager, data, size);
+
+		if (effect != nullptr)
+		{
+			effect->SetName(path);
+
+			if (Network::GetInstance()->IsRunning())
+			{
+				Network::GetInstance()->Register(effect->GetName(), effect);
+			}
+		}
+
+		return effect;
 	}
 	
 	// エフェクトのアンロード
 	void UNITY_API EffekseerReleaseEffect(Effect* effect)
 	{
 		if (effect != NULL) {
+
+			if (Network::GetInstance()->IsRunning())
+			{
+				Network::GetInstance()->Unregister(effect);
+			}
+
 			effect->Release();
 		}
 	}

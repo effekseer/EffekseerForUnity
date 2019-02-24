@@ -185,8 +185,8 @@ namespace Effekseer
 		public static extern IntPtr EffekseerLoadEffect(IntPtr path);
 		
 		[DllImport(pluginName)]
-		public static extern IntPtr EffekseerLoadEffectOnMemory(IntPtr data, int size);
-	
+		public static extern IntPtr EffekseerLoadEffectOnMemory(IntPtr data, int size, IntPtr path);
+
 		[DllImport(pluginName)]
 		public static extern void EffekseerReleaseEffect(IntPtr effect);
 	
@@ -279,6 +279,18 @@ namespace Effekseer
 		public delegate void EffekseerSoundPlayerPauseTag(IntPtr tag, bool pause);
 		public delegate bool EffekseerSoundPlayerCheckPlayingTag(IntPtr tag);
 		public delegate void EffekseerSoundPlayerStopAll();
+
+		#region Network
+		[DllImport(pluginName)]
+		public static extern int StartNetwork(int port);
+
+		[DllImport(pluginName)]
+		public static extern void StopNetwork();
+
+		[DllImport(pluginName)]
+		public static extern void UpdateNetwork();
+
+		#endregion
 	}
 
 	public class SoundInstance : MonoBehaviour {

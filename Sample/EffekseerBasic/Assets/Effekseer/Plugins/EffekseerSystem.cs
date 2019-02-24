@@ -75,7 +75,26 @@ public class EffekseerSystem : MonoBehaviour
 	/// エフェクトの描画するタイミング
 	/// </summary>
 	const CameraEvent cameraEvent	= CameraEvent.AfterForwardAlpha;
-	
+
+	#region Network
+	/// <summary xml:lang="en">
+	/// A network port to edit effects from remote
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// リモートでエフェクトを編集するためのネットワークのポート
+	/// </summary>
+	public uint NetworkPort = 60000;
+
+	/// <summary xml:lang="en">
+	/// Does run a server automatically to edit effects from remote?
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// リモートでエフェクトを編集するためにサーバーを自動的に起動するか?
+	/// </summary>
+	public bool DoStartNetworkAutomatically = false;
+	#endregion
+
+
 	/// <summary xml:lang="en">
 	/// Plays the effect.
 	/// </summary>
@@ -161,8 +180,32 @@ public class EffekseerSystem : MonoBehaviour
 		Instance._ReleaseEffect(name);
 	}
 
+	#region Network
+	/// <summary xml:lang="en">
+	/// start a server to edit effects from remote
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// リモートでエフェクトを編集するためにサーバーを起動する。
+	/// </summary>
+	public static bool StartNetwork()
+	{
+		return Plugin.StartNetwork((int)Instance.NetworkPort) > 0;
+	}
+
+	/// <summary xml:lang="en">
+	/// stop a server to edit effects from remote
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// リモートでエフェクトを編集するためにサーバーを停止する。
+	/// </summary>
+	public static void StopNetwork()
+	{
+		Plugin.StopNetwork();
+	}
+	#endregion
+
 	#region Internal Implimentation
-	
+
 	// Singleton instance
 	private static EffekseerSystem instance = null;
 	public static EffekseerSystem Instance
@@ -303,9 +346,10 @@ public class EffekseerSystem : MonoBehaviour
 		GCHandle ghc = GCHandle.Alloc(bytes, GCHandleType.Pinned);
 
 		currentLoadingEffectPath = name;
-		IntPtr effect = Plugin.EffekseerLoadEffectOnMemory(ghc.AddrOfPinnedObject(), bytes.Length);
+		var namePtr = Marshal.StringToCoTaskMemUni(name);
+		IntPtr effect = Plugin.EffekseerLoadEffectOnMemory(ghc.AddrOfPinnedObject(), bytes.Length, namePtr);
 		currentLoadingEffectPath = string.Empty;
-
+		Marshal.FreeCoTaskMem(namePtr);
 		ghc.Free();
 		this.assetBundle = null;
 		
@@ -386,12 +430,19 @@ public class EffekseerSystem : MonoBehaviour
 		}
 		
 		Camera.onPreCull += OnPreCullEvent;
+
+		if(Instance.DoStartNetworkAutomatically)
+		{
+			StartNetwork();
+		}
 	}
 
 	internal void Term() {
 		if (--this.initedCount > 0) {
 			return;
 		}
+
+		StopNetwork();
 		
 		Camera.onPreCull -= OnPreCullEvent;
 
@@ -460,6 +511,9 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	void LateUpdate() {
+
+		Plugin.UpdateNetwork();
+
 		float deltaFrames = Time.deltaTime * 60.0f;
 		int updateCount = Mathf.Max(1, Mathf.RoundToInt(deltaFrames));
 		for (int i = 0; i < updateCount; i++) {

@@ -39,3 +39,7 @@ EXPORTS
   EffekseerSetModelLoaderEvent
   EffekseerSetSoundLoaderEvent
   EffekseerSetSoundPlayerEvent
+
+  StartNetwork
+  StopNetwork
+  UpdateNetwork
