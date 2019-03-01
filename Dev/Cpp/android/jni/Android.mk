@@ -14,6 +14,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginCommon.cpp \
+	$(LOCAL_PATH)/../common/EffekseerPluginNetwork.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginModel.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginSound.cpp \
 	$(LOCAL_PATH)/../opengl/EffekseerPluginGL.cpp \
@@ -60,12 +61,14 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.IndexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer_Impl.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RenderStateBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RibbonRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
