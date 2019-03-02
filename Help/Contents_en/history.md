@@ -1,7 +1,10 @@
 ﻿# Release notes
 
+## 1.43
+- Added network functions
+
 ## 1.41b
--Fixed a bug that 3D model is not shown in Mac
+- Fixed a bug that 3D model is not shown in Mac
 
 ## 1.41
 - Fixed a bug that effects can not be played if .. is included in the file path

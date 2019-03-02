@@ -120,6 +120,10 @@ Please do not release AssetBundle before all effects are released.
 
 You can edit the playing effect in Unity via the network from the outside when application is running.
 
+![](../img/network.png)
+
 You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall. 
 
 ![](../img/network_ui.png)
+
+As a limitation, changes to blends or changes to unused images are not applied.

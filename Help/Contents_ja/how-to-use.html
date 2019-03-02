@@ -188,6 +188,14 @@ GameObjectに連動したエフェクトの再生を行うことができます�
 <p>通常のロードと同じようにReleaseEffect()してください。</p>
 <p>全てのエフェクトのリリースが終わる前にAssetBundleのリリースを行わないでください。</p>
 </section>
+<section class="level2">
+<h2>ネットワーク機能</h2>
+<p>ネットワーク経由でUnityで再生しているエフェクトを外部からアプリケーションの起動中に編集することができます。</p>
+<p><img src="../img/network.png" /></p>
+<p>Effekseer SettingsにEffekseerから接続するためのポートを指定します。DoStartNetworkAutomaticallyをOnにするか、EffekseerSystemのStartNetworkを実行します。 そうすると、Effekseerからエフェクトを編集できるようになります。他のコンピューターからエフェクトを編集するためにはファイヤーウォールの設定でポート開放する必要があります。</p>
+<p><img src="../img/network_ui.png" /></p>
+<p>制限として、ブレンドの変更や使用していない画像への変更は適用されません。</p>
+</section>
 </section>
 </body>
 </html>

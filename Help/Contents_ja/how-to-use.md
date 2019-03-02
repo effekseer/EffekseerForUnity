@@ -125,7 +125,11 @@ IEnumerator Load() {
 
 ネットワーク経由でUnityで再生しているエフェクトを外部からアプリケーションの起動中に編集することができます。
 
+![](../img/network.png)
+
 Effekseer SettingsにEffekseerから接続するためのポートを指定します。DoStartNetworkAutomaticallyをOnにするか、EffekseerSystemのStartNetworkを実行します。
 そうすると、Effekseerからエフェクトを編集できるようになります。他のコンピューターからエフェクトを編集するためにはファイヤーウォールの設定でポート開放する必要があります。
 
 ![](../img/network_ui.png)
+
+制限として、ブレンドの変更や使用していない画像への変更は適用されません。

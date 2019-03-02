@@ -184,6 +184,14 @@ If you use asset bundle, you can not auto load.</p>
 <p>Please ReleaseEffect() like loading from Resources.</p>
 <p>Please do not release AssetBundle before all effects are released.</p>
 </section>
+<section class="level2">
+<h2>Network</h2>
+<p>You can edit the playing effect in Unity via the network from the outside when application is running.</p>
+<p><img src="../img/network.png" /></p>
+<p>You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall.</p>
+<p><img src="../img/network_ui.png" /></p>
+<p>As a limitation, changes to blends or changes to unused images are not applied.</p>
+</section>
 </section>
 </body>
 </html>
