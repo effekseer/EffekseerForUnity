@@ -9,12 +9,46 @@
 
 #include "EffekseerPluginLoaderGL.h"
 
+#include "../common/EffekseerPluginTexture.h"
+#include "../common/EffekseerPluginModel.h"
+
+#include "../common/IUnityGraphics.h"
+#include "../common/EffekseerPluginTexture.h"
+#include "../common/EffekseerPluginModel.h"
+
+#include "../renderer/EffekseerRendererTextureLoader.h"
+#include "../renderer/EffekseerRendererModelLoader.h"
+
 using namespace Effekseer;
 
 namespace EffekseerPlugin
 {
 	extern UnityGfxRenderer					g_UnityRendererType;
+	extern EffekseerRenderer::Renderer*		g_EffekseerRenderer;
 	extern RendererType g_rendererType;
+
+	class TextureLoaderGL : public TextureLoader
+	{
+		struct TextureResource
+		{
+			int referenceCount = 1;
+			Effekseer::TextureData texture = {};
+		};
+
+		std::map<std::u16string, TextureResource> resources;
+		std::map<void*, void*> textureData2NativePtr;
+
+	public:
+		TextureLoaderGL(
+			TextureLoaderLoad load,
+			TextureLoaderUnload unload);
+
+		virtual ~TextureLoaderGL();
+
+		virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
+
+		virtual void Unload(Effekseer::TextureData* source);
+	};
 
 	bool IsPowerOfTwo(uint32_t x) {
 		return (x & (x - 1)) == 0;
@@ -105,21 +139,35 @@ namespace EffekseerPlugin
 #ifdef _WIN32
 
 #else
-	TextureLoader* TextureLoader::Create(
+	Effekseer::TextureLoader* TextureLoader::Create(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
 	{
-		return new TextureLoaderGL( load, unload );
+		if (g_rendererType == RendererType::Native)
+		{
+			return new TextureLoaderGL(load, unload);
+		}
+		else
+		{
+			return new EffekseerRendererUnity::TextureLoader(load, unload);
+		}
 	}
-	
-	ModelLoader* ModelLoader::Create(
+
+	Effekseer::ModelLoader* ModelLoader::Create(
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload)
 	{
-		auto loader = new ModelLoader( load, unload );
-		auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
-		loader->SetInternalLoader( internalLoader );
-		return loader;
+		if (g_rendererType == RendererType::Native)
+		{
+			auto loader = new ModelLoader(load, unload);
+			auto internalLoader = g_EffekseerRenderer->CreateModelLoader(loader->GetFileInterface());
+			loader->SetInternalLoader(internalLoader);
+			return loader;
+		}
+		else
+		{
+			return new EffekseerRendererUnity::ModelLoader(load, unload);
+		}
 	}
 #endif
 };

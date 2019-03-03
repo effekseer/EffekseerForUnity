@@ -146,6 +146,9 @@ namespace Effekseer
 				asset = CreateInstance<EffekseerSettings>();
 				asset.standardShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardShader.shader");
 				asset.standardDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardDistortionShader.shader");
+				asset.standardModelShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelShader.shader");
+				asset.standardModelDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelDistortionShader.shader");
+
 				AssetDatabase.CreateAsset(asset, assetPath);
 				AssetDatabase.Refresh();
 			}

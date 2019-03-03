@@ -182,18 +182,34 @@ namespace Effekseer
 
 			RendererType = settings.RendererType;
 
-			// Check whether this api is supported
-			switch (SystemInfo.graphicsDeviceType) {
-			case GraphicsDeviceType.Metal:
-			case GraphicsDeviceType.Direct3D12:
-			case GraphicsDeviceType.Vulkan:
-
-				if(RendererType == EffekseerRendererType.Native)
+			if(RendererType == EffekseerRendererType.Unity)
+			{
+				if(SystemInfo.supportsComputeShaders)
 				{
-					RendererType = EffekseerRendererType.Unity;
+					// OK
 				}
-				Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported. Renderer is changed into Unity.");
-				break;
+				else
+				{
+					Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported. Renderer is changed into Native.");
+					RendererType = EffekseerRendererType.Native;
+				}
+			}
+			else
+			{
+				// Check whether this api is supported
+				switch (SystemInfo.graphicsDeviceType)
+				{
+					case GraphicsDeviceType.Metal:
+					case GraphicsDeviceType.Direct3D12:
+					case GraphicsDeviceType.Vulkan:
+
+						if (RendererType == EffekseerRendererType.Native)
+						{
+							RendererType = EffekseerRendererType.Unity;
+						}
+						Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" is not supported. Renderer is changed into Unity.");
+						break;
+				}
 			}
 
 			// Zのnearとfarの反転対応

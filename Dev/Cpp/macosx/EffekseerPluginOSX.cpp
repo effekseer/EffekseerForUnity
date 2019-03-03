@@ -13,10 +13,10 @@ RendererType g_rendererType = RendererType::Native;
 Effekseer::Manager*				g_EffekseerManager = NULL;
 EffekseerRenderer::Renderer*	g_EffekseerRenderer = NULL;
 
-static void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType);
+UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType);
 
 // Unity plugin load event
-extern "C" void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
 {
 	g_UnityInterfaces = unityInterfaces;
 	g_Graphics = unityInterfaces->Get<IUnityGraphics>();
@@ -29,12 +29,12 @@ extern "C" void UNITY_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
 }
 
 // Unity plugin unload event
-extern "C" void UNITY_API UnityPluginUnload()
+extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
 {
 	g_Graphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 }
 
-static void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
+UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
 {
 	switch (eventType) {
 	case kUnityGfxDeviceEventInitialize:
@@ -52,7 +52,7 @@ static void UNITY_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
 
 extern "C"
 {
-	void UNITY_API EffekseerRender(int renderId)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRender(int renderId)
 	{
 		if (g_EffekseerManager == NULL) return;
 		if (g_EffekseerRenderer == NULL) return;
@@ -66,12 +66,12 @@ extern "C"
 	}
 	
 	
-	UnityRenderingEvent UNITY_API EffekseerGetRenderFunc(int renderId)
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderFunc(int renderId)
 	{
 		return EffekseerRender;
 	}
 
-	void UNITY_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
 	{
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 		g_rendererType = (RendererType)rendererType;
@@ -93,7 +93,7 @@ extern "C"
 		}
 	}
 
-	void UNITY_API EffekseerTerm()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerTerm()
 	{
 		if (g_EffekseerManager != NULL) {
 			g_EffekseerManager->Destroy();

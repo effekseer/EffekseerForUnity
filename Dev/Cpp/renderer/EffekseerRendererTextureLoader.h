@@ -3,6 +3,7 @@
 
 #include <Effekseer.h>
 #include <map>
+#include <string>
 #include "../common/IUnityInterface.h"
 #include "../common/EffekseerPluginTexture.h"
 

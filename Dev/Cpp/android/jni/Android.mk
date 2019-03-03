@@ -10,14 +10,23 @@ LOCAL_LDLIBS    := -landroid -lEGL -lGLESv2
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer \
+	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon \
 	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL
 
 LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginCommon.cpp \
+	$(LOCAL_PATH)/../common/EffekseerPluginNetwork.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginModel.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginSound.cpp \
 	$(LOCAL_PATH)/../opengl/EffekseerPluginGL.cpp \
-	$(LOCAL_PATH)/../opengl/EffekseerPluginLoaderGL.cpp
+	$(LOCAL_PATH)/../opengl/EffekseerPluginLoaderGL.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererImplemented.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererIndexBuffer.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererModelLoader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererRenderState.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererShader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererTextureLoader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererVertexBuffer.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
@@ -60,12 +69,14 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.IndexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer_Impl.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RenderStateBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RibbonRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
