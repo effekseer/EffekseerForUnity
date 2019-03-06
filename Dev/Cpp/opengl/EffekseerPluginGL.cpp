@@ -94,7 +94,14 @@ namespace EffekseerPlugin
 	void SetBackGroundTexture(void *backgroundTexture)
 	{
 		// 背景テクスチャをセット
-		((EffekseerRendererGL::Renderer*)g_EffekseerRenderer)->SetBackground((GLuint)(uintptr_t)backgroundTexture);
+		if (g_rendererType == RendererType::Native)
+		{
+			((EffekseerRendererGL::Renderer*)g_EffekseerRenderer)->SetBackground((GLuint)(uintptr_t)backgroundTexture);
+		}
+		else
+		{
+			((EffekseerRendererUnity::RendererImplemented*)g_EffekseerRenderer)->SetBackground(backgroundTexture);
+		}
 	}
 	
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
