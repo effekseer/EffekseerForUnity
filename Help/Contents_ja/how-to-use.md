@@ -79,6 +79,8 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 ネットワーク経由でUnityで再生しているエフェクトを外部からアプリケーションの起動中に編集することができます。
 
+![](../img/network.png)
+
 Effekseer SettingsにEffekseerから接続するためのポートを指定します。DoStartNetworkAutomaticallyをOnにするか、EffekseerSystemのStartNetworkを実行します。
 そうすると、Effekseerからエフェクトを編集できるようになります。他のコンピューターからエフェクトを編集するためにはファイヤーウォールの設定でポート開放する必要があります。
 

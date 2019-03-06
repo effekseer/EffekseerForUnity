@@ -94,9 +94,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="resource_files" class="level2">
 <h2>About resource files</h2>
-<p>Place the output effect (<em>.efk), texture, sound in Resources/Effekseer/.<br />
-When importing the </em>.efk file, it is renamed *.bytes.<br />
-If it does not work, please try Reimport.</p>
+<p>Place the output effect (<em>.efk), texture, sound in Unity project.<br />
+When importing the </em>.efk file, EffectAsset is generated in addition of *.efk file.</p>
 <p><img src="../img/unity_resource.png" /></p>
 </section>
 <section id="emitter_playback" class="level2">
@@ -110,13 +109,19 @@ In that case will play the effect linked to GameObject.</p>
 <section class="level3">
 <h3>Properties</h3>
 <ul>
-<li>Effect Name: Specifies the effect name.<br>(The effect name is a character string excluding the extension from the file name (*.efk))</li>
+<li>Effect Asset: Specifies the effect asset which is imported</li>
 <li>Play On Start: Plays on Start() when it is checked.</li>
-<li>Loop: When playback ends, it will automatically request playback.</li>
+<li>IsLooping: When playback ends, it will automatically request playback.</li>
 </ul>
+<p><img src="../img/unity_emitter.png" /></p>
 </section>
 <section class="level3">
-<h3>Notes</h3>
+<h3>Preview</h3>
+<p>A controller for preview is shown in Scene View when EffekseerEmitter is specified. Effects can be previewed in Game View without playing.</p>
+<p><img src="../img/unity_emitter_component_scene_view.png" /></p>
+</section>
+<section class="level3">
+<h3>Note</h3>
 <p>It is suitable for effects that follow the installed effects and characters.</p>
 </section>
 </section>
@@ -128,11 +133,13 @@ In that case will play the effect linked to GameObject.</p>
 <p>The sample code is as follows.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="dt">void</span> <span class="fu">Start</span>()</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">    <span class="co">// Plays effect in transform.position</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">    EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(<span class="st">&quot;Laser01&quot;</span>, transform.<span class="fu">position</span>);</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="co">// Sets the rotation of the effect</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">    handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7">}</a></code></pre></div>
+<a class="sourceLine" id="cb1-3" data-line-number="3">    <span class="co">// get an effect</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">    EffekseerEffectAsset effect = Resources.<span class="fu">Load</span>&lt;EffekseerEffectAsset&gt; (<span class="st">&quot;Laser01&quot;</span>);</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="co">// Plays effect in transform.position</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">    EffekseerHandle handle = EffekseerSystem.<span class="fu">PlayEffect</span>(effect, transform.<span class="fu">position</span>);</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">    <span class="co">// Sets the rotation of the effect</span></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">    handle.<span class="fu">SetRotation</span>(transform.<span class="fu">rotation</span>);</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">}</a></code></pre></div>
 </section>
 <section class="level3">
 <h3>Note</h3>
@@ -140,49 +147,11 @@ In that case will play the effect linked to GameObject.</p>
 <p>Suitable for simple use, such as hit effects and explosion effects.</p>
 </section>
 </section>
-<section id="preload" class="level2">
-<h2>Preload from Resources</h2>
-<section class="level3">
-<h3>Automatic loading</h3>
-<p>The resource file necessary for the effect is loaded in the following time.</p>
-<ul>
-<li>EffekseerEmitter.Start()</li>
-<li>EffekseerSystem.PlayEffect()</li>
-</ul>
-<p>In both cases, only resources of the specified effect are loaded.<br />
-The loaded effect will be retained and will not be loaded the next time it is played.</p>
-<p>Automatic loading is easy, but depending on the moment of loading, the game may fall.</p>
-</section>
-<section class="level3">
-<h3>Manual preloading</h3>
-<p>By LoadEffect() beforehand, you can prevent frame dropping.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="dt">void</span> <span class="fu">Start</span>()</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="co">// Loads effect &quot;Laser01.efk&quot;</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>);</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">}</a></code></pre></div>
-<p>Loaded effects are automatically released at EffekseerSystem’s OnDestroy().<br />
-It is also possible to explicitly release an unnecessary effect with ReleaseEffect().</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="dt">void</span> <span class="fu">OnDestroy</span>()</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="co">// Releases effect &quot;Laser01.efk&quot;</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">    EffekseerSystem.<span class="fu">ReleaseEffect</span>(<span class="st">&quot;Laser01&quot;</span>);</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">}</a></code></pre></div>
-</section>
-</section>
-<section id="assetbundle" class="level2">
-<h2>Preload from AssetBundle</h2>
-<p>You can load effect resources from asset bundles.<br />
-If you use asset bundle, you can not auto load.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cs"><code class="sourceCode cs"><a class="sourceLine" id="cb4-1" data-line-number="1">IEnumerator <span class="fu">Load</span>() {</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="dt">string</span> url = <span class="st">&quot;file:///&quot;</span> + Application.<span class="fu">streamingAssetsPath</span> + <span class="st">&quot;/effects&quot;</span>;</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">    WWW www = <span class="kw">new</span> <span class="fu">WWW</span>(url);</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">    <span class="kw">yield</span> <span class="kw">return</span> www;</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">    <span class="dt">var</span> assetBundle = www.<span class="fu">assetBundle</span>;</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">    EffekseerSystem.<span class="fu">LoadEffect</span>(<span class="st">&quot;Laser01&quot;</span>, assetBundle);</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">}</a></code></pre></div>
-<p>Please ReleaseEffect() like loading from Resources.</p>
-<p>Please do not release AssetBundle before all effects are released.</p>
+<section class="level2">
+<h2>Network</h2>
+<p>You can edit the playing effect in Unity via the network from the outside when application is running.</p>
+<p>You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall.</p>
+<p><img src="../img/network_ui.png" /></p>
 </section>
 </section>
 </body>
