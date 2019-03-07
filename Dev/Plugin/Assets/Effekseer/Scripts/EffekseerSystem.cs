@@ -377,8 +377,8 @@ namespace Effekseer
 				}
 
 				var ptr = texture.GetNativeTexturePtr();
-				
-				if(EffekseerSettings.Instance.RendererType == EffekseerRendererType.Unity)
+
+				if (Instance.RendererType == EffekseerRendererType.Unity)
 				{
 					if (!cachedTextures.ContainsKey(ptr)) {
 						cachedTextures.Add(ptr, texture);
