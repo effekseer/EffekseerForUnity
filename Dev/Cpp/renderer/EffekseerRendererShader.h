@@ -5,33 +5,27 @@
 
 namespace EffekseerRendererUnity
 {
-	/**
-		@brief	Shader
-	*/
-	class Shader
+/**
+	@brief	Shader
+*/
+class Shader
+{
+private:
+	std::vector<uint8_t> vertexConstantBuffer;
+	std::vector<uint8_t> pixelConstantBuffer;
+
+public:
+	Shader();
+
+	virtual ~Shader();
+
+	void* GetVertexConstantBuffer() { return vertexConstantBuffer.data(); }
+
+	void* GetPixelConstantBuffer() { return pixelConstantBuffer.data(); }
+
+	void SetConstantBuffer()
 	{
-	private:
-		std::vector<uint8_t>	vertexConstantBuffer;
-		std::vector<uint8_t>	pixelConstantBuffer;
-
-	public:
-		Shader();
-
-		virtual ~Shader();
-
-		void* GetVertexConstantBuffer()
-		{
-			return vertexConstantBuffer.data();
-		}
-
-		void* GetPixelConstantBuffer()
-		{
-			return pixelConstantBuffer.data();
-		}
-
-		void SetConstantBuffer()
-		{
-			// TODO
-		}
-	};
-}
+		// TODO
+	}
+};
+} // namespace EffekseerRendererUnity
