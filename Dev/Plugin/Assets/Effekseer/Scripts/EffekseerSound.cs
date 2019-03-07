@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -86,7 +86,7 @@ namespace Effekseer.Internal
 		{
 			if (Application.isPlaying) {
 				var settings = EffekseerSettings.Instance;
-				// ƒTƒEƒ“ƒhƒCƒ“ƒXƒ^ƒ“ƒX‚ğì‚é
+				// ã‚µã‚¦ãƒ³ãƒ‰ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œã‚‹
 				for (int i = 0; i < settings.soundInstances; i++) {
 					GameObject go = new GameObject();
 					go.name = "SoundInstance #" + i;

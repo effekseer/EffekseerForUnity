@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -496,7 +496,7 @@ namespace Effekseer.Internal
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)
 			{
-				// ƒV[ƒ“ƒrƒ…[‚ÌƒJƒƒ‰‚Íƒ`ƒFƒbƒN
+				// ã‚·ãƒ¼ãƒ³ãƒ“ãƒ¥ãƒ¼ã®ã‚«ãƒ¡ãƒ©ã¯ãƒã‚§ãƒƒã‚¯
 				if (settings.drawInSceneView == false)
 				{
 					return;
@@ -505,12 +505,12 @@ namespace Effekseer.Internal
 #endif
 			RenderPath path;
 
-			// ƒJƒŠƒ“ƒOƒ}ƒXƒN‚ğƒ`ƒFƒbƒN
+			// ã‚«ãƒªãƒ³ã‚°ãƒã‚¹ã‚¯ã‚’ãƒã‚§ãƒƒã‚¯
 			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
-					// ƒŒƒ“ƒ_[ƒpƒX‚ª‘¶İ‚·‚ê‚ÎƒRƒ}ƒ“ƒhƒoƒbƒtƒ@‚ğ‰ğœ
+					// ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ãŒå­˜åœ¨ã™ã‚Œã°ã‚³ãƒãƒ³ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚’è§£é™¤
 					path = renderPaths[camera];
 					path.Dispose();
 					renderPaths.Remove(camera);
@@ -520,12 +520,12 @@ namespace Effekseer.Internal
 
 			if (renderPaths.ContainsKey(camera))
 			{
-				// ƒŒƒ“ƒ_[ƒpƒX‚ª—L‚ê‚Îg‚¤
+				// ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ãŒæœ‰ã‚Œã°ä½¿ã†
 				path = renderPaths[camera];
 			}
 			else
 			{
-				// –³‚¯‚ê‚ÎƒŒƒ“ƒ_[ƒpƒX‚ğì¬
+				// ç„¡ã‘ã‚Œã°ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ã‚’ä½œæˆ
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
 				path.Init(settings.enableDistortion);
 				renderPaths.Add(camera, path);
@@ -537,13 +537,13 @@ namespace Effekseer.Internal
 				path.Init(settings.enableDistortion);
 			}
 
-			// ˜c‚İƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+			// æ­ªã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 			if (path.renderTexture)
 			{
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
 
-			// ƒXƒeƒŒƒIƒŒƒ“ƒ_ƒŠƒ“ƒO(VR)—p‚É¶‰E–Ú‚Ìs—ñ‚ğİ’è
+			// ã‚¹ãƒ†ãƒ¬ã‚ªãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°(VR)ç”¨ã«å·¦å³ç›®ã®è¡Œåˆ—ã‚’è¨­å®š
 			if (camera.stereoEnabled)
 			{
 				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
@@ -554,7 +554,7 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				// ƒrƒ…[ŠÖ˜A‚Ìs—ñ‚ğXV
+				// ãƒ“ãƒ¥ãƒ¼é–¢é€£ã®è¡Œåˆ—ã‚’æ›´æ–°
 				Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 					GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
 				Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
@@ -915,7 +915,7 @@ namespace Effekseer.Internal
 
 		public void CleanUp()
 		{
-			// ƒŒƒ“ƒ_[ƒpƒX‚Ì‘S”jŠü
+			// ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ã®å…¨ç ´æ£„
 			foreach (var pair in renderPaths)
 			{
 				pair.Value.Dispose();
@@ -944,7 +944,7 @@ namespace Effekseer.Internal
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)
 			{
-				// ƒV[ƒ“ƒrƒ…[‚ÌƒJƒƒ‰‚Íƒ`ƒFƒbƒN
+				// ã‚·ãƒ¼ãƒ³ãƒ“ãƒ¥ãƒ¼ã®ã‚«ãƒ¡ãƒ©ã¯ãƒã‚§ãƒƒã‚¯
 				if (settings.drawInSceneView == false)
 				{
 					return;
@@ -953,12 +953,12 @@ namespace Effekseer.Internal
 #endif
 			RenderPath path;
 
-			// ƒJƒŠƒ“ƒOƒ}ƒXƒN‚ğƒ`ƒFƒbƒN
+			// ã‚«ãƒªãƒ³ã‚°ãƒã‚¹ã‚¯ã‚’ãƒã‚§ãƒƒã‚¯
 			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
-					// ƒŒƒ“ƒ_[ƒpƒX‚ª‘¶İ‚·‚ê‚ÎƒRƒ}ƒ“ƒhƒoƒbƒtƒ@‚ğ‰ğœ
+					// ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ãŒå­˜åœ¨ã™ã‚Œã°ã‚³ãƒãƒ³ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚’è§£é™¤
 					path = renderPaths[camera];
 					path.Dispose();
 					renderPaths.Remove(camera);
@@ -968,12 +968,12 @@ namespace Effekseer.Internal
 
 			if (renderPaths.ContainsKey(camera))
 			{
-				// ƒŒƒ“ƒ_[ƒpƒX‚ª—L‚ê‚Îg‚¤
+				// ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ãŒæœ‰ã‚Œã°ä½¿ã†
 				path = renderPaths[camera];
 			}
 			else
 			{
-				// –³‚¯‚ê‚ÎƒŒƒ“ƒ_[ƒpƒX‚ğì¬
+				// ç„¡ã‘ã‚Œã°ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ‘ã‚¹ã‚’ä½œæˆ
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
 				path.Init(settings.enableDistortion);
 				renderPaths.Add(camera, path);
@@ -985,14 +985,14 @@ namespace Effekseer.Internal
 				path.Init(settings.enableDistortion);
 			}
 
-			// ˜c‚İƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+			// æ­ªã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 			if (path.renderTexture)
 			{
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
 
 #if UNITY_5_4_OR_NEWER
-			// ƒXƒeƒŒƒIƒŒƒ“ƒ_ƒŠƒ“ƒO(VR)—p‚É¶‰E–Ú‚Ìs—ñ‚ğİ’è
+			// ã‚¹ãƒ†ãƒ¬ã‚ªãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°(VR)ç”¨ã«å·¦å³ç›®ã®è¡Œåˆ—ã‚’è¨­å®š
 			if (camera.stereoEnabled)
 			{
 				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
@@ -1004,7 +1004,7 @@ namespace Effekseer.Internal
 			else
 #endif
 			{
-				// ƒrƒ…[ŠÖ˜A‚Ìs—ñ‚ğXV
+				// ãƒ“ãƒ¥ãƒ¼é–¢é€£ã®è¡Œåˆ—ã‚’æ›´æ–°
 				Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 					GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
 				Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(

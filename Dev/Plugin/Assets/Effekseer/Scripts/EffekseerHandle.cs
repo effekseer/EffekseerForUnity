@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace Effekseer
 {
@@ -6,7 +6,7 @@ namespace Effekseer
 	/// A instance handle of played effect
 	/// </summary>
 	/// <summary xml:lang="ja">
-	/// Ä¶‚µ‚½ƒGƒtƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
+	/// å†ç”Ÿã—ãŸã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«
 	/// </summary>
 	public struct EffekseerHandle
 	{
@@ -30,8 +30,8 @@ namespace Effekseer
 		/// All nodes will be destroyed.
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚ğ’â~‚·‚é
-		/// ‘S‚Ä‚ÌƒGƒtƒFƒNƒg‚ªu‚ÉÁ‚¦‚é
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’åœæ­¢ã™ã‚‹
+		/// å…¨ã¦ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãŒç¬æ™‚ã«æ¶ˆãˆã‚‹
 		/// </summary>
 		public void Stop()
 		{
@@ -43,8 +43,8 @@ namespace Effekseer
 		/// The root node will be destroyed. Then children also will be destroyed by their lifetime.
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// Ä¶’†‚ÌƒGƒtƒFƒNƒg‚Ìƒ‹[ƒgƒm[ƒh‚¾‚¯‚ğ’â~
-		/// ƒ‹[ƒgƒm[ƒh‚ğíœ‚µ‚½‚±‚Æ‚Åqƒm[ƒh¶¬‚ª’â~‚³‚êõ–½‚Å™X‚ÉÁ‚¦‚é
+		/// å†ç”Ÿä¸­ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰ã ã‘ã‚’åœæ­¢
+		/// ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰ã‚’å‰Šé™¤ã—ãŸã“ã¨ã§å­ãƒãƒ¼ãƒ‰ç”ŸæˆãŒåœæ­¢ã•ã‚Œå¯¿å‘½ã§å¾ã€…ã«æ¶ˆãˆã‚‹
 		/// </summary>
 		public void StopRoot()
 		{
@@ -55,9 +55,9 @@ namespace Effekseer
 		/// Sets the effect location
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚ÌˆÊ’u‚ğİ’è
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ä½ç½®ã‚’è¨­å®š
 		/// </summary>
-		/// <param name="location">ˆÊ’u</param>
+		/// <param name="location">ä½ç½®</param>
 		public void SetLocation(Vector3 location)
 		{
 			Plugin.EffekseerSetLocation(m_handle, location.x, location.y, location.z);
@@ -67,9 +67,9 @@ namespace Effekseer
 		/// Sets the effect rotation
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚Ì‰ñ“]‚ğİ’è
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å›è»¢ã‚’è¨­å®š
 		/// </summary>
-		/// <param name="rotation">‰ñ“]</param>
+		/// <param name="rotation">å›è»¢</param>
 		public void SetRotation(Quaternion rotation)
 		{
 			Vector3 axis;
@@ -82,9 +82,9 @@ namespace Effekseer
 		/// Sets the effect scale
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚ÌŠgk‚ğİ’è
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®æ‹¡ç¸®ã‚’è¨­å®š
 		/// </summary>
-		/// <param name="scale">Šgk</param>
+		/// <param name="scale">æ‹¡ç¸®</param>
 		public void SetScale(Vector3 scale)
 		{
 			Plugin.EffekseerSetScale(m_handle, scale.x, scale.y, scale.z);
@@ -94,7 +94,7 @@ namespace Effekseer
 		/// Specify the color of overall effect.
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‘S‘Ì‚ÌF‚ğw’è‚·‚éB
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆå…¨ä½“ã®è‰²ã‚’æŒ‡å®šã™ã‚‹ã€‚
 		/// </summary>
 		/// <param name="color">Color</param>
 		public void SetAllColor(Color color)
@@ -106,9 +106,9 @@ namespace Effekseer
 		/// Sets the effect target location
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚Ìƒ^[ƒQƒbƒgˆÊ’u‚ğİ’è
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‚’è¨­å®š
 		/// </summary>
-		/// <param name="targetLocation">ƒ^[ƒQƒbƒgˆÊ’u</param>
+		/// <param name="targetLocation">ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®</param>
 		public void SetTargetLocation(Vector3 targetLocation)
 		{
 			Plugin.EffekseerSetTargetLocation(m_handle, targetLocation.x, targetLocation.y, targetLocation.z);
@@ -120,9 +120,9 @@ namespace Effekseer
 		/// <para>false: It will not update on Update()</para>
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒ|[ƒYİ’è
-		/// <para>true:  ’â~’†BUpdate‚ÅXV‚µ‚È‚¢</para>
-		/// <para>false: Ä¶’†BUpdate‚ÅXV‚·‚é</para>
+		/// ãƒãƒ¼ã‚ºè¨­å®š
+		/// <para>true:  åœæ­¢ä¸­ã€‚Updateã§æ›´æ–°ã—ãªã„</para>
+		/// <para>false: å†ç”Ÿä¸­ã€‚Updateã§æ›´æ–°ã™ã‚‹</para>
 		/// </summary>
 		public bool paused
 		{
@@ -140,9 +140,9 @@ namespace Effekseer
 		/// <para>false: It will not be rendering.</para>
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// •\¦İ’è
-		/// <para>true:  •\¦ONBDraw‚Å•`‰æ‚·‚é</para>
-		/// <para>false: •\¦OFFBDraw‚Å•`‰æ‚µ‚È‚¢</para>
+		/// è¡¨ç¤ºè¨­å®š
+		/// <para>true:  è¡¨ç¤ºONã€‚Drawã§æç”»ã™ã‚‹</para>
+		/// <para>false: è¡¨ç¤ºOFFã€‚Drawã§æç”»ã—ãªã„</para>
 		/// </summary>
 		public bool shown
 		{
@@ -158,7 +158,7 @@ namespace Effekseer
 		/// Playback speed
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// Ä¶‘¬“x
+		/// å†ç”Ÿé€Ÿåº¦
 		/// </summary>
 		public float speed
 		{
@@ -178,9 +178,9 @@ namespace Effekseer
 		/// <para>false: disabled</para>
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹‚ª—LŒø‚©‚Ç‚¤‚©<br/>
-		/// <para>true:  —LŒø</para>
-		/// <para>false: –³Œø</para>
+		/// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«ãŒæœ‰åŠ¹ã‹ã©ã†ã‹<br/>
+		/// <para>true:  æœ‰åŠ¹</para>
+		/// <para>false: ç„¡åŠ¹</para>
 		/// </summary>
 		public bool enabled
 		{
@@ -195,9 +195,9 @@ namespace Effekseer
 		/// <para>false: It isn't existed or stopped.</para>
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// ƒGƒtƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ª‘¶İ‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©
-		/// <para>true:  ‘¶İ‚µ‚Ä‚¢‚é</para>
-		/// <para>false: Ä¶I—¹‚Å”jŠüB‚à‚µ‚­‚ÍStop‚Å’â~‚³‚ê‚½</para>
+		/// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒå­˜åœ¨ã—ã¦ã„ã‚‹ã‹ã©ã†ã‹
+		/// <para>true:  å­˜åœ¨ã—ã¦ã„ã‚‹</para>
+		/// <para>false: å†ç”Ÿçµ‚äº†ã§ç ´æ£„ã€‚ã‚‚ã—ãã¯Stopã§åœæ­¢ã•ã‚ŒãŸ</para>
 		/// </summary>
 		public bool exists
 		{
