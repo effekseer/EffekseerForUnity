@@ -87,8 +87,6 @@ namespace EffekseerPlugin
 		res.texture.Height = height;
 		res.texture.TextureFormat = (TextureFormatType)format;
 		
-		if (g_rendererType == RendererType::Native)
-		{
 			res.texture.UserID = textureID;
 #if !defined(_WIN32)
 			if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
@@ -100,11 +98,7 @@ namespace EffekseerPlugin
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
 #endif
-		}
-		else
-		{
-			res.texture.UserPtr = (void*)textureID;
-		}
+		
 
 		textureData2NativePtr[&res.texture] = (void*)textureID;
 
@@ -160,7 +154,7 @@ namespace EffekseerPlugin
 		if (g_rendererType == RendererType::Native)
 		{
 			auto loader = new ModelLoader(load, unload);
-			auto internalLoader = g_EffekseerRenderer->CreateModelLoader(loader->GetFileInterface());
+			auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
 			loader->SetInternalLoader(internalLoader);
 			return loader;
 		}
