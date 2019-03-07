@@ -30,7 +30,10 @@ namespace EffekseerPlugin
 	{
 		using namespace EffekseerRendererGL;
 		OpenGLDeviceType openglDeviceType = OpenGLDeviceType::OpenGL2;
-		switch (g_UnityRendererType) {
+
+		if (g_rendererType == RendererType::Native)
+		{
+			switch (g_UnityRendererType) {
 			case kUnityGfxRendererOpenGL:
 				openglDeviceType = OpenGLDeviceType::OpenGL2;
 				break;
@@ -45,6 +48,7 @@ namespace EffekseerPlugin
 				break;
 			default:
 				return;
+			}
 		}
 
 		auto maxSquares = g_maxSquares;
