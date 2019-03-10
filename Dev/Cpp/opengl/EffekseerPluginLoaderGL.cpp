@@ -12,7 +12,7 @@
 #include "../common/EffekseerPluginTexture.h"
 #include "../common/EffekseerPluginModel.h"
 
-#include "../common/IUnityGraphics.h"
+#include "../unity/IUnityGraphics.h"
 #include "../common/EffekseerPluginTexture.h"
 #include "../common/EffekseerPluginModel.h"
 
@@ -27,6 +27,9 @@ namespace EffekseerPlugin
 	extern EffekseerRenderer::Renderer*		g_EffekseerRenderer;
 	extern RendererType g_rendererType;
 
+#ifdef _WIN32
+
+#else
 	class TextureLoaderGL : public TextureLoader
 	{
 		struct TextureResource
@@ -130,9 +133,6 @@ namespace EffekseerPlugin
 		}
 	}
 
-#ifdef _WIN32
-
-#else
 	Effekseer::TextureLoader* TextureLoader::Create(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)

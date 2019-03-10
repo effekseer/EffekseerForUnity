@@ -7,7 +7,7 @@
 #include <memory>
 #include <Effekseer.h>
 #include "EffekseerPluginCommon.h"
-#include "IUnityInterface.h"
+#include "../unity/IUnityInterface.h"
 
 namespace EffekseerPlugin
 {
@@ -48,16 +48,15 @@ namespace EffekseerPlugin
 		std::map<std::u16string, ModelResource> resources;
 		MemoryFile memoryFile;
 		std::unique_ptr<Effekseer::ModelLoader> internalLoader;
-
-	private:
-		ModelLoader(
-			ModelLoaderLoad load,
-			ModelLoaderUnload unload );
 		
 	public:
 		static Effekseer::ModelLoader* Create(
 			ModelLoaderLoad load,
 			ModelLoaderUnload unload);
+
+		ModelLoader(
+			ModelLoaderLoad load,
+			ModelLoaderUnload unload );
 		
 		virtual ~ModelLoader() = default;
 		virtual void* Load( const EFK_CHAR* path );

@@ -78,7 +78,8 @@ void ModelLoader::Unload(void* source)
 	{
 		auto model = (Model*)it->second.internalData;
 		unload(it->first.c_str(), model->InternalPtr);
-		ES_SAFE_DELETE(it->second.internalData);
+		ES_SAFE_DELETE(model);
+		it->second.internalData = nullptr;
 		resources.erase(it);
 	}
 }

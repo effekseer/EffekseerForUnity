@@ -12,7 +12,7 @@
 
 #include <map>
 
-#include "../common/IUnityInterface.h"
+#include "../unity/IUnityInterface.h"
 
 extern "C"
 {
