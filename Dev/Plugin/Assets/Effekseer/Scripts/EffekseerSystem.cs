@@ -202,7 +202,9 @@ namespace Effekseer
 					case GraphicsDeviceType.Metal:
 					case GraphicsDeviceType.Direct3D12:
 					case GraphicsDeviceType.Vulkan:
-
+					case GraphicsDeviceType.XboxOne:
+					case GraphicsDeviceType.Switch:
+					case GraphicsDeviceType.PlayStation4:
 						if (RendererType == EffekseerRendererType.Native)
 						{
 							RendererType = EffekseerRendererType.Unity;
@@ -214,7 +216,6 @@ namespace Effekseer
 
 			// Zのnearとfarの反転対応
 			bool reversedDepth = false;
-	#if UNITY_5_5_OR_NEWER
 			switch (SystemInfo.graphicsDeviceType) {
 			case GraphicsDeviceType.Direct3D11:
 			case GraphicsDeviceType.Direct3D12:
@@ -226,7 +227,6 @@ namespace Effekseer
 				reversedDepth = true;
 				break;
 			}
-	#endif
 
 			// Initialize effekseer library
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)RendererType);
