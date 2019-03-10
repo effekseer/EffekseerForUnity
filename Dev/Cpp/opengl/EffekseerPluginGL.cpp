@@ -1,6 +1,6 @@
 ﻿
 #include "../common/EffekseerPluginCommon.h"
-#include "../common/IUnityGraphics.h"
+#include "../unity/IUnityGraphics.h"
 
 #include "EffekseerPluginGL.h"
 

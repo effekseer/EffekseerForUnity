@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "Effekseer.h"
-#include "IUnityInterface.h"
+#include "../unity/IUnityInterface.h"
 
 namespace EffekseerPlugin
 {

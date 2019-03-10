@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../common/EffekseerPluginModel.h"
-#include "../common/IUnityInterface.h"
+#include "../unity/IUnityInterface.h"
 #include <Effekseer.h>
 #include <map>
 #include <memory>

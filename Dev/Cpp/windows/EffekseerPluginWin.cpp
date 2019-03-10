@@ -11,9 +11,9 @@
 #include "EffekseerRendererDX11.h"
 
 #include "../common/EffekseerPluginCommon.h"
-#include "../common/IUnityGraphics.h"
-#include "../common/IUnityGraphicsD3D9.h"
-#include "../common/IUnityGraphicsD3D11.h"
+#include "../unity/IUnityGraphics.h"
+#include "../unity/IUnityGraphicsD3D9.h"
+#include "../unity/IUnityGraphicsD3D11.h"
 
 #include "../opengl/EffekseerPluginGL.h"
 

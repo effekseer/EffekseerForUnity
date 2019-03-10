@@ -12,7 +12,7 @@
 #include "../common/EffekseerPluginTexture.h"
 #include "../common/EffekseerPluginModel.h"
 
-#include "../common/IUnityGraphics.h"
+#include "../unity/IUnityGraphics.h"
 #include "../common/EffekseerPluginTexture.h"
 #include "../common/EffekseerPluginModel.h"
 
