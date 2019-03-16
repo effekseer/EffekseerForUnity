@@ -1,5 +1,8 @@
 ﻿# Release notes
 
+## 1.43
+- Renewal!!
+
 ## 1.40
 - Distortion specification is changed.
 - Added functions

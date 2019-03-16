@@ -176,6 +176,10 @@ namespace Effekseer
 				Debug.LogError("[Effekseer] EffekseerSystem instance is already found.");
 			}
 
+#if (UNITY_WEBGL || UNITY_IOS || UNITY_SWITCH) && !UNITY_EDITOR
+			Plugin.RegisterPlugin();
+#endif
+
 			Instance = this;
 			
 			var settings = EffekseerSettings.Instance;
@@ -186,7 +190,16 @@ namespace Effekseer
 			{
 				if(SystemInfo.supportsComputeShaders)
 				{
-					// OK
+					if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
+						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
+					{
+						Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" has many limitations with ComputeShader. Renderer is changed into Native.");
+						RendererType = EffekseerRendererType.Native;
+					}
+					else
+					{
+						// OK
+					}
 				}
 				else
 				{

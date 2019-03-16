@@ -28,7 +28,12 @@ namespace Effekseer
 			public const string pluginName = "__Internal";
 		#else
 			public const string pluginName = "EffekseerUnity";
-		#endif
+#endif
+
+#if (UNITY_WEBGL || UNITY_IOS || UNITY_SWITCH) && !UNITY_EDITOR
+		[DllImport (pluginName)]
+		public static extern void RegisterPlugin();
+#endif
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerInit(int maxInstances, int maxSquares, int isRightHandedCoordinate, int reversedDepth, int rendererType);
