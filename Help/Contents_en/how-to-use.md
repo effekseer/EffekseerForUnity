@@ -62,6 +62,13 @@ void Start()
 }
 ```
 
+### LightWeightRenderPipeline (Experimental)
+
+Effekseer supports LightWeightRenderPipeline.
+Please remove comment out from ``` ScriptsExternal/EffekseerRendererLWRP.cs ``` because LWRP is not contained in Unity with default settings at first.
+
+Add ``` Effekseer/Effekseer RendererLWRP ``` to GameObject with Camera. 
+
 ### Note
 
 When playing with PlayEffect(), the position rotation does not change automatically.
@@ -71,6 +78,8 @@ Suitable for simple use, such as hit effects and explosion effects.
 
 ## Network
 You can edit the playing effect in Unity via the network from the outside when application is running.
+
+![](../img/network.png)
 
 You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall. 
 

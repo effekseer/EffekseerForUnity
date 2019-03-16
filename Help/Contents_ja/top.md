@@ -3,6 +3,7 @@
 ![](../img/plugin_logo.png)
 
 ## 概要 {#overview}
+
 ゲームエンジンUnityとの連携について説明します。  
 なお、Unity Technologies社とこのツールは特に提携しているというわけではないため、  
 バージョンや状況によっては上手く動作しない可能性があります。
@@ -12,122 +13,157 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 ## 動作環境 {#environment}
 
 ### Unityバージョン
-Unity 5.5 以降。 Personal, Plus, Pro
+Unity 2017 以降
 
 ### プラットフォーム
+
+EffekseerForUnity has two renderers. First renderer is drawn with Compute Shader(UnityRenderer). Second renderer is drawn with native API(NativeRenderer). 
+UnityRenderer runs on everywhere where compute shader is enabled. On the other hand, NativeRenderer runs on limited platforms. But NativeRenderer is drawn with multithread.
+If unsupported renderer is selected, renderer is changed automatically.
+
+EffekseerForUnityには2種類のレンダラーがあります。1つ目はComputeShaderで描画するUnityRendererです。2つ目はネイティブのAPIで描画するNativeRendererです。
+UnityRendererはComputeShaderが有効な全ての環境で動きます。一方、NativeRendererは限られたプラットフォームでしか動きません。しかし、マルチスレッドで描画することができます。
+レンダラーは ``` Edit -> ProjectSettings -> Effekseer ``` から選択できます.
+もし、サポートされていないレンダラらーが選択されていた場合、自動的にレンダラーが変更されます。
 
 <table>
 <thead>
 <tr class="header">
-<th>プラットフォーム</th>
+<th>Platforms</th>
 <th style="text-align: center;">Graphics API</th>
-<th style="text-align: center;">対応状況</th>
-<th width="350px">備考</th>
+<th style="text-align: center;">UnityRenderer</th>
+<th style="text-align: center;">NativeRenderer</th>
+<th width="350px">Notes</th>
 </tr>
 </thead>
 <tbody>
+
 <tr>
-<td rowspan="4">Windows</td>
+<td rowspan="5">Windows</td>
 <td style="text-align: center;">DirectX9</td>
-<td style="text-align: center;">○</td>
-<td rowspan="4">
-Unity 5.5.0 時点で DirectX12 は標準APIに含まれていないので Player Settings の変更は不要。
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
+<td rowspan="5">
 </td>
 </tr>
+
 <tr>
 <td style="text-align: center;">DirectX11</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;">OK</td>
+<td style="text-align: center;">OK</td>
 </tr>
+
 <tr>
 <td style="text-align: center;">DirectX12</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">OK</td>
+<td style="text-align: center;"></td>
 </tr>
+
 <tr>
 <td style="text-align: center;">OpenGLCore</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">Theoretically</td>
+<td style="text-align: center;"></td>
 </tr>
+
 <tr>
 <td rowspan="3">macOS</td>
 <td style="text-align: center;">OpenGLCore</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;">Theoretically</td>
+<td style="text-align: center;">OK</td>
 <td rowspan="3">
-Unity 5.5.0 時点で Metal は標準APIに含まれていないので Player Settings の変更は不要。	
 </td>
 </tr>
+
 <tr>
 <td style="text-align: center;">OpenGL2</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 </tr>
+
 <tr>
 <td style="text-align: center;">Metal</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">OK</td>
+<td style="text-align: center;"></td>
 </tr>
+
 <tr>
 <td rowspan="3">Android</td>
 <td style="text-align: center;">OpenGL ES 2.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 <td rowspan="3">
-Unity 5.5.0 時点で Vulkan は標準APIに含まれていないので Player Settings の変更は不要。
+もしVulkanがデフォルトの場合、Player Settingsを変更してください。
 </td>
 </tr>
+
 <tr>
 <td style="text-align: center;">OpenGL ES 3.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 </tr>
+
 <tr>
 <td style="text-align: center;">Vulkan</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">Debugging</td>
+<td style="text-align: center;"></td>
 </tr>
+
 <tr>
 <td rowspan="3">iOS</td>
 <td style="text-align: center;">OpenGL ES 2.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 <td rowspan="3">
-Build Settings -&gt; Player Settings -&gt; Other Settings -&gt; Auto Graphics API のチェックを外し、Metalを削除する必要があります。
 </td>
 </tr>
+
 <tr>
 <td style="text-align: center;">OpenGL ES 3.0</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 </tr>
+
 <tr>
 <td style="text-align: center;">Metal</td>
-<td style="text-align: center;">×</td>
+<td style="text-align: center;">OK</td>
+<td style="text-align: center;"></td>
 </tr>
+
 <tr>
 <td rowspan="2">WebGL</td>
 <td style="text-align: center;">OpenGL ES 2.0 (WebGL 1.0)</td>
-<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">OK</td>
 <td rowspan="2"></td>
 </tr>
+
+<tr>
 <td style="text-align: center;">OpenGL ES 3.0 (WebGL 2.0)</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;">？</td>
 </tr>
+<tr>
+<td>Console Game</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">Theoretically</td>
+<td style="text-align: center;"></td>
+<td>開発者がC++をコンパイルする必要があります。</td>
+</tr>
+
 </tbody>
 </table>
+
+Theoretically - テストはしていないですが、理論的には動作します。
+
+Debugging -　テストはしましたが、何らかの不具合により動きません。
 
 ## 導入方法 {#how-to-import}
 Effekseer.unitypackage を開いてUnityプロジェクトにインポートします。
 
 ![](../img/unity_import.png)
 
-## 仕様変更
-
-### 1.4
-
-歪みに機能が追加されました。Effekseerのエフェクトが歪みにより一部歪むようになりました。
-
-### 1.3
-
-エフェクトの前後が入れ替わっています。
-1.2以前の表示を行う場合、EffekseerSystemコンポーネントの ```isRightHandledCoordinateSystem``` をtrueにしてください。
-
-歪み方法が変更されました。Effekseerのエフェクトが歪みにより歪まなくなっています。
-1.4以降に、歪みにより歪むエフェクトを追加する予定です。
-
 
 ## 既知の問題 {#issues}
-- 対応プラットフォームでも非対応の Graphics API では、正しくエフェクトの描画が行われません。<br>上記の"対応プラットフォーム"の表を確認をしてください。
 - DirectX11のForwardレンダラーで、Editor上のGameViewのみ、3Dモデルの表裏が逆になります。Effekseer上でカリングの設定を変更してください。
 
 ## Todo {#todo}
