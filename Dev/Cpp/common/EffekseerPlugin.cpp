@@ -24,10 +24,10 @@
 
 // DirectX
 #ifdef _WIN32
-#include "../unity/IUnityGraphicsD3D11.h"
-#include "../unity/IUnityGraphicsD3D9.h"
 #include "EffekseerRendererDX11.h"
 #include "EffekseerRendererDX9.h"
+#include "../unity/IUnityGraphicsD3D11.h"
+#include "../unity/IUnityGraphicsD3D9.h"
 #endif
 
 #include "../common/EffekseerPluginModel.h"
