@@ -1,5 +1,8 @@
 ﻿# Release notes
 
+## 1.43b
+- Fixed a bug that multithread rendering crashes an applications
+
 ## 1.43
 - Added network functions
 
