@@ -153,7 +153,7 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <tr>
 <td style="text-align: center;">OpenGL ES 3.0 (WebGL 2.0)</td>
 <td style="text-align: center;"></td>
-<td style="text-align: center;">？</td>
+<td style="text-align: center;">Debugging</td>
 </tr>
 <tr>
 <td>Console Game</td>
