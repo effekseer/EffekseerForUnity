@@ -26,8 +26,6 @@
 #ifdef _WIN32
 #include "EffekseerRendererDX11.h"
 #include "EffekseerRendererDX9.h"
-#include "../unity/IUnityGraphicsD3D11.h"
-#include "../unity/IUnityGraphicsD3D9.h"
 #endif
 
 #include "../common/EffekseerPluginModel.h"
@@ -81,6 +79,20 @@ bool IsRequiredToInitOnRenderThread()
 	if (g_rendererType == RendererType::Unity)
 		return false;
 
+	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGL)
+		return true;
+	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGLCore)
+		return true;
+	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGLES20)
+		return true;
+	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGLES30)
+		return true;
+
+	return false;
+}
+
+bool IsOpenGLRenderer()
+{
 	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGL)
 		return true;
 	if (g_UnityRendererType == UnityGfxRenderer::kUnityGfxRendererOpenGLCore)
@@ -271,9 +283,9 @@ extern "C"
 			cameraMatrix = settings.cameraMatrix;
 		}
 
-		if (settings.renderIntoTexture)
+		// if renderer is not opengl, render flipped image when render to a texture.
+		if (settings.renderIntoTexture && !IsOpenGLRenderer())
 		{
-			// テクスチャに対してレンダリングするときは上下反転させる
 			projectionMatrix.Values[1][1] = -projectionMatrix.Values[1][1];
 		}
 
@@ -371,9 +383,9 @@ extern "C"
 			cameraMatrix = settings.cameraMatrix;
 		}
 
-		if (settings.renderIntoTexture)
+		// if renderer is not opengl, render flipped image when render to a texture.
+		if (settings.renderIntoTexture && !IsOpenGLRenderer())
 		{
-			// テクスチャに対してレンダリングするときは上下反転させる
 			projectionMatrix.Values[1][1] = -projectionMatrix.Values[1][1];
 		}
 
