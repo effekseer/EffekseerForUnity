@@ -10,9 +10,7 @@ Those who need them please ask me to download the package of tools.
 ■ Directory structure
 -Effekseer.unitypackage
 Unity packages
-
--Sample
-Samples are stored.
+Plugin and samples are stored.
 
 -Help
 Help written about how to use is saved.
@@ -30,9 +28,7 @@ Effekseerをダウンロードしていただきありがとうございます�
 ■　ディレクトリ構成
 -Effekseer.unitypackage
 Unityのパッケージ
-
--Sample
-サンプルが保存されています。
+プラグインとサンプルが保存されています。
 
 -Help
 使い方について記述されているヘルプが保存されています。

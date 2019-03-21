@@ -10,6 +10,20 @@ Depending on the version and circumstances it may not work well.
 
 Because Effekseer's playback program is written in C ++, it is handled as a native plugin on Unity.
 
+
+### Beta version
+
+This is beta version. It lacks any functions.
+
+- Distortion on Metal
+- Support Vulkan
+- Lighting
+- Documentation
+
+I wich your help to develop
+
+[github](https://github.com/effekseer/EffekseerForUnity/tree/renewal)
+
 ## Environment {#environment}
 
 ### Unity version

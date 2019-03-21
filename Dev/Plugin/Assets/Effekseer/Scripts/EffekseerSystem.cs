@@ -188,12 +188,22 @@ namespace Effekseer
 
 			if(RendererType == EffekseerRendererType.Unity)
 			{
-				if(SystemInfo.supportsComputeShaders)
+				bool isWebGL = false;
+#if (UNITY_WEBGL)
+				isWebGL = true;
+#endif
+
+				if (SystemInfo.supportsComputeShaders)
 				{
 					if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
 						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
 					{
 						Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" has many limitations with ComputeShader. Renderer is changed into Native.");
+						RendererType = EffekseerRendererType.Native;
+					}
+					else if(isWebGL)
+					{
+						Debug.LogWarning("[Effekseer] Graphics API WebGL has many limitations with ComputeShader. Renderer is changed into Native.");
 						RendererType = EffekseerRendererType.Native;
 					}
 					else
@@ -234,9 +244,9 @@ namespace Effekseer
 			case GraphicsDeviceType.Direct3D12:
 			case GraphicsDeviceType.Metal:
 			case GraphicsDeviceType.PlayStation4:
-	#if UNITY_2017_4_OR_NEWER
+#if UNITY_2017_4_OR_NEWER
 			case GraphicsDeviceType.Switch:
-	#endif
+#endif
 				reversedDepth = true;
 				break;
 			}
@@ -263,10 +273,10 @@ namespace Effekseer
 			}
 			nativeEffects.Clear();
 			
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 			nativeEffectsKeys.Clear();
 			nativeEffectsValues.Clear();
-	#endif
+#endif
 
 			// Finalize Effekseer library
 			Plugin.EffekseerTerm();
@@ -306,14 +316,14 @@ namespace Effekseer
 				SoundLoaderLoad, 
 				SoundLoaderUnload);
 			
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 			for (int i = 0; i < nativeEffectsKeys.Count; i++) {
 				IntPtr nativeEffect = new IntPtr((long)ulong.Parse(nativeEffectsValues[i]));
 				nativeEffects.Add(nativeEffectsKeys[i], nativeEffect);
 			}
 			nativeEffectsKeys.Clear();
 			nativeEffectsValues.Clear();
-	#endif
+#endif
 
 			ReloadEffects();
 
@@ -326,14 +336,14 @@ namespace Effekseer
 		public void OnDisable() {
 			enabled = false;
 
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 			foreach (var pair in nativeEffects) {
 				nativeEffectsKeys.Add(pair.Key);
 				nativeEffectsValues.Add(pair.Value.ToString());
 				Plugin.EffekseerUnloadResources(pair.Value);
 			}
 			nativeEffects.Clear();
-	#endif
+#endif
 			renderer.CleanUp();
 			renderer.SetVisible(false);
 			renderer = null;
@@ -468,6 +478,6 @@ namespace Effekseer
 		private static void SoundLoaderUnload(IntPtr path) {
 		}
 
-		#endregion
+#endregion
 	}
 }

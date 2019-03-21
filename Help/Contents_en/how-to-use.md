@@ -15,6 +15,9 @@ When importing the *.efk file, EffectAsset is generated in addition of *.efk fil
 
 ![](../img/unity_resource.png)
 
+It is no problem that you remove .efk files.
+Please don't include .efk in custom packages currently. 
+
 ## Play by Emitter {#emitter_playback}
 
 ### Introduction

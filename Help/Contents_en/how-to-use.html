@@ -97,6 +97,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Place the output effect (<em>.efk), texture, sound in Unity project.<br />
 When importing the </em>.efk file, EffectAsset is generated in addition of *.efk file.</p>
 <p><img src="../img/unity_resource.png" /></p>
+<p>It is no problem that you remove .efk files. Please don’t include .efk in custom packages currently.</p>
 </section>
 <section id="emitter_playback" class="level2">
 <h2>Play by Emitter</h2>
@@ -142,6 +143,11 @@ In that case will play the effect linked to GameObject.</p>
 <a class="sourceLine" id="cb1-9" data-line-number="9">}</a></code></pre></div>
 </section>
 <section class="level3">
+<h3>LightWeightRenderPipeline (Experimental)</h3>
+<p>Effekseer supports LightWeightRenderPipeline. Please remove comment out from <code>ScriptsExternal/EffekseerRendererLWRP.cs</code> because LWRP is not contained in Unity with default settings at first.</p>
+<p>Add <code>Effekseer/Effekseer RendererLWRP</code> to GameObject with Camera.</p>
+</section>
+<section class="level3">
 <h3>Note</h3>
 <p>When playing with PlayEffect(), the position rotation does not change automatically. If you want to move it you need to set it manually.</p>
 <p>Suitable for simple use, such as hit effects and explosion effects.</p>
@@ -150,6 +156,7 @@ In that case will play the effect linked to GameObject.</p>
 <section class="level2">
 <h2>Network</h2>
 <p>You can edit the playing effect in Unity via the network from the outside when application is running.</p>
+<p><img src="../img/network.png" /></p>
 <p>You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall.</p>
 <p><img src="../img/network_ui.png" /></p>
 </section>
