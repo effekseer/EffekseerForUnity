@@ -30,8 +30,8 @@
 <h3>ベータバージョン</h3>
 <p>このバージョンはベータバージョンです。いくつかの機能が不足しています。</p>
 <ul>
-<li>Metalでの歪み機能</li>
 <li>Vulkanでの動作</li>
+<li>最適化</li>
 <li>ライティング</li>
 <li>ドキュメント</li>
 </ul>
@@ -47,7 +47,6 @@
 </section>
 <section class="level3">
 <h3>プラットフォーム</h3>
-<p>EffekseerForUnity has two renderers. First renderer is drawn with Compute Shader(UnityRenderer). Second renderer is drawn with native API(NativeRenderer). UnityRenderer runs on everywhere where compute shader is enabled. On the other hand, NativeRenderer runs on limited platforms. But NativeRenderer is drawn with multithread. If unsupported renderer is selected, renderer is changed automatically.</p>
 <p>EffekseerForUnityには2種類のレンダラーがあります。1つ目はComputeShaderで描画するUnityRendererです。2つ目はネイティブのAPIで描画するNativeRendererです。 UnityRendererはComputeShaderが有効な全ての環境で動きます。一方、NativeRendererは限られたプラットフォームでしか動きません。しかし、マルチスレッドで描画することができます。 レンダラーは <code>Edit -&gt; ProjectSettings -&gt; Effekseer</code> から選択できます. もし、サポートされていないレンダラらーが選択されていた場合、自動的にレンダラーが変更されます。</p>
 <table>
 <thead>
@@ -71,7 +70,7 @@ Notes
 </thead>
 <tbody>
 <tr>
-<td rowspan="5">
+<td rowspan="4">
 Windows
 </td>
 <td style="text-align: center;">
@@ -82,7 +81,7 @@ DirectX9
 <td style="text-align: center;">
 OK
 </td>
-<td rowspan="5">
+<td rowspan="4">
 </td>
 </tr>
 <tr>
@@ -236,6 +235,7 @@ OpenGL ES 2.0 (WebGL 1.0)
 OK
 </td>
 <td rowspan="2">
+起動直後に音を再生するとおかしくなります。
 </td>
 </tr>
 <tr>
@@ -245,7 +245,7 @@ OpenGL ES 3.0 (WebGL 2.0)
 <td style="text-align: center;">
 </td>
 <td style="text-align: center;">
-Debugging
+OK
 </td>
 </tr>
 <tr>

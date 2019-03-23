@@ -14,8 +14,8 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 
 このバージョンはベータバージョンです。いくつかの機能が不足しています。
 
-- Metalでの歪み機能
 - Vulkanでの動作
+- 最適化
 - ライティング
 - ドキュメント
 
@@ -29,10 +29,6 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 Unity 2017 以降
 
 ### プラットフォーム
-
-EffekseerForUnity has two renderers. First renderer is drawn with Compute Shader(UnityRenderer). Second renderer is drawn with native API(NativeRenderer). 
-UnityRenderer runs on everywhere where compute shader is enabled. On the other hand, NativeRenderer runs on limited platforms. But NativeRenderer is drawn with multithread.
-If unsupported renderer is selected, renderer is changed automatically.
 
 EffekseerForUnityには2種類のレンダラーがあります。1つ目はComputeShaderで描画するUnityRendererです。2つ目はネイティブのAPIで描画するNativeRendererです。
 UnityRendererはComputeShaderが有効な全ての環境で動きます。一方、NativeRendererは限られたプラットフォームでしか動きません。しかし、マルチスレッドで描画することができます。
@@ -52,11 +48,11 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <tbody>
 
 <tr>
-<td rowspan="5">Windows</td>
+<td rowspan="4">Windows</td>
 <td style="text-align: center;">DirectX9</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
-<td rowspan="5">
+<td rowspan="4">
 </td>
 </tr>
 
@@ -147,13 +143,13 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <td style="text-align: center;">OpenGL ES 2.0 (WebGL 1.0)</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
-<td rowspan="2"></td>
+<td rowspan="2">起動直後に音を再生するとおかしくなります。</td>
 </tr>
 
 <tr>
 <td style="text-align: center;">OpenGL ES 3.0 (WebGL 2.0)</td>
 <td style="text-align: center;"></td>
-<td style="text-align: center;">Debugging</td>
+<td style="text-align: center;">OK</td>
 </tr>
 <tr>
 <td>Console Game</td>

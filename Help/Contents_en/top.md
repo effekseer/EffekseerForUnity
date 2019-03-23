@@ -15,8 +15,8 @@ Because Effekseer's playback program is written in C ++, it is handled as a nati
 
 This is beta version. It lacks any functions.
 
-- Distortion on Metal
 - Support Vulkan
+- Performance
 - Lighting
 - Documentation
 
@@ -49,11 +49,11 @@ If unsupported renderer is selected, renderer is changed automatically.
 <tbody>
 
 <tr>
-<td rowspan="5">Windows</td>
+<td rowspan="4">Windows</td>
 <td style="text-align: center;">DirectX9</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
-<td rowspan="5">
+<td rowspan="4">
 </td>
 </tr>
 
@@ -144,13 +144,13 @@ If Vulkan is used by default, it must be checked off from Player Settings.
 <td style="text-align: center;">OpenGL ES 2.0 (WebGL 1.0)</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
-<td rowspan="2"></td>
+<td rowspan="2">If you play a sound after launch immidiately, something is wrong.</td>
 </tr>
 
 <tr>
 <td style="text-align: center;">OpenGL ES 3.0 (WebGL 2.0)</td>
 <td style="text-align: center;"></td>
-<td style="text-align: center;">Debugging</td>
+<td style="text-align: center;">OK</td>
 </tr>
 <tr>
 <td>Console Game</td>
