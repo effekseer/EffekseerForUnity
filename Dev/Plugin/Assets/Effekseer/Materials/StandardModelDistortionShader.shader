@@ -59,10 +59,10 @@ Properties{
 		struct ps_input
 		{
 			float4 pos : SV_POSITION;
-			float4 posC : POS0;
-			float4 posR : POS1;
-			float4 posU : POS2;
-			float2 uv : UV0;
+            float4 posC : NORMAL0;      // if this name is POS0, something is wrong with Metal API
+            float4 posR : NORMAL1;      // if this name is POS1, something is wrong with Metal API
+            float4 posU : NORMAL2;      // if this name is POS2, something is wrong with Metal API
+			float2 uv : TEXCOORD0;
 			float4 color : COLOR0;
 		};
 
