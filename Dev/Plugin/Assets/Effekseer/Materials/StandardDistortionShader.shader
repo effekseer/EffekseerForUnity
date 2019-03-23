@@ -46,10 +46,10 @@
 		struct ps_input
 		{
 			float4 pos : SV_POSITION;
-			float4 posC : POS0;
-			float4 posR : POS1;
-			float4 posU : POS2;
-			float2 uv : UV0;
+			float4 posC : NORMAL0;      // if this name is POS0, something is wrong with Metal API
+			float4 posR : NORMAL1;      // if this name is POS1, something is wrong with Metal API
+			float4 posU : NORMAL2;      // if this name is POS2, something is wrong with Metal API
+			float2 uv : TEXCOORD0;
 			float4 color : COLOR0;
 		};
 
@@ -69,7 +69,7 @@
 			v_offset[5] = 3;
 
 			SimpleVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
-
+            
 			float4 localBinormal = float4((v.Pos + v.Binormal), 1.0);
 			float4 localTangent = float4((v.Pos + v.Tangent), 1.0);
 			localBinormal = mul(UNITY_MATRIX_V, localBinormal);
@@ -97,6 +97,7 @@
 		{
 			float2 g_scale = float2(1.0f, 1.0f);
 			float4 color = tex2D(_ColorTex, i.uv);
+            
 			color.w = color.w * i.color.w;
 
 			float2 pos = i.posC.xy / i.posC.w;
