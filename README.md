@@ -39,23 +39,23 @@ You need to native binaries.
 
 Visual Studio 2015 or later is required.
 
-Execute ''' Dev/Cpp/windows/Build.bat '''
+Execute ``` Dev/Cpp/windows/Build.bat ```
 
 #### macOS(iOS)
 
-Execute ''' Dev/Cpp/macosx/Build.sh '''
+Execute ``` Dev/Cpp/macosx/Build.sh ```
 
 #### Android
 
 NDK is required.
 
-Execute ''' Dev/Cpp/android/Build.bat '''
+Execute ``` Dev/Cpp/android/Build.bat ```
 
 #### WebGL
 
 emscripten, MinGW and Visual Studio 2015 or late are required.
 
-Execute ''' Dev/Cpp/webgl/Build.bat '''
+Execute ``` Dev/Cpp/webgl/Build.bat ```
 
 ### Edit native codes
 
