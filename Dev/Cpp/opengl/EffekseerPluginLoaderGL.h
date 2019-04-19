@@ -1,4 +1,4 @@
-
+﻿/*
 #pragma once
 
 #include <memory>
@@ -12,7 +12,7 @@
 
 namespace EffekseerPlugin
 {
-	class TextureLoaderGL : public TextureLoader
+	class TextureLoaderGL : public Effekseer::TextureLoader
 	{
 		struct TextureResource
 		{
@@ -21,6 +21,7 @@ namespace EffekseerPlugin
 		};
 
 		std::map<std::u16string, TextureResource> resources;
+		std::map<void*, void*> textureData2NativePtr;
 
 	public:
 		TextureLoaderGL(
@@ -34,3 +35,4 @@ namespace EffekseerPlugin
 		virtual void Unload(Effekseer::TextureData* source);
 	};
 };
+*/

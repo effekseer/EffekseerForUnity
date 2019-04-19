@@ -90,8 +90,7 @@ public class EffekseerAssetInspector : Editor
 		if (textureVisible) {
 			for (int i = 0; i < texturePaths.Count; i++) {
 				EditorGUILayout.LabelField("[" + i + "] " + texturePaths[i]);
-				var path = EffekseerEditorUtility.NormalizePath(assetDir + "/" + texturePaths[i]);
-				Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+				Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetDir + "/" + texturePaths[i]);
 				EditorGUILayout.ObjectField(texture, typeof(Texture2D), false, GUILayout.Width (64), GUILayout.Height (64));
 			}
 		}
@@ -101,8 +100,7 @@ public class EffekseerAssetInspector : Editor
 		if (soundVisible) {
 			for (int i = 0; i < soundPaths.Count; i++) {
 				EditorGUILayout.LabelField("[" + i + "] " + soundPaths[i]);
-				var path = EffekseerEditorUtility.NormalizePath(assetDir + "/" + soundPaths[i]);
-				AudioClip audio = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+				AudioClip audio = AssetDatabase.LoadAssetAtPath<AudioClip>(assetDir + "/" + soundPaths[i]);
 				EditorGUILayout.ObjectField(audio, typeof(AudioClip), false);
 			}
 		}
@@ -112,8 +110,7 @@ public class EffekseerAssetInspector : Editor
 		if (modelVisible) {
 			for (int i = 0; i < modelPaths.Count; i++) {
 				EditorGUILayout.LabelField("[" + i + "] " + modelPaths[i]);
-				var path = EffekseerEditorUtility.NormalizePath(assetDir + "/" + modelPaths[i] + ".bytes");
-				TextAsset model = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+				TextAsset model = AssetDatabase.LoadAssetAtPath<TextAsset>(assetDir + "/" + modelPaths[i] + ".bytes");
 				EditorGUILayout.ObjectField(model, typeof(TextAsset), false);
 			}
 		}
@@ -126,27 +123,5 @@ public class EffekseerAssetInspector : Editor
 		string str = Encoding.Unicode.GetString(data, filepos, (length - 1) * 2);
 		filepos += length * 2;
 		return str;
-	}
-}
-
-internal class EffekseerEditorUtility
-{
-	public static string NormalizePath(string path)
-	{
-		var pathes = new List<string>(path.Split('\\', '/'));
-
-		for (int i = 0; i < pathes.Count - 1;)
-		{
-			if (pathes[i + 1] == "..")
-			{
-				pathes.RemoveRange(i, 2);
-			}
-			else
-			{
-				i++;
-			}
-		}
-
-		return string.Join("/", pathes.ToArray());
 	}
 }

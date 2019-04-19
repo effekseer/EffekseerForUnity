@@ -24,6 +24,8 @@
 *.illk
 *.exp
 *.sdf
+*.db
+*.opendb
 
 [Oo]bj/
 
@@ -39,6 +41,9 @@ Dev/Cpp/webgl/CMakeFiles/
 Dev/Cpp/webgl/CMakeCache.txt
 Dev/Cpp/webgl/*.cmake
 Dev/Cpp/webgl/MakeFile
+
+Dev/Plugin/*.sln
+Dev/Plugin/*.csproj
 
 Sample/*/Build/
 Sample/*/Assets/Plugins/

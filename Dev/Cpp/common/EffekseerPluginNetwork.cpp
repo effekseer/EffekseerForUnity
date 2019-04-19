@@ -85,17 +85,17 @@ namespace EffekseerPlugin
 
 extern "C"
 {
-	int UNITY_INTERFACE_API StartNetwork(int port)
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API StartNetwork(int port)
 	{
 		return static_cast<int>(EffekseerPlugin::Network::GetInstance()->Start(port));
 	}
 
-	void UNITY_INTERFACE_API StopNetwork()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API StopNetwork()
 	{
 		EffekseerPlugin::Network::GetInstance()->Stop();
 	}
 
-	void UNITY_INTERFACE_API UpdateNetwork()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UpdateNetwork()
 	{
 		EffekseerPlugin::Network::GetInstance()->Update();
 	}

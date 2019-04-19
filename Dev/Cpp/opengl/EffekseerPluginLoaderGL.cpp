@@ -1,3 +1,7 @@
+﻿
+#include <map>
+#include <string>
+
 #include "Effekseer.h"
 #include "EffekseerRendererGL.h"
 
@@ -5,11 +9,49 @@
 
 #include "EffekseerPluginLoaderGL.h"
 
+#include "../common/EffekseerPluginTexture.h"
+#include "../common/EffekseerPluginModel.h"
+
+#include "../unity/IUnityGraphics.h"
+#include "../common/EffekseerPluginTexture.h"
+#include "../common/EffekseerPluginModel.h"
+
+#include "../renderer/EffekseerRendererTextureLoader.h"
+#include "../renderer/EffekseerRendererModelLoader.h"
+
 using namespace Effekseer;
 
 namespace EffekseerPlugin
 {
 	extern UnityGfxRenderer					g_UnityRendererType;
+	extern EffekseerRenderer::Renderer*		g_EffekseerRenderer;
+	extern RendererType g_rendererType;
+
+#ifdef _WIN32
+
+#else
+	class TextureLoaderGL : public TextureLoader
+	{
+		struct TextureResource
+		{
+			int referenceCount = 1;
+			Effekseer::TextureData texture = {};
+		};
+
+		std::map<std::u16string, TextureResource> resources;
+		std::map<void*, void*> textureData2NativePtr;
+
+	public:
+		TextureLoaderGL(
+			TextureLoaderLoad load,
+			TextureLoaderUnload unload);
+
+		virtual ~TextureLoaderGL();
+
+		virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
+
+		virtual void Unload(Effekseer::TextureData* source);
+	};
 
 	bool IsPowerOfTwo(uint32_t x) {
 		return (x & (x - 1)) == 0;
@@ -44,21 +86,24 @@ namespace EffekseerPlugin
 		auto added = resources.insert(std::make_pair((const char16_t*) path, TextureResource()));
 		TextureResource& res = added.first->second;
 
-		res.texture.UserID = textureID;
 		res.texture.Width = width;
 		res.texture.Height = height;
 		res.texture.TextureFormat = (TextureFormatType)format;
 		
+			res.texture.UserID = textureID;
 #if !defined(_WIN32)
-		if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
-			(IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
-		{
-			// テクスチャのミップマップを生成する
-			glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+			if (g_UnityRendererType != kUnityGfxRendererOpenGLES20 ||
+				(IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
+			{
+				// テクスチャのミップマップを生成する
+				glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
+				glGenerateMipmap(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 #endif
+		
+
+		textureData2NativePtr[&res.texture] = (void*)textureID;
 
 		return &res.texture;
 	}
@@ -82,29 +127,41 @@ namespace EffekseerPlugin
 		it->second.referenceCount--;
 		if (it->second.referenceCount <= 0) {
 			// Unity側でアンロード
-			unload(it->first.c_str());
+			unload(it->first.c_str(), textureData2NativePtr[source]);
+			textureData2NativePtr.erase(source);
 			resources.erase(it);
 		}
 	}
 
-#ifdef _WIN32
-
-#else
-	TextureLoader* TextureLoader::Create(
+	Effekseer::TextureLoader* TextureLoader::Create(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
 	{
-		return new TextureLoaderGL( load, unload );
+		if (g_rendererType == RendererType::Native)
+		{
+			return new TextureLoaderGL(load, unload);
+		}
+		else
+		{
+			return new EffekseerRendererUnity::TextureLoader(load, unload);
+		}
 	}
-	
-	ModelLoader* ModelLoader::Create(
+
+	Effekseer::ModelLoader* ModelLoader::Create(
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload)
 	{
-		auto loader = new ModelLoader( load, unload );
-		auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
-		loader->SetInternalLoader( internalLoader );
-		return loader;
+		if (g_rendererType == RendererType::Native)
+		{
+			auto loader = new ModelLoader(load, unload);
+			auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
+			loader->SetInternalLoader(internalLoader);
+			return loader;
+		}
+		else
+		{
+			return new EffekseerRendererUnity::ModelLoader(load, unload);
+		}
 	}
 #endif
 };

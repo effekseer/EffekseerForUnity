@@ -10,11 +10,13 @@ There is a sample project using the Effekseer plugin in the following places.
 
 ## About resource files {#resource_files}
 
-Place the output effect (*.efk), texture, sound in Resources/Effekseer/.  
-When importing the *.efk file, it is renamed *.bytes.  
-If it does not work, please try Reimport.  
+Place the output effect (*.efk), texture, sound in Unity project.  
+When importing the *.efk file, EffectAsset is generated in addition of *.efk file.
 
 ![](../img/unity_resource.png)
+
+It is no problem that you remove .efk files.
+Please don't include .efk in custom packages currently. 
 
 ## Play by Emitter {#emitter_playback}
 
@@ -27,11 +29,19 @@ In that case will play the effect linked to GameObject.
 
 ### Properties
 
-- Effect Name: Specifies the effect name.<br>(The effect name is a character string excluding the extension from the file name (*.efk))
+- Effect Asset: Specifies the effect asset which is imported
 - Play On Start: Plays on Start() when it is checked.
-- Loop: When playback ends, it will automatically request playback.
+- IsLooping: When playback ends, it will automatically request playback.
 
-### Notes
+![](../img/unity_emitter.png)
+
+### Preview
+
+A controller for preview is shown in Scene View when EffekseerEmitter is specified. Effects can be previewed in Game View without playing.
+
+![](../img/unity_emitter_component_scene_view.png)
+
+### Note
 
 It is suitable for effects that follow the installed effects and characters.
 
@@ -46,12 +56,21 @@ The sample code is as follows.
 ```cs
 void Start()
 {
+    // get an effect
+    EffekseerEffectAsset effect = Resources.Load<EffekseerEffectAsset> ("Laser01");
     // Plays effect in transform.position
-    EffekseerHandle handle = EffekseerSystem.PlayEffect("Laser01", transform.position);
+    EffekseerHandle handle = EffekseerSystem.PlayEffect(effect, transform.position);
     // Sets the rotation of the effect
     handle.SetRotation(transform.rotation);
 }
 ```
+
+### LightWeightRenderPipeline (Experimental)
+
+Effekseer supports LightWeightRenderPipeline.
+Please remove comment out from ``` ScriptsExternal/EffekseerRendererLWRP.cs ``` because LWRP is not contained in Unity with default settings at first.
+
+Add ``` Effekseer/Effekseer RendererLWRP ``` to GameObject with Camera. 
 
 ### Note
 
@@ -60,64 +79,7 @@ If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
 
-## Preload from Resources {#preload}
-
-### Automatic loading
-
-The resource file necessary for the effect is loaded in the following time.
-
-- EffekseerEmitter.Start()
-- EffekseerSystem.PlayEffect()
-
-In both cases, only resources of the specified effect are loaded.  
-The loaded effect will be retained and will not be loaded the next time it is played.
-
-Automatic loading is easy, but depending on the moment of loading, the game may fall.
-
-### Manual preloading
-
-By LoadEffect() beforehand, you can prevent frame dropping.
-
-```cs
-void Start()
-{
-    // Loads effect "Laser01.efk"
-    EffekseerSystem.LoadEffect("Laser01");
-}
-```
-
-Loaded effects are automatically released at EffekseerSystem's OnDestroy().  
-It is also possible to explicitly release an unnecessary effect with ReleaseEffect().
-
-```cs
-void OnDestroy()
-{
-    // Releases effect "Laser01.efk"
-    EffekseerSystem.ReleaseEffect("Laser01");
-}
-```
-
-## Preload from AssetBundle {#assetbundle}
-
-You can load effect resources from asset bundles.  
-If you use asset bundle, you can not auto load.
-
-```cs
-IEnumerator Load() {
-    string url = "file:///" + Application.streamingAssetsPath + "/effects";
-    WWW www = new WWW(url);
-    yield return www;
-    var assetBundle = www.assetBundle;
-    EffekseerSystem.LoadEffect("Laser01", assetBundle);
-}
-```
-
-Please ReleaseEffect() like loading from Resources.
-
-Please do not release AssetBundle before all effects are released.
-
 ## Network
-
 You can edit the playing effect in Unity via the network from the outside when application is running.
 
 ![](../img/network.png)
@@ -125,5 +87,3 @@ You can edit the playing effect in Unity via the network from the outside when a
 You specify the port to be connected from Effekseer fo Effekseer Setting. Make DoStartNetworkAutomatically On or execute StartNetwork in EffekseerSystem. Then you can edit the effect from Effekseer. In order to edit the effect from another computer, it is necessary to open the port with the setting of the firewall. 
 
 ![](../img/network_ui.png)
-
-As a limitation, changes to blends or changes to unused images are not applied.

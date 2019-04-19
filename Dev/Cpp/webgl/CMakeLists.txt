@@ -31,7 +31,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Oz" ${CMAKE_CXX_FLAGS})
 # include 一覧を指定する
 set(
 	INCLUDE_DIR
-	"${PROJECT_SOURCE_DIR}./../opengl"
+	"${PROJECT_SOURCE_DIR}./../unity"
 	"${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/Effekseer"
 	"${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon"
 	"${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/EffekseerRendererGL")
@@ -45,10 +45,14 @@ add_definitions(-D__EFFEKSEER_RENDERER_GLES2__)
 file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/Effekseer/*.cpp
 	${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/*.cpp
+	${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Culling/*.cpp
 	${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon/*.cpp
 	${PROJECT_SOURCE_DIR}./../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer/*.cpp
 	${PROJECT_SOURCE_DIR}./../common/*.cpp
-	${PROJECT_SOURCE_DIR}./../opengl/*.cpp)
+	${PROJECT_SOURCE_DIR}./../renderer/*.cpp
+	${PROJECT_SOURCE_DIR}./../graphicsAPI/EffekseerPluginGraphics.cpp
+	${PROJECT_SOURCE_DIR}./../graphicsAPI/EffekseerPluginGraphicsGL.cpp
+	${PROJECT_SOURCE_DIR}./../graphicsAPI/EffekseerPluginGraphicsUnity.cpp)
 
 # 使わないソースファイルを削除
 # INTERNAL_LOADER

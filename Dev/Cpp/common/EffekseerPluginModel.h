@@ -7,11 +7,12 @@
 #include <memory>
 #include <Effekseer.h>
 #include "EffekseerPluginCommon.h"
+#include "../unity/IUnityInterface.h"
 
 namespace EffekseerPlugin
 {
-	using ModelLoaderLoad = int (UNITY_API*)(const char16_t* path, void* buffer, int bufferSize);
-	using ModelLoaderUnload = void (UNITY_API*)(const char16_t* path);
+	using ModelLoaderLoad = void* (UNITY_INTERFACE_API*)(const char16_t* path, void* data, int dataSize, int& requiredDataSize);
+	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path, void* modelPointer);
 
 	class ModelLoader : public Effekseer::ModelLoader
 	{
@@ -47,16 +48,15 @@ namespace EffekseerPlugin
 		std::map<std::u16string, ModelResource> resources;
 		MemoryFile memoryFile;
 		std::unique_ptr<Effekseer::ModelLoader> internalLoader;
+		
+	public:
+		static Effekseer::ModelLoader* Create(
+			ModelLoaderLoad load,
+			ModelLoaderUnload unload);
 
-	private:
 		ModelLoader(
 			ModelLoaderLoad load,
 			ModelLoaderUnload unload );
-		
-	public:
-		static ModelLoader* Create(
-			ModelLoaderLoad load,
-			ModelLoaderUnload unload);
 		
 		virtual ~ModelLoader() = default;
 		virtual void* Load( const EFK_CHAR* path );

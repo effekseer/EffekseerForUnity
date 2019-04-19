@@ -10,6 +10,7 @@ LOCAL_LDLIBS    := -landroid -lEGL -lGLESv2
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer \
+	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon \
 	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL
 
 LOCAL_SRC_FILES := \
@@ -17,8 +18,17 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginNetwork.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginModel.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginSound.cpp \
-	$(LOCAL_PATH)/../opengl/EffekseerPluginGL.cpp \
-	$(LOCAL_PATH)/../opengl/EffekseerPluginLoaderGL.cpp
+	$(LOCAL_PATH)/../common/EffekseerPlugin.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererImplemented.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererIndexBuffer.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererModelLoader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererRenderState.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererShader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererTextureLoader.cpp \
+	$(LOCAL_PATH)/../renderer/EffekseerRendererVertexBuffer.cpp \
+	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphics.cpp \
+	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp \
+	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \

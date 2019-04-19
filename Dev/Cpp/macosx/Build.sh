@@ -14,5 +14,5 @@ xcodebuild -target EffekseerUnity-iOS -sdk iphonesimulator -configuration Releas
 lipo -create build/Release-iphoneos/libEffekseerUnity.a build/Release-iphonesimulator/libEffekseerUnity.a -output libEffekseerUnity.a
 
 # Copy to PluginProject
-cp -rf build/Release/EffekseerUnity.bundle ../../Plugin/Assets/Plugins/
-cp libEffekseerUnity.a ../../Plugin/Assets/Plugins/iOS/
+cp -rf build/Release/EffekseerUnity.bundle ../../Plugin/Assets/Effekseer/Plugins/
+cp libEffekseerUnity.a ../../Plugin/Assets/Effekseer/Plugins/iOS/

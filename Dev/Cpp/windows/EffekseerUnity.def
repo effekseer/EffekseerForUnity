@@ -8,10 +8,15 @@ EXPORTS
   EffekseerGetRenderFunc
   EffekseerGetRenderFrontFunc
   EffekseerGetRenderBackFunc
+  EffekseerRender
+  EffekseerRenderFront
+  EffekseerRenderBack
   EffekseerUpdate
   EffekseerLoadEffect
   EffekseerLoadEffectOnMemory
   EffekseerReleaseEffect
+  EffekseerReloadResources
+  EffekseerUnloadResources
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
   EffekseerSetStereoRenderingMatrix
@@ -39,6 +44,13 @@ EXPORTS
   EffekseerSetModelLoaderEvent
   EffekseerSetSoundLoaderEvent
   EffekseerSetSoundPlayerEvent
+
+  GetUnityRenderParameter
+  GetUnityRenderParameterCount
+  GetUnityRenderVertexBuffer
+  GetUnityRenderVertexBufferCount
+  GetUnityRenderInfoBuffer
+  SetMaterial
 
   StartNetwork
   StopNetwork

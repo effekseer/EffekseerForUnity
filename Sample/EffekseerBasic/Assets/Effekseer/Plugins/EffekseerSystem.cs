@@ -75,26 +75,7 @@ public class EffekseerSystem : MonoBehaviour
 	/// エフェクトの描画するタイミング
 	/// </summary>
 	const CameraEvent cameraEvent	= CameraEvent.AfterForwardAlpha;
-
-	#region Network
-	/// <summary xml:lang="en">
-	/// A network port to edit effects from remote
-	/// </summary>
-	/// <summary xml:lang="ja">
-	/// リモートでエフェクトを編集するためのネットワークのポート
-	/// </summary>
-	public uint NetworkPort = 60000;
-
-	/// <summary xml:lang="en">
-	/// Does run a server automatically to edit effects from remote?
-	/// </summary>
-	/// <summary xml:lang="ja">
-	/// リモートでエフェクトを編集するためにサーバーを自動的に起動するか?
-	/// </summary>
-	public bool DoStartNetworkAutomatically = false;
-	#endregion
-
-
+	
 	/// <summary xml:lang="en">
 	/// Plays the effect.
 	/// </summary>
@@ -180,32 +161,8 @@ public class EffekseerSystem : MonoBehaviour
 		Instance._ReleaseEffect(name);
 	}
 
-	#region Network
-	/// <summary xml:lang="en">
-	/// start a server to edit effects from remote
-	/// </summary>
-	/// <summary xml:lang="ja">
-	/// リモートでエフェクトを編集するためにサーバーを起動する。
-	/// </summary>
-	public static bool StartNetwork()
-	{
-		return Plugin.StartNetwork((int)Instance.NetworkPort) > 0;
-	}
-
-	/// <summary xml:lang="en">
-	/// stop a server to edit effects from remote
-	/// </summary>
-	/// <summary xml:lang="ja">
-	/// リモートでエフェクトを編集するためにサーバーを停止する。
-	/// </summary>
-	public static void StopNetwork()
-	{
-		Plugin.StopNetwork();
-	}
-	#endregion
-
 	#region Internal Implimentation
-
+	
 	// Singleton instance
 	private static EffekseerSystem instance = null;
 	public static EffekseerSystem Instance
@@ -344,12 +301,7 @@ public class EffekseerSystem : MonoBehaviour
 
 		this.assetBundle = assetBundle;
 		GCHandle ghc = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-
-		currentLoadingEffectPath = name;
-		var namePtr = Marshal.StringToCoTaskMemUni(name);
-		IntPtr effect = Plugin.EffekseerLoadEffectOnMemory(ghc.AddrOfPinnedObject(), bytes.Length, namePtr);
-		currentLoadingEffectPath = string.Empty;
-		Marshal.FreeCoTaskMem(namePtr);
+		IntPtr effect = Plugin.EffekseerLoadEffectOnMemory(ghc.AddrOfPinnedObject(), bytes.Length);
 		ghc.Free();
 		this.assetBundle = null;
 		
@@ -359,7 +311,7 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	private void _ReleaseEffect(string name) {
-		if (effectList.ContainsKey(name)) {
+		if (effectList.ContainsKey(name) == false) {
 			var effect = effectList[name];
 			Plugin.EffekseerReleaseEffect(effect);
 			effectList.Remove(name);
@@ -430,19 +382,12 @@ public class EffekseerSystem : MonoBehaviour
 		}
 		
 		Camera.onPreCull += OnPreCullEvent;
-
-		if(Instance.DoStartNetworkAutomatically)
-		{
-			StartNetwork();
-		}
 	}
 
 	internal void Term() {
 		if (--this.initedCount > 0) {
 			return;
 		}
-
-		StopNetwork();
 		
 		Camera.onPreCull -= OnPreCullEvent;
 
@@ -511,9 +456,6 @@ public class EffekseerSystem : MonoBehaviour
 	}
 	
 	void LateUpdate() {
-
-		Plugin.UpdateNetwork();
-
 		float deltaFrames = Time.deltaTime * 60.0f;
 		int updateCount = Mathf.Max(1, Mathf.RoundToInt(deltaFrames));
 		for (int i = 0; i < updateCount; i++) {
@@ -591,20 +533,11 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// HACK
-	/// </summary>
-	internal static string currentLoadingEffectPath = string.Empty;
-
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderLoad))]
 	private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format) {
 		var pathstr = Marshal.PtrToStringUni(path);
-
-		// HACK
-		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
-
 		var res = new TextureResource();
-		if (res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle)) {
+		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle)) {
 			EffekseerSystem.Instance.textureList.Add(res);
 			width = res.texture.width;
 			height = res.texture.height;
@@ -624,9 +557,8 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerTextureLoaderUnload))]
 	private static void TextureLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
-
 		foreach (var res in EffekseerSystem.Instance.textureList) {
-			if (res.keyPath == pathstr) {
+			if (res.path == pathstr) {
 				EffekseerSystem.Instance.textureList.Remove(res);
 				return;
 			}
@@ -635,13 +567,9 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerModelLoaderLoad))]
 	private static int ModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize) {
 		var pathstr = Marshal.PtrToStringUni(path);
-
-		// HACK
-		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
-
 		var res = new ModelResource();
 
-		if(!res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle))
+		if(!res.Load(pathstr, EffekseerSystem.Instance.assetBundle))
 		{
 			return 0;
 		}
@@ -657,7 +585,7 @@ public class EffekseerSystem : MonoBehaviour
 	private static void ModelLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		foreach (var res in EffekseerSystem.Instance.modelList) {
-			if (res.keyPath == pathstr) {
+			if (res.path == pathstr) {
 				EffekseerSystem.Instance.modelList.Remove(res);
 				return;
 			}
@@ -666,12 +594,8 @@ public class EffekseerSystem : MonoBehaviour
 	[AOT.MonoPInvokeCallbackAttribute(typeof(Plugin.EffekseerSoundLoaderLoad))]
 	private static int SoundLoaderLoad(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
-
-		// HACK
-		var combinedPath = CombinePathForResource(currentLoadingEffectPath, pathstr);
-
 		var res = new SoundResource();
-		if (res.Load(combinedPath, pathstr, EffekseerSystem.Instance.assetBundle)) {
+		if (res.Load(pathstr, EffekseerSystem.Instance.assetBundle)) {
 			EffekseerSystem.Instance.soundList.Add(res);
 			return EffekseerSystem.Instance.soundList.Count;
 		}
@@ -681,7 +605,7 @@ public class EffekseerSystem : MonoBehaviour
 	private static void SoundLoaderUnload(IntPtr path) {
 		var pathstr = Marshal.PtrToStringUni(path);
 		foreach (var res in EffekseerSystem.Instance.soundList) {
-			if (res.keyPath == pathstr) {
+			if (res.path == pathstr) {
 				EffekseerSystem.Instance.soundList.Remove(res);
 				return;
 			}
@@ -758,37 +682,6 @@ public class EffekseerSystem : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// This is HACK
-	/// </summary>
-	/// <param name="effectName"></param>
-	/// <param name="resourcePath"></param>
-	/// <returns></returns>
-	private static string CombinePathForResource(string effectName, string resourcePath)
-	{
-		var directoryName = System.IO.Path.GetDirectoryName(currentLoadingEffectPath);
-		if (directoryName == string.Empty) return resourcePath;
-		return NormalizePath(directoryName + "/" + resourcePath);
-	}
-
-	private static string NormalizePath(string path)
-	{
-		var pathes = new List<string>(path.Split('\\', '/'));
-
-		for (int i = 0; i < pathes.Count - 1;)
-		{
-			if (pathes[i + 1] == "..")
-			{
-				pathes.RemoveRange(i, 2);
-			}
-			else
-			{
-				i++;
-			}
-		}
-
-		return string.Join("/", pathes.ToArray());
-	}
 	#endregion
 }
 

@@ -35,6 +35,9 @@ namespace EffekseerPlugin
 			[soundID](const std::pair<std::u16string, SoundResource>& pair){
 				return pair.second.soundID == soundID;
 			});
+		if (it == resources.end()) {
+			return;
+		}
 
 		// 参照カウンタが0になったら実際にアンロード
 		it->second.referenceCount--;

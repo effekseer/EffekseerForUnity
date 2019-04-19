@@ -4,13 +4,16 @@
 
 #include <vector>
 #include "Effekseer.h"
-#include "IUnityInterface.h"
-
-//#define UNITY_INTERFACE_EXPORT	// Must export by .def!!
-#define UNITY_API UNITY_INTERFACE_API
+#include "../unity/IUnityInterface.h"
 
 namespace EffekseerPlugin
 {
+	enum class RendererType : int
+	{
+		Native = 0,
+		Unity = 1,
+	};
+
 	const int MAX_RENDER_PATH = 128;
 
 	extern Effekseer::Manager*	g_EffekseerManager;

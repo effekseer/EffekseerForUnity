@@ -1,4 +1,4 @@
-#include <algorithm>
+ï»¿#include <algorithm>
 #include "EffekseerPluginModel.h"
 
 namespace EffekseerPlugin
@@ -55,7 +55,7 @@ namespace EffekseerPlugin
 	{
 	}
 	void* ModelLoader::Load( const EFK_CHAR* path ){
-		// ƒŠƒ\[ƒXƒe[ƒuƒ‹‚ğŒŸõ‚µ‚Ä‘¶İ‚µ‚½‚ç‚»‚ê‚ğg‚¤
+		// ãƒªã‚½ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒ–ãƒ«ã‚’æ¤œç´¢ã—ã¦å­˜åœ¨ã—ãŸã‚‰ãã‚Œã‚’ä½¿ã†
 		auto it = resources.find((const char16_t*)path);
 		if (it != resources.end()) {
 			it->second.referenceCount++;
@@ -64,31 +64,32 @@ namespace EffekseerPlugin
 
 		// Load with unity
 		ModelResource res;
-		int size = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size() );
+		int requiredDataSize = 0;
+		auto modelPtr = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
 
-		if (size == 0)
+		if (requiredDataSize == 0)
 		{
 			// Failed to load
 			return nullptr;
 		}
 
-		if (size < 0)
+		if (modelPtr == nullptr)
 		{
 			// Lack of memory
-			memoryFile.Resize(-size);
+			memoryFile.Resize(requiredDataSize);
 
 			// Load with unity
-			size = load((const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size());
+			modelPtr = load((const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
 
-			if(size <= 0)
+			if(modelPtr == nullptr)
 			{
 				// Failed to load
 				return nullptr;
 			}
 		}
 
-		// “à•”ƒ[ƒ_‚É“n‚µ‚Äƒ[ƒhˆ—‚·‚é
-		memoryFile.loadsize = (size_t)size;
+		// å†…éƒ¨ãƒ­ãƒ¼ãƒ€ã«æ¸¡ã—ã¦ãƒ­ãƒ¼ãƒ‰å‡¦ç†ã™ã‚‹
+		memoryFile.loadsize = (size_t)requiredDataSize;
 		res.internalData = internalLoader->Load( path );
 			
 		resources.insert( std::make_pair(
@@ -100,18 +101,21 @@ namespace EffekseerPlugin
 			return;
 		}
 
-		// ƒAƒ“ƒ[ƒh‚·‚éƒ‚ƒfƒ‹‚ğŒŸõ
+		// ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ãƒ¢ãƒ‡ãƒ«ã‚’æ¤œç´¢
 		auto it = std::find_if(resources.begin(), resources.end(), 
 			[source](const std::pair<std::u16string, ModelResource>& pair){
 				return pair.second.internalData == source;
 			});
+		if (it == resources.end()) {
+			return;
+		}
 
-		// QÆƒJƒEƒ“ƒ^‚ª0‚É‚È‚Á‚½‚çÀÛ‚ÉƒAƒ“ƒ[ƒh
+		// å‚ç…§ã‚«ã‚¦ãƒ³ã‚¿ãŒ0ã«ãªã£ãŸã‚‰å®Ÿéš›ã«ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰
 		it->second.referenceCount--;
 		if (it->second.referenceCount <= 0)
 		{
 			internalLoader->Unload(it->second.internalData);
-			unload(it->first.c_str());
+			unload(it->first.c_str(), nullptr);
 			resources.erase(it);
 		}
 	}
