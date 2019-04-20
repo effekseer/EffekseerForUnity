@@ -149,7 +149,7 @@ namespace Effekseer
 			if (!nativeEffects.TryGetValue(id, out nativeEffect)) {
 				byte[] bytes = effectAsset.efkBytes;
 				var namePtr = Marshal.StringToCoTaskMemUni(effectAsset.name);
-				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length, namePtr);
+				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length, namePtr, effectAsset.Scale);
 				nativeEffects.Add(id, nativeEffect);
 				loadedEffects.Add(effectAsset);
 				Marshal.FreeCoTaskMem(namePtr);

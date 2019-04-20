@@ -88,10 +88,11 @@ GraphicsDX9::~GraphicsDX9() { assert(d3d9Device == nullptr); }
 bool GraphicsDX9::Initialize(IUnityInterfaces* unityInterfaces)
 {
 	d3d9Device = unityInterfaces->Get<IUnityGraphicsD3D9>()->GetDevice();
+	ES_SAFE_ADDREF(d3d9Device);
 	return true;
 }
 
-void GraphicsDX9::Shutdown(IUnityInterfaces* unityInterface) {}
+void GraphicsDX9::Shutdown(IUnityInterfaces* unityInterface) { ES_SAFE_RELEASE(d3d9Device); }
 
 EffekseerRenderer::Renderer* GraphicsDX9::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {

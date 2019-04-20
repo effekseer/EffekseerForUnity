@@ -21,6 +21,14 @@ namespace Effekseer.Editor
 			
 			EditorGUILayout.LabelField("Data Size", asset.efkBytes.Length.ToString() + " bytes");
 
+            var scale = EditorGUILayout.FloatField("Scale", asset.Scale);
+            scale = Math.Max(0, scale);
+            if(asset.Scale != scale)
+            {
+                asset.Scale = scale;
+                EditorUtility.SetDirty(asset);
+            }
+
 			textureVisible = EditorGUILayout.Foldout(textureVisible, "Texture Resources: " + asset.textureResources.Length);
 			if (textureVisible) {
 				EditorGUI.indentLevel++;

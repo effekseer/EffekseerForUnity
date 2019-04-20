@@ -67,13 +67,13 @@ extern "C"
 	}
 	
 	// エフェクトのロード
-	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffect(const EFK_CHAR* path)
+	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffect(const EFK_CHAR* path, float magnification)
 	{
 		if (g_EffekseerManager == NULL) {
 			return NULL;
 		}
 		
-		auto effect = Effect::Create(g_EffekseerManager, path);
+		auto effect = Effect::Create(g_EffekseerManager, path, magnification);
 
 		if (Network::GetInstance()->IsRunning())
 		{
@@ -84,13 +84,16 @@ extern "C"
 	}
 	
 	// エフェクトのロード（メモリ指定）
-	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data, int32_t size, const EFK_CHAR* path)
+	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data,
+																				   int32_t size,
+																				   const EFK_CHAR* path,
+																				   float magnification)
 	{
 		if (g_EffekseerManager == NULL) {
 			return NULL;
 		}
 		
-		auto effect = Effect::Create(g_EffekseerManager, data, size);
+		auto effect = Effect::Create(g_EffekseerManager, data, size, magnification);
 		
 		if (effect != nullptr)
 		{

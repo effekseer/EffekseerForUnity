@@ -55,8 +55,11 @@ namespace Effekseer
 		public EffekseerSoundResource[] soundResources;
 		[SerializeField]
 		public EffekseerModelResource[] modelResources;
-		
-		internal static HashSet<EffekseerEffectAsset> enabledAssets = new HashSet<EffekseerEffectAsset>();
+
+        [SerializeField]
+        public float Scale = 1.0f;
+
+        internal static HashSet<EffekseerEffectAsset> enabledAssets = new HashSet<EffekseerEffectAsset>();
 		
 		void OnEnable()
 		{
@@ -93,9 +96,14 @@ namespace Effekseer
 		}
 
 #if UNITY_EDITOR
-		public static void CreateAsset(string path)
+        public static void CreateAsset(string path)
+        {
+            byte[] data = File.ReadAllBytes(path);
+            CreateAsset(path, data);
+        }
+
+        public static void CreateAsset(string path, byte[] data)
 		{
-			byte[] data = File.ReadAllBytes(path);
 			if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E') {
 				return;
 			}

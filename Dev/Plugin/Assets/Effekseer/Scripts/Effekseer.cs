@@ -78,10 +78,10 @@ namespace Effekseer
 		public static extern void EffekseerSetRenderSettings(int renderId, bool renderIntoTexture);
 
 		[DllImport(pluginName)]
-		public static extern IntPtr EffekseerLoadEffect(IntPtr path);
+		public static extern IntPtr EffekseerLoadEffect(IntPtr path, float magnification);
 
 		[DllImport(pluginName)]
-		public static extern IntPtr EffekseerLoadEffectOnMemory(byte[] data, int size, IntPtr path);
+		public static extern IntPtr EffekseerLoadEffectOnMemory(byte[] data, int size, IntPtr path, float magnification);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerReleaseEffect(IntPtr effect);

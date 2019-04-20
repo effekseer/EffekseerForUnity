@@ -23,7 +23,14 @@ namespace Effekseer.Editor
 				{
 					EffekseerModelAsset.CreateAsset(assetPath);
 				}
-			}
+                if (Path.GetExtension(assetPath) == ".efkproj")
+                {
+                    EffekseerTool.Core.LoadFrom(assetPath);
+                    var exporter = new EffekseerTool.Binary.Exporter();
+                    var data = exporter.Export(1);
+                    EffekseerEffectAsset.CreateAsset(assetPath, data);
+                }
+            }
 		}
 	}
 }
