@@ -16,7 +16,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 		
-		void Render(Camera camera, int? dstID);
+		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstUdentifier);
 
 		void OnPostRender(Camera camera);
 	}
@@ -486,10 +486,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null);
+			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID)
+		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -571,7 +571,7 @@ namespace Effekseer.Internal
 
 			// Distortion
 			if (settings.enableDistortion && 
-				(path.renderTexture != null || dstID.HasValue))
+				(path.renderTexture != null || dstID.HasValue || dstIdentifier.HasValue))
 			{
 				// Add a blit command that copy to the distortion texture
 				if(dstID.HasValue)
@@ -579,6 +579,11 @@ namespace Effekseer.Internal
 					path.commandBuffer.Blit(dstID.Value, path.renderTexture);
 					path.commandBuffer.SetRenderTarget(dstID.Value);
 				}
+                else if (dstIdentifier.HasValue)
+                {
+                    path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture);
+                    path.commandBuffer.SetRenderTarget(dstIdentifier.Value);
+                }
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture);
@@ -934,10 +939,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null);
+			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID)
+		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstUdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
 

@@ -1,4 +1,4 @@
-# EffekseerForUnity
+﻿# EffekseerForUnity
 
 This is the Effekseer's runtime plugin for Unity.  
 You will be able to show the effects that was created with Effekseer.  
@@ -33,7 +33,7 @@ git clone https://github.com/effekseer/EffekseerForUnity
 
 ### Build binaries
 
-You need to native binaries.
+You need to build native binaries.
 
 #### Windows
 

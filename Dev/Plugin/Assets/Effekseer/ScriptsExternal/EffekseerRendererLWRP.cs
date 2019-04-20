@@ -1,4 +1,66 @@
-﻿/*
+﻿// After 5.7
+/*
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.LWRP;
+
+namespace Effekseer
+{
+    public class EffekseerRendererLWRP : ScriptableRendererFeature
+    {
+        static RenderTargetHandle afterTransparent;
+
+        public EffekseerRendererLWRP()
+        {
+            afterTransparent.Init("_AfterTransparent");
+        }
+
+        public override void Create()
+        {
+        }
+
+        public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+        {
+            var pass = new EffekseerRenderPassLWRP(renderer.cameraColorTarget);
+            renderer.EnqueuePass(pass);
+        }
+    }
+
+    class EffekseerRenderPassLWRP : ScriptableRenderPass
+    {
+        RenderTargetIdentifier cameraColorTarget;
+
+        public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget)
+        {
+            this.cameraColorTarget = cameraColorTarget;
+            this.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
+        }
+
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        {
+            if (EffekseerSystem.Instance == null) return;
+
+            EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, null, this.cameraColorTarget);
+            var commandBuffer = EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
+
+            if (commandBuffer != null)
+            {
+                context.ExecuteCommandBuffer(commandBuffer);
+                context.Submit();
+            }
+        }
+    }
+}
+*/
+
+// Before 5.7
+/*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +104,7 @@ namespace Effekseer
 		{
 			if (EffekseerSystem.Instance == null) return;
 
-			EffekseerSystem.Instance.renderer.Render(cameraComponent, dstID);
+			EffekseerSystem.Instance.renderer.Render(cameraComponent, dstID, null);
 			var commandBuffer = EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(cameraComponent);
 
 			if (commandBuffer != null)
