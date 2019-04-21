@@ -94,10 +94,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="resource_files" class="level2">
 <h2>リソースファイルについて</h2>
-<p>Unityのプロジェクトに出力済エフェクト(*.efk)やテクスチャ、サウンドを配置します。<br />
-*.efkファイルをインポートすると、.efkファイルのほかにEffectAssetが生成されます。</p>
+<p>Unityのプロジェクトにエフェクトプロジェクトファイル(<em>.efkproj)、出力済エフェクト(</em>.efk)やテクスチャ、サウンドを配置します。<br />
+*.efk,efkprojファイルをインポートすると、.efk,efkprojファイルのほかにEffectAssetが生成されます。</p>
 <p><img src="../img/unity_resource.png" /></p>
-<p>.efkファイルは削除しても問題ありません。 また、現在はカスタムパッケージ作成の時に.efkファイルを含めてはいけません。</p>
+<p>.efk,efkprojファイルは削除しても問題ありません。 また、現在はカスタムパッケージ作成の時に.efk,efkprojファイルを含めてはいけません。</p>
 </section>
 <section id="emitter_playback" class="level2">
 <h2>エミッタを使って再生する方法</h2>
@@ -149,6 +149,19 @@ GameObjectに連動したエフェクトの再生を行うことができます�
 もし動かしたいときは手動で設定してやる必要があります。</p>
 <p>ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。</p>
 </section>
+</section>
+<section class="level2">
+<h2>Light Weight Render Pipeline</h2>
+<p>Effekseer は Light Weight Render Pipeline に対応しています。. LWRPはUnityでは標準に含まれていないため、 <em>ScriptsExternal/EffekseerRendererLWRP.cs</em> からコメントアウトを外してください。</p>
+<p>Effekseerのエフェクトを表示するために <em>Custom Forward Render</em> を使用します。</p>
+<p><em>Assets -&gt; Create -&gt; Rendering -&gt; Lightweight Render Pipeline -&gt; Forward Render</em> から <em>Forward Render Asset</em> を作成します。</p>
+<p><em>Pipeline Asset</em> から <em>Renderer Type</em> を <em>Custom</em> に変更します。 <em>Data</em> に先ほど作成した <em>Forward Render Asset</em> を設定します。</p>
+<p><em>Forward Render Asset</em> の <em>Render Features</em> から <em>EffekseerRenderer</em> を追加します。</p>
+<p>現在、UnityRendererのみLWRPに対応しています。</p>
+</section>
+<section class="level2">
+<h2>High Definition Render Pipeline</h2>
+<p>対応予定です。</p>
 </section>
 <section class="level2">
 <h2>ネットワーク機能</h2>

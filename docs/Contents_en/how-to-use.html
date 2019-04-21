@@ -94,10 +94,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="resource_files" class="level2">
 <h2>About resource files</h2>
-<p>Place the output effect (<em>.efk), texture, sound in Unity project.<br />
-When importing the </em>.efk file, EffectAsset is generated in addition of *.efk file.</p>
+<p>Place the output effect projcet(<em>.efkproj), effect (</em>.efk), texture, sound in Unity project.<br />
+When importing the <em>.efk, efkproj file, EffectAsset is generated in addition of </em>.efk, efkproj file.</p>
 <p><img src="../img/unity_resource.png" /></p>
-<p>It is no problem that you remove .efk files. Please don’t include .efk in custom packages currently.</p>
+<p>It is no problem that you remove .efk, efkproj files. Please don’t include .efk, efkproj in custom packages currently.</p>
 </section>
 <section id="emitter_playback" class="level2">
 <h2>Play by Emitter</h2>
@@ -143,15 +143,23 @@ In that case will play the effect linked to GameObject.</p>
 <a class="sourceLine" id="cb1-9" data-line-number="9">}</a></code></pre></div>
 </section>
 <section class="level3">
-<h3>LightWeightRenderPipeline (Experimental)</h3>
-<p>Effekseer supports LightWeightRenderPipeline. Please remove comment out from <code>ScriptsExternal/EffekseerRendererLWRP.cs</code> because LWRP is not contained in Unity with default settings at first.</p>
-<p>Add <code>Effekseer/Effekseer RendererLWRP</code> to GameObject with Camera.</p>
-</section>
-<section class="level3">
 <h3>Note</h3>
 <p>When playing with PlayEffect(), the position rotation does not change automatically. If you want to move it you need to set it manually.</p>
 <p>Suitable for simple use, such as hit effects and explosion effects.</p>
 </section>
+</section>
+<section class="level2">
+<h2>Light Weight Render Pipeline</h2>
+<p>Effekseer supports LightWeightRenderPipeline. Please remove comment out from <em>ScriptsExternal/EffekseerRendererLWRP.cs</em> because LWRP is not contained in Unity with default settings at first.</p>
+<p><em>Custom Forward Render</em> is used to show effects of Effekseer.</p>
+<p>Create <em>Forward Render Asset</em> from <em>Assets -&gt; Create -&gt; Rendering -&gt; Lightweight Render Pipeline -&gt; Forward Render</em>.</p>
+<p>Change <em>Renderer Type</em> into <em>Custom</em> from <em>Pipeline Asset</em>. Specify created <em>Forward Render Asset</em> to <em>Data</em>.</p>
+<p>Add EffekseerRenderer from <em>Render Features</em> in <em>Forward Render Asset</em>.</p>
+<p>LWRP is only supported with UnityRenderer now.</p>
+</section>
+<section class="level2">
+<h2>High Definition Render Pipeline</h2>
+<p>I will support it.</p>
 </section>
 <section class="level2">
 <h2>Network</h2>

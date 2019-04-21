@@ -10,13 +10,13 @@ There is a sample project using the Effekseer plugin in the following places.
 
 ## About resource files {#resource_files}
 
-Place the output effect (*.efk), texture, sound in Unity project.  
-When importing the *.efk file, EffectAsset is generated in addition of *.efk file.
+Place the output effect projcet(*.efkproj), effect (*.efk), texture, sound in Unity project.  
+When importing the *.efk, efkproj file, EffectAsset is generated in addition of *.efk, efkproj file.
 
 ![](../img/unity_resource.png)
 
-It is no problem that you remove .efk files.
-Please don't include .efk in custom packages currently. 
+It is no problem that you remove .efk, efkproj files.
+Please don't include .efk, efkproj in custom packages currently. 
 
 ## Play by Emitter {#emitter_playback}
 
@@ -65,19 +65,32 @@ void Start()
 }
 ```
 
-### LightWeightRenderPipeline (Experimental)
-
-Effekseer supports LightWeightRenderPipeline.
-Please remove comment out from ``` ScriptsExternal/EffekseerRendererLWRP.cs ``` because LWRP is not contained in Unity with default settings at first.
-
-Add ``` Effekseer/Effekseer RendererLWRP ``` to GameObject with Camera. 
-
 ### Note
 
 When playing with PlayEffect(), the position rotation does not change automatically.
 If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
+
+## Light Weight Render Pipeline
+
+Effekseer supports LightWeightRenderPipeline.
+Please remove comment out from *ScriptsExternal/EffekseerRendererLWRP.cs* because LWRP is not contained in Unity with default settings at first.
+
+*Custom Forward Render* is used to show effects of Effekseer.
+
+Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render*.
+
+Change *Renderer Type* into *Custom* from *Pipeline Asset*. Specify created *Forward Render Asset* to *Data*.
+
+Add EffekseerRenderer from *Render Features* in *Forward Render Asset*.
+
+LWRP is only supported with UnityRenderer now.
+
+## High Definition Render Pipeline
+
+I will support it.
+
 
 ## Network
 You can edit the playing effect in Unity via the network from the outside when application is running.
