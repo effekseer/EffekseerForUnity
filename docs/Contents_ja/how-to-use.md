@@ -76,7 +76,7 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。
 
-## Light Weight Render Pipeline
+## Light Weight Render Pipeline {#lwrp}
 
 Effekseer は Light Weight Render Pipeline に対応しています。.
 LWRPはUnityでは標準に含まれていないため、 *ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
@@ -90,6 +90,8 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 *Forward Render Asset* の *Render Features* から *EffekseerRenderer* を追加します。
 
 現在、UnityRendererのみLWRPに対応しています。
+
+古いLWRPでは、* Effekseer/Effekseer RendererLWRP * コンポーネントをカメラがあるGameObjectに設定してください。
 
 ## High Definition Render Pipeline
 

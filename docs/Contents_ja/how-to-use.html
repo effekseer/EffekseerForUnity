@@ -150,7 +150,7 @@ GameObjectに連動したエフェクトの再生を行うことができます�
 <p>ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。</p>
 </section>
 </section>
-<section class="level2">
+<section id="lwrp" class="level2">
 <h2>Light Weight Render Pipeline</h2>
 <p>Effekseer は Light Weight Render Pipeline に対応しています。. LWRPはUnityでは標準に含まれていないため、 <em>ScriptsExternal/EffekseerRendererLWRP.cs</em> からコメントアウトを外してください。</p>
 <p>Effekseerのエフェクトを表示するために <em>Custom Forward Render</em> を使用します。</p>
@@ -158,6 +158,7 @@ GameObjectに連動したエフェクトの再生を行うことができます�
 <p><em>Pipeline Asset</em> から <em>Renderer Type</em> を <em>Custom</em> に変更します。 <em>Data</em> に先ほど作成した <em>Forward Render Asset</em> を設定します。</p>
 <p><em>Forward Render Asset</em> の <em>Render Features</em> から <em>EffekseerRenderer</em> を追加します。</p>
 <p>現在、UnityRendererのみLWRPに対応しています。</p>
+<p>古いLWRPでは、* Effekseer/Effekseer RendererLWRP * コンポーネントをカメラがあるGameObjectに設定してください。</p>
 </section>
 <section class="level2">
 <h2>High Definition Render Pipeline</h2>

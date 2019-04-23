@@ -87,6 +87,8 @@ Add EffekseerRenderer from *Render Features* in *Forward Render Asset*.
 
 LWRP is only supported with UnityRenderer now.
 
+Add * Effekseer/Effekseer RendererLWRP * component to GameObject with Camera in old LWRP.
+
 ## High Definition Render Pipeline
 
 I will support it.

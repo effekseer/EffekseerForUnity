@@ -57,7 +57,7 @@ namespace EffekseerTool
 		{
 			get;
 			private set;
-		} = Language.English;
+		}
 
 		public static Data.NodeRoot Root
 		{
@@ -298,6 +298,7 @@ namespace EffekseerTool
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+            Language = Language.English;
         }
 
 		public static void Initialize(Language? language = null)
@@ -937,7 +938,7 @@ namespace EffekseerTool
 			// Check
 			if(movedNode.Parent == targetParent && targetIndex != int.MaxValue)
 			{
-				var index = targetParent.Children.Internal.Select((i, n) => Tuple.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
+				var index = targetParent.Children.Internal.Select((i, n) => Tuple35.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
 
 				// Not changed.
 				if (index == targetIndex || index + 1 == targetIndex)
@@ -976,7 +977,7 @@ namespace EffekseerTool
 			// 
 			if(targetParent == movedNode.Parent && targetIndex != int.MaxValue)
 			{
-				var index = targetParent.Children.Internal.Select((i, n) => Tuple.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
+				var index = targetParent.Children.Internal.Select((i, n) => Tuple35.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
 				if(index < targetIndex)
 				{
 					targetIndex -= 1;
@@ -999,9 +1000,9 @@ namespace EffekseerTool
 			// 実行速度を上げるために、全て力技で対応
 
 			// 値を取得する
-			Func<Data.Node, Tuple<string, object>[]> getParameters = (node) =>
+			Func<Data.Node, Tuple35<string, object>[]> getParameters = (node) =>
 				{
-					var list = new List<Tuple<string, object>>();
+					var list = new List<Tuple35<string, object>>();
 
 					if (node.LocationValues.Type.Value == Data.LocationValues.ParamaterType.LocationFCurve)
 					{
@@ -1011,7 +1012,7 @@ namespace EffekseerTool
 							name = "位置";
 						}
 
-						list.Add(Tuple.Create(name,(object)node.LocationValues.LocationFCurve.FCurve));
+						list.Add(Tuple35.Create(name,(object)node.LocationValues.LocationFCurve.FCurve));
 					}
 
 					if (node.RotationValues.Type.Value == Data.RotationValues.ParamaterType.RotationFCurve)
@@ -1022,7 +1023,7 @@ namespace EffekseerTool
 							name = "角度";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.RotationValues.RotationFCurve.FCurve));
+						list.Add(Tuple35.Create(name, (object)node.RotationValues.RotationFCurve.FCurve));
 					}
 
 					if (node.ScalingValues.Type.Value == Data.ScaleValues.ParamaterType.FCurve)
@@ -1033,7 +1034,7 @@ namespace EffekseerTool
 							name = "拡大率";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.ScalingValues.FCurve.FCurve));
+						list.Add(Tuple35.Create(name, (object)node.ScalingValues.FCurve.FCurve));
 					}
 
 					if (node.RendererCommonValues.UV.Value == Data.RendererCommonValues.UVType.FCurve)
@@ -1044,7 +1045,7 @@ namespace EffekseerTool
 							name = "UV(始点)";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.RendererCommonValues.UVFCurve.Start));
+						list.Add(Tuple35.Create(name, (object)node.RendererCommonValues.UVFCurve.Start));
 					}
 
 					if (node.RendererCommonValues.UV.Value == Data.RendererCommonValues.UVType.FCurve)
@@ -1055,7 +1056,7 @@ namespace EffekseerTool
 							name = "UV(大きさ)";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.RendererCommonValues.UVFCurve.Size));
+						list.Add(Tuple35.Create(name, (object)node.RendererCommonValues.UVFCurve.Size));
 					}
 
 					if (node.DrawingValues.Type.Value == Data.RendererValues.ParamaterType.Sprite &&
@@ -1067,7 +1068,7 @@ namespace EffekseerTool
 							name = "スプライト・全体色(RGBA)";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.DrawingValues.Sprite.ColorAll_FCurve.FCurve));
+						list.Add(Tuple35.Create(name, (object)node.DrawingValues.Sprite.ColorAll_FCurve.FCurve));
 					}
 
 					if (node.DrawingValues.Type.Value == Data.RendererValues.ParamaterType.Model &&
@@ -1079,7 +1080,7 @@ namespace EffekseerTool
 							name = "モデル・色(RGBA)";
 						}
 
-						list.Add(Tuple.Create(name, (object)node.DrawingValues.Model.Color_FCurve.FCurve));
+						list.Add(Tuple35.Create(name, (object)node.DrawingValues.Model.Color_FCurve.FCurve));
 					}
 
 					if (node.DrawingValues.Type.Value == Data.RendererValues.ParamaterType.Track)
@@ -1092,7 +1093,7 @@ namespace EffekseerTool
 								name = "軌跡・左(RGBA)";
 							}
 
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorLeft_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorLeft_FCurve.FCurve));
 						}
 
 						if (node.DrawingValues.Track.ColorLeftMiddle.Value == Data.StandardColorType.FCurve)
@@ -1103,7 +1104,7 @@ namespace EffekseerTool
 								name = "軌跡・左中間(RGBA)";
 							}
 
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorLeftMiddle_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorLeftMiddle_FCurve.FCurve));
 						}
 
 						if (node.DrawingValues.Track.ColorCenter.Value == Data.StandardColorType.FCurve)
@@ -1114,7 +1115,7 @@ namespace EffekseerTool
 								name = "軌跡・中央(RGBA)";
 							}
 
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorCenter_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorCenter_FCurve.FCurve));
 						}
 
 						if (node.DrawingValues.Track.ColorCenterMiddle.Value == Data.StandardColorType.FCurve)
@@ -1125,7 +1126,7 @@ namespace EffekseerTool
 								name = "軌跡・中央中間(RGBA)";
 							}
 
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorCenterMiddle_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorCenterMiddle_FCurve.FCurve));
 						}
 
 						if (node.DrawingValues.Track.ColorRight.Value == Data.StandardColorType.FCurve)
@@ -1136,7 +1137,7 @@ namespace EffekseerTool
 								name = "軌跡・右(RGBA)";
 							}
 
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorRight_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorRight_FCurve.FCurve));
 						}
 
 						if (node.DrawingValues.Track.ColorRightMiddle.Value == Data.StandardColorType.FCurve)
@@ -1147,7 +1148,7 @@ namespace EffekseerTool
 								name = "軌跡・右中間(RGBA)";
 
 							}
-							list.Add(Tuple.Create(name, (object)node.DrawingValues.Track.ColorRightMiddle_FCurve.FCurve));
+							list.Add(Tuple35.Create(name, (object)node.DrawingValues.Track.ColorRightMiddle_FCurve.FCurve));
 						}
 					}
 
@@ -1159,14 +1160,14 @@ namespace EffekseerTool
 
 			getParameterTreeNodes = (node) =>
 				{
-					Tuple<string, object>[] parameters = null;
+					Tuple35<string, object>[] parameters = null;
 
 					var rootNode = node as Data.NodeRoot;
 					var normalNode = node as Data.Node;
 
 					if (rootNode != null)
 					{
-						parameters = new Tuple<string, object>[0];
+						parameters = new Tuple35<string, object>[0];
 					}
 					else if (normalNode != null)
 					{
@@ -1277,7 +1278,7 @@ namespace EffekseerTool
 				if (strs.Length < 2) continue;
 
 				var key = strs[0];
-				var value = string.Join(",", strs.Skip(1));
+				var value = string.Join(",", strs.Skip(1).ToArray());
 				value = value.Replace(@"\n", "\n");
 
 				keyToStrings.Add(key, value);
@@ -1490,6 +1491,32 @@ namespace EffekseerTool
 			NFI = culture.NumberFormat;
 		}
 	}
+
+    public class Tuple35<T1, T2>
+    {
+        public T1 Item1;
+        public T2 Item2;
+
+        public Tuple35()
+        {
+            Item1 = default(T1);
+            Item2 = default(T2);
+        }
+
+        public Tuple35(T1 t1, T2 t2)
+        {
+            Item1 = t1;
+            Item2 = t2;
+        }
+    }
+
+    public class Tuple35
+    {
+        public static Tuple35<TV1, TV2> Create<TV1, TV2>(TV1 t1, TV2 t2)
+        {
+            return new Tuple35<TV1, TV2>(t1, t2);
+        }
+    }
 }
 
 namespace EffekseerTool.Binary
@@ -1610,11 +1637,11 @@ namespace EffekseerTool.Binary
 	{
 		const int Version = 13;
 
-		public SortedSet<string> UsedTextures = new SortedSet<string>();
+		public HashSet<string> UsedTextures = new HashSet<string>();
 
-		public SortedSet<string> UsedNormalTextures = new SortedSet<string>();
+		public HashSet<string> UsedNormalTextures = new HashSet<string>();
 
-		public SortedSet<string> UsedDistortionTextures = new SortedSet<string>();
+		public HashSet<string> UsedDistortionTextures = new HashSet<string>();
 
 		/// <summary>
 		/// エフェクトデータの出力
@@ -1631,17 +1658,17 @@ namespace EffekseerTool.Binary
 			data.Add(BitConverter.GetBytes(Version));
 
 			// reset texture names
-            UsedTextures = new SortedSet<string>();
+            UsedTextures = new HashSet<string>();
 
-			UsedNormalTextures = new SortedSet<string>();
+			UsedNormalTextures = new HashSet<string>();
 
-			UsedDistortionTextures = new SortedSet<string>();
+			UsedDistortionTextures = new HashSet<string>();
 
             // ウェーブ名称一覧取得
-            SortedSet<string> waves = new SortedSet<string>();
+            HashSet<string> waves = new HashSet<string>();
 
 			// モデル名称一覧取得
-			SortedSet<string> models = new SortedSet<string>();
+			HashSet<string> models = new HashSet<string>();
 
 			Action<Data.NodeBase> get_textures = null;
 			get_textures = (node) =>
@@ -1700,7 +1727,7 @@ namespace EffekseerTool.Binary
             Dictionary<string, int> texture_and_index = new Dictionary<string, int>();
             {
                 int index = 0;
-                foreach (var texture in UsedTextures)
+                foreach (var texture in UsedTextures.ToList().OrderBy(_ => _))
                 {
                     texture_and_index.Add(texture, index);
                     index++;
@@ -1710,7 +1737,7 @@ namespace EffekseerTool.Binary
 			Dictionary<string, int> normalTexture_and_index = new Dictionary<string, int>();
 			{
 				int index = 0;
-				foreach (var texture in UsedNormalTextures)
+				foreach (var texture in UsedNormalTextures.ToList().OrderBy(_ => _))
 				{
 					normalTexture_and_index.Add(texture, index);
 					index++;
@@ -1720,7 +1747,7 @@ namespace EffekseerTool.Binary
 			Dictionary<string, int> distortionTexture_and_index = new Dictionary<string, int>();
 			{
 				int index = 0;
-				foreach (var texture in UsedDistortionTextures)
+				foreach (var texture in UsedDistortionTextures.ToList().OrderBy(_ => _))
 				{
 					distortionTexture_and_index.Add(texture, index);
 					index++;
@@ -1761,7 +1788,7 @@ namespace EffekseerTool.Binary
             Dictionary<string, int> wave_and_index = new Dictionary<string, int>();
             {
                 int index = 0;
-                foreach (var wave in waves)
+                foreach (var wave in waves.ToList().OrderBy(_ => _))
                 {
                     wave_and_index.Add(wave, index);
                     index++;
@@ -1838,7 +1865,7 @@ namespace EffekseerTool.Binary
 			Dictionary<string, int> model_and_index = new Dictionary<string, int>();
 			{
 				int index = 0;
-				foreach (var model in models)
+				foreach (var model in models.ToList().OrderBy(_ => _))
 				{
 					model_and_index.Add(model, index);
 					index++;
@@ -1866,9 +1893,9 @@ namespace EffekseerTool.Binary
 			get_nodes(Core.Root);
 
 			var snode2ind = nodes.
-				Select((v, i) => Tuple.Create(v, i)).
+				Select((v, i) => Tuple35.Create(v, i)).
 				OrderBy(_ => _.Item1.DepthValues.DrawingPriority.Value * 255 + _.Item2).
-				Select((v, i) => Tuple.Create(v.Item1, i)).ToList();
+				Select((v, i) => Tuple35.Create(v.Item1, i)).ToList();
 
 				// ファイルにテクスチャ一覧出力
 				data.Add(BitConverter.GetBytes(texture_and_index.Count));
@@ -6744,7 +6771,7 @@ namespace EffekseerTool.Data
 			var cmd = new Command.DelegateCommand(
 				() =>
 				{
-					Tuple<Node, Node> nodes = new Tuple<Node, Node>(node1, node2);
+					Tuple35<Node, Node> nodes = new Tuple35<Node, Node>(node1, node2);
 					children = new_value;
 
 					if (OnAfterExchangeNodes != null)
@@ -6754,7 +6781,7 @@ namespace EffekseerTool.Data
 				},
 				() =>
 				{
-					Tuple<Node, Node> nodes = new Tuple<Node, Node>(node2, node1);
+					Tuple35<Node, Node> nodes = new Tuple35<Node, Node>(node2, node1);
 					children = old_value;
 
 					if (OnAfterExchangeNodes != null)
@@ -7037,7 +7064,7 @@ namespace EffekseerTool.Data
 
         /// <summary>
         /// </summary>
-        Lazy<Value.PathForImage> LasyBackgroundImage;
+        Value.PathForImage LasyBackgroundImage;
 
 		[Name(language = Language.Japanese, value = "背景画像")]
 		[Description(language = Language.Japanese, value = "背景画像")]
@@ -7048,7 +7075,11 @@ namespace EffekseerTool.Data
 		{
             get
             {
-                return LasyBackgroundImage.Value;
+                if(LasyBackgroundImage == null)
+                {
+                    LasyBackgroundImage = new Value.PathForImage(Resources.GetString("ImageFilter"), false, "");
+                }
+                return LasyBackgroundImage;
             }
 		}
 
@@ -7132,53 +7163,51 @@ namespace EffekseerTool.Data
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
-        public Value.Int RecordingWidth { get; private set; } = new Value.Int(256);
+        public Value.Int RecordingWidth { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
-        public Value.Int RecordingHeight { get; private set; } = new Value.Int(256);
+        public Value.Int RecordingHeight { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown =false)]
         [IO(Export = true, Import = true)]
-        public Value.Boolean IsRecordingGuideShown { get; private set; } = new Value.Boolean(false);
+        public Value.Boolean IsRecordingGuideShown { get; private set; }
 
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Int RecordingStartingFrame { get; private set; } = new Value.Int(1);
+        public Value.Int RecordingStartingFrame { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Int RecordingEndingFrame { get; private set; } = new Value.Int(30);
+        public Value.Int RecordingEndingFrame { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Int RecordingFrequency { get; private set; } = new Value.Int(1);
+        public Value.Int RecordingFrequency { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Int RecordingHorizontalCount { get; private set; } = new Value.Int(4);
+        public Value.Int RecordingHorizontalCount { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Enum<RecordingExporterType> RecordingExporter { get; private set; } = new Value.Enum<RecordingExporterType>(Data.RecordingExporterType.Sprite);
+        public Value.Enum<RecordingExporterType> RecordingExporter { get; private set; }
 
         [Undo(Undo = false)]
         [Shown(Shown = false)]
         [IO(Export = true, Import = true)]
-        public Value.Enum<RecordingTransparentMethodType> RecordingTransparentMethod { get; private set; } = new Value.Enum<RecordingTransparentMethodType>(Data.RecordingTransparentMethodType.None);
-
+        public Value.Enum<RecordingTransparentMethodType> RecordingTransparentMethod { get; private set; }
         public OptionValues()
 		{
 			RenderingMode = new Value.Enum<RenderMode>(RenderMode.Normal);
 			BackgroundColor = new Value.Color(0, 0, 0, 255);
-            LasyBackgroundImage = new Lazy<Value.PathForImage>(() => { return new Value.PathForImage(Resources.GetString("ImageFilter"), false, ""); });
 			GridColor = new Value.Color(255, 255, 255, 255);
 			
 			IsGridShown = new Value.Boolean(true);
@@ -7203,6 +7232,16 @@ namespace EffekseerTool.Data
 			MouseSlideInvY = new Value.Boolean(false);
 
 			DistortionType = new Value.Enum<DistortionMethodType>(DistortionMethodType.Current);
+
+            RecordingWidth = new Value.Int(256);
+            RecordingHeight = new Value.Int(256);
+            IsRecordingGuideShown = new Value.Boolean(false);
+            RecordingStartingFrame = new Value.Int(1);
+            RecordingEndingFrame = new Value.Int(30);
+            RecordingFrequency = new Value.Int(1);
+            RecordingHorizontalCount = new Value.Int(4);
+            RecordingExporter = new Value.Enum<RecordingExporterType>(Data.RecordingExporterType.Sprite);
+            RecordingTransparentMethod = new Value.Enum<RecordingTransparentMethodType>(Data.RecordingTransparentMethodType.None);
 
             // Switch the language according to the OS settings
             var culture = System.Globalization.CultureInfo.CurrentCulture;
@@ -10248,7 +10287,7 @@ namespace EffekseerTool.Data.Value
 		{
 			get
 			{
-				return keys;
+				return (IEnumerable<IFCurveKey>)keys;
 			}
 		}
 
@@ -13054,8 +13093,8 @@ namespace EffekseerTool.Utl
 			if (br.Read(buf, 0, 8) != 8)
 			{
 				fs.Dispose();
-				br.Dispose();
-				return false;
+                br.Close();
+                return false;
 			}
 
 			var version = BitConverter.ToInt32(buf, 0);
@@ -13064,8 +13103,8 @@ namespace EffekseerTool.Utl
 			{
 				Scale = BitConverter.ToSingle(buf, 4);
 				fs.Dispose();
-				br.Dispose();
-				return false;
+                br.Close();
+                return false;
 			}
 
 			if(version == 3)
@@ -13079,8 +13118,8 @@ namespace EffekseerTool.Utl
 				else
 				{
 					fs.Dispose();
-					br.Dispose();
-					return false;
+                    br.Close();
+                    return false;
 				}
 			}
 
@@ -13088,14 +13127,14 @@ namespace EffekseerTool.Utl
 			{
 				Scale = BitConverter.ToSingle(buf, 4);
 				fs.Dispose();
-				br.Dispose();
-				return true;
+                br.Close();
+                return true;
 			}
 
 			fs.Dispose();
-			br.Dispose();
+            br.Close();
 
-			return true;
+            return true;
 		}
 	}
 }
@@ -13109,11 +13148,11 @@ namespace EffekseerTool.Utl
 	{
 		public Data.NodeBase Node { get; private set; }
 
-		public Tuple<string,object>[] Parameters { get; private set; }
+		public Tuple35<string,object>[] Parameters { get; private set; }
 
 		public ParameterTreeNode[] Children { get; private set; }
 
-		public ParameterTreeNode(Data.NodeBase node, Tuple<string, object>[] paramaters, ParameterTreeNode[] children)
+		public ParameterTreeNode(Data.NodeBase node, Tuple35<string, object>[] paramaters, ParameterTreeNode[] children)
 		{
 			Node = node;
 			Parameters = paramaters;
@@ -13156,7 +13195,7 @@ namespace EffekseerTool.Utl
 			if (br.Read(buf, 0, 8) != 8)
 			{
 				fs.Dispose();
-				br.Dispose();
+				br.Close();
 				return false;
 			}
 
@@ -13174,8 +13213,8 @@ namespace EffekseerTool.Utl
 				if (br.Read(buf, 0, 25) != 25)
 				{
 					fs.Dispose();
-					br.Dispose();
-					return false;
+                    br.Close();
+                    return false;
 				}
 
 				var width = new byte[] { buf[11], buf[10], buf[9], buf[8] };
@@ -13189,8 +13228,8 @@ namespace EffekseerTool.Utl
 				if (br.Read(buf, 0, 25) != 25)
 				{
 					fs.Dispose();
-					br.Dispose();
-					return false;
+                    br.Close();
+                    return false;
 				}
 
 				Width = BitConverter.ToInt32(buf, 8);
@@ -13199,13 +13238,13 @@ namespace EffekseerTool.Utl
 			else
 			{
 				fs.Dispose();
-				br.Dispose();
-				return false;
+                br.Close();
+                return false;
 			}
 
 			fs.Dispose();
-			br.Dispose();
-			return true;
+            br.Close();
+            return true;
 		}
 	}
 }
