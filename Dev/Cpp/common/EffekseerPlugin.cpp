@@ -55,6 +55,8 @@ int32_t g_maxSquares = 0;
 RendererType g_rendererType = RendererType::Native;
 
 bool g_reversedDepth = false;
+bool g_isTextureFlipped = false;
+bool g_isBackgroundTextureFlipped = false;
 bool g_isRightHandedCoordinate = false;
 
 IUnityInterfaces* g_UnityInterfaces = NULL;
@@ -113,9 +115,6 @@ void InitRenderer()
 	if (g_rendererType == RendererType::Native)
 	{
 		g_EffekseerRenderer = g_graphics->CreateRenderer(g_maxSquares, g_reversedDepth);
-
-		g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
-		g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
 	}
 	else if (g_rendererType == RendererType::Unity)
 	{
@@ -260,6 +259,26 @@ extern "C"
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
+		// assign flipped
+
+		if (g_isTextureFlipped)
+		{
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+		}
+		else
+		{
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::Normal);
+		}
+
+		if (g_isBackgroundTextureFlipped)
+		{
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+		}
+		else
+		{
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::Normal);
+		}
+
 		RenderSettings& settings = renderSettings[renderId];
 		Effekseer::Matrix44 projectionMatrix, cameraMatrix;
 
@@ -359,6 +378,25 @@ extern "C"
 			return;
 		if (g_EffekseerRenderer == nullptr)
 			return;
+
+		// assign flipped
+		if (g_isTextureFlipped)
+		{
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+		}
+		else
+		{
+			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::Normal);
+		}
+
+		if (g_isBackgroundTextureFlipped)
+		{
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
+		}
+		else
+		{
+			g_EffekseerRenderer->SetBackgroundTextureUVStyle(EffekseerRenderer::UVStyle::Normal);
+		}
 
 		RenderSettings& settings = renderSettings[renderId];
 		Effekseer::Matrix44 projectionMatrix, cameraMatrix;
@@ -493,13 +531,19 @@ extern "C"
 		}
 	}
 
-	// 歪み用テクスチャ設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetBackGroundTexture(int renderId, void* texture)
 	{
 		if (g_graphics != nullptr)
 		{
 			g_graphics->EffekseerSetBackGroundTexture(renderId, texture);
 		}
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetIsTextureFlipped(int isFlipped) { g_isTextureFlipped = isFlipped; }
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetIsBackgroundTextureFlipped(int isFlipped)
+	{
+		g_isBackgroundTextureFlipped = isFlipped;
 	}
 
 	Effekseer::TextureLoader* TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)

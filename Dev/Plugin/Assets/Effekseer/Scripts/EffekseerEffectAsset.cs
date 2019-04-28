@@ -107,9 +107,18 @@ namespace Effekseer
 			if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E') {
 				return;
 			}
-			
 
-			int filepos = 4;
+            float defaultScale = 1.0f;
+
+            string assetPath = Path.ChangeExtension(path, ".asset");
+            var baseAsset = AssetDatabase.LoadAssetAtPath<EffekseerEffectAsset>(assetPath);
+            if(baseAsset != null)
+            {
+                defaultScale = baseAsset.Scale;
+            }
+
+
+            int filepos = 4;
 
 			// Get Format Version number
 			int version = BitConverter.ToInt32(data, filepos);
@@ -163,7 +172,6 @@ namespace Effekseer
 				}
 			}
 
-			string assetPath = Path.ChangeExtension(path, ".asset");
 			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
 			
 			var asset = CreateInstance<EffekseerEffectAsset>();
@@ -183,6 +191,8 @@ namespace Effekseer
 			for (int i = 0; i < modelPathList.Count; i++) {
 				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, modelPathList[i]);
 			}
+
+            asset.Scale = defaultScale;
 
 			AssetDatabase.CreateAsset(asset, assetPath);
 			AssetDatabase.Refresh();

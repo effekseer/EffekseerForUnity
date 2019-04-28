@@ -116,6 +116,9 @@
     <ClInclude Include="..\graphicsAPI\EffekseerPluginGraphicsUnity.h">
       <Filter>graphicsAPI</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\EffekseerPlugin.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="EffekseerUnity.def" />

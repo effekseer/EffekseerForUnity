@@ -77,7 +77,13 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetRenderSettings(int renderId, bool renderIntoTexture);
 
-		[DllImport(pluginName)]
+        [DllImport(pluginName)]
+        public static extern void EffekseerSetIsTextureFlipped(int isFlipped);
+
+        [DllImport(pluginName)]
+        public static extern void EffekseerSetIsBackgroundTextureFlipped(int isFlipped);
+
+        [DllImport(pluginName)]
 		public static extern IntPtr EffekseerLoadEffect(IntPtr path, float magnification);
 
 		[DllImport(pluginName)]

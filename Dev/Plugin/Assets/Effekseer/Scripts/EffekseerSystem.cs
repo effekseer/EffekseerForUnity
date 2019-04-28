@@ -254,7 +254,19 @@ namespace Effekseer
 			// Initialize effekseer library
 			Plugin.EffekseerInit(settings.effectInstances, settings.maxSquares, reversedDepth ? 1 : 0, settings.isRightEffekseerHandledCoordinateSystem ? 1 : 0, (int)RendererType);
 
-			if (EffekseerSettings.Instance.DoStartNetworkAutomatically)
+            // Flip
+            if(RendererType == EffekseerRendererType.Native)
+            {
+                Plugin.EffekseerSetIsTextureFlipped(1);
+                Plugin.EffekseerSetIsBackgroundTextureFlipped(1);
+            }
+            if (RendererType == EffekseerRendererType.Unity)
+            {
+                Plugin.EffekseerSetIsTextureFlipped(0);
+                Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
+            }
+
+            if (EffekseerSettings.Instance.DoStartNetworkAutomatically)
 			{
 				StartNetwork();
 			}

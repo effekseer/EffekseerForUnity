@@ -45,6 +45,9 @@ EXPORTS
   EffekseerSetSoundLoaderEvent
   EffekseerSetSoundPlayerEvent
 
+  EffekseerSetIsTextureFlipped
+  EffekseerSetIsBackgroundTextureFlipped
+
   GetUnityRenderParameter
   GetUnityRenderParameterCount
   GetUnityRenderVertexBuffer

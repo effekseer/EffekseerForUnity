@@ -16,7 +16,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 		
-		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstUdentifier);
+		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier);
 
 		void OnPostRender(Camera camera);
 	}
@@ -496,7 +496,7 @@ namespace Effekseer.Internal
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)
 			{
-				// シーンビューのカメラはチェック
+				// check a camera in the scene view
 				if (settings.drawInSceneView == false)
 				{
 					return;
@@ -505,12 +505,11 @@ namespace Effekseer.Internal
 #endif
 			RenderPath path;
 
-			// カリングマスクをチェック
+			// check a culling mask
 			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
-					// レンダーパスが存在すればコマンドバッファを解除
 					path = renderPaths[camera];
 					path.Dispose();
 					renderPaths.Remove(camera);
@@ -520,12 +519,11 @@ namespace Effekseer.Internal
 
 			if (renderPaths.ContainsKey(camera))
 			{
-				// レンダーパスが有れば使う
 				path = renderPaths[camera];
 			}
 			else
 			{
-				// 無ければレンダーパスを作成
+				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
 				path.Init(settings.enableDistortion);
 				renderPaths.Add(camera, path);
@@ -537,13 +535,13 @@ namespace Effekseer.Internal
 				path.Init(settings.enableDistortion);
 			}
 
-			// 歪みテクスチャをセット
+			// assign a dinsotrion texture
 			if (path.renderTexture)
 			{
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
 
-			// ステレオレンダリング(VR)用に左右目の行列を設定
+			// specify matrixes for stereo rendering
 			if (camera.stereoEnabled)
 			{
 				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
@@ -554,7 +552,7 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				// ビュー関連の行列を更新
+				// update view matrixes
 				Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 					GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
 				Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
@@ -842,7 +840,7 @@ namespace Effekseer.Internal
 				this.cameraEvent = cameraEvent;
 			}
 
-			public void Init(bool enableDistortion)
+			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
 			{
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
@@ -851,15 +849,9 @@ namespace Effekseer.Internal
 				// add a command to render effects.
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
-#if UNITY_5_6_OR_NEWER
 				if (enableDistortion)
 				{
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#else
-				if (enableDistortion && camera.cameraType == CameraType.Game) {
-					RenderTextureFormat format = (camera.hdr) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#endif
-
 					// Create a distortion texture
 					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
 					this.renderTexture.Create();
@@ -867,7 +859,22 @@ namespace Effekseer.Internal
 					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
 					this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-				}
+                    if (dstID.HasValue)
+                    {
+                        this.commandBuffer.Blit(dstID.Value, this.renderTexture);
+                        this.commandBuffer.SetRenderTarget(dstID.Value);
+                    }
+                    else if (dstIdentifier.HasValue)
+                    {
+                        this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture);
+                        this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
+                    }
+                    else
+                    {
+                        this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+                        this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+                    }
+                }
 
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 
@@ -942,14 +949,14 @@ namespace Effekseer.Internal
 			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstUdentifier)
+		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
 
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)
 			{
-				// シーンビューのカメラはチェック
+				// check a camera in the scene view
 				if (settings.drawInSceneView == false)
 				{
 					return;
@@ -958,12 +965,11 @@ namespace Effekseer.Internal
 #endif
 			RenderPath path;
 
-			// カリングマスクをチェック
+			// check a culling mask
 			if ((camera.cullingMask & (1 << layer)) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
-					// レンダーパスが存在すればコマンドバッファを解除
 					path = renderPaths[camera];
 					path.Dispose();
 					renderPaths.Remove(camera);
@@ -973,31 +979,39 @@ namespace Effekseer.Internal
 
 			if (renderPaths.ContainsKey(camera))
 			{
-				// レンダーパスが有れば使う
 				path = renderPaths[camera];
 			}
 			else
 			{
-				// 無ければレンダーパスを作成
+				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
-				path.Init(settings.enableDistortion);
+				path.Init(settings.enableDistortion, dstID, dstIdentifier);
 				renderPaths.Add(camera, path);
 			}
 
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(settings.enableDistortion);
+				path.Init(settings.enableDistortion, dstID, dstIdentifier);
 			}
 
-			// 歪みテクスチャをセット
+            // if LWRP
+            if(dstID.HasValue || dstIdentifier.HasValue)
+            {
+				// flip a rendertaget
+				// Direct11 : OK (2019, LWRP 5.13)
+				// Android(OpenGL) : OK (2019, LWRP 5.13)
+				Plugin.EffekseerSetRenderSettings(path.renderId, true);
+                Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
+            }
+
+			// assign a dinsotrion texture
 			if (path.renderTexture)
 			{
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
 
-#if UNITY_5_4_OR_NEWER
-			// ステレオレンダリング(VR)用に左右目の行列を設定
+			// specify matrixes for stereo rendering
 			if (camera.stereoEnabled)
 			{
 				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
@@ -1007,9 +1021,8 @@ namespace Effekseer.Internal
 				Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, projMatL, projMatR, camMatL, camMatR);
 			}
 			else
-#endif
 			{
-				// ビュー関連の行列を更新
+				// update view matrixes
 				Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 					GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
 				Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
