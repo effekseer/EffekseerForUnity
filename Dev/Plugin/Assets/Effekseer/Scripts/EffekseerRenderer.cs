@@ -1005,6 +1005,11 @@ namespace Effekseer.Internal
                 Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
             }
 
+#if (UNITY_WEBGL)
+			Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
+#endif
+
+
 			// assign a dinsotrion texture
 			if (path.renderTexture)
 			{
