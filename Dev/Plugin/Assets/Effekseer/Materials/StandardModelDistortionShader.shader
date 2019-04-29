@@ -102,6 +102,7 @@ Properties{
 
 			o.pos = mul(UNITY_MATRIX_VP, vPos);
 			o.uv.xy = v.UV.xy * buf_uv.zw + buf_uv.xy;
+			o.uv.y = 1.0 - o.uv.y;
 			o.color = (float4)v.Color * buf_color;
 			return o;
 		}

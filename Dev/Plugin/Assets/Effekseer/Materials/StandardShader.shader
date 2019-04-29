@@ -67,6 +67,7 @@
 		float3 worldPos = v.Pos;
 		o.pos = mul(UNITY_MATRIX_VP, float4(worldPos,1.0f));
 		o.uv = v.UV;
+		o.uv.y = 1.0 - o.uv.y;
 		o.color = (float4)v.Color;
 		return o;
 	}

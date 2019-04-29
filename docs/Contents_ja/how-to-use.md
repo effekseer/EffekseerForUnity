@@ -89,8 +89,6 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 
 *Forward Render Asset* の *Render Features* から *EffekseerRenderer* を追加します。
 
-現在、UnityRendererのみLWRPに対応しています。
-
 古いLWRPでは、* Effekseer/Effekseer RendererLWRP * コンポーネントをカメラがあるGameObjectに設定してください。
 
 ## High Definition Render Pipeline
