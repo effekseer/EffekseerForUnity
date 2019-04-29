@@ -8,6 +8,17 @@ namespace Effekseer.Editor
 {
 	using Internal;
 
+	[CustomEditor(typeof(EffekseerModelAsset))]
+	public class EffekseerModelAssetEditor : UnityEditor.Editor
+	{
+		public override void OnInspectorGUI()
+		{
+			var asset = target as EffekseerModelAsset;
+
+			EditorGUILayout.LabelField("Data Size", asset.bytes.Length.ToString() + " bytes");
+		}
+	}
+
 	[CustomEditor(typeof(EffekseerEffectAsset))]
 	public class EffekseerEffectAssetEditor : UnityEditor.Editor
 	{
