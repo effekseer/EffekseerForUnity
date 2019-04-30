@@ -111,10 +111,10 @@ namespace Effekseer
             float defaultScale = 1.0f;
 
             string assetPath = Path.ChangeExtension(path, ".asset");
-            var baseAsset = AssetDatabase.LoadAssetAtPath<EffekseerEffectAsset>(assetPath);
-            if(baseAsset != null)
+            var asset = AssetDatabase.LoadAssetAtPath<EffekseerEffectAsset>(assetPath);
+            if(asset != null)
             {
-                defaultScale = baseAsset.Scale;
+                defaultScale = asset.Scale;
             }
 
 
@@ -173,8 +173,14 @@ namespace Effekseer
 			}
 
 			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
-			
-			var asset = CreateInstance<EffekseerEffectAsset>();
+
+			bool isNewAsset = false;
+			if(asset == null)
+			{
+				isNewAsset = true;
+				asset = CreateInstance<EffekseerEffectAsset>();
+			}
+
 			asset.efkBytes = data;
 			
 			asset.textureResources = new EffekseerTextureResource[texturePathList.Count];
@@ -194,7 +200,15 @@ namespace Effekseer
 
             asset.Scale = defaultScale;
 
-			AssetDatabase.CreateAsset(asset, assetPath);
+			if(isNewAsset)
+			{
+				AssetDatabase.CreateAsset(asset, assetPath);
+			}
+			else
+			{
+				EditorUtility.SetDirty(asset);
+			}
+
 			AssetDatabase.Refresh();
 		}
 
