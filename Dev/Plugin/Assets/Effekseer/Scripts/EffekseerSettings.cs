@@ -29,7 +29,7 @@ namespace Effekseer
 		/// 
 		/// </summary>
 		[SerializeField]
-		public EffekseerRendererType RendererType = EffekseerRendererType.Unity;
+		public EffekseerRendererType RendererType = EffekseerRendererType.Native;
 
 		/// <summary xml:lang="en">
 		/// Maximum number of effect instances.

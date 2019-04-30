@@ -72,7 +72,7 @@ If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
 
-## Light Weight Render Pipeline
+## Light Weight Render Pipeline {#lwrp}
 
 Effekseer supports LightWeightRenderPipeline.
 Please remove comment out from *ScriptsExternal/EffekseerRendererLWRP.cs* because LWRP is not contained in Unity with default settings at first.
@@ -92,7 +92,7 @@ Add * Effekseer/Effekseer RendererLWRP * component to GameObject with Camera in 
 I will support it.
 
 
-## Network
+## Network {#network}
 You can edit the playing effect in Unity via the network from the outside when application is running.
 
 ![](../img/network.png)
