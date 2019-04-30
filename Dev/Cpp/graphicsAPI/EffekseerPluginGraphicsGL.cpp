@@ -2,6 +2,7 @@
 #include "EffekseerPluginGraphicsGL.h"
 #include <algorithm>
 #include <assert.h>
+#include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
 
 namespace EffekseerPlugin
 {
@@ -157,7 +158,8 @@ Effekseer::TextureLoader* GraphicsGL::Create(TextureLoaderLoad load, TextureLoad
 Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
 	auto loader = new ModelLoader(load, unload);
-	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
+	//auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
+	auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
