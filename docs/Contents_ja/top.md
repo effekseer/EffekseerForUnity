@@ -10,19 +10,6 @@
 
 Effekseerの再生プログラムはC++で書かれているため、Unity上ではネイティブプラグイン扱いになります。<br>
 
-### ベータバージョン
-
-このバージョンはベータバージョンです。いくつかの機能が不足しています。
-
-- Vulkanでの動作
-- 最適化
-- ライティング
-- ドキュメント
-
-開発に協力してくれると助かります。
-
-[github](https://github.com/effekseer/EffekseerForUnity/tree/renewal)
-
 ## 動作環境 {#environment}
 
 ### Unityバージョン
@@ -176,6 +163,6 @@ Effekseer.unitypackage を開いてUnityプロジェクトにインポートし�
 - DirectX11のForwardレンダラーで、Editor上のGameViewのみ、3Dモデルの表裏が逆になります。Effekseer上でカリングの設定を変更してください。
 
 ## Todo {#todo}
-- 未対応の Graphics API (Metal, Vulkan) の対応
+- ネイティブ描画の実装 (Metal, Vulkan) 
 - ポイントライトのコントロール
 - インスタンスのコリジョン判定

@@ -10,20 +10,6 @@ Depending on the version and circumstances it may not work well.
 
 Because Effekseer's playback program is written in C ++, it is handled as a native plugin on Unity.
 
-
-### Beta version
-
-This is beta version. It lacks any functions.
-
-- Support Vulkan
-- Performance
-- Lighting
-- Documentation
-
-I wich your help to develop
-
-[github](https://github.com/effekseer/EffekseerForUnity/tree/renewal)
-
 ## Environment {#environment}
 
 ### Unity version
@@ -177,6 +163,6 @@ Open Effekseer.unitypackage and import it into the your Unity project.
 - In the Forward renderer of DirectX 11, only the GameView on the Editor, the front and back of the 3D model are reversed. Please change the Culling setting on Effekseer.
 
 ## Todo {#todo}
-- Support some new Graphics API (Metal, Vulkan)
+- Rendering with native graphics API (Metal, Vulkan) 
 - Controll point lights
 - Collision to particles
