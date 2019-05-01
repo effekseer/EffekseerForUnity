@@ -88,7 +88,6 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
-もしVulkanがデフォルトの場合、Player Settingsを変更してください。
 </td>
 </tr>
 
@@ -100,7 +99,7 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 
 <tr>
 <td style="text-align: center;">Vulkan</td>
-<td style="text-align: center;">Debugging</td>
+<td style="text-align: center;">OK</td>
 <td style="text-align: center;"></td>
 </tr>
 

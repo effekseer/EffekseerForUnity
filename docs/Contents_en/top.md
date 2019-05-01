@@ -88,7 +88,6 @@ If unsupported renderer is selected, renderer is changed automatically.
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
-If Vulkan is used by default, it must be checked off from Player Settings.
 </td>
 </tr>
 
@@ -100,7 +99,7 @@ If Vulkan is used by default, it must be checked off from Player Settings.
 
 <tr>
 <td style="text-align: center;">Vulkan</td>
-<td style="text-align: center;">Debugging</td>
+<td style="text-align: center;">OK</td>
 <td style="text-align: center;"></td>
 </tr>
 
