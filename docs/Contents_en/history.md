@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43b
+
+- Fixed a bug where much particles causes a crash in iOS
+
 ## 1.43
 - Renewal!!
 

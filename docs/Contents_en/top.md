@@ -13,7 +13,7 @@ Because Effekseer's playback program is written in C ++, it is handled as a nati
 ## Environment {#environment}
 
 ### Unity version
-Unity 2017 or later.  
+Unity 2017 or later.  (Part 2018, 2019 or later)
 
 ### Supported Platform
 
@@ -89,6 +89,8 @@ If unsupported renderer is selected, renderer is changed automatically.
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
 </td>
+Vulkan is 2019 or later <br>
+We have confirmed that OpenGL does not work on some models.
 </tr>
 
 <tr>
@@ -109,6 +111,7 @@ If unsupported renderer is selected, renderer is changed automatically.
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
+Metal is 2019 or later
 </td>
 </tr>
 

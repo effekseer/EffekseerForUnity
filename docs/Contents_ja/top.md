@@ -13,7 +13,7 @@ Effekseerの再生プログラムはC++で書かれているため、Unity上で
 ## 動作環境 {#environment}
 
 ### Unityバージョン
-Unity 2017 以降
+Unity 2017 以降 (一部2018, 2019以降)
 
 ### プラットフォーム
 
@@ -88,6 +88,8 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
+Vulkanは2019以降<br>
+OpenGLは一部の機種で動作しないことを確認しています。
 </td>
 </tr>
 
@@ -109,6 +111,7 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
+Metalは2018以降
 </td>
 </tr>
 
@@ -149,8 +152,6 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 </table>
 
 Theoretically - テストはしていないですが、理論的には動作します。
-
-Debugging -　テストはしましたが、何らかの不具合により動きません。
 
 ## 導入方法 {#how-to-import}
 Effekseer.unitypackage を開いてUnityプロジェクトにインポートします。

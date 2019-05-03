@@ -354,9 +354,15 @@ namespace Effekseer.Internal
 			}
 		}
 
+		class DelayEvent
+		{
+			public int RestTime = 0;
+			public Action Event;
+		}
+
 		private class RenderPath : IDisposable
 		{
-			const int VertexMaxCount = 8192 * 4 * 2;
+			int VertexMaxCount = 8192 * 4 * 2;
 			public Camera camera;
 			public CommandBuffer commandBuffer;
 			public CameraEvent cameraEvent;
@@ -368,6 +374,8 @@ namespace Effekseer.Internal
 
 			public MaterialPropCollection materiaProps = new MaterialPropCollection();
 
+			List<DelayEvent> delayEvents = new List<DelayEvent>();
+			
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
 				this.camera = camera;
@@ -390,6 +398,27 @@ namespace Effekseer.Internal
 					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
 					this.renderTexture.Create();
 				}
+
+				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
+				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
+				computeBufferTemp = new byte[VertexMaxCount * VertexSize];
+			}
+
+			public void ReallocateComputeBuffer()
+			{
+				VertexMaxCount *= 2;
+
+				var oldBufB = computeBufferBack;
+				var oldBufF = computeBufferFront;
+
+				var e = new DelayEvent();
+				e.RestTime = 5;
+				e.Event = () =>
+				{
+					oldBufB.Dispose();
+					oldBufF.Dispose();
+				};
+				delayEvents.Add(e);
 
 				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
 				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
@@ -419,6 +448,15 @@ namespace Effekseer.Internal
 					this.computeBufferBack.Dispose();
 					this.computeBufferBack = null;
 				}
+
+				foreach (var e in delayEvents)
+				{
+					if (e.RestTime <= 0)
+					{
+						e.Event();
+					}
+				}
+				delayEvents.Clear();
 			}
 
 			public bool IsValid()
@@ -429,6 +467,20 @@ namespace Effekseer.Internal
 						this.camera.pixelHeight == this.renderTexture.height;
 				}
 				return true;
+			}
+
+			public void Update()
+			{
+				foreach(var e in delayEvents)
+				{
+					e.RestTime--;
+					if(e.RestTime <= 0)
+					{
+						e.Event();
+					}
+				}
+
+				delayEvents.RemoveAll(_ => _.RestTime <= 0);
 			}
 		};
 
@@ -535,6 +587,8 @@ namespace Effekseer.Internal
 				path.Init(settings.enableDistortion);
 			}
 
+			path.Update();
+
 			// assign a dinsotrion texture
 			if (path.renderTexture)
 			{
@@ -565,6 +619,13 @@ namespace Effekseer.Internal
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
+
+			// if memory is lacked, reallocate memory
+			while(Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferTemp.Length)
+			{
+				path.ReallocateComputeBuffer();
+			}
+
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps, path.renderTexture);
 
 			// Distortion
@@ -590,6 +651,13 @@ namespace Effekseer.Internal
 			}
 
 			Plugin.EffekseerRenderFront(path.renderId);
+
+			// if memory is lacked, reallocate memory
+			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferTemp.Length)
+			{
+				path.ReallocateComputeBuffer();
+			}
+
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps, path.renderTexture);
 		}
 
@@ -612,7 +680,6 @@ namespace Effekseer.Internal
 				var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
 				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
 
-				// TODO : rescale compute buffer
 				System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, computeBufferTemp, 0, vertexBufferCount);
 				computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
 

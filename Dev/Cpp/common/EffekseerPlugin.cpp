@@ -62,7 +62,7 @@ bool g_isRightHandedCoordinate = false;
 IUnityInterfaces* g_UnityInterfaces = NULL;
 IUnityGraphics* g_UnityGraphics = NULL;
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(EMSCRIPTEN) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(EMSCRIPTEN) || defined(_SWITCH)
 // TODO adhoc code
 UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererOpenGLES20;
 #else
