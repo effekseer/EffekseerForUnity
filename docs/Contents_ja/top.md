@@ -88,8 +88,7 @@ UnityRendererはComputeShaderが有効な全ての環境で動きます。一方
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
-Vulkanは2019以降<br>
-OpenGLは一部の機種で動作しないことを確認しています。
+Vulkanは2019以降
 </td>
 </tr>
 

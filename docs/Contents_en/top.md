@@ -88,9 +88,8 @@ If unsupported renderer is selected, renderer is changed automatically.
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
+Vulkan is 2019 or later
 </td>
-Vulkan is 2019 or later <br>
-We have confirmed that OpenGL does not work on some models.
 </tr>
 
 <tr>
