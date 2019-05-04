@@ -85,7 +85,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 
 	// アンロードするテクスチャを検索
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return &pair.second.texture == source;
+		return pair.second.texture.UserID == source->UserID;
 	});
 	if (it == resources.end())
 	{

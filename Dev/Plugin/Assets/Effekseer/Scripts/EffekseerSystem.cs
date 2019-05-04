@@ -456,7 +456,10 @@ namespace Effekseer
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderUnload))]
 		private static void TextureLoaderUnload(IntPtr path, IntPtr nativePtr)
 		{
-			cachedTextures.Remove(nativePtr);
+			if (Instance.RendererType == EffekseerRendererType.Unity)
+			{
+				cachedTextures.Remove(nativePtr);
+			}
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderLoad))]

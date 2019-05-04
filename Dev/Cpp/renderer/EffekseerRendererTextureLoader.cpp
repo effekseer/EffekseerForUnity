@@ -43,7 +43,7 @@ void TextureLoader::Unload(Effekseer::TextureData* source)
 
 	// find a texture
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return &pair.second.texture == source;
+		return pair.second.texture.UserPtr == source->UserPtr;
 	});
 	if (it == resources.end())
 	{
