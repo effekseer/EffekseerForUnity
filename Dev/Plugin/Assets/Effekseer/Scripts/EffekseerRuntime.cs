@@ -47,9 +47,9 @@ namespace Effekseer
 
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets)
 			{
-				EffekseerEffectAsset target = null;
+                EffekseerEffectAsset target = effectAsset.Value.Target as EffekseerEffectAsset;
 
-				if (effectAsset.Value.TryGetTarget(out target))
+                if (target != null)
 				{
 					EffekseerSystem.Instance.LoadEffect(target);
 				}

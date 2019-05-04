@@ -59,7 +59,7 @@ namespace Effekseer
         [SerializeField]
         public float Scale = 1.0f;
 
-		internal static Dictionary<int, WeakReference<EffekseerEffectAsset>> enabledAssets = new Dictionary<int, WeakReference<EffekseerEffectAsset>>();
+		internal static Dictionary<int, WeakReference> enabledAssets = new Dictionary<int, WeakReference>();
 		internal static System.Random keyGenerator = new System.Random();
 		internal static int gcCounter = 0;
 		internal static List<int> removingTargets = new List<int>();
@@ -77,7 +77,7 @@ namespace Effekseer
 				dictionaryKey = keyGenerator.Next();
 				if(!enabledAssets.ContainsKey(dictionaryKey))
 				{
-					enabledAssets.Add(dictionaryKey, new WeakReference<EffekseerEffectAsset>(this));
+					enabledAssets.Add(dictionaryKey, new WeakReference(this));
 					break;
 				}
 			}
@@ -91,8 +91,9 @@ namespace Effekseer
 
 				foreach(var kv in enabledAssets)
 				{
-					EffekseerEffectAsset target = null;
-					if(!kv.Value.TryGetTarget(out target))
+					EffekseerEffectAsset target = kv.Value.Target as EffekseerEffectAsset;
+
+                    if (target == null)
 					{
 						removingTargets.Add(kv.Key);
 					}

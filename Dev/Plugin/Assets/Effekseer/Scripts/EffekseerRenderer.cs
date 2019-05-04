@@ -397,7 +397,11 @@ namespace Effekseer.Internal
 				{
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
-					this.renderTexture.Create();
+	
+					// HACK for ZenPhone (cannot understand)
+					if(this.renderTexture == null || !this.renderTexture.Create())
+					{
+					}
 				}
 
 				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
@@ -952,7 +956,15 @@ namespace Effekseer.Internal
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 					// Create a distortion texture
 					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
-					this.renderTexture.Create();
+
+					// HACK for ZenPhone (cannot understand)
+					if(this.renderTexture == null || !this.renderTexture.Create())
+					{
+						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
+						this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
+						return;
+					}
+
 					// Add a blit command that copy to the distortion texture
 					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
 					this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);

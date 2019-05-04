@@ -130,9 +130,9 @@ namespace Effekseer
 		{
 			foreach (var weakEffectAsset in EffekseerEffectAsset.enabledAssets)
 			{
-				EffekseerEffectAsset effectAsset = null;
+                EffekseerEffectAsset effectAsset = weakEffectAsset.Value.Target as EffekseerEffectAsset;
 
-				if (weakEffectAsset.Value.TryGetTarget(out effectAsset))
+                if (effectAsset != null)
 				{
 					effectAssetInLoading = effectAsset;
 					int id = effectAsset.GetInstanceID();
@@ -301,11 +301,11 @@ namespace Effekseer
 
 			//Debug.Log("EffekseerSystem.TermPlugin");
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
-				EffekseerEffectAsset target = null;
+                EffekseerEffectAsset target = effectAsset.Value.Target as EffekseerEffectAsset;
 
-				if(effectAsset.Value.TryGetTarget(out target))
-				{
-					ReleaseEffect(target);
+                if (target != null)
+                {
+                    ReleaseEffect(target);
 				}
 			}
 			nativeEffects.Clear();
