@@ -290,16 +290,12 @@ namespace Effekseer
 			{
 				StartNetwork();
 			}
-
-			UnityEngine.SceneManagement.SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
 		}
 
 		/// <summary>
 		/// Don't touch it!!
 		/// </summary>
 		public void TermPlugin() {
-
-			UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= SceneManager_activeSceneChanged;
 
 			StopNetwork();
 
@@ -393,14 +389,6 @@ namespace Effekseer
 			Plugin.EffekseerSetTextureLoaderEvent(null, null);
 			Plugin.EffekseerSetModelLoaderEvent(null, null);
 			Plugin.EffekseerSetSoundLoaderEvent(null, null);
-		}
-
-		private void SceneManager_activeSceneChanged(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.Scene arg1)
-		{
-			if(renderer != null)
-			{
-				renderer.CleanUp();
-			}
 		}
 
 		internal void Update(float deltaTime) {

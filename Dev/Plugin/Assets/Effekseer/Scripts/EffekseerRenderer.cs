@@ -371,6 +371,7 @@ namespace Effekseer.Internal
 			public ComputeBuffer computeBufferFront;
 			public ComputeBuffer computeBufferBack;
 			public byte[] computeBufferTemp;
+			public int LifeTime = 5;
 
 			public MaterialPropCollection materiaProps = new MaterialPropCollection();
 
@@ -555,6 +556,34 @@ namespace Effekseer.Internal
 				}
 			}
 #endif
+			// GC renderpaths
+			bool hasDisposed = false;
+			foreach (var path_ in renderPaths)
+			{
+				path_.Value.LifeTime--;
+				if (path_.Value.LifeTime < 0)
+				{
+					path_.Value.Dispose();
+					hasDisposed = true;
+				}
+			}
+
+			if (hasDisposed)
+			{
+				List<Camera> removed = new List<Camera>();
+				foreach (var path_ in renderPaths)
+				{
+					if (path_.Value.LifeTime >= 0) continue;
+
+					removed.Add(path_.Key);
+				}
+
+				foreach(var r in removed)
+				{
+					renderPaths.Remove(r);
+				}
+			}
+
 			RenderPath path;
 
 			// check a culling mask
@@ -588,6 +617,7 @@ namespace Effekseer.Internal
 			}
 
 			path.Update();
+			path.LifeTime = 5;
 
 			// assign a dinsotrion texture
 			if (path.renderTexture)
@@ -899,6 +929,7 @@ namespace Effekseer.Internal
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public RenderTexture renderTexture;
+			public int LifeTime = 5;
 
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
@@ -1030,6 +1061,34 @@ namespace Effekseer.Internal
 				}
 			}
 #endif
+			// GC renderpaths
+			bool hasDisposed = false;
+			foreach (var path_ in renderPaths)
+			{
+				path_.Value.LifeTime--;
+				if (path_.Value.LifeTime < 0)
+				{
+					path_.Value.Dispose();
+					hasDisposed = true;
+				}
+			}
+
+			if (hasDisposed)
+			{
+				List<Camera> removed = new List<Camera>();
+				foreach (var path_ in renderPaths)
+				{
+					if (path_.Value.LifeTime >= 0) continue;
+
+					removed.Add(path_.Key);
+				}
+
+				foreach (var r in removed)
+				{
+					renderPaths.Remove(r);
+				}
+			}
+
 			RenderPath path;
 
 			// check a culling mask
@@ -1061,6 +1120,8 @@ namespace Effekseer.Internal
 				path.Dispose();
 				path.Init(settings.enableDistortion, dstID, dstIdentifier);
 			}
+
+			path.LifeTime = 5;
 
             // if LWRP
             if(dstID.HasValue || dstIdentifier.HasValue)
