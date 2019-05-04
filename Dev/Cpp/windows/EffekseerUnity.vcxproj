@@ -188,7 +188,6 @@
     <ClCompile Include="..\renderer\EffekseerRendererVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\EffekseerPlugin.h" />
     <ClInclude Include="..\common\EffekseerPluginCommon.h" />
     <ClInclude Include="..\common\EffekseerPluginModel.h" />
     <ClInclude Include="..\common\EffekseerPluginNetwork.h" />

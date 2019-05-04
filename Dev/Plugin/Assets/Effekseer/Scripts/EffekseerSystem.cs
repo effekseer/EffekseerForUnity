@@ -108,7 +108,7 @@ namespace Effekseer
 		public IEffekseerRenderer renderer { get; private set; }
 
 		// Loaded native effects
-		[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
+		//[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
 		private Dictionary<int, IntPtr> nativeEffects = new Dictionary<int, IntPtr>();
 
 #if UNITY_EDITOR
@@ -128,6 +128,24 @@ namespace Effekseer
 
 		private void ReloadEffects()
 		{
+			foreach (var weakEffectAsset in EffekseerEffectAsset.enabledAssets)
+			{
+				EffekseerEffectAsset effectAsset = null;
+
+				if (weakEffectAsset.Value.TryGetTarget(out effectAsset))
+				{
+					effectAssetInLoading = effectAsset;
+					int id = effectAsset.GetInstanceID();
+					IntPtr nativeEffect;
+					if (nativeEffects.TryGetValue(id, out nativeEffect))
+					{
+						Plugin.EffekseerReloadResources(nativeEffect);
+					}
+					effectAssetInLoading = null;
+				}
+			}
+
+			/*
 			foreach (var effectAsset in loadedEffects) {
 				effectAssetInLoading = effectAsset;
 				int id = effectAsset.GetInstanceID();
@@ -137,6 +155,7 @@ namespace Effekseer
 				}
 				effectAssetInLoading = null;
 			}
+			*/
 		}
 
 		/// <summary>
@@ -151,7 +170,8 @@ namespace Effekseer
 				var namePtr = Marshal.StringToCoTaskMemUni(effectAsset.name);
 				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length, namePtr, effectAsset.Scale);
 				nativeEffects.Add(id, nativeEffect);
-				loadedEffects.Add(effectAsset);
+				//loadedEffects.Add(effectAsset);
+				//effectAsset.GetInstanceID
 				Marshal.FreeCoTaskMem(namePtr);
 			}
 			effectAssetInLoading = null;
@@ -163,7 +183,7 @@ namespace Effekseer
 			if (nativeEffects.TryGetValue(id, out nativeEffect)) {
 				Plugin.EffekseerReleaseEffect(nativeEffect);
 				nativeEffects.Remove(id);
-				loadedEffects.Remove(effectAsset);
+				//loadedEffects.Remove(effectAsset);
 			}
 		}
 
@@ -285,7 +305,12 @@ namespace Effekseer
 
 			//Debug.Log("EffekseerSystem.TermPlugin");
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
-				ReleaseEffect(effectAsset);
+				EffekseerEffectAsset target = null;
+
+				if(effectAsset.Value.TryGetTarget(out target))
+				{
+					ReleaseEffect(target);
+				}
 			}
 			nativeEffects.Clear();
 			

@@ -45,8 +45,14 @@ namespace Effekseer
 			system.OnEnable();
 			soundPlayer.OnEnable();
 
-			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
-				EffekseerSystem.Instance.LoadEffect(effectAsset);
+			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets)
+			{
+				EffekseerEffectAsset target = null;
+
+				if (effectAsset.Value.TryGetTarget(out target))
+				{
+					EffekseerSystem.Instance.LoadEffect(target);
+				}
 			}
 		}
 		

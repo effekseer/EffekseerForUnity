@@ -59,22 +59,64 @@ namespace Effekseer
         [SerializeField]
         public float Scale = 1.0f;
 
-        internal static HashSet<EffekseerEffectAsset> enabledAssets = new HashSet<EffekseerEffectAsset>();
+		internal static Dictionary<int, WeakReference<EffekseerEffectAsset>> enabledAssets = new Dictionary<int, WeakReference<EffekseerEffectAsset>>();
+		internal static System.Random keyGenerator = new System.Random();
+		internal static int gcCounter = 0;
+		internal static List<int> removingTargets = new List<int>();
+
+		int dictionaryKey = 0;
 		
 		void OnEnable()
 		{
 			if (EffekseerSystem.IsValid) {
 				EffekseerSystem.Instance.LoadEffect(this);
 			}
-			enabledAssets.Add(this);
+
+			while(true)
+			{
+				dictionaryKey = keyGenerator.Next();
+				if(!enabledAssets.ContainsKey(dictionaryKey))
+				{
+					enabledAssets.Add(dictionaryKey, new WeakReference<EffekseerEffectAsset>(this));
+					break;
+				}
+			}
+
+			gcCounter++;
+
+			// GC
+			if (gcCounter > 20)
+			{
+				removingTargets.Clear();
+
+				foreach(var kv in enabledAssets)
+				{
+					EffekseerEffectAsset target = null;
+					if(!kv.Value.TryGetTarget(out target))
+					{
+						removingTargets.Add(kv.Key);
+					}
+				}
+
+				foreach(var k in removingTargets)
+				{
+					enabledAssets.Remove(k);
+				}
+
+				gcCounter = 0;
+			}
+
+			Debug.Log("EffekseerEffectAsset.OnEnable");
 		}
 
 		void OnDisable()
 		{
-			enabledAssets.Remove(this);
+			enabledAssets.Remove(dictionaryKey);
 			if (EffekseerSystem.IsValid) {
 				EffekseerSystem.Instance.ReleaseEffect(this);
 			}
+
+			Debug.Log("EffekseerEffectAsset.OnDisable");
 		}
 
 		public EffekseerTextureResource FindTexture(string path)
