@@ -106,7 +106,7 @@ namespace Effekseer
 				gcCounter = 0;
 			}
 
-			Debug.Log("EffekseerEffectAsset.OnEnable");
+			//Debug.Log("EffekseerEffectAsset.OnEnable");
 		}
 
 		void OnDisable()
@@ -116,7 +116,7 @@ namespace Effekseer
 				EffekseerSystem.Instance.ReleaseEffect(this);
 			}
 
-			Debug.Log("EffekseerEffectAsset.OnDisable");
+			//Debug.Log("EffekseerEffectAsset.OnDisable");
 		}
 
 		public EffekseerTextureResource FindTexture(string path)

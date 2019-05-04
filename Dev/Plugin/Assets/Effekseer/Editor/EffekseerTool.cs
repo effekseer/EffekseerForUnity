@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+#pragma warning disable
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -13386,4 +13387,5 @@ namespace EffekseerTool.Utl
 		}
 	}
 }
+#pragma warning restore
 #endif
