@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43c
+
+- Fixed a bug about memories (This bug fix is very important)
+
 ## 1.43b
 
 - Fixed a bug where much particles causes a crash in iOS
