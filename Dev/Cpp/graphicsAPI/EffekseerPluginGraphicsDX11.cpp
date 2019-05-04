@@ -14,7 +14,7 @@ class TextureLoaderDX11 : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData texture = {};
+		Effekseer::TextureData* textureDataPtr = nullptr;
 	};
 
 	std::map<std::u16string, TextureResource> resources;
@@ -38,7 +38,7 @@ public:
 		if (it != resources.end())
 		{
 			it->second.referenceCount++;
-			return &it->second.texture;
+			return it->second.textureDataPtr;
 		}
 
 		// Unityでテクスチャをロード
@@ -52,10 +52,10 @@ public:
 		// リソーステーブルに追加
 		auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 		TextureResource& res = added.first->second;
-
-		res.texture.Width = width;
-		res.texture.Height = height;
-		res.texture.TextureFormat = (Effekseer::TextureFormatType)format;
+		res.textureDataPtr = new Effekseer::TextureData();
+		res.textureDataPtr->Width = width;
+		res.textureDataPtr->Height = height;
+		res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
 		// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
 		// ID3D11ShaderResourceViewを作成する
@@ -78,11 +78,11 @@ public:
 			return nullptr;
 		}
 
-		res.texture.UserPtr = srv;
+		res.textureDataPtr->UserPtr = srv;
 
-		textureData2NativePtr[&res.texture] = texturePtr;
+		textureData2NativePtr[res.textureDataPtr] = texturePtr;
 
-		return &res.texture;
+		return res.textureDataPtr;
 	}
 
 	virtual void Unload(Effekseer::TextureData* source)
@@ -94,7 +94,7 @@ public:
 
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.texture.UserPtr == source->UserPtr;
+			return pair.second.textureDataPtr->UserPtr == source->UserPtr;
 		});
 		if (it == resources.end())
 		{

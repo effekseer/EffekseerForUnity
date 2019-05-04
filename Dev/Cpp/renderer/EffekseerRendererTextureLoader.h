@@ -18,7 +18,7 @@ protected:
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData texture = {};
+		Effekseer::TextureData* textureDataPtr = nullptr;
 	};
 	std::map<std::u16string, TextureResource> resources;
 	std::map<void*, void*> textureData2NativePtr;

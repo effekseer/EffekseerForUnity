@@ -12,7 +12,7 @@ class TextureLoaderDX9 : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData texture = {};
+		Effekseer::TextureData* textureDataPtr = nullptr;
 	};
 	std::map<std::u16string, TextureResource> resources;
 	std::map<void*, void*> textureData2NativePtr;
@@ -27,7 +27,7 @@ public:
 		if (it != resources.end())
 		{
 			it->second.referenceCount++;
-			return &it->second.texture;
+			return it->second.textureDataPtr;
 		}
 
 		// Unityでテクスチャをロード
@@ -41,17 +41,17 @@ public:
 		// リソーステーブルに追加
 		auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 		TextureResource& res = added.first->second;
-
-		res.texture.Width = width;
-		res.texture.Height = height;
-		res.texture.TextureFormat = (Effekseer::TextureFormatType)format;
+		res.textureDataPtr = new Effekseer::TextureData();
+		res.textureDataPtr->Width = width;
+		res.textureDataPtr->Height = height;
+		res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
 		IDirect3DTexture9* textureDX9 = (IDirect3DTexture9*)texturePtr;
-		res.texture.UserPtr = textureDX9;
+		res.textureDataPtr->UserPtr = textureDX9;
 
-		textureData2NativePtr[&res.texture] = texturePtr;
+		textureData2NativePtr[res.textureDataPtr] = texturePtr;
 
-		return &res.texture;
+		return res.textureDataPtr;
 	}
 	virtual void Unload(Effekseer::TextureData* source)
 	{
@@ -62,7 +62,7 @@ public:
 
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.texture.UserPtr == source->UserPtr;
+			return pair.second.textureDataPtr->UserPtr == source->UserPtr;
 		});
 		if (it == resources.end())
 		{
@@ -76,6 +76,7 @@ public:
 			// Unload from unity
 			unload(it->first.c_str(), textureData2NativePtr[source]);
 			textureData2NativePtr.erase(source);
+			ES_SAFE_DELETE(it->second.textureDataPtr);
 			resources.erase(it);
 		}
 	}

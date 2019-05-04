@@ -12,7 +12,7 @@ class TextureLoaderGL : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData texture = {};
+		Effekseer::TextureData* textureDataPtr = nullptr;
 	};
 
 	std::map<std::u16string, TextureResource> resources;
@@ -42,7 +42,7 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 	if (it != resources.end())
 	{
 		it->second.referenceCount++;
-		return &it->second.texture;
+		return it->second.textureDataPtr;
 	}
 
 	// Unityでテクスチャをロード
@@ -55,14 +55,14 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 	// リソーステーブルに追加
 	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 	TextureResource& res = added.first->second;
+	res.textureDataPtr = new Effekseer::TextureData();
+	res.textureDataPtr->Width = width;
+	res.textureDataPtr->Height = height;
+	res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
-	res.texture.Width = width;
-	res.texture.Height = height;
-	res.texture.TextureFormat = (Effekseer::TextureFormatType)format;
-
-	res.texture.UserID = textureID;
+	res.textureDataPtr->UserID = textureID;
 #if !defined(_WIN32)
-	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(res.texture.Width) && IsPowerOfTwo(res.texture.Height)))
+	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(res.textureDataPtr->Width) && IsPowerOfTwo(res.textureDataPtr->Height)))
 	{
 		// テクスチャのミップマップを生成する
 		glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
@@ -71,9 +71,9 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 	}
 #endif
 
-	textureData2NativePtr[&res.texture] = (void*)textureID;
+	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
 
-	return &res.texture;
+	return res.textureDataPtr;
 }
 
 void TextureLoaderGL::Unload(Effekseer::TextureData* source)
@@ -85,7 +85,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 
 	// アンロードするテクスチャを検索
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return pair.second.texture.UserID == source->UserID;
+		return pair.second.textureDataPtr->UserID == source->UserID;
 	});
 	if (it == resources.end())
 	{
@@ -99,6 +99,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 		// Unity側でアンロード
 		unload(it->first.c_str(), textureData2NativePtr[source]);
 		textureData2NativePtr.erase(source);
+		ES_SAFE_DELETE(it->second.textureDataPtr);
 		resources.erase(it);
 	}
 }

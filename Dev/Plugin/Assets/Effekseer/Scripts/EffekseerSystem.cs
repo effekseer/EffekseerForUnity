@@ -443,6 +443,7 @@ namespace Effekseer
 					if (!cachedTextures.ContainsKey(ptr)) {
 						cachedTextures.Add(ptr, texture);
 					}
+					Debug.Log("Load(Unity) " + pathstr.ToString());
 				}
 
 				return ptr;
@@ -456,9 +457,12 @@ namespace Effekseer
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderUnload))]
 		private static void TextureLoaderUnload(IntPtr path, IntPtr nativePtr)
 		{
+			var pathstr = Marshal.PtrToStringUni(path);
+
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
 				cachedTextures.Remove(nativePtr);
+				Debug.Log("Unload(Unity) " + pathstr.ToString());
 			}
 		}
 
