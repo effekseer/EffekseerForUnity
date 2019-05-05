@@ -401,6 +401,7 @@ namespace Effekseer.Internal
 					// HACK for ZenPhone (cannot understand)
 					if(this.renderTexture == null || !this.renderTexture.Create())
 					{
+						this.renderTexture = null;
 					}
 				}
 
@@ -960,6 +961,7 @@ namespace Effekseer.Internal
 					// HACK for ZenPhone (cannot understand)
 					if(this.renderTexture == null || !this.renderTexture.Create())
 					{
+						this.renderTexture = null;
 						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 						this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 						return;
