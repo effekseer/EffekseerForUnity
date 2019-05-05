@@ -110,7 +110,8 @@ Vulkan is 2019 or later
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
-Metal is 2019 or later
+Metal is 2019 or later<br>
+Currently, HDR needs to be turned off to use distortion.
 </td>
 </tr>
 

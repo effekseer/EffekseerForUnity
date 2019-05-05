@@ -110,7 +110,8 @@ Vulkanは2019以降
 <td style="text-align: center;"></td>
 <td style="text-align: center;">OK</td>
 <td rowspan="3">
-Metalは2018以降
+Metalは2018以降。<br>
+現在、歪みを使用するにはHDRをオフにする必要があります。
 </td>
 </tr>
 

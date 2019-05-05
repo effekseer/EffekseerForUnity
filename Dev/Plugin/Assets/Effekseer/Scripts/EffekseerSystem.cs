@@ -174,6 +174,12 @@ namespace Effekseer
 				//effectAsset.GetInstanceID
 				Marshal.FreeCoTaskMem(namePtr);
 			}
+			else
+			{
+				// For reloading
+				Plugin.EffekseerReloadResources(nativeEffect);
+			}
+
 			effectAssetInLoading = null;
 		}
 

@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43d
+
+- Fixed a bug hotreloading of effects somtimes fails.
+
 ## 1.43c
 
 - Fixed a bug about memories (This bug fix is very important)
