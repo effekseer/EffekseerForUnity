@@ -457,10 +457,7 @@ namespace Effekseer.Internal
 
 				foreach (var e in delayEvents)
 				{
-					if (e.RestTime <= 0)
-					{
-						e.Event();
-					}
+					e.Event();
 				}
 				delayEvents.Clear();
 			}
@@ -712,11 +709,15 @@ namespace Effekseer.Internal
 			{
 				Plugin.UnityRenderParameter parameter = new Plugin.UnityRenderParameter();
 
-				var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
 				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
 
-				System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, computeBufferTemp, 0, vertexBufferCount);
-				computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
+				if(vertexBufferCount > 0)
+				{
+					var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
+
+					System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, computeBufferTemp, 0, vertexBufferCount);
+					computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
+				}
 
 				for (int i = 0; i < renderParameterCount; i++)
 				{

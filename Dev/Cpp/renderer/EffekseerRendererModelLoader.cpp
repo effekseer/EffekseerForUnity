@@ -37,13 +37,13 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 	{
 		// reallocate a buffer
 		internalBuffer.resize(requiredDataSize);
-	}
 
-	modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
+		modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
 
-	if (modelPtr == nullptr)
-	{
-		return nullptr;
+		if (modelPtr == nullptr)
+		{
+			return nullptr;
+		}
 	}
 
 	internalBuffer.resize(requiredDataSize);

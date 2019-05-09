@@ -509,7 +509,12 @@ namespace Effekseer
 		private static void ModelLoaderUnload(IntPtr path, IntPtr modelPtr) {
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				cachedModels.Remove(modelPtr);
+				if(cachedModels.ContainsKey(modelPtr))
+				{
+					var model = cachedModels[modelPtr];
+					model.Dispose();
+					cachedModels.Remove(modelPtr);
+				}
 			}
 		}
 
