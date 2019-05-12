@@ -133,7 +133,9 @@ void InitRenderer()
 	g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
 
 	// light a model
-	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(255, 255, 255, 255));
+	g_EffekseerRenderer->SetLightColor(Effekseer::Color(255, 255, 255, 255));
+	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1,1,1));
+	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(40, 40, 40, 255));
 }
 
 void TermRenderer()
