@@ -6,7 +6,7 @@ rem Enable Visual Studio 2015 environment
 call "%VS140COMNTOOLS% \VsDevCmd.bat"
 
 rem emscripten configuration
-call emcmake cmake -G "MinGW Makefiles"
+call emcmake cmake -G "NMake Makefiles"
 
 rem build
 nmake

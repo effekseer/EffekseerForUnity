@@ -124,6 +124,10 @@ namespace Effekseer
 
 		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
 
+		private static Dictionary<Texture, IntPtr> cachedTextureIDs = new Dictionary<Texture, IntPtr>();
+
+		private static int textureIDCounter = 0;
+
 		private static Dictionary<IntPtr, UnityRendererModel> cachedModels = new Dictionary<IntPtr, UnityRendererModel>();
 
 		private void ReloadEffects()
@@ -446,17 +450,40 @@ namespace Effekseer
 					default: format = 0; break;
 				}
 
-				var ptr = texture.GetNativeTexturePtr();
-
 				if (Instance.RendererType == EffekseerRendererType.Unity)
 				{
-					if (!cachedTextures.ContainsKey(ptr)) {
-						cachedTextures.Add(ptr, texture);
+					// metal has a bug in GetNativeTexturePtr
+					// to avoid to call GetNativeTexturePtr, use textureID
+					if (cachedTextureIDs.ContainsKey(texture))
+					{
+						//Debug.Log("LoadCache(Unity) " + pathstr.ToString());
+						return cachedTextureIDs[texture];
 					}
-					//Debug.Log("Load(Unity) " + pathstr.ToString());
-				}
+					else
+					{
+						var ptr = new IntPtr();
+						do
+						{
+							textureIDCounter++;
+							if (textureIDCounter > int.MaxValue / 2)
+							{
+								textureIDCounter = 0;
+							}
+							ptr = new IntPtr(textureIDCounter);
+						}
+						while (cachedTextures.ContainsKey(ptr));
 
-				return ptr;
+						cachedTextures.Add(ptr, texture);
+						cachedTextureIDs.Add(texture, ptr);
+						//Debug.Log("Load(Unity) " + pathstr.ToString());
+						return ptr;
+					}
+				}
+				else
+				{
+					var ptr = texture.GetNativeTexturePtr();
+					return ptr;
+				}
 			}
 			width = 0;
 			height = 0;
@@ -471,6 +498,8 @@ namespace Effekseer
 
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
+				var texture = cachedTextures[nativePtr];
+				cachedTextureIDs.Remove(texture);
 				cachedTextures.Remove(nativePtr);
 				//Debug.Log("Unload(Unity) " + pathstr.ToString());
 			}

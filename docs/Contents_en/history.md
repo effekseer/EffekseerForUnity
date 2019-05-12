@@ -1,5 +1,14 @@
 ﻿# Release notes
 
+## 1.43e
+
+- Separate distortion settings on PC and mobile
+- Fixed a bug that sometimes crashes in Metal environment
+- Fixed a bug that a model with lighting enabled can not be drawn
+- Fixed a bug that speeding up when the frame rate is over 60
+- Fixed a bug that multiplication is not drawn correctly in UnityRenderer
+- Fixed a memory leak about a model
+
 ## 1.43d
 
 - Fixed a bug hotreloading of effects somtimes fails.
