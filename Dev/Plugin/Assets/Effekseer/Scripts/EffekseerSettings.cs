@@ -76,11 +76,35 @@ namespace Effekseer
 		/// When It has set false, rendering will be faster.
 		/// </summary>
 		/// <summary xml:lang="ja">
-		/// 歪みエフェクトを有効にする。
+		/// 歪みエフェクトを有効にします。
 		/// falseにすると描画処理が軽くなります。
 		/// </summary>
 		[SerializeField]
-		public bool enableDistortion	= true;
+		public bool enableDistortion = true;
+
+		/// <summary xml:lang="en">
+		/// Enables distortion effect on mobile environment (iOS,Android,WebGL,Switch).
+		/// When It has set false, rendering will be faster.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// モバイル環境(iOS,Android,WebGL,Switch)で歪みエフェクトを有効にします。
+		/// falseにすると描画処理が軽くなります。
+		/// </summary>
+		[SerializeField]
+		public bool enableDistortionMobile = false;
+
+		/*
+		/// <summary xml:lang="en">
+		/// The scale of buffer for distortion.
+		/// If this values is small, run fastly
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 歪みのためのバッファの大きさです。
+		/// この値が小さいと、速度が速くなります。
+		/// </summary>
+		[SerializeField]
+		public float distortionBufferScale = 1.0f;
+		*/
 
 		[SerializeField]
 		public Shader standardShader = null;

@@ -246,6 +246,37 @@ namespace Effekseer.Internal
 		public Color VColor;
 	}
 
+	internal class EffekseerRendererUtils
+	{
+	    internal static int ScaledClamp(int value, float scale)
+		{
+			var v = (int)(value * scale);
+			v = Math.Max(v, 1);
+			v = Math.Min(v, value);
+			return v;
+		}
+
+		internal static float DistortionBufferScale
+		{
+			get
+			{
+				return 1.0f;
+			}
+		}
+
+		internal static bool IsDistortionEnabled
+		{
+			get
+			{
+#if UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL || UNITY_SWITCH
+				return EffekseerSettings.Instance.enableDistortionMobile;
+#else
+				return EffekseerSettings.Instance.enableDistortion;
+#endif
+			}
+		}
+	}
+	
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
@@ -311,7 +342,7 @@ namespace Effekseer.Internal
 				else if (key.Blend == AlphaBlendType.Mul)
 				{
 					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.Zero);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.DstColor);
+					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.SrcColor);
 					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
 				}
 				else if (key.Blend == AlphaBlendType.Sub)
@@ -373,6 +404,8 @@ namespace Effekseer.Internal
 			public byte[] computeBufferTemp;
 			public int LifeTime = 5;
 
+			bool isDistortionEnabled = false;
+
 			public MaterialPropCollection materiaProps = new MaterialPropCollection();
 
 			List<DelayEvent> delayEvents = new List<DelayEvent>();
@@ -386,6 +419,8 @@ namespace Effekseer.Internal
 
 			public void Init(bool enableDistortion)
 			{
+				bool isDistortionEnabled = enableDistortion;
+
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
 				this.commandBuffer.name = "Effekseer Rendering";
@@ -395,8 +430,15 @@ namespace Effekseer.Internal
 
 				if (enableDistortion)
 				{
+					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale );
+					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+
+#if UNITY_IOS || UNITY_ANDROID
+					RenderTextureFormat format = RenderTextureFormat.ARGB32;
+#else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
+#endif
+					this.renderTexture = new RenderTexture(width, height, 0, format);
 	
 					// HACK for ZenPhone (cannot understand)
 					if(this.renderTexture == null || !this.renderTexture.Create())
@@ -464,10 +506,15 @@ namespace Effekseer.Internal
 
 			public bool IsValid()
 			{
+				if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+
 				if (this.renderTexture != null)
 				{
-					return this.camera.pixelWidth == this.renderTexture.width &&
-						this.camera.pixelHeight == this.renderTexture.height;
+					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
+					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+
+					return width == this.renderTexture.width &&
+						height == this.renderTexture.height;
 				}
 				return true;
 			}
@@ -608,14 +655,14 @@ namespace Effekseer.Internal
 			{
 				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
-				path.Init(settings.enableDistortion);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 				renderPaths.Add(camera, path);
 			}
 
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(settings.enableDistortion);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 			}
 
 			path.Update();
@@ -661,7 +708,7 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps, path.renderTexture);
 
 			// Distortion
-			if (settings.enableDistortion && 
+			if (EffekseerRendererUtils.IsDistortionEnabled && 
 				(path.renderTexture != null || dstID.HasValue || dstIdentifier.HasValue))
 			{
 				// Add a blit command that copy to the distortion texture
@@ -937,6 +984,8 @@ namespace Effekseer.Internal
 			public RenderTexture renderTexture;
 			public int LifeTime = 5;
 
+			bool isDistortionEnabled = false;
+
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
 				this.camera = camera;
@@ -946,6 +995,8 @@ namespace Effekseer.Internal
 
 			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
 			{
+				this.isDistortionEnabled = enableDistortion;
+
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
 				this.commandBuffer.name = "Effekseer Rendering";
@@ -955,12 +1006,18 @@ namespace Effekseer.Internal
 
 				if (enableDistortion)
 				{
+					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
+					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+
+#if UNITY_IOS || UNITY_ANDROID
+					RenderTextureFormat format = RenderTextureFormat.ARGB32;
+#else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-					// Create a distortion texture
-					this.renderTexture = new RenderTexture(this.camera.pixelWidth, this.camera.pixelHeight, 0, format);
+#endif
+					this.renderTexture = new RenderTexture(width, height, 0, format);
 
 					// HACK for ZenPhone (cannot understand)
-					if(this.renderTexture == null || !this.renderTexture.Create())
+					if (this.renderTexture == null || !this.renderTexture.Create())
 					{
 						this.renderTexture = null;
 						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
@@ -1010,10 +1067,15 @@ namespace Effekseer.Internal
 
 			public bool IsValid()
 			{
+				if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+
 				if (this.renderTexture != null)
 				{
-					return this.camera.pixelWidth == this.renderTexture.width &&
-						this.camera.pixelHeight == this.renderTexture.height;
+					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
+					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+
+					return width == this.renderTexture.width &&
+						height == this.renderTexture.height;
 				}
 				return true;
 			}
@@ -1126,14 +1188,14 @@ namespace Effekseer.Internal
 			{
 				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
-				path.Init(settings.enableDistortion, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
 				renderPaths.Add(camera, path);
 			}
 
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(settings.enableDistortion, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
 			}
 
 			path.LifeTime = 5;

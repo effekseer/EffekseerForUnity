@@ -397,12 +397,16 @@ namespace Effekseer
 			Plugin.EffekseerSetSoundLoaderEvent(null, null);
 		}
 
+		float restFrames = 0;
+
 		internal void Update(float deltaTime) {
 			float deltaFrames = Utility.TimeToFrames(deltaTime);
-			int updateCount = Mathf.Max(1, Mathf.RoundToInt(deltaFrames));
+			restFrames += deltaFrames;
+			int updateCount = Mathf.RoundToInt(restFrames);
 			for (int i = 0; i < updateCount; i++) {
-				Plugin.EffekseerUpdate(deltaFrames / updateCount);
+				Plugin.EffekseerUpdate(1);
 			}
+			restFrames -= updateCount;
 		}
 
 		internal static Texture GetCachedTexture(IntPtr key)

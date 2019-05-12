@@ -131,6 +131,9 @@ void InitRenderer()
 	g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
 	g_EffekseerManager->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
 	g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+
+	// light a model
+	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(255, 255, 255, 255));
 }
 
 void TermRenderer()
@@ -471,7 +474,7 @@ extern "C"
 		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
-
+		
 		if (g_isRightHandedCoordinate)
 		{
 			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);

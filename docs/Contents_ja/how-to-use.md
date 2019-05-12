@@ -95,6 +95,10 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 
 対応予定です。
 
+## モバイル環境 {#mobile}
+
+EffekseerSettingsから歪みを無効化すると高速化します。
+
 ## ネットワーク機能 {#network}
 
 ネットワーク経由でUnityで再生しているエフェクトを外部からアプリケーションの起動中に編集することができます。

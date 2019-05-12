@@ -91,6 +91,9 @@ Add * Effekseer/Effekseer RendererLWRP * component to GameObject with Camera in 
 
 I will support it.
 
+## Mobile environment {#mobile}
+
+Disabling distortion from EffekseerSettings speeds up.
 
 ## Network {#network}
 You can edit the playing effect in Unity via the network from the outside when application is running.
