@@ -1,4 +1,4 @@
-
+﻿
 #include <assert.h>
 
 #ifdef _WIN32
@@ -134,7 +134,7 @@ void InitRenderer()
 
 	// light a model
 	g_EffekseerRenderer->SetLightColor(Effekseer::Color(255, 255, 255, 255));
-	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1,1,1));
+	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1,1,-1));
 	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(40, 40, 40, 255));
 }
 
