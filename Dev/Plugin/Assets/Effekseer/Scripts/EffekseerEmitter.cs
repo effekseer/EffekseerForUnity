@@ -204,7 +204,7 @@ namespace Effekseer
 				return _shown;
 			}
 		}
-		private bool _shown = false;
+		private bool _shown = true;
 
 		/// <summary xml:lang="en">
 		/// Playback speed
@@ -246,8 +246,34 @@ namespace Effekseer
 				return res;
 			}
 		}
-	
+
 		#region Internal Implimentation
+
+		void OnEnable()
+		{
+			foreach (var handle in handles)
+			{
+				Plugin.EffekseerSetPaused(handle.m_handle, _paused);
+			}
+
+			foreach (var handle in handles)
+			{
+				Plugin.EffekseerSetShown(handle.m_handle, _shown);
+			}
+		}
+
+		void OnDisable()
+		{
+			foreach (var handle in handles)
+			{
+				Plugin.EffekseerSetPaused(handle.m_handle, true);
+			}
+
+			foreach (var handle in handles)
+			{
+				Plugin.EffekseerSetShown(handle.m_handle, false);
+			}
+		}
 
 		void Start()
 		{
