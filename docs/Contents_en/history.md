@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43f
+
+- Changed to not display when the EffekseerEmitter component is unchecked
+
 ## 1.43e
 
 - Separate distortion settings on PC and mobile

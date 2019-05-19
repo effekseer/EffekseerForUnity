@@ -76,6 +76,12 @@ namespace Effekseer.Editor
 		
 		void OnSceneGUI()
 		{
+			if (emitter == null)
+				return;
+
+			if (!emitter.isActiveAndEnabled)
+				return;
+
 			SceneView sceneView = SceneView.currentDrawingSceneView;
 
 			Handles.BeginGUI();
