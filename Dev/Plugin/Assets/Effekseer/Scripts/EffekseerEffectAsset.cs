@@ -230,6 +230,15 @@ namespace Effekseer
 			return true;
 		}
 
+		private static string ReadString(byte[] data, ref int filepos)
+		{
+			int length = BitConverter.ToInt32(data, filepos);
+			filepos += 4;
+			string str = Encoding.Unicode.GetString(data, filepos, (length - 1) * 2);
+			filepos += length * 2;
+			return str;
+		}
+
 #if UNITY_EDITOR
 		public static void CreateAsset(string path)
 		{
@@ -294,14 +303,6 @@ namespace Effekseer
 			AssetDatabase.Refresh();
 		}
 
-		private static string ReadString(byte[] data, ref int filepos)
-		{
-			int length = BitConverter.ToInt32(data, filepos);
-			filepos += 4;
-			string str = Encoding.Unicode.GetString(data, filepos, (length - 1) * 2);
-			filepos += length * 2;
-			return str;
-		}
 #endif
 	}
 }
