@@ -44,7 +44,18 @@ namespace Effekseer
 {
 	using Internal;
 
-	public class EffekseerEffectAsset : ScriptableObject
+    public class EffekseerResourcePath
+    {
+        public int Version;
+        public float Scale = 1.0f;
+
+        public List<string> TexturePathList = new List<string>();
+        public List<string> SoundPathList = new List<string>();
+        public List<string> ModelPathList = new List<string>();
+    }
+
+
+    public class EffekseerEffectAsset : ScriptableObject
 	{
 		[SerializeField]
 		public byte[] efkBytes;
@@ -65,52 +76,62 @@ namespace Effekseer
 		internal static List<int> removingTargets = new List<int>();
 
 		int dictionaryKey = 0;
-		
+
 		void OnEnable()
 		{
-			if (EffekseerSystem.IsValid) {
-				EffekseerSystem.Instance.LoadEffect(this);
-			}
-
-			while(true)
-			{
-				dictionaryKey = keyGenerator.Next();
-				if(!enabledAssets.ContainsKey(dictionaryKey))
-				{
-					enabledAssets.Add(dictionaryKey, new WeakReference(this));
-					break;
-				}
-			}
-
-			gcCounter++;
-
-			// GC
-			if (gcCounter > 20)
-			{
-				removingTargets.Clear();
-
-				foreach(var kv in enabledAssets)
-				{
-					EffekseerEffectAsset target = kv.Value.Target as EffekseerEffectAsset;
-
-                    if (target == null)
-					{
-						removingTargets.Add(kv.Key);
-					}
-				}
-
-				foreach(var k in removingTargets)
-				{
-					enabledAssets.Remove(k);
-				}
-
-				gcCounter = 0;
-			}
+            if(efkBytes != null && efkBytes.Length > 0)
+            {
+                LoadEffect();
+            }
 
 			//Debug.Log("EffekseerEffectAsset.OnEnable");
 		}
 
-		void OnDisable()
+        public void LoadEffect()
+        {
+            if (EffekseerSystem.IsValid)
+            {
+                EffekseerSystem.Instance.LoadEffect(this);
+            }
+
+            while (true)
+            {
+                dictionaryKey = keyGenerator.Next();
+                if (!enabledAssets.ContainsKey(dictionaryKey))
+                {
+                    enabledAssets.Add(dictionaryKey, new WeakReference(this));
+                    break;
+                }
+            }
+
+            gcCounter++;
+
+            // GC
+            if (gcCounter > 20)
+            {
+                removingTargets.Clear();
+
+                foreach (var kv in enabledAssets)
+                {
+                    EffekseerEffectAsset target = kv.Value.Target as EffekseerEffectAsset;
+
+                    if (target == null)
+                    {
+                        removingTargets.Add(kv.Key);
+                    }
+                }
+
+                foreach (var k in removingTargets)
+                {
+                    enabledAssets.Remove(k);
+                }
+
+                gcCounter = 0;
+            }
+        }
+
+
+        void OnDisable()
 		{
 			enabledAssets.Remove(dictionaryKey);
 			if (EffekseerSystem.IsValid) {
@@ -138,6 +159,77 @@ namespace Effekseer
 			return (index >= 0) ? modelResources[index] : null;
 		}
 
+        public static bool ReadResourcePath(byte[] data, ref EffekseerResourcePath resourcePath)
+        {
+            if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E')
+            {
+                return false;
+            }
+
+            int filepos = 4;
+
+            // Get Format Version number
+            resourcePath.Version = BitConverter.ToInt32(data, filepos);
+            filepos += 4;
+
+            resourcePath.TexturePathList = new List<string>();
+            resourcePath.SoundPathList = new List<string>();
+            resourcePath.ModelPathList = new List<string>();
+
+            // Get color texture paths
+            {
+                int colorTextureCount = BitConverter.ToInt32(data, filepos);
+                filepos += 4;
+                for (int i = 0; i < colorTextureCount; i++)
+                {
+                    resourcePath.TexturePathList.Add(ReadString(data, ref filepos));
+                }
+            }
+
+            if (resourcePath.Version >= 9)
+            {
+                // Get normal texture paths
+                int normalTextureCount = BitConverter.ToInt32(data, filepos);
+                filepos += 4;
+                for (int i = 0; i < normalTextureCount; i++)
+                {
+                    resourcePath.TexturePathList.Add(ReadString(data, ref filepos));
+                }
+
+                // Get normal texture paths
+                int distortionTextureCount = BitConverter.ToInt32(data, filepos);
+                filepos += 4;
+                for (int i = 0; i < distortionTextureCount; i++)
+                {
+                    resourcePath.TexturePathList.Add(ReadString(data, ref filepos));
+                }
+            }
+
+            if (resourcePath.Version >= 1)
+            {
+                // Get sound paths
+                int soundCount = BitConverter.ToInt32(data, filepos);
+                filepos += 4;
+                for (int i = 0; i < soundCount; i++)
+                {
+                    resourcePath.SoundPathList.Add(ReadString(data, ref filepos));
+                }
+            }
+
+            if (resourcePath.Version >= 6)
+            {
+                // Get sound paths
+                int modelCount = BitConverter.ToInt32(data, filepos);
+                filepos += 4;
+                for (int i = 0; i < modelCount; i++)
+                {
+                    resourcePath.ModelPathList.Add(ReadString(data, ref filepos));
+                }
+            }
+
+            return true;
+        }
+
 #if UNITY_EDITOR
         public static void CreateAsset(string path)
         {
@@ -147,9 +239,11 @@ namespace Effekseer
 
         public static void CreateAsset(string path, byte[] data)
 		{
-			if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E') {
-				return;
-			}
+            EffekseerResourcePath resourcePath = new EffekseerResourcePath();
+            if (!ReadResourcePath(data, ref resourcePath))
+            {
+                return;
+            }
 
             float defaultScale = 1.0f;
 
@@ -160,62 +254,7 @@ namespace Effekseer
                 defaultScale = asset.Scale;
             }
 
-
-            int filepos = 4;
-
-			// Get Format Version number
-			int version = BitConverter.ToInt32(data, filepos);
-			filepos += 4;
-		
-			// Effect resource paths
-			List<string> texturePathList = new List<string>();
-			List<string> soundPathList = new List<string>();
-			List<string> modelPathList = new List<string>();
-
-			// Get color texture paths
-			{
-				int colorTextureCount = BitConverter.ToInt32(data, filepos);
-				filepos += 4;
-				for (int i = 0; i < colorTextureCount; i++) {
-					texturePathList.Add(ReadString(data, ref filepos));
-				}
-			}
-		
-			if (version >= 9) {
-				// Get normal texture paths
-				int normalTextureCount = BitConverter.ToInt32(data, filepos);
-				filepos += 4;
-				for (int i = 0; i < normalTextureCount; i++) {
-					texturePathList.Add(ReadString(data, ref filepos));
-				}
-
-				// Get normal texture paths
-				int distortionTextureCount = BitConverter.ToInt32(data, filepos);
-				filepos += 4;
-				for (int i = 0; i < distortionTextureCount; i++) {
-					texturePathList.Add(ReadString(data, ref filepos));
-				}
-			}
-
-			if (version >= 1) {
-				// Get sound paths
-				int soundCount = BitConverter.ToInt32(data, filepos);
-				filepos += 4;
-				for (int i = 0; i < soundCount; i++) {
-					soundPathList.Add(ReadString(data, ref filepos));
-				}
-			}
-		
-			if (version >= 6) {
-				// Get sound paths
-				int modelCount = BitConverter.ToInt32(data, filepos);
-				filepos += 4;
-				for (int i = 0; i < modelCount; i++) {
-					modelPathList.Add(ReadString(data, ref filepos));
-				}
-			}
-
-			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
+            string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
 
 			bool isNewAsset = false;
 			if(asset == null)
@@ -226,19 +265,19 @@ namespace Effekseer
 
 			asset.efkBytes = data;
 			
-			asset.textureResources = new EffekseerTextureResource[texturePathList.Count];
-			for (int i = 0; i < texturePathList.Count; i++) {
-				asset.textureResources[i] = EffekseerTextureResource.LoadAsset(assetDir, texturePathList[i]);
+			asset.textureResources = new EffekseerTextureResource[resourcePath.TexturePathList.Count];
+			for (int i = 0; i < resourcePath.TexturePathList.Count; i++) {
+				asset.textureResources[i] = EffekseerTextureResource.LoadAsset(assetDir, resourcePath.TexturePathList[i]);
 			}
 			
-			asset.soundResources = new EffekseerSoundResource[soundPathList.Count];
-			for (int i = 0; i < soundPathList.Count; i++) {
-				asset.soundResources[i] = EffekseerSoundResource.LoadAsset(assetDir, soundPathList[i]);
+			asset.soundResources = new EffekseerSoundResource[resourcePath.SoundPathList.Count];
+			for (int i = 0; i < resourcePath.SoundPathList.Count; i++) {
+				asset.soundResources[i] = EffekseerSoundResource.LoadAsset(assetDir, resourcePath.SoundPathList[i]);
 			}
 			
-			asset.modelResources = new EffekseerModelResource[modelPathList.Count];
-			for (int i = 0; i < modelPathList.Count; i++) {
-				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, modelPathList[i]);
+			asset.modelResources = new EffekseerModelResource[resourcePath.ModelPathList.Count];
+			for (int i = 0; i < resourcePath.ModelPathList.Count; i++) {
+				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, resourcePath.ModelPathList[i]);
 			}
 
             asset.Scale = defaultScale;
