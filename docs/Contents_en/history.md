@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43g
+
+- Support Android 64bit
+
 ## 1.43f
 
 - Changed to not display when the EffekseerEmitter component is unchecked
