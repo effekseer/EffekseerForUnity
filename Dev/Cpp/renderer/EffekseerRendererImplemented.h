@@ -309,6 +309,8 @@ public:
 	*/
 	::Effekseer::ModelLoader* CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
+	::Effekseer::MaterialLoader* CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
+	
 	/**
 	@brief	レンダーステートを強制的にリセットする。
 	*/
