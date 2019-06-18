@@ -616,16 +616,18 @@ void RendererImplemented::BeginShader(Shader* shader)
 
 void RendererImplemented::RendererImplemented::EndShader(Shader* shader) {}
 
-void RendererImplemented::SetVertexBufferToShader(const void* data, int32_t size)
+void RendererImplemented::SetVertexBufferToShader(const void* data, int32_t size, int32_t dstOffset)
 {
-	assert(m_currentShader != nullptr);
-	memcpy(m_currentShader->GetVertexConstantBuffer(), data, size);
+	assert(currentShader != nullptr);
+	auto p = static_cast<uint8_t*>(m_currentShader->GetVertexConstantBuffer()) + dstOffset;
+	memcpy(p, data, size);
 }
 
-void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size)
+void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset)
 {
-	assert(m_currentShader != nullptr);
-	memcpy(m_currentShader->GetPixelConstantBuffer(), data, size);
+	assert(currentShader != nullptr);
+	auto p = static_cast<uint8_t*>(m_currentShader->GetVertexConstantBuffer()) + dstOffset;
+	memcpy(p, data, size);
 }
 
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count)

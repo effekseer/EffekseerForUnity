@@ -367,9 +367,9 @@ public:
 	void BeginShader(Shader* shader);
 	void EndShader(Shader* shader);
 
-	void SetVertexBufferToShader(const void* data, int32_t size);
+	void SetVertexBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
-	void SetPixelBufferToShader(const void* data, int32_t size);
+	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
 	void SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count);
 	void SetIsLighting(bool value) { m_isLighting = value; }
