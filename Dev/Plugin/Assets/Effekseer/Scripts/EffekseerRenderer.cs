@@ -674,23 +674,11 @@ namespace Effekseer.Internal
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
 
-			// specify matrixes for stereo rendering
-			if (camera.stereoEnabled)
-			{
-				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
-				float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
-				float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
-				float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
-				Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, projMatL, projMatR, camMatL, camMatR);
-			}
-			else
-			{
-				// update view matrixes
-				Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
-					GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
-				Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
-					camera.worldToCameraMatrix));
-			}
+			// update view matrixes
+			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
+				GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
+			Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
+				camera.worldToCameraMatrix));
 
 			// Reset command buffer
 			path.commandBuffer.Clear();
