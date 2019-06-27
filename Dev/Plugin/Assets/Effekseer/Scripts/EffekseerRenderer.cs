@@ -981,7 +981,8 @@ namespace Effekseer.Internal
 				this.cameraEvent = cameraEvent;
 			}
 
-			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
+			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier
+				, StereoRendererUtil.StereoRenderingTypes stereoRenderingMode = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
 
@@ -989,6 +990,20 @@ namespace Effekseer.Internal
 				this.commandBuffer = new CommandBuffer();
 				this.commandBuffer.name = "Effekseer Rendering";
 
+				SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, dstIdentifier);
+
+				if (stereoRenderingMode == StereoRendererUtil.StereoRenderingTypes.SinglePass)
+				{
+					// In SinglePass Stereo Rendering, draw eyes twice on the left and right with one CommandBuffer
+					SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, dstIdentifier);
+				}
+
+				// register the command to a camera
+				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
+			}
+
+			private void SetupEffekseerRenderCommandBuffer(CommandBuffer commandBuffer, bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
+			{
 				// add a command to render effects.
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
@@ -1017,27 +1032,24 @@ namespace Effekseer.Internal
 					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
 					this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-                    if (dstID.HasValue)
-                    {
-                        this.commandBuffer.Blit(dstID.Value, this.renderTexture);
-                        this.commandBuffer.SetRenderTarget(dstID.Value);
-                    }
-                    else if (dstIdentifier.HasValue)
-                    {
-                        this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture);
-                        this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
-                    }
-                    else
-                    {
-                        this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
-                        this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-                    }
-                }
+					if (dstID.HasValue)
+					{
+						this.commandBuffer.Blit(dstID.Value, this.renderTexture);
+						this.commandBuffer.SetRenderTarget(dstID.Value);
+					}
+					else if (dstIdentifier.HasValue)
+					{
+						this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture);
+						this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
+					}
+					else
+					{
+						this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+						this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					}
+				}
 
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
-
-				// register the command to a camera
-				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 			}
 
 			public void Dispose()
@@ -1176,14 +1188,14 @@ namespace Effekseer.Internal
 			{
 				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
 				renderPaths.Add(camera, path);
 			}
 
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
 			}
 
 			path.LifeTime = 5;
@@ -1211,11 +1223,15 @@ namespace Effekseer.Internal
 			// specify matrixes for stereo rendering
 			if (camera.stereoEnabled)
 			{
-				float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
-				float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
-				float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
-				float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
-				Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, projMatL, projMatR, camMatL, camMatR);
+				var stereoRenderType = StereoRendererUtil.GetStereoRenderingType();
+				if(stereoRenderType != StereoRendererUtil.StereoRenderingTypes.None)
+				{
+					float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
+					float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
+					float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
+					float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
+					Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, (int)stereoRenderType, projMatL, projMatR, camMatL, camMatR);
+				}
 			}
 			else
 			{
