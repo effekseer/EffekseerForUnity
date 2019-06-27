@@ -50,4 +50,8 @@ Effekseer::ModelLoader* GraphicsUnity::Create(ModelLoaderLoad load, ModelLoaderU
 	return new EffekseerRendererUnity::ModelLoader(load, unload);
 }
 
+void GraphicsUnity::ShiftViewportForStereoSinglePass() 
+{
+}
+
 } // namespace EffekseerPlugin

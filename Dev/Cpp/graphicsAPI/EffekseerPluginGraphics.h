@@ -40,6 +40,8 @@ public:
 	virtual Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
 
 	virtual Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
+
+	virtual void ShiftViewportForStereoSinglePass() = 0;
 };
 
 } // namespace EffekseerPlugin

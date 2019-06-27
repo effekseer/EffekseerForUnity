@@ -223,4 +223,13 @@ Effekseer::ModelLoader* GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUn
 	return loader;
 }
 
+void GraphicsDX11::ShiftViewportForStereoSinglePass()
+{
+	D3D11_VIEWPORT vp;
+	UINT viewportNum = 1;
+	d3d11Context->RSGetViewports(&viewportNum, &vp);
+	vp.TopLeftX = vp.Width;
+	d3d11Context->RSSetViewports(1, &vp);
+}
+
 } // namespace EffekseerPlugin

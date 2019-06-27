@@ -417,6 +417,11 @@ extern "C"
 			{
 				projectionMatrix = settings.rightProjectionMatrix;
 				cameraMatrix = settings.rightCameraMatrix;
+
+				if (settings.stereoRenderingType == StereoRenderingType::SinglePass)
+				{
+					g_graphics->ShiftViewportForStereoSinglePass();
+				}
 			}
 			settings.stereoRenderCount++;
 		}
