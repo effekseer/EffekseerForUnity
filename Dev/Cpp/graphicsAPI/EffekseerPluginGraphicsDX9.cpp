@@ -121,4 +121,12 @@ Effekseer::ModelLoader* GraphicsDX9::Create(ModelLoaderLoad load, ModelLoaderUnl
 	return loader;
 }
 
+void GraphicsDX9::ShiftViewportForStereoSinglePass()
+{
+	D3DVIEWPORT9 vp;
+	d3d9Device->GetViewport(&vp);
+	vp.X = vp.Width;
+	d3d9Device->SetViewport(&vp);
+}
+
 } // namespace EffekseerPlugin

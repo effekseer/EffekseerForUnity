@@ -33,6 +33,8 @@ public:
 	Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+
+	void ShiftViewportForStereoSinglePass() override;
 };
 
 } // namespace EffekseerPlugin

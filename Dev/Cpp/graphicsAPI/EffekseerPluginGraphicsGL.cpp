@@ -165,4 +165,12 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 	return loader;
 }
 
+void GraphicsGL::ShiftViewportForStereoSinglePass()
+{
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	viewport[0] += viewport[2];
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+}
+
 } // namespace EffekseerPlugin
