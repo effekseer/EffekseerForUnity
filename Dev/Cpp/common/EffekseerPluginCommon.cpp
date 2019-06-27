@@ -60,10 +60,6 @@ extern "C"
 		}
 		
 		g_EffekseerManager->Update(deltaFrame);
-
-		for (auto& settings : renderSettings) {
-			settings.stereoRenderCount = 0;
-		}
 	}
 	
 	// エフェクトのロード
@@ -336,11 +332,16 @@ extern "C"
 	}
 
 	// ステレオレンダリング(VR)用行列設定
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetStereoRenderingMatrix(int renderId, float projMatL[], float projMatR[], float camMatL[], float camMatR[])
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetStereoRenderingMatrix(
+		int renderId, int renderType, 
+		float projMatL[], float projMatR[],
+		float camMatL[], float camMatR[])
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			auto& settings = renderSettings[renderId];
 			settings.stereoEnabled = true;
+			settings.stereoRenderCount = 0;
+			settings.stereoRenderingType = (StereoRenderingType)renderType;
 			Array2Matrix(settings.leftProjectionMatrix, projMatL);
 			Array2Matrix(settings.rightProjectionMatrix, projMatR);
 			Array2Matrix(settings.leftCameraMatrix, camMatL);

@@ -14,6 +14,16 @@ namespace EffekseerPlugin
 		Unity = 1,
 	};
 
+	enum class StereoRenderingType : int
+	{
+		// Multiple pass VR rendering.
+		MultiPass = 0,
+		// Single pass VR rendering ( via double-wide render texture ).
+		SinglePass = 1,
+		// Single pass VR rendering ( via instanced rendering ).
+		Instancing = 2
+	};
+
 	const int MAX_RENDER_PATH = 128;
 
 	extern Effekseer::Manager*	g_EffekseerManager;
@@ -26,6 +36,7 @@ namespace EffekseerPlugin
 
 		bool					stereoEnabled;
 		int						stereoRenderCount;
+		StereoRenderingType     stereoRenderingType;
 		Effekseer::Matrix44		leftCameraMatrix;
 		Effekseer::Matrix44		leftProjectionMatrix;
 		Effekseer::Matrix44		rightCameraMatrix;
