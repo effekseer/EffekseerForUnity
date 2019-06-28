@@ -982,7 +982,7 @@ namespace Effekseer.Internal
 			}
 
 			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier
-				, StereoRendererUtil.StereoRenderingTypes stereoRenderingMode = StereoRendererUtil.StereoRenderingTypes.None)
+				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
 
@@ -992,17 +992,21 @@ namespace Effekseer.Internal
 
 				SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, dstIdentifier);
 
-				if (stereoRenderingMode == StereoRendererUtil.StereoRenderingTypes.SinglePass)
+				if (stereoRenderingType == StereoRendererUtil.StereoRenderingTypes.SinglePass)
 				{
 					// In SinglePass Stereo Rendering, draw eyes twice on the left and right with one CommandBuffer
-					SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, dstIdentifier);
+					SetupEffekseerRenderCommandBuffer(commandBuffer, false, dstID, dstIdentifier);
 				}
 
 				// register the command to a camera
 				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 			}
 
-			private void SetupEffekseerRenderCommandBuffer(CommandBuffer commandBuffer, bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
+			private void SetupEffekseerRenderCommandBuffer(
+				CommandBuffer commandBuffer,
+				bool enableDistortion,
+				int? dstID,
+				RenderTargetIdentifier? dstIdentifier)
 			{
 				// add a command to render effects.
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
@@ -1188,13 +1192,15 @@ namespace Effekseer.Internal
 			{
 				// render path doesn't exists, create a render path
 				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
+				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, stereoRenderingType);
 				renderPaths.Add(camera, path);
 			}
 
 			if (!path.IsValid())
 			{
 				path.Dispose();
+				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
 			}
 

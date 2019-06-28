@@ -16,7 +16,11 @@
 
 		public static StereoRenderingTypes GetStereoRenderingType()
 		{
-			if (UnityEngine.XR.XRSettings.stereoRenderingMode == UnityEngine.XR.XRSettings.StereoRenderingMode.MultiPass)
+			if(!UnityEngine.XR.XRSettings.enabled)
+			{
+				return StereoRenderingTypes.None;
+			}
+			else if (UnityEngine.XR.XRSettings.stereoRenderingMode == UnityEngine.XR.XRSettings.StereoRenderingMode.MultiPass)
 			{
 				return StereoRenderingTypes.MultiPass;
 			}
