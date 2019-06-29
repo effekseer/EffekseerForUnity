@@ -28,6 +28,22 @@
 #include "EffekseerRendererDX9.h"
 #endif
 
+#ifdef _PS4
+#include "EffekseerRendererPS4.h"
+#endif
+
+#ifdef _SWITCH
+#include "EffekseerRendererSwitch.h"
+#endif
+
+#ifdef _XBOXONE
+#include "EffekseerRendererXBoxOne.h"
+#endif
+
+#ifdef _XBOXONE_DX12
+#include "EffekseerRendererXBoxOneDx12.h"
+#endif
+
 #include "../common/EffekseerPluginModel.h"
 #include "../common/EffekseerPluginTexture.h"
 #include "../graphicsAPI/EffekseerPluginGraphics.h"

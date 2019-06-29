@@ -256,7 +256,7 @@ namespace Effekseer
 					case GraphicsDeviceType.Direct3D12:
 					case GraphicsDeviceType.Vulkan:
 					case GraphicsDeviceType.XboxOne:
-					case GraphicsDeviceType.Switch:
+					case GraphicsDeviceType.XboxOneD3D12:
 					case GraphicsDeviceType.PlayStation4:
 						if (RendererType == EffekseerRendererType.Native)
 						{
@@ -267,7 +267,7 @@ namespace Effekseer
 				}
 			}
 
-			// Zのnearとfarの反転対応
+			// reverse Znear and Zfar
 			bool reversedDepth = false;
 			switch (SystemInfo.graphicsDeviceType) {
 			case GraphicsDeviceType.Direct3D11:
@@ -494,7 +494,7 @@ namespace Effekseer
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderUnload))]
 		private static void TextureLoaderUnload(IntPtr path, IntPtr nativePtr)
 		{
-			var pathstr = Marshal.PtrToStringUni(path);
+			// var pathstr = Marshal.PtrToStringUni(path);
 
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{

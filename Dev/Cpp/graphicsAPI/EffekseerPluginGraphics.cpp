@@ -7,6 +7,22 @@
 #include "EffekseerPluginGraphicsDX9.h"
 #endif
 
+#ifdef _PS4
+#include "../PS4/EffekseerRendererPS4.h"
+#endif
+
+#ifdef _SWITCH
+#include "../switch/EffekseerPluginGraphicsSwitch.h"
+#endif
+
+#ifdef _XBOXONE
+#include "../XBoxOne/EffekseerPluginGraphicsXBoxOne.h"
+#endif
+
+#ifdef _XBOXONE_DX12
+#include "../XBoxOneDX12/EffekseerPluginGraphicsXBoxOneDX12.h"
+#endif
+
 #if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
 #include "EffekseerPluginGraphicsGL.h"
 #endif
@@ -19,6 +35,30 @@ Graphics* Graphics::Create(UnityGfxRenderer renderer, bool isUnityRenderer, bool
 	{
 		return new GraphicsUnity();
 	}
+
+#ifdef _PS4
+	{
+		return new GraphicsPS4();
+	}
+#endif
+
+#ifdef _SWITCH
+	{
+		return new GraphicsSwitch();
+	}
+#endif
+
+#ifdef _XBOXONE
+	{
+		return new GraphicsXBoxOne();
+	}
+#endif
+
+#ifdef _XBOXONE_DX12
+	{
+		return new GraphicsXBoxOneDX12();
+	}
+#endif
 
 #ifdef _WIN32
 	if (renderer == UnityGfxRenderer::kUnityGfxRendererD3D9)

@@ -16,7 +16,8 @@
 
 		public static StereoRenderingTypes GetStereoRenderingType()
 		{
-			if(!UnityEngine.XR.XRSettings.enabled)
+#if UNITY_2018_1_OR_NEWER
+			if (!UnityEngine.XR.XRSettings.enabled)
 			{
 				return StereoRenderingTypes.None;
 			}
@@ -36,7 +37,9 @@
 			{
 				return StereoRenderingTypes.None;
 			}
+#else
+			return StereoRenderingTypes.None;
+#endif
 		}
 	}
-
 }
