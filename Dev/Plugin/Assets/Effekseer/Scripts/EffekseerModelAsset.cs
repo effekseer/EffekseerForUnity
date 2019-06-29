@@ -57,8 +57,7 @@ namespace Effekseer
 			}
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
-			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
-
+			
 			var asset = CreateInstance<EffekseerModelAsset>();
 			asset.bytes = data;
 			

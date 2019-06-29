@@ -50,11 +50,13 @@ namespace Effekseer.Internal
 
 			if (version == 2 || version >= 5)
 			{
-				float scale = BitConverter.ToSingle(buffer, offset);
+				// float scale = (unused)
+				BitConverter.ToSingle(buffer, offset);
 				offset += sizeof(float);
 			}
 
-			int modelCount = BitConverter.ToInt32(buffer, offset);
+			// int modelCount = (unused)
+			BitConverter.ToInt32(buffer, offset);
 			offset += sizeof(int);
 
 			int frameCount = 0;
@@ -419,7 +421,7 @@ namespace Effekseer.Internal
 
 			public void Init(bool enableDistortion)
 			{
-				bool isDistortionEnabled = enableDistortion;
+				// bool isDistortionEnabled = enableDistortion;
 
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
@@ -738,7 +740,7 @@ namespace Effekseer.Internal
 		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, RenderTexture background)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
-			var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
+			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
 
 			if (renderParameterCount > 0)
 			{
@@ -1200,7 +1202,7 @@ namespace Effekseer.Internal
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
+				// var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
 			}
 
