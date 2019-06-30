@@ -261,7 +261,7 @@ extern "C"
 		{
 			if (g_EffekseerRenderer != nullptr)
 			{
-				// 遅延終了処理
+				// terminate (Delay)
 				TermRenderer();
 			}
 			return;
@@ -270,7 +270,7 @@ extern "C"
 		{
 			if (g_EffekseerRenderer == nullptr)
 			{
-				// 遅延初期化処理
+				// initialize (Delay)
 				InitRenderer();
 			}
 		}
@@ -280,8 +280,10 @@ extern "C"
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
-		// assign flipped
+		assert(g_graphics != nullptr);
+		g_graphics->StartRender(g_EffekseerRenderer);
 
+		// assign flipped
 		if (g_isTextureFlipped)
 		{
 			g_EffekseerRenderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
@@ -349,7 +351,7 @@ extern "C"
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 
-		// 描画実行(全体)
+		// render
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw();
 		g_EffekseerRenderer->EndRendering();
@@ -381,7 +383,7 @@ extern "C"
 		{
 			if (g_EffekseerRenderer != nullptr)
 			{
-				// 遅延終了処理
+				// terminate (Delay)
 				TermRenderer();
 			}
 			return;
@@ -390,7 +392,7 @@ extern "C"
 		{
 			if (g_EffekseerRenderer == nullptr)
 			{
-				// 遅延初期化処理
+				// initialize (Delay)
 				InitRenderer();
 			}
 		}
@@ -399,6 +401,9 @@ extern "C"
 			return;
 		if (g_EffekseerRenderer == nullptr)
 			return;
+
+		assert(g_graphics != nullptr);
+		g_graphics->StartRender(g_EffekseerRenderer);
 
 		// assign flipped
 		if (g_isTextureFlipped)
@@ -472,7 +477,7 @@ extern "C"
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 
-		// 描画実行(全体)
+		// render
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack();
 		g_EffekseerRenderer->EndRendering();

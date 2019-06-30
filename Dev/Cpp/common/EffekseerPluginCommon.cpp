@@ -71,10 +71,12 @@ extern "C"
 		
 		auto effect = Effect::Create(g_EffekseerManager, path, magnification);
 
+#ifndef _SWITCH
 		if (Network::GetInstance()->IsRunning())
 		{
 			Network::GetInstance()->Register(effect->GetName(), effect);
 		}
+#endif
 
 		return effect;
 	}
@@ -95,10 +97,12 @@ extern "C"
 		{
 			effect->SetName(path);
 
+#ifndef _SWITCH
 			if (Network::GetInstance()->IsRunning())
 			{
 				Network::GetInstance()->Register(effect->GetName(), effect);
 			}
+#endif
 		}
 		
 		return effect;
@@ -108,11 +112,12 @@ extern "C"
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReleaseEffect(Effect* effect)
 	{
 		if (effect != NULL) {
-
+#ifndef _SWITCH
 			if (Network::GetInstance()->IsRunning())
 			{
 				Network::GetInstance()->Unregister(effect);
 			}
+#endif
 
 			effect->Release();
 		}

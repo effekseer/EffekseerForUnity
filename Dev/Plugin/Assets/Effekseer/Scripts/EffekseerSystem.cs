@@ -210,6 +210,10 @@ namespace Effekseer
 			Plugin.RegisterPlugin();
 #endif
 
+#if UNITY_SWITCH && UNITY_2017 && NET_4_6
+#error cannot compile with ilcpp
+#endif
+
 			Instance = this;
 			
 			var settings = EffekseerSettings.Instance;

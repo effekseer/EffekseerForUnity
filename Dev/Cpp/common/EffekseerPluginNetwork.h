@@ -7,6 +7,8 @@
 #include "Effekseer.h"
 #include "../unity/IUnityInterface.h"
 
+#ifndef _SWITCH
+
 namespace EffekseerPlugin
 {
 	class Network
@@ -35,3 +37,5 @@ namespace EffekseerPlugin
 		static std::shared_ptr<Network>& GetInstance();
 	};
 }
+
+#endif

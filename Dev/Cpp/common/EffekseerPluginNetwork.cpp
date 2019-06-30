@@ -1,5 +1,7 @@
 #include "EffekseerPluginNetwork.h"
 
+#ifndef _SWITCH
+
 namespace EffekseerPlugin
 {
 	extern Effekseer::Manager*	g_EffekseerManager;
@@ -83,20 +85,34 @@ namespace EffekseerPlugin
 	}
 }
 
+#endif
+
 extern "C"
 {
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API StartNetwork(int port)
 	{
+#ifdef _SWITCH
+		return 0;
+#else
 		return static_cast<int>(EffekseerPlugin::Network::GetInstance()->Start(port));
+#endif
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API StopNetwork()
 	{
+#ifdef _SWITCH
+		return;
+#else
 		EffekseerPlugin::Network::GetInstance()->Stop();
+#endif
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UpdateNetwork()
 	{
+#ifdef _SWITCH
+		return;
+#else
 		EffekseerPlugin::Network::GetInstance()->Update();
+#endif
 	}
 }
