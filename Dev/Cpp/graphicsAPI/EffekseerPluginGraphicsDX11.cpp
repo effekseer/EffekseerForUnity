@@ -113,6 +113,7 @@ public:
 			// Unload from unity
 			unload(it->first.c_str(), textureData2NativePtr[source]);
 			textureData2NativePtr.erase(source);
+			ES_SAFE_DELETE(it->second.textureDataPtr);
 			resources.erase(it);
 		}
 	}
