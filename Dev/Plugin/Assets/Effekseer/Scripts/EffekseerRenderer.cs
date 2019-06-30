@@ -419,7 +419,7 @@ namespace Effekseer.Internal
 
 			public void Init(bool enableDistortion)
 			{
-				bool isDistortionEnabled = enableDistortion;
+				isDistortionEnabled = enableDistortion;
 
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
@@ -495,6 +495,12 @@ namespace Effekseer.Internal
 				{
 					this.computeBufferBack.Dispose();
 					this.computeBufferBack = null;
+				}
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
 				}
 
 				foreach (var e in delayEvents)
@@ -1062,6 +1068,12 @@ namespace Effekseer.Internal
 					}
 					this.commandBuffer.Dispose();
 					this.commandBuffer = null;
+				}
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
 				}
 			}
 

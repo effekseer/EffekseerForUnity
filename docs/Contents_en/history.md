@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+## 1.43h
+
+- Fixed a fatal memory leak on MacOS and distortion
+
 ## 1.43g
 
 - Support Android 64bit
