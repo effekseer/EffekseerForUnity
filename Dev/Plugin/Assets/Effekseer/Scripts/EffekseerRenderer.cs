@@ -421,11 +421,17 @@ namespace Effekseer.Internal
 
 			public void Init(bool enableDistortion)
 			{
-				// bool isDistortionEnabled = enableDistortion;
+				isDistortionEnabled = enableDistortion;
 
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
 				this.commandBuffer.name = "Effekseer Rendering";
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
+				}
 
 				// register the command to a camera
 				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
@@ -497,6 +503,12 @@ namespace Effekseer.Internal
 				{
 					this.computeBufferBack.Dispose();
 					this.computeBufferBack = null;
+				}
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
 				}
 
 				foreach (var e in delayEvents)
@@ -976,6 +988,11 @@ namespace Effekseer.Internal
 
 			bool isDistortionEnabled = false;
 
+			/// <summary>
+			/// Distortion is disabled forcely because of VR
+			/// </summary>
+			bool isDistortionMakeDisabledForcely = false;
+
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
 				this.camera = camera;
@@ -987,6 +1004,13 @@ namespace Effekseer.Internal
 				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
+				isDistortionMakeDisabledForcely = false;
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
+				}
 
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
@@ -997,7 +1021,10 @@ namespace Effekseer.Internal
 				if (stereoRenderingType == StereoRendererUtil.StereoRenderingTypes.SinglePass)
 				{
 					// In SinglePass Stereo Rendering, draw eyes twice on the left and right with one CommandBuffer
-					SetupEffekseerRenderCommandBuffer(commandBuffer, false, dstID, dstIdentifier);
+					this.isDistortionEnabled = false;
+					this.isDistortionMakeDisabledForcely = true;
+
+					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, dstID, dstIdentifier);
 				}
 
 				// register the command to a camera
@@ -1069,11 +1096,24 @@ namespace Effekseer.Internal
 					this.commandBuffer.Dispose();
 					this.commandBuffer = null;
 				}
+
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
+				}
 			}
 
 			public bool IsValid()
 			{
-				if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+				if(isDistortionMakeDisabledForcely)
+				{
+
+				}
+				else
+				{
+					if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+				}
 
 				if (this.renderTexture != null)
 				{
