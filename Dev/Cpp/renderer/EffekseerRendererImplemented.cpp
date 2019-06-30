@@ -626,7 +626,7 @@ void RendererImplemented::SetVertexBufferToShader(const void* data, int32_t size
 void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset)
 {
 	assert(m_currentShader != nullptr);
-	auto p = static_cast<uint8_t*>(m_currentShader->GetVertexConstantBuffer()) + dstOffset;
+	auto p = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + dstOffset;
 	memcpy(p, data, size);
 }
 

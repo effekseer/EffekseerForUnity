@@ -837,9 +837,9 @@ namespace Effekseer.Internal
 								}
 
 								prop.SetTexture("_ColorTex", colorTexture);
-								//prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
+								prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
 								//Temp
-								prop.SetTexture("_BackTex", background);
+								//prop.SetTexture("_BackTex", background);
 
 								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], 1, prop);
 							}
@@ -920,9 +920,9 @@ namespace Effekseer.Internal
 							}
 
 							prop.SetTexture("_ColorTex", colorTexture);
-							//prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
+							prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
 							//Temp
-							prop.SetTexture("_BackTex", background);
+							//prop.SetTexture("_BackTex", background);
 
 							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 						}

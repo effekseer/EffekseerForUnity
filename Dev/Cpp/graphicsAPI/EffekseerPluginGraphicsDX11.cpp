@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <assert.h>
 
+// TODO is default OK?
+#pragma comment(lib, "d3dcompiler.lib")
+
 namespace EffekseerPlugin
 {
 
