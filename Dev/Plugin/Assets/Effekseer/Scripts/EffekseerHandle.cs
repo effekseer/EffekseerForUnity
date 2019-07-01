@@ -115,6 +115,32 @@ namespace Effekseer
 		}
 
 		/// <summary xml:lang="en">
+		/// get a dynamic parameter, which changes effect parameters dynamically while playing
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 再生中にエフェクトのパラメーターを変更する動的パラメーターを取得する。
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public float GetDynamicInput(int index)
+		{
+			return Plugin.EffekseerGetDynamicInput(m_handle, index);
+		}
+
+		/// <summary xml:lang="en">
+		/// specfiy a dynamic parameter, which changes effect parameters dynamically while playing
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 再生中にエフェクトのパラメーターを変更する動的パラメーターを設定する。
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="value"></param>
+		public void SetDynamicInput(int index, float value)
+		{
+			Plugin.EffekseerSetDynamicInput(m_handle, index, value);
+		}
+
+		/// <summary xml:lang="en">
 		/// Pausing the effect
 		/// <para>true:  It will update on Update()</para>
 		/// <para>false: It will not update on Update()</para>

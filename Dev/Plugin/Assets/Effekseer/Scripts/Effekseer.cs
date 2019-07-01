@@ -99,6 +99,9 @@ namespace Effekseer
 		public static extern void EffekseerUnloadResources(IntPtr effect);
 
 		[DllImport(pluginName)]
+		public static extern float EffekseerGetEffectMagnification(IntPtr effect);
+
+		[DllImport(pluginName)]
 		public static extern int EffekseerPlayEffect(IntPtr effect, float x, float y, float z);
 
 		[DllImport(pluginName)]
@@ -151,6 +154,12 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetTargetLocation(int handle, float x, float y, float z);
+
+		[DllImport(pluginName)]
+		public static extern float EffekseerGetDynamicInput(int handle, int index);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetDynamicInput(int handle, int index, float value);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetTextureLoaderEvent(

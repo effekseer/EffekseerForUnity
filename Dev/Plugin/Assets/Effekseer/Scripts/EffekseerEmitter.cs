@@ -12,6 +12,8 @@ namespace Effekseer
 	[AddComponentMenu("Effekseer/Effekseer Emitter")]
 	public class EffekseerEmitter : MonoBehaviour
 	{
+		float cachedMagnification = 0.0f;
+
 		/// <summary xml:lang="en">
 		/// Effect name
 		/// </summary>
@@ -64,6 +66,8 @@ namespace Effekseer
 		/// </summary>
 		public EffekseerHandle Play(EffekseerEffectAsset effectAsset)
 		{
+			cachedMagnification = effectAsset.Magnification;
+
 			var h = EffekseerSystem.PlayEffect(effectAsset, transform.position);
 			h.SetRotation(transform.rotation);
 			h.SetScale(transform.localScale);
@@ -157,7 +161,93 @@ namespace Effekseer
 				handle.SetTargetLocation(targetLocation);
 			}
 		}
-	
+
+		/// <summary xml:lang="en">
+		/// get first effect's dynamic parameter, which changes effect parameters dynamically while playing
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 再生中にエフェクトのパラメーターを変更する最初のエフェクトの動的パラメーターを取得する。
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public float GetDynamicInput(int index)
+		{
+			foreach (var handle in handles)
+			{
+				return handle.GetDynamicInput(index);
+			}
+
+			return 0.0f;
+		}
+
+		/// <summary xml:lang="en">
+		/// specfiy a dynamic parameter, which changes effect parameters dynamically while playing
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 再生中にエフェクトのパラメーターを変更する動的パラメーターを設定する。
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="value"></param>
+		public void SetDynamicInput(int index, float value)
+		{
+			foreach (var handle in handles)
+			{
+				handle.SetDynamicInput(index, value);
+			}
+		}
+
+		/// <summary xml:lang="en">
+		/// specify a dynamic parameters x,y,z with a world position converting into local position considering effect magnification.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトの拡大率を考慮しつつ、ローカル座標に変換しつつ、ワールド座標で動的パラメーターx,y,zを設定する。
+		/// </summary>
+		/// <param name="worldPos"></param>
+		public void SetDynamicInputWithWorldPosition(ref Vector3 worldPos)
+		{
+			var localPos = transform.InverseTransformPoint(worldPos);
+			SetDynamicInputWithLocalPosition(ref localPos);
+		}
+
+		/// <summary xml:lang="en">
+		/// specify a dynamic parameters x,y,z with a local position considering effect magnification.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトの拡大率を考慮しつつ、ローカル座標座標で動的パラメーターx,y,zを設定する。
+		/// </summary>
+		/// <param name="worldPos"></param>
+		public void SetDynamicInputWithLocalPosition(ref Vector3 localPos)
+		{
+			SetDynamicInput(0, localPos.x / cachedMagnification);
+			SetDynamicInput(1, localPos.y / cachedMagnification);
+			SetDynamicInput(2, localPos.z / cachedMagnification);
+		}
+
+		/// <summary xml:lang="en">
+		/// specify a dynamic parameters x with distance to a world position converting into local position considering effect magnification.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトの拡大率を考慮しつつ、ローカル座標に変換しつつ、ワールド座標への距離で動的パラメーターxを設定する。
+		/// </summary>
+		/// <param name="worldPos"></param>
+		public void SetDynamicInputWithWorldDistance(ref Vector3 worldPos)
+		{
+			var localPos = transform.InverseTransformPoint(worldPos);
+			SetDynamicInputWithLocalDistance(ref localPos);
+		}
+
+		/// <summary xml:lang="en">
+		/// specify a dynamic parameters x with distance to a world position converting into local position considering effect magnification.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトの拡大率を考慮しつつ、ローカル座標への距離で動的パラメーターxを設定する。
+		/// </summary>
+		/// <param name="localPos"></param>
+		public void SetDynamicInputWithLocalDistance(ref Vector3 localPos)
+		{
+			SetDynamicInput(0, localPos.magnitude / cachedMagnification);
+		}
+
 		/// <summary xml:lang="en">
 		/// Pausing the effect
 		/// <para>true:  It will update on Update()</para>

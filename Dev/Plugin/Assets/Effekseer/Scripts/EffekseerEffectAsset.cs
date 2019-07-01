@@ -77,6 +77,24 @@ namespace Effekseer
 
 		int dictionaryKey = 0;
 
+		/// <summary xml:lang="en">
+		/// Get a magnification combined with internal and external one
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 外部と内部の拡大率を合わせた拡大率を取得する。
+		/// </summary>
+		public float Magnification
+		{
+			get
+			{
+				if (EffekseerSystem.IsValid)
+				{
+					EffekseerSystem.Instance.GetEffectMagnification(this);
+				}
+				return 0.0f;
+			}
+		}
+
 		void OnEnable()
 		{
 			if(efkBytes != null && efkBytes.Length > 0)

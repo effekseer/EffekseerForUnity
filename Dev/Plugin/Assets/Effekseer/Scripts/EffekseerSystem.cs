@@ -197,6 +197,17 @@ namespace Effekseer
 			}
 		}
 
+		internal float GetEffectMagnification(EffekseerEffectAsset effectAsset)
+		{
+			int id = effectAsset.GetInstanceID();
+			IntPtr nativeEffect;
+			if (nativeEffects.TryGetValue(id, out nativeEffect))
+			{
+				return Plugin.EffekseerGetEffectMagnification(nativeEffect);
+			}
+			return 0.0f;
+		}
+
 		/// <summary>
 		/// Don't touch it!!
 		/// </summary>

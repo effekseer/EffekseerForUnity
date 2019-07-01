@@ -17,6 +17,7 @@ EXPORTS
   EffekseerReleaseEffect
   EffekseerReloadResources
   EffekseerUnloadResources
+  EffekseerGetEffectMagnification
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
   EffekseerSetStereoRenderingMatrix
@@ -40,6 +41,8 @@ EXPORTS
   EffekseerSetScale
   EffekseerSetAllColor
   EffekseerSetTargetLocation
+  EffekseerGetDynamicInput
+  EffekseerSetDynamicInput
   EffekseerSetTextureLoaderEvent
   EffekseerSetModelLoaderEvent
   EffekseerSetSoundLoaderEvent

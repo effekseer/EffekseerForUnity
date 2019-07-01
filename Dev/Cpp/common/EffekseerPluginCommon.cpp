@@ -139,6 +139,15 @@ extern "C"
 		}
 	}
 
+	UNITY_INTERFACE_EXPORT float UNITY_INTERFACE_API EffekseerGetEffectMagnification(Effect* effect)
+	{ 
+		if (effect != nullptr)
+		{
+			return effect->GetMaginification();
+		}
+		return 0.0f;
+	}
+
 	// エフェクト再生
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerPlayEffect(Effect* effect, float x, float y, float z)
 	{
@@ -319,7 +328,27 @@ extern "C"
 
 		g_EffekseerManager->SetTargetLocation(handle, x, y, z);
 	}
-	
+
+	UNITY_INTERFACE_EXPORT float UNITY_INTERFACE_API EffekseerGetDynamicInput(int handle, int index)
+	{
+		if (g_EffekseerManager == NULL)
+		{
+			return 0.0f;
+		}
+
+		return g_EffekseerManager->GetDynamicInput(handle, index);
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetDynamicInput(int handle, int index, float value)
+	{
+		if (g_EffekseerManager == NULL)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetDynamicInput(handle, index, value);
+	}
+
 	// プロジェクション行列設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProjectionMatrix(int renderId, float matrixArray[])
 	{
