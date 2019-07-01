@@ -41,7 +41,7 @@ public:
 
 	virtual Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
 
-	virtual void ShiftViewportForStereoSinglePass() = 0;
+	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 
 	virtual void StartRender(EffekseerRenderer::Renderer* renderer) {};
 };

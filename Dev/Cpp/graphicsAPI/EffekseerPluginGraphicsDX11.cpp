@@ -227,12 +227,15 @@ Effekseer::ModelLoader* GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUn
 	return loader;
 }
 
-void GraphicsDX11::ShiftViewportForStereoSinglePass()
+void GraphicsDX11::ShiftViewportForStereoSinglePass(bool isShift)
 {
 	D3D11_VIEWPORT vp;
 	UINT viewportNum = 1;
 	d3d11Context->RSGetViewports(&viewportNum, &vp);
-	vp.TopLeftX = vp.Width;
+	if (isShift)
+		vp.TopLeftX = vp.Width;
+	else
+		vp.TopLeftX = 0;
 	d3d11Context->RSSetViewports(1, &vp);
 }
 

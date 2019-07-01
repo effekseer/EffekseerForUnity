@@ -121,11 +121,14 @@ Effekseer::ModelLoader* GraphicsDX9::Create(ModelLoaderLoad load, ModelLoaderUnl
 	return loader;
 }
 
-void GraphicsDX9::ShiftViewportForStereoSinglePass()
+void GraphicsDX9::ShiftViewportForStereoSinglePass(bool isShift)
 {
 	D3DVIEWPORT9 vp;
 	d3d9Device->GetViewport(&vp);
-	vp.X = vp.Width;
+	if (isShift)
+		vp.X = vp.Width;
+	else
+		vp.X = 0;
 	d3d9Device->SetViewport(&vp);
 }
 
