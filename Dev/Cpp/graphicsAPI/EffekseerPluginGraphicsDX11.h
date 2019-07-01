@@ -34,7 +34,7 @@ public:
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
 
-	void ShiftViewportForStereoSinglePass() override;
+	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };
 
 } // namespace EffekseerPlugin

@@ -165,11 +165,14 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 	return loader;
 }
 
-void GraphicsGL::ShiftViewportForStereoSinglePass()
+void GraphicsGL::ShiftViewportForStereoSinglePass(bool isShift)
 {
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
-	viewport[0] += viewport[2];
+	if (isShift)
+		viewport[0] = viewport[2];
+	else
+		viewport[0] = 0;
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 

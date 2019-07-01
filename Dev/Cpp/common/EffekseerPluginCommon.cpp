@@ -354,6 +354,7 @@ extern "C"
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			Array2Matrix(renderSettings[renderId].projectionMatrix, matrixArray);
+			renderSettings[renderId].stereoEnabled = false;
 		}
 	}
 	
@@ -362,6 +363,7 @@ extern "C"
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			Array2Matrix(renderSettings[renderId].cameraMatrix, matrixArray);
+			renderSettings[renderId].stereoEnabled = false;
 		}
 	}
 
