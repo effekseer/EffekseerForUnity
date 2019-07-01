@@ -1242,8 +1242,8 @@ namespace Effekseer.Internal
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				// var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, StereoRendererUtil.GetStereoRenderingType());
+				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, stereoRenderingType);
 			}
 
 			path.LifeTime = 5;
