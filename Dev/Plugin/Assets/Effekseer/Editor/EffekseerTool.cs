@@ -1,7 +1,7 @@
 ﻿#if UNITY_EDITOR
-#pragma warning disable
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Xml;
@@ -33,6 +33,10 @@ namespace EffekseerTool
 		static Data.EffectCullingValues culling = new Data.EffectCullingValues();
 
 		static Data.GlobalValues globalValues = new Data.GlobalValues();
+
+		static Data.RecordingValues recording = new Data.RecordingValues();
+
+		static Data.DynamicValues dynamic_ = new Data.DynamicValues();
 
 		static int start_frame = 0;
 
@@ -189,6 +193,11 @@ namespace EffekseerTool
 			get { return option; }
 		}
 		
+		public static Data.RecordingValues Recording
+		{
+			get { return recording; }
+		}
+
 		public static Data.PostEffectValues PostEffect
 		{
 			get { return postEffect; }
@@ -209,6 +218,10 @@ namespace EffekseerTool
 			get { return globalValues; }
 		}
 
+		public static Data.DynamicValues Dynamic
+		{
+			get { return dynamic_; }
+		}
 
 		/// <summary>
 		/// 選択中のノード
@@ -559,8 +572,15 @@ namespace EffekseerTool
 			culling = new Data.EffectCullingValues();
 			globalValues = new Data.GlobalValues();
 
-            // Add a root node
-            Root.AddChild();
+			if(recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Local)
+			{
+				recording = new Data.RecordingValues();
+			}
+
+			dynamic_ = new Data.DynamicValues();
+
+			// Add a root node
+			Root.AddChild();
 			Command.CommandManager.Clear();
 			FullPath = string.Empty;
 			IsChanged = false;
@@ -587,6 +607,7 @@ namespace EffekseerTool
 			var behaviorElement = Data.IO.SaveObjectToElement(doc, "Behavior", EffectBehavior, false);
 			var cullingElement = Data.IO.SaveObjectToElement(doc, "Culling", Culling, false);
 			var globalElement = Data.IO.SaveObjectToElement(doc, "Global", Global, false);
+			var dynamicElement = Data.IO.SaveObjectToElement(doc, "Dynamic", Dynamic, false);
 
 			System.Xml.XmlElement project_root = doc.CreateElement("EffekseerProject");
 
@@ -595,6 +616,14 @@ namespace EffekseerTool
 			if(behaviorElement != null) project_root.AppendChild(behaviorElement);
 			if (cullingElement != null) project_root.AppendChild(cullingElement);
 			if (globalElement != null) project_root.AppendChild(globalElement);
+			if (dynamicElement != null) project_root.AppendChild(dynamicElement);
+
+			// recording option (this option is stored in local or global)
+			if (recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Local)
+			{
+				var recordingElement = Data.IO.SaveObjectToElement(doc, "Recording", Recording, false);
+				if (recordingElement != null) project_root.AppendChild(recordingElement);
+			}
 
 			project_root.AppendChild(doc.CreateTextElement("ToolVersion", Core.Version));
 			project_root.AppendChild(doc.CreateTextElement("Version", 3));
@@ -740,6 +769,20 @@ namespace EffekseerTool
 				Data.IO.LoadObjectFromElement(globalElement as System.Xml.XmlElement, ref o, false);
 			}
 
+			var dynamicElement = doc["EffekseerProject"]["Dynamic"];
+			if (dynamicElement != null)
+			{
+				var o = dynamic_ as object;
+				Data.IO.LoadObjectFromElement(dynamicElement as System.Xml.XmlElement, ref o, false);
+			}
+
+			// recording option (this option is stored in local or global)
+			if (doc["EffekseerProject"]["Recording"] != null)
+			{
+				var o = recording as object;
+				Data.IO.LoadObjectFromElement(doc["EffekseerProject"]["Recording"] as System.Xml.XmlElement, ref o, false);
+			}
+
 			StartFrame = 0;
 			EndFrame = doc["EffekseerProject"]["EndFrame"].GetTextAsInt();
 			StartFrame = doc["EffekseerProject"]["StartFrame"].GetTextAsInt();
@@ -845,6 +888,13 @@ namespace EffekseerTool
 				Data.IO.LoadObjectFromElement(postEffectElement as System.Xml.XmlElement, ref o, false);
 			}
 
+			var recordingElement = doc["EffekseerProject"]["Recording"];
+			if(recordingElement != null)
+			{
+				var o = recording as object;
+				Data.IO.LoadObjectFromElement(recordingElement as System.Xml.XmlElement, ref o, false);
+			}
+
 			IsChanged = false;
 
             return res;
@@ -862,6 +912,13 @@ namespace EffekseerTool
 			System.Xml.XmlElement project_root = doc.CreateElement("EffekseerProject");
 			if(optionElement != null) project_root.AppendChild(optionElement);
 			if(postEffectElement != null) project_root.AppendChild(postEffectElement);
+
+			// recording option (this option is stored in local or global)
+			if (recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Global)
+			{
+				var recordingElement = Data.IO.SaveObjectToElement(doc, "Recording", Recording, false);
+				if (recordingElement != null) project_root.AppendChild(recordingElement);
+			}
 
 			doc.AppendChild(project_root);
 
@@ -1525,6 +1582,14 @@ namespace EffekseerTool.Binary
 	[StructLayout(LayoutKind.Sequential)]
 	struct CommonValues
 	{
+		public int RefEqMaxGeneration;
+		public int RefEqLifeMax;
+		public int RefEqLifeMin;
+		public int RefEqGenerationTimeMax;
+		public int RefEqGenerationTimeMin;
+		public int RefEqGenerationTimeOffsetMax;
+		public int RefEqGenerationTimeOffsetMin;
+
 		public int MaxCreation;
 		public int TranslationEffectType;
 		public int RotationEffectType;
@@ -1553,6 +1618,14 @@ namespace EffekseerTool.Binary
 		static public CommonValues Create(Data.CommonValues value)
 		{
 			var s_value = new CommonValues();
+
+			s_value.RefEqMaxGeneration = value.MaxGeneration.DynamicEquation.Index;
+			s_value.RefEqLifeMax = value.Life.DynamicEquationMax.Index;
+			s_value.RefEqLifeMin = value.Life.DynamicEquationMin.Index;
+			s_value.RefEqGenerationTimeMax = value.GenerationTime.DynamicEquationMax.Index;
+			s_value.RefEqGenerationTimeMin = value.GenerationTime.DynamicEquationMin.Index;
+			s_value.RefEqGenerationTimeOffsetMax = value.GenerationTimeOffset.DynamicEquationMax.Index;
+			s_value.RefEqGenerationTimeOffsetMin = value.GenerationTimeOffset.DynamicEquationMin.Index;
 
 			s_value.MaxCreation = value.MaxGeneration.Value;
 			if (value.MaxGeneration.Infinite)
@@ -1636,13 +1709,27 @@ namespace EffekseerTool.Binary
 {
 	public class Exporter
 	{
-		const int Version = 13;
-
+#if MATERIAL_ENABLED
+		/// <summary>
+		/// Binary version
+		/// </summary>
+		/// <remarks>
+		/// Version14
+		/// Support dynamic parameter
+		/// </remarks>
+		const int Version = 15;
+#else
+		const int Version = 14;
+#endif
 		public HashSet<string> UsedTextures = new HashSet<string>();
 
 		public HashSet<string> UsedNormalTextures = new HashSet<string>();
 
 		public HashSet<string> UsedDistortionTextures = new HashSet<string>();
+
+		public HashSet<string> Sounds = new HashSet<string>();
+
+		public HashSet<string> Models = new HashSet<string>();
 
 		/// <summary>
 		/// エフェクトデータの出力
@@ -1665,11 +1752,13 @@ namespace EffekseerTool.Binary
 
 			UsedDistortionTextures = new HashSet<string>();
 
-            // ウェーブ名称一覧取得
-            HashSet<string> waves = new HashSet<string>();
+            Sounds = new HashSet<string>();
 
-			// モデル名称一覧取得
-			HashSet<string> models = new HashSet<string>();
+			Models = new HashSet<string>();
+
+#if MATERIAL_ENABLED
+			HashSet<string> materials = new HashSet<string>();
+#endif
 
 			Action<Data.NodeBase> get_textures = null;
 			get_textures = (node) =>
@@ -1683,6 +1772,58 @@ namespace EffekseerTool.Binary
 						}
 						else
 						{
+#if MATERIAL_ENABLED
+							if(_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.Default)
+							{
+								var relative_path = _node.RendererCommonValues.ColorTexture.RelativePath;
+								if (relative_path != string.Empty)
+								{
+									if (_node.RendererCommonValues.Distortion.Value)
+									{
+										if (!UsedDistortionTextures.Contains(relative_path))
+										{
+											UsedDistortionTextures.Add(relative_path);
+										}
+									}
+									else
+									{
+										if (!UsedTextures.Contains(relative_path))
+										{
+											UsedTextures.Add(relative_path);
+										}
+									}
+								}
+							}
+							else if(_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File)
+							{
+								var materialInfo = new Utl.MaterialInformation();
+								materialInfo.Load(_node.RendererCommonValues.MaterialFile.Path.AbsolutePath);
+
+								var textures = _node.RendererCommonValues.MaterialFile.GetTextures(materialInfo);
+
+								foreach (var texture in textures)
+								{
+									var relative_path = (texture.Item1.Value as Data.Value.PathForImage).RelativePath;
+									if (relative_path != string.Empty)
+									{
+										if(texture.Item2)
+										{
+											if (!UsedNormalTextures.Contains(relative_path))
+											{
+												UsedNormalTextures.Add(relative_path);
+											}
+										}
+										else
+										{
+											if (!UsedTextures.Contains(relative_path))
+											{
+												UsedTextures.Add(relative_path);
+											}
+										}
+									}
+								}
+							}
+#else
 							{
 								var relative_path = _node.RendererCommonValues.ColorTexture.RelativePath;
 								if (relative_path != string.Empty)
@@ -1703,7 +1844,7 @@ namespace EffekseerTool.Binary
 									}
 								}
 							}
-
+#endif
 							{
 								var relative_path = _node.DrawingValues.Model.NormalTexture.RelativePath;
 								if (relative_path != string.Empty)
@@ -1770,9 +1911,9 @@ namespace EffekseerTool.Binary
                         var relative_path = _node.SoundValues.Sound.Wave.RelativePath;
                         if (relative_path != string.Empty)
                         {
-                            if (!waves.Contains(relative_path))
+                            if (!Sounds.Contains(relative_path))
                             {
-                                waves.Add(relative_path);
+                                Sounds.Add(relative_path);
                             }
                         }
                     }
@@ -1789,7 +1930,7 @@ namespace EffekseerTool.Binary
             Dictionary<string, int> wave_and_index = new Dictionary<string, int>();
             {
                 int index = 0;
-                foreach (var wave in waves.ToList().OrderBy(_ => _))
+                foreach (var wave in Sounds.ToList().OrderBy(_ => _))
                 {
                     wave_and_index.Add(wave, index);
                     index++;
@@ -1820,9 +1961,9 @@ namespace EffekseerTool.Binary
 
 							if (relative_path != string.Empty)
                             {
-                                if (!models.Contains(relative_path))
+                                if (!Models.Contains(relative_path))
                                 {
-                                    models.Add(relative_path);
+                                    Models.Add(relative_path);
                                 }
                             }
                         }
@@ -1846,9 +1987,9 @@ namespace EffekseerTool.Binary
 
 							if (relative_path != string.Empty)
                             {
-                                if (!models.Contains(relative_path))
+                                if (!Models.Contains(relative_path))
                                 {
-                                    models.Add(relative_path);
+                                    Models.Add(relative_path);
                                 }
                             }
                         }
@@ -1866,12 +2007,52 @@ namespace EffekseerTool.Binary
 			Dictionary<string, int> model_and_index = new Dictionary<string, int>();
 			{
 				int index = 0;
-				foreach (var model in models.ToList().OrderBy(_ => _))
+				foreach (var model in Models.ToList().OrderBy(_ => _))
 				{
 					model_and_index.Add(model, index);
 					index++;
 				}
 			}
+
+#if MATERIAL_ENABLED
+			Action<Data.NodeBase> get_materials = null;
+			get_materials = (node) =>
+			{
+				if (node is Data.Node)
+				{
+					var _node = node as Data.Node;
+
+					if (_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File)
+					{
+						var relative_path = _node.RendererCommonValues.MaterialFile.Path.RelativePath;
+						if (relative_path != string.Empty)
+						{
+							if (!materials.Contains(relative_path))
+							{
+								materials.Add(relative_path);
+							}
+						}
+					}
+				}
+
+				for (int i = 0; i < node.Children.Count; i++)
+				{
+					get_materials(node.Children[i]);
+				}
+			};
+
+			get_materials(Core.Root);
+
+			Dictionary<string, int> material_and_index = new Dictionary<string, int>();
+			{
+				int index = 0;
+				foreach (var wave in materials.ToList().OrderBy(_ => _))
+				{
+					material_and_index.Add(wave, index);
+					index++;
+				}
+			}
+#endif
 
 			// get all nodes
 			var nodes = new List<Data.Node>();
@@ -1944,6 +2125,50 @@ namespace EffekseerTool.Binary
 				data.Add(((path.Count() + 2) / 2).GetBytes());
 				data.Add(path);
 				data.Add(new byte[] { 0, 0 });
+			}
+
+#if MATERIAL_ENABLED
+			// export materials to a file
+			data.Add(BitConverter.GetBytes(material_and_index.Count));
+			foreach (var material in material_and_index)
+			{
+				var path = Encoding.Unicode.GetBytes(material.Key);
+				data.Add(((path.Count() + 2) / 2).GetBytes());
+				data.Add(path);
+				data.Add(new byte[] { 0, 0 });
+			}
+#endif
+
+			// export dynamic parameters
+			data.Add(BitConverter.GetBytes(Core.Dynamic.Inputs.Values.Count));
+			foreach (var value in Core.Dynamic.Inputs.Values)
+			{
+				float value_ = value.Input.Value;
+				data.Add(BitConverter.GetBytes(value_));
+			}
+
+			data.Add(BitConverter.GetBytes(Core.Dynamic.Equations.Values.Count));
+
+			var compiler = new InternalScript.Compiler();
+
+			foreach (var value in Core.Dynamic.Equations.Values)
+			{
+				var cx = compiler.Compile(value.Code.Value);
+
+				var cs = new []{ cx };
+
+				foreach(var c in cs)
+				{
+					if(c.Bytecode != null)
+					{
+						data.Add(BitConverter.GetBytes((int)c.Bytecode.Length));
+						data.Add(c.Bytecode);
+					}
+					else
+					{
+						data.Add(BitConverter.GetBytes((int)0));
+					}
+				}
 			}
 
 			// Export the number of nodes
@@ -2074,7 +2299,11 @@ namespace EffekseerTool.Binary
 				node_data.Add(n.DepthValues.DrawingPriority.Value.GetBytes());
 				node_data.Add(n.DepthValues.SoftParticle.Value.GetBytes());
 
-                node_data.Add(RendererCommonValues.GetBytes(n.RendererCommonValues, texture_and_index, distortionTexture_and_index));
+#if MATERIAL_ENABLED
+				node_data.Add(RendererCommonValues.GetBytes(n.RendererCommonValues, texture_and_index, normalTexture_and_index, distortionTexture_and_index, material_and_index));
+#else
+				node_data.Add(RendererCommonValues.GetBytes(n.RendererCommonValues, texture_and_index, distortionTexture_and_index));
+#endif
 
 				if (isRenderParamExported)
 				{
@@ -2281,21 +2510,45 @@ namespace EffekseerTool.Binary
 
 			if (value.Type.GetValue() == Data.LocationValues.ParamaterType.Fixed)
 			{
-				var bytes = Translation_Fixed_Values.Create(value.Fixed, 1.0f).GetBytes();
-				data.Add(bytes.Count().GetBytes());
-				data.Add(bytes);
+				var refBuf = value.Fixed.Location.DynamicEquation.Index.GetBytes();
+				var mainBuf = Translation_Fixed_Values.Create(value.Fixed, 1.0f).GetBytes();
+				data.Add((mainBuf.Count() + refBuf.Count()).GetBytes());
+				data.Add(refBuf);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.LocationValues.ParamaterType.PVA)
 			{
-				var bytes = Translation_PVA_Values.Create(value.PVA, 1.0f).GetBytes();
-				data.Add(bytes.Count().GetBytes());
-				data.Add(bytes);
+				var refBuf1_1 = value.PVA.Location.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.PVA.Location.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.PVA.Velocity.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.PVA.Velocity.DynamicEquationMin.Index.GetBytes();
+				var refBuf3_1 = value.PVA.Acceleration.DynamicEquationMax.Index.GetBytes();
+				var refBuf3_2 = value.PVA.Acceleration.DynamicEquationMin.Index.GetBytes();
+
+				var mainBuf = Translation_PVA_Values.Create(value.PVA, 1.0f).GetBytes();
+				data.Add((mainBuf.Count() + refBuf1_1.Count() * 6).GetBytes());
+				data.Add(refBuf1_1);
+				data.Add(refBuf1_2);
+				data.Add(refBuf2_1);
+				data.Add(refBuf2_2);
+				data.Add(refBuf3_1);
+				data.Add(refBuf3_2);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.LocationValues.ParamaterType.Easing)
 			{
 				var easing = Utl.MathUtl.Easing((float)value.Easing.StartSpeed.Value, (float)value.Easing.EndSpeed.Value);
 
+				var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
+
 				List<byte[]> _data = new List<byte[]>();
+				_data.Add(refBuf1_1);
+				_data.Add(refBuf1_2);
+				_data.Add(refBuf2_1);
+				_data.Add(refBuf2_2);
 				_data.Add(value.Easing.Start.GetBytes(1.0f));
 				_data.Add(value.Easing.End.GetBytes(1.0f));
 				_data.Add(BitConverter.GetBytes(easing[0]));
@@ -2392,12 +2645,141 @@ namespace EffekseerTool.Binary
 {
 	class RendererCommonValues
 	{
+#if MATERIAL_ENABLED
+		public static byte[] GetBytes(Data.RendererCommonValues value, Dictionary<string, int> texture_and_index, Dictionary<string, int> normalTexture_and_index, Dictionary<string, int> distortionTexture_and_index, Dictionary<string, int> material_and_index)
+#else
 		public static byte[] GetBytes(Data.RendererCommonValues value, Dictionary<string, int> texture_and_index, Dictionary<string, int> distortionTexture_and_index)
+#endif
 		{
 			List<byte[]> data = new List<byte[]>();
 
 			var texInfo = new TextureInformation();
 			var hasTexture = true;
+
+#if MATERIAL_ENABLED
+			data.Add(((int)value.Material.Value).GetBytes());
+
+
+			if (value.Material.Value == Data.RendererCommonValues.MaterialType.Default)
+			{
+				// テクスチャ番号
+				if (value.Distortion.Value)
+				{
+					if (value.ColorTexture.RelativePath != string.Empty &&
+					distortionTexture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
+					texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(distortionTexture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
+				}
+				else
+				{
+					if (value.ColorTexture.RelativePath != string.Empty &&
+						texture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
+						texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(texture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
+				}
+			}
+			else
+			{
+				var materialInfo = new Utl.MaterialInformation();
+				materialInfo.Load(value.MaterialFile.Path.AbsolutePath);
+	
+				var textures = value.MaterialFile.GetTextures(materialInfo);
+				var uniforms = value.MaterialFile.GetUniforms(materialInfo);
+
+				if(material_and_index.ContainsKey(value.MaterialFile.Path.RelativePath))
+				{
+					data.Add(material_and_index[value.MaterialFile.Path.RelativePath].GetBytes());
+				}
+				else
+				{
+					data.Add((-1).GetBytes());
+
+				}
+
+				data.Add(textures.Count.GetBytes());
+
+				foreach (var texture in textures)
+				{
+					var texture_ = texture.Item1.Value as Data.Value.PathForImage;
+					if (texture.Item2)
+					{
+
+						if (texture_.RelativePath != string.Empty &&
+							normalTexture_and_index.ContainsKey(texture_.RelativePath) &&
+							texInfo.Load(texture_.AbsolutePath))
+						{
+							data.Add((1).GetBytes());
+							data.Add(normalTexture_and_index[texture_.RelativePath].GetBytes());
+							hasTexture = true;
+						}
+						else
+						{
+							data.Add((1).GetBytes());
+							data.Add((-1).GetBytes());
+							hasTexture = false;
+						}
+					}
+					else
+					{
+						if (texture_.RelativePath != string.Empty &&
+texture_and_index.ContainsKey(texture_.RelativePath) &&
+texInfo.Load(texture_.AbsolutePath))
+						{
+							data.Add((0).GetBytes());
+							data.Add(texture_and_index[texture_.RelativePath].GetBytes());
+							hasTexture = true;
+						}
+						else
+						{
+							data.Add((0).GetBytes());
+							data.Add((-1).GetBytes());
+							hasTexture = false;
+						}
+					}
+				}
+
+				data.Add(uniforms.Count.GetBytes());
+
+				foreach (var uniform in uniforms)
+				{
+					float[] floats = new float[4];
+					
+					if(uniform.Value is Data.Value.Float)
+					{
+						floats[0] = (uniform.Value as Data.Value.Float).Value;
+					}
+
+					if (uniform.Value is Data.Value.Vector4D)
+					{
+						floats[0] = (uniform.Value as Data.Value.Vector4D).X.Value;
+						floats[1] = (uniform.Value as Data.Value.Vector4D).Y.Value;
+						floats[2] = (uniform.Value as Data.Value.Vector4D).Z.Value;
+						floats[3] = (uniform.Value as Data.Value.Vector4D).W.Value;
+					}
+
+					data.Add(floats[0].GetBytes());
+					data.Add(floats[1].GetBytes());
+					data.Add(floats[2].GetBytes());
+					data.Add(floats[3].GetBytes());
+				}
+			}
+#else
 
 			// テクスチャ番号
 			if (value.Distortion.Value)
@@ -2430,7 +2812,7 @@ namespace EffekseerTool.Binary
 					hasTexture = false;
 				}
 			}
-			
+#endif
 
 			data.Add(value.AlphaBlend);
 			data.Add(value.Filter);
@@ -3099,25 +3481,49 @@ namespace EffekseerTool.Binary
 
 			if (value.Type.GetValue() == Data.RotationValues.ParamaterType.Fixed)
 			{
-				var bytes = Rotation_Fixed_Values.Create(value.Fixed).GetBytes();
-				data.Add(bytes.Count().GetBytes());
-				data.Add(bytes);
+				var refBuf = value.Fixed.Rotation.DynamicEquation.Index.GetBytes();
+				var mainBuf = Rotation_Fixed_Values.Create(value.Fixed).GetBytes();
+				data.Add((mainBuf.Count() + refBuf.Count()).GetBytes());
+				data.Add(refBuf);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.RotationValues.ParamaterType.PVA)
 			{
+				var refBuf1_1 = value.PVA.Rotation.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.PVA.Rotation.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.PVA.Velocity.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.PVA.Velocity.DynamicEquationMin.Index.GetBytes();
+				var refBuf3_1 = value.PVA.Acceleration.DynamicEquationMax.Index.GetBytes();
+				var refBuf3_2 = value.PVA.Acceleration.DynamicEquationMin.Index.GetBytes();
+
 				List<byte[]> _data = new List<byte[]>();
 				_data.Add(value.PVA.Rotation.GetBytes((float)Math.PI / 180.0f));
 				_data.Add(value.PVA.Velocity.GetBytes((float)Math.PI / 180.0f));
 				_data.Add(value.PVA.Acceleration.GetBytes((float)Math.PI / 180.0f));
-				var __data = _data.ToArray().ToArray();
-				data.Add(__data.Count().GetBytes());
-				data.Add(__data);
+				var mainBuf = _data.ToArray().ToArray();
+				data.Add((mainBuf.Count() + refBuf1_1.Count() * 6).GetBytes());
+				data.Add(refBuf1_1);
+				data.Add(refBuf1_2);
+				data.Add(refBuf2_1);
+				data.Add(refBuf2_2);
+				data.Add(refBuf3_1);
+				data.Add(refBuf3_2);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.RotationValues.ParamaterType.Easing)
 			{
 				var easing = Utl.MathUtl.Easing((float)value.Easing.StartSpeed.Value, (float)value.Easing.EndSpeed.Value);
 
+				var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
+
 				List<byte[]> _data = new List<byte[]>();
+				_data.Add(refBuf1_1);
+				_data.Add(refBuf1_2);
+				_data.Add(refBuf2_1);
+				_data.Add(refBuf2_2);
 				_data.Add(value.Easing.Start.GetBytes((float)Math.PI / 180.0f));
 				_data.Add(value.Easing.End.GetBytes((float)Math.PI / 180.0f));
 				_data.Add(BitConverter.GetBytes(easing[0]));
@@ -3204,15 +3610,30 @@ namespace EffekseerTool.Binary
 
 			if (value.Type.GetValue() == Data.ScaleValues.ParamaterType.Fixed)
 			{
-				var bytes = Scaling_Fixed_Values.Create(value.Fixed,magnification).GetBytes();
-				data.Add(bytes.Count().GetBytes());
-				data.Add(bytes);
+				var refBuf = value.Fixed.Scale.DynamicEquation.Index.GetBytes();
+				var mainBuf = Scaling_Fixed_Values.Create(value.Fixed,magnification).GetBytes();
+				data.Add((mainBuf.Count() + refBuf.Count()).GetBytes());
+				data.Add(refBuf);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.ScaleValues.ParamaterType.PVA)
 			{
-				var bytes = Scaling_PVA_Values.Create(value.PVA, magnification).GetBytes();
-				data.Add(bytes.Count().GetBytes());
-				data.Add(bytes);
+				var refBuf1_1 = value.PVA.Scale.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.PVA.Scale.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.PVA.Velocity.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.PVA.Velocity.DynamicEquationMin.Index.GetBytes();
+				var refBuf3_1 = value.PVA.Acceleration.DynamicEquationMax.Index.GetBytes();
+				var refBuf3_2 = value.PVA.Acceleration.DynamicEquationMin.Index.GetBytes();
+
+				var mainBuf = Scaling_PVA_Values.Create(value.PVA, magnification).GetBytes();
+				data.Add((mainBuf.Count() + refBuf1_1.Count() * 6).GetBytes());
+				data.Add(refBuf1_1);
+				data.Add(refBuf1_2);
+				data.Add(refBuf2_1);
+				data.Add(refBuf2_2);
+				data.Add(refBuf3_1);
+				data.Add(refBuf3_2);
+				data.Add(mainBuf);
 			}
 			else if (value.Type.GetValue() == Data.ScaleValues.ParamaterType.Easing)
 			{
@@ -3220,7 +3641,16 @@ namespace EffekseerTool.Binary
 					(float)value.Easing.StartSpeed.Value,
 					(float)value.Easing.EndSpeed.Value);
 
+				var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
+
 				List<byte[]> _data = new List<byte[]>();
+				_data.Add(refBuf1_1);
+				_data.Add(refBuf1_2);
+				_data.Add(refBuf2_1);
+				_data.Add(refBuf2_2);
 				_data.Add(value.Easing.Start.GetBytes(magnification));
 				_data.Add(value.Easing.End.GetBytes(magnification));
 				_data.Add(BitConverter.GetBytes(easing[0]));
@@ -3944,6 +4374,11 @@ namespace EffekseerTool.Data
         GenerateAlpha,
     }
 
+	public enum RecordingStorageTargetTyoe : int
+	{
+		Global,
+		Local,
+	}
     public enum ParentEffectType : int
 	{
 		[Name(value = "なし", language = Language.Japanese)]
@@ -4462,6 +4897,75 @@ namespace EffekseerTool.Data
 			Value = -1;
 		}
 	}
+
+	/// <summary>
+	/// A class to show editable value in parameter list
+	/// </summary>
+	public class EditableValue
+	{
+		public object Value;
+		public string Title = string.Empty;
+		public string Description = string.Empty;
+		public bool IsUndoEnabled;
+		public bool IsShown = true;
+		public int SelectorID = -1;
+		public int SelectedID = -1;
+		public int SelectedValue = -1;
+
+		public static EditableValue Create(object o, System.Reflection.PropertyInfo info)
+		{
+			var ret = new EditableValue();
+			ret.Value = o;
+
+			var p = info;
+			var attributes = p.GetCustomAttributes(false);
+
+			ret.Title = NameAttribute.GetName(attributes);
+			ret.Description = DescriptionAttribute.GetDescription(attributes);
+
+			var undo = attributes.Where(_ => _.GetType() == typeof(UndoAttribute)).FirstOrDefault() as UndoAttribute;
+			if (undo != null && !undo.Undo)
+			{
+				ret.IsUndoEnabled = false;
+			}
+			else
+			{
+				ret.IsUndoEnabled = true;
+			}
+
+			var shown = attributes.Where(_ => _.GetType() == typeof(ShownAttribute)).FirstOrDefault() as ShownAttribute;
+
+			if (shown != null && !shown.Shown)
+			{
+				ret.IsShown = false;
+			}
+
+			var selector_attribute = (from a in attributes where a is Data.SelectorAttribute select a).FirstOrDefault() as Data.SelectorAttribute;
+			if (selector_attribute != null)
+			{
+				ret.SelectorID = selector_attribute.ID;
+			}
+
+			var selected_attribute = (from a in attributes where a is Data.SelectedAttribute select a).FirstOrDefault() as Data.SelectedAttribute;
+			if (selected_attribute != null)
+			{
+				ret.SelectedID = selected_attribute.ID;
+				ret.SelectedValue = selected_attribute.Value;
+			}
+
+			return ret;
+		}
+	}
+
+	/// <summary>
+	/// An interface to special editable parameters
+	/// </summary>
+	public interface IEditableValueCollection
+	{
+		EditableValue[] GetValues();
+
+		event ChangedValueEventHandler OnChanged;
+	}
 }
 
 namespace EffekseerTool.Data
@@ -4556,6 +5060,221 @@ namespace EffekseerTool.Data
 			SoftParticle = new Value.Float(0, float.MaxValue, 0.0f);
         }
     }
+}
+
+namespace EffekseerTool.Data
+{
+	public class DynamicInput
+	{
+		public Value.Float Input { get; private set; }
+
+		public DynamicInput()
+		{
+			Input = new Value.Float();
+		}
+	}
+
+	public class DynamicEquation
+	{
+		public const string DefaultName = "Eq";
+
+		public Value.String Name { get; private set; }
+
+		public Value.String Code { get; private set; }
+
+		DynamicEquationCollection parent = null;
+
+		public DynamicEquation(string name, DynamicEquationCollection parent)
+		{
+			Name = new Value.String(name);
+			Code = new Value.String();
+			Code.IsMultiLine = true;
+			this.parent = parent;
+		}
+
+
+		/// <summary>
+		/// This instance is enabled if it exists in a list and there is not instances with same name
+		/// </summary>
+		public bool IsValid
+		{
+			get
+			{
+				if (!parent.Values.Any(_ => _ == this)) return false;
+				return true;
+			}
+		}
+	}
+
+	public class DynamicInputCollection : IEditableValueCollection
+	{
+		List<DynamicInput> values = new List<DynamicInput>();
+
+		public List<DynamicInput> Values
+		{
+			get
+			{
+				return values;
+			}
+		}
+
+		public void Add()
+		{
+			var old_value = values;
+			var new_value = new List<DynamicInput>(values);
+			new_value.Add(new DynamicInput());
+
+
+			var cmd = new Command.DelegateCommand(
+				() =>
+				{
+					values = new_value;
+					if(OnChanged != null)
+					{
+						OnChanged(this, null);
+					}
+				},
+				() =>
+				{
+					values = old_value;
+					if (OnChanged != null)
+					{
+						OnChanged(this, null);
+					}
+				});
+
+			Command.CommandManager.Execute(cmd);
+		}
+
+		public EditableValue[] GetValues()
+		{
+			List<EditableValue> ret = new List<EditableValue>();
+
+			for(int i = 0; i < values.Count; i++)
+			{
+				EditableValue v = new EditableValue();
+
+				v.Value = values[i].Input;
+				v.Title = (i + 1).ToString();
+				v.IsUndoEnabled = false;
+				ret.Add(v);
+			}
+
+			return ret.ToArray();
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+	}
+
+	public class DynamicEquationCollection : IEditableValueCollection
+	{
+		List<DynamicEquation> values = new List<DynamicEquation>();
+
+		public int GetIndex(DynamicEquation vector)
+		{
+			if (vector == null) return -1;
+			return Values.IndexOf(vector);
+		}
+
+		public List<DynamicEquation> Values
+		{
+			get
+			{
+				return values;
+			}
+		}
+
+		DynamicEquation selected = null;
+		public DynamicEquation Selected
+		{
+			get
+			{
+				return selected;
+			}
+			set
+			{
+				selected = value;
+				if (OnChanged != null)
+				{
+					OnChanged(this, null);
+				}
+			}
+		}
+
+		public bool Add()
+		{
+			if (values.Count >= 16) return false;
+
+			var old_value = values;
+			var new_value = new List<DynamicEquation>(values);
+			new_value.Add(new DynamicEquation(DynamicEquation.DefaultName, this));
+
+
+			var cmd = new Command.DelegateCommand(
+				() =>
+				{
+					values = new_value;
+					if (OnChanged != null)
+					{
+						OnChanged(this, null);
+					}
+				},
+				() =>
+				{
+					values = old_value;
+					if (OnChanged != null)
+					{
+						OnChanged(this, null);
+					}
+				});
+
+			Command.CommandManager.Execute(cmd);
+
+			return true;
+		}
+
+		public EditableValue[] GetValues()
+		{
+			List<EditableValue> ret = new List<EditableValue>();
+
+			if (selected == null) return ret.ToArray();
+
+			EditableValue vn = new EditableValue();
+			vn.Value = selected.Name;
+			vn.Title = "Name";
+			vn.IsUndoEnabled = true;
+			ret.Add(vn);
+
+			EditableValue vx = new EditableValue();
+			vx.Value = selected.Code;
+			vx.Title = "Code";
+			vx.IsUndoEnabled = true;
+			ret.Add(vx);
+
+			return ret.ToArray();
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+	}
+
+	public class DynamicValues
+	{
+		public DynamicInputCollection Inputs { get; private set; }
+
+		public DynamicEquationCollection Equations { get; private set; }
+
+		public DynamicValues()
+		{
+			Inputs = new DynamicInputCollection();
+
+			for(int i = 0; i < 4; i++)
+			{
+				Inputs.Add();
+			}
+
+			Equations = new DynamicEquationCollection();
+		}
+	}
 }
 
 namespace EffekseerTool.Data
@@ -5303,6 +6022,160 @@ namespace EffekseerTool.Data
 			return e;
 		}
 
+#if MATERIAL_ENABLED
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, MaterialFileParameter mfp, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+
+			var e_path = SaveObjectToElement(doc, "Path", mfp.Path, isClip);
+			if(e_path != null)
+			{
+				e.AppendChild(e_path);
+			}
+
+			var e_float1 = doc.CreateElement("Float1");
+			var e_float4 = doc.CreateElement("Float4");
+			var e_texture = doc.CreateElement("Texture");
+
+
+			// check file info
+			var info = new Utl.MaterialInformation();
+			if(info.Load(mfp.Path.AbsolutePath))
+			{
+				var uniforms = mfp.GetUniforms(info);
+
+				foreach(var uniform in uniforms)
+				{
+					var status = uniform;
+
+					if (status.Value is Data.Value.Vector4D)
+					{
+						var v = status.Value as Data.Value.Vector4D;
+						var v_e = SaveToElement(doc, uniform.Key, v, isClip);
+						if(v_e != null)
+						{
+							e_float4.AppendChild(v_e);
+						}
+					}
+					else if (status.Value is Data.Value.Float)
+					{
+						var v = status.Value as Data.Value.Float;
+						var v_e = SaveToElement(doc, uniform.Key, v, isClip);
+						if (v_e != null)
+						{
+							e_float1.AppendChild(v_e);
+						}
+					}
+				}
+
+				var textures = mfp.GetTextures(info);
+
+				foreach (var kv in textures)
+				{
+					var status = kv.Item1;
+					
+					// regard as defalt texture
+					if (!status.IsShown)
+						continue;
+
+					if (status.Value is Data.Value.PathForImage)
+					{
+						var v = status.Value as Data.Value.PathForImage;
+						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						if (v_e != null)
+						{
+							e_texture.AppendChild(v_e);
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach(var kv in mfp.KeyValues)
+				{
+					var key = kv.Key;
+					var status = kv.Value as MaterialFileParameter.ValueStatus;
+
+					if(status.Value is Data.Value.Vector4D)
+					{
+						var v = status.Value as Data.Value.Vector4D;
+						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						if (v_e != null)
+						{
+							e_float4.AppendChild(v_e);
+						}
+					}
+					else if (status.Value is Data.Value.Float)
+					{
+						var v = status.Value as Data.Value.Float;
+						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						if (v_e != null)
+						{
+							e_float1.AppendChild(v_e);
+						}
+					}
+					else if (status.Value is Data.Value.PathForImage)
+					{
+						var v = status.Value as Data.Value.PathForImage;
+
+						// regard as defalt texture
+						if (!status.IsShown)
+							continue;
+
+						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						if (v_e != null)
+						{
+							e_texture.AppendChild(v_e);
+						}
+					}
+				}
+			}
+
+			if(e_float1.ChildNodes.Count > 0)
+			{
+				e.AppendChild(e_float1);
+			}
+
+			if (e_float4.ChildNodes.Count > 0)
+			{
+				e.AppendChild(e_float4);
+			}
+
+			if (e_texture.ChildNodes.Count > 0)
+			{
+				e.AppendChild(e_texture);
+			}
+
+			return e;
+		}
+#endif
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Data.DynamicInputCollection collection, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+			for (int i = 0; i < collection.Values.Count; i++)
+			{
+				var e_node = SaveToElement(doc, collection.Values[i].GetType().Name, collection.Values[i], true);
+				if(e_node != null)
+				{
+					e.AppendChild(e_node);
+				}
+			}
+
+			return e;
+		}
+
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Data.DynamicEquationCollection collection, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+			for (int i = 0; i < collection.Values.Count; i++)
+			{
+				var e_node = SaveToElement(doc, collection.Values[i].GetType().Name, collection.Values[i], isClip);
+				e.AppendChild(e_node);
+			}
+
+			return e;
+		}
+
 		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Value.String value, bool isClip)
 		{
 			if (value.DefaultValue == value.Value && !isClip) return null;
@@ -5326,9 +6199,27 @@ namespace EffekseerTool.Data
 
 		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Value.Float value, bool isClip)
 		{
-			if (value.Value == value.DefaultValue && !isClip) return null;
-			var text = value.GetValue().ToString();
-			return doc.CreateTextElement(element_name, text);
+			if(value.DynamicEquation.Index >= 0)
+			{
+				var e = doc.CreateElement(element_name);
+				var text = value.GetValue().ToString();
+				var value_ = doc.CreateTextElement("Value", text);
+				e.AppendChild(value_);
+
+				var d = SaveToElement(doc, "DynamicEquation", value.DynamicEquation, isClip);
+				if (d != null)
+				{
+					e.AppendChild(d);
+				}
+
+				return e.ChildNodes.Count > 0 ? e : null;
+			}
+			else
+			{
+				if (value.Value == value.DefaultValue && !isClip) return null;
+				var text = value.GetValue().ToString();
+				return doc.CreateTextElement(element_name, text);
+			}
 		}
 
 		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Value.IntWithInifinite value, bool isClip)
@@ -5339,6 +6230,12 @@ namespace EffekseerTool.Data
 			
 			if (v != null) e.AppendChild(v);
 			if (i != null) e.AppendChild(i);
+
+			var d = SaveToElement(doc, "DynamicEquation", value.DynamicEquation, isClip);
+			if (d != null)
+			{
+				e.AppendChild(d);
+			}
 
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
@@ -5365,6 +6262,28 @@ namespace EffekseerTool.Data
 			if (x != null) e.AppendChild(x);
 			if (y != null) e.AppendChild(y);
 			if (z != null) e.AppendChild(z);
+
+			var d = SaveToElement(doc, "DynamicEquation", value.DynamicEquation, isClip);
+			if(d != null)
+			{
+				e.AppendChild(d);
+			}
+
+			return e.ChildNodes.Count > 0 ? e : null;
+		}
+
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Value.Vector4D value, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+			var x = SaveToElement(doc, "X", value.X, isClip);
+			var y = SaveToElement(doc, "Y", value.Y, isClip);
+			var z = SaveToElement(doc, "Z", value.Z, isClip);
+			var w = SaveToElement(doc, "W", value.W, isClip);
+
+			if (x != null) e.AppendChild(x);
+			if (y != null) e.AppendChild(y);
+			if (z != null) e.AppendChild(z);
+			if (w != null) e.AppendChild(w);
 
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
@@ -5393,6 +6312,20 @@ namespace EffekseerTool.Data
 			if (value.DefaultValueMin != value.Min || isClip) e.AppendChild(doc.CreateTextElement("Min", value.Min.ToString()));
 			if (value.DefaultDrawnAs != value.DrawnAs || isClip) e.AppendChild(doc.CreateTextElement("DrawnAs", (int)value.DrawnAs));
 
+			var d_min = SaveToElement(doc, "DynamicEquationMin", value.DynamicEquationMin, isClip);
+
+			if (d_min != null)
+			{
+				e.AppendChild(d_min);
+			}
+
+			var d_max = SaveToElement(doc, "DynamicEquationMax", value.DynamicEquationMax, isClip);
+
+			if (d_max != null)
+			{
+				e.AppendChild(d_max);
+			}
+
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
 
@@ -5404,7 +6337,21 @@ namespace EffekseerTool.Data
 			if (value.DefaultValueMax != value.Max || isClip) e.AppendChild(doc.CreateTextElement("Max", value.Max.ToString()));
 			if (value.DefaultValueMin != value.Min || isClip) e.AppendChild(doc.CreateTextElement("Min", value.Min.ToString()));
 			if (value.DefaultDrawnAs != value.DrawnAs || isClip) e.AppendChild(doc.CreateTextElement("DrawnAs", (int)value.DrawnAs));
-			
+
+			var d_min = SaveToElement(doc, "DynamicEquationMin", value.DynamicEquationMin, isClip);
+
+			if (d_min != null)
+			{
+				e.AppendChild(d_min);
+			}
+
+			var d_max = SaveToElement(doc, "DynamicEquationMax", value.DynamicEquationMax, isClip);
+
+			if (d_max != null)
+			{
+				e.AppendChild(d_max);
+			}
+
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
 
@@ -5434,6 +6381,20 @@ namespace EffekseerTool.Data
 			if (y != null) e.AppendChild(y);
 			if (z != null) e.AppendChild(z);
 			if (da != null) e.AppendChild(da);
+
+			var d_min = SaveToElement(doc, "DynamicEquationMin", value.DynamicEquationMin, isClip);
+
+			if (d_min != null)
+			{
+				e.AppendChild(d_min);
+			}
+
+			var d_max = SaveToElement(doc, "DynamicEquationMax", value.DynamicEquationMax, isClip);
+
+			if (d_max != null)
+			{
+				e.AppendChild(d_max);
+			}
 
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
@@ -5644,6 +6605,48 @@ namespace EffekseerTool.Data
 			return e.ChildNodes.Count > 0 ? e : null;
 		}
 
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Data.DynamicInput value, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+			var input = SaveToElement(doc, "Input", value.Input, isClip);
+			if (input != null)
+			{
+				e.AppendChild(input);
+			}
+
+			return e.ChildNodes.Count > 0 ? e : null;
+		}
+
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Data.DynamicEquation value, bool isClip)
+		{
+			var e = doc.CreateElement(element_name);
+			var name = SaveToElement(doc, "Name", value.Name, isClip);
+			if (name != null)
+			{
+				e.AppendChild(name);
+			}
+
+			var code = SaveToElement(doc, "Code", value.Code, isClip);
+			if (code != null)
+			{
+				e.AppendChild(code);
+			}
+
+			return e.ChildNodes.Count > 0 ? e : null;
+		}
+
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Data.Value.DynamicEquationReference de, bool isClip)
+		{
+			var d_ind = de.Index;
+			if (d_ind >= 0)
+			{
+				var d = doc.CreateTextElement(element_name, d_ind.ToString());
+				return d;
+			}
+
+			return null;
+		}
+
 		public static void LoadObjectFromElement(XmlElement e, ref object o, bool isClip)
 		{
 			var o_type = o.GetType();
@@ -5696,6 +6699,89 @@ namespace EffekseerTool.Data
 			}
 		}
 
+		public static void LoadFromElement(XmlElement e, MaterialFileParameter mfp, bool isClip)
+		{
+			var e_path = e["Path"] as XmlElement;
+			if(e_path != null)
+			{
+				LoadFromElement(e_path, mfp.Path, isClip);
+			}
+
+			var e_float1 = e["Float1"] as XmlElement;
+			var e_float4 = e["Float4"] as XmlElement;
+			var e_texture = e["Texture"] as XmlElement;
+
+			var kv = mfp.KeyValues;
+
+			if (e_float1 != null)
+			{
+				for (var i = 0; i < e_float1.ChildNodes.Count; i++)
+				{
+					var e_child = e_float1.ChildNodes[i] as XmlElement;
+					if (kv.ContainsKey(mfp.CreateKey<Value.Float>(e_child.Name)))
+					{
+						var vs = kv[mfp.CreateKey<Value.Float>(e_child.Name)] as MaterialFileParameter.ValueStatus;
+						var v = vs.Value as Value.Float;
+						LoadFromElement(e_child, v, isClip);
+					}
+				}
+			}
+
+			if (e_float4 != null)
+			{
+				for (var i = 0; i < e_float4.ChildNodes.Count; i++)
+				{
+					var e_child = e_float4.ChildNodes[i] as XmlElement;
+					if (kv.ContainsKey(mfp.CreateKey<Value.Vector4D>(e_child.Name)))
+					{
+						var vs = kv[mfp.CreateKey<Value.Vector4D>(e_child.Name)] as MaterialFileParameter.ValueStatus;
+						var v = vs.Value as Value.Vector4D;
+						LoadFromElement(e_child, v, isClip);
+					}
+				}
+			}
+
+			if (e_texture != null)
+			{
+				for (var i = 0; i < e_texture.ChildNodes.Count; i++)
+				{
+					var e_child = e_float4.ChildNodes[i] as XmlElement;
+					if (kv.ContainsKey(mfp.CreateKey<Value.PathForImage>(e_child.Name)))
+					{
+						var vs = kv[mfp.CreateKey<Value.PathForImage>(e_child.Name)] as MaterialFileParameter.ValueStatus;
+						var v = vs.Value as Value.PathForImage;
+						LoadFromElement(e_child, v, isClip);
+					}
+				}
+			}
+		}
+
+		public static void LoadFromElement(XmlElement e, Data.DynamicInputCollection collection, bool isClip)
+		{
+			collection.Values.Clear();
+
+			for (var i = 0; i < e.ChildNodes.Count; i++)
+			{
+				var e_child = e.ChildNodes[i] as XmlElement;
+				var element = new DynamicInput();
+				LoadFromElement(e_child, element, isClip);
+				collection.Values.Add(element);
+			}
+		}
+
+		public static void LoadFromElement(XmlElement e, Data.DynamicEquationCollection collection, bool isClip)
+		{
+			collection.Values.Clear();
+
+			for (var i = 0; i < e.ChildNodes.Count; i++)
+			{
+				var e_child = e.ChildNodes[i] as XmlElement;
+				var element = new DynamicEquation(DynamicEquation.DefaultName, collection);
+				LoadFromElement(e_child, element, isClip);
+				collection.Values.Add(element);
+			}
+		}
+
 		public static void LoadFromElement(XmlElement e, Value.String value, bool isClip)
 		{
 			var text = e.GetText();
@@ -5724,11 +6810,33 @@ namespace EffekseerTool.Data
 
 		public static void LoadFromElement(XmlElement e, Value.Float value, bool isClip)
 		{
-			var text = e.GetText();
-			var parsed = 0.0f;
-			if (float.TryParse(text, System.Globalization.NumberStyles.Float, Setting.NFI, out parsed))
+			if(e.HasChildNodes && e.ChildNodes[0].HasChildNodes)
 			{
-				value.SetValue(parsed);
+				// with dynamic equation
+				var e_value = e["Value"] as XmlElement;
+
+				if(e_value != null)
+				{
+					LoadFromElement(e_value, value, isClip);
+				}
+
+				var e_d = e["DynamicEquation"] as XmlElement;
+
+				if (e_d != null)
+				{
+					LoadFromElement(e_d, value.DynamicEquation, isClip);
+					value.IsDynamicEquationEnabled.SetValue(true);
+				}
+			}
+			else
+			{
+				// without dynamic equation
+				var text = e.GetText();
+				var parsed = 0.0f;
+				if (float.TryParse(text, System.Globalization.NumberStyles.Float, Setting.NFI, out parsed))
+				{
+					value.SetValue(parsed);
+				}
 			}
 		}
 
@@ -5748,6 +6856,14 @@ namespace EffekseerTool.Data
 				if (e_value != null) LoadFromElement(e_value, value.Value, isClip);
 				if (e_infinite != null) LoadFromElement(e_infinite, value.Infinite, isClip);
 			}
+
+			var e_d = e["DynamicEquation"] as XmlElement;
+
+			if (e_d != null)
+			{
+				LoadFromElement(e_d, value.DynamicEquation, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
 		}
 
 		public static void LoadFromElement(XmlElement e, Value.Vector2D value, bool isClip)
@@ -5764,10 +6880,30 @@ namespace EffekseerTool.Data
 			var e_x = e["X"] as XmlElement;
 			var e_y = e["Y"] as XmlElement;
 			var e_z = e["Z"] as XmlElement;
+			var e_d = e["DynamicEquation"] as XmlElement;
 
 			if (e_x != null) LoadFromElement(e_x, value.X, isClip);
 			if (e_y != null) LoadFromElement(e_y, value.Y, isClip);
 			if (e_z != null) LoadFromElement(e_z, value.Z, isClip);
+
+			if (e_d != null) 
+			{
+				LoadFromElement(e_d, value.DynamicEquation, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
+		}
+
+		public static void LoadFromElement(XmlElement e, Value.Vector4D value, bool isClip)
+		{
+			var e_x = e["X"] as XmlElement;
+			var e_y = e["Y"] as XmlElement;
+			var e_z = e["Z"] as XmlElement;
+			var e_w = e["W"] as XmlElement;
+
+			if (e_x != null) LoadFromElement(e_x, value.X, isClip);
+			if (e_y != null) LoadFromElement(e_y, value.Y, isClip);
+			if (e_z != null) LoadFromElement(e_z, value.Z, isClip);
+			if (e_w != null) LoadFromElement(e_w, value.W, isClip);
 		}
 
 		public static void LoadFromElement(XmlElement e, Value.Color value, bool isClip)
@@ -5820,6 +6956,21 @@ namespace EffekseerTool.Data
 			{
 				value.DrawnAs = (DrawnAs)e_da.GetTextAsInt();
 			}
+
+			var e_d_min = e["DynamicEquationMin"] as XmlElement;
+			var e_d_max = e["DynamicEquationMax"] as XmlElement;
+
+			if (e_d_min != null)
+			{
+				LoadFromElement(e_d_min, value.DynamicEquationMin, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
+
+			if (e_d_max != null)
+			{
+				LoadFromElement(e_d_max, value.DynamicEquationMax, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
 		}
 
 		public static void LoadFromElement(XmlElement e, Value.FloatWithRandom value, bool isClip)
@@ -5858,6 +7009,21 @@ namespace EffekseerTool.Data
 			if (e_da != null)
 			{
 				value.DrawnAs = (DrawnAs)e_da.GetTextAsInt();
+			}
+
+			var e_d_min = e["DynamicEquationMin"] as XmlElement;
+			var e_d_max = e["DynamicEquationMax"] as XmlElement;
+
+			if (e_d_min != null)
+			{
+				LoadFromElement(e_d_min, value.DynamicEquationMin, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
+
+			if (e_d_max != null)
+			{
+				LoadFromElement(e_d_max, value.DynamicEquationMax, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
 			}
 		}
 
@@ -5906,6 +7072,8 @@ namespace EffekseerTool.Data
 			var e_y = e["Y"] as XmlElement;
 			var e_z = e["Z"] as XmlElement;
 			var e_da = e["DrawnAs"];
+			var e_d_min = e["DynamicEquationMin"] as XmlElement;
+			var e_d_max = e["DynamicEquationMax"] as XmlElement;
 
 			if (e_x != null) LoadFromElement(e_x, value.X, isClip);
 			if (e_y != null) LoadFromElement(e_y, value.Y, isClip);
@@ -5914,6 +7082,18 @@ namespace EffekseerTool.Data
 			if (e_da != null)
 			{
 				value.DrawnAs = (DrawnAs)e_da.GetTextAsInt();
+			}
+
+			if (e_d_min != null)
+			{
+				LoadFromElement(e_d_min, value.DynamicEquationMin, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
+			}
+
+			if (e_d_max != null)
+			{
+				LoadFromElement(e_d_max, value.DynamicEquationMax, isClip);
+				value.IsDynamicEquationEnabled.SetValue(true);
 			}
 		}
 
@@ -6151,6 +7331,32 @@ namespace EffekseerTool.Data
 			if (e_g != null) import(value.G, e_g);
 			if (e_b != null) import(value.B, e_b);
 			if (e_a != null) import(value.A, e_a);
+		}
+
+		public static void LoadFromElement(XmlElement e, Data.DynamicInput value, bool isClip)
+		{
+			var e_input = e["Input"] as XmlElement;
+			if (e_input != null) LoadFromElement(e_input, value.Input, isClip);
+		}
+
+		public static void LoadFromElement(XmlElement e, Data.DynamicEquation value, bool isClip)
+		{
+			var e_name = e["Name"] as XmlElement;
+			var e_x = e["Code"] as XmlElement;
+
+			if (e_name != null) LoadFromElement(e_name, value.Name, isClip);
+			if (e_x != null) LoadFromElement(e_x, value.Code, isClip);
+		}
+
+		public static void LoadFromElement(XmlElement e, Data.Value.DynamicEquationReference de, bool isClip)
+		{
+			var ind = e.GetTextAsInt();
+
+			if (0 <= ind && ind < Core.Dynamic.Equations.Values.Count)
+			{
+				var d = Core.Dynamic.Equations.Values[ind];
+				de.SetValue(d);
+			}
 		}
 	}
 }
@@ -7162,49 +8368,6 @@ namespace EffekseerTool.Data
             private set;
         }
 
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        public Value.Int RecordingWidth { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        public Value.Int RecordingHeight { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown =false)]
-        [IO(Export = true, Import = true)]
-        public Value.Boolean IsRecordingGuideShown { get; private set; }
-
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Int RecordingStartingFrame { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Int RecordingEndingFrame { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Int RecordingFrequency { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Int RecordingHorizontalCount { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Enum<RecordingExporterType> RecordingExporter { get; private set; }
-
-        [Undo(Undo = false)]
-        [Shown(Shown = false)]
-        [IO(Export = true, Import = true)]
-        public Value.Enum<RecordingTransparentMethodType> RecordingTransparentMethod { get; private set; }
         public OptionValues()
 		{
 			RenderingMode = new Value.Enum<RenderMode>(RenderMode.Normal);
@@ -7233,16 +8396,6 @@ namespace EffekseerTool.Data
 			MouseSlideInvY = new Value.Boolean(false);
 
 			DistortionType = new Value.Enum<DistortionMethodType>(DistortionMethodType.Current);
-
-            RecordingWidth = new Value.Int(256);
-            RecordingHeight = new Value.Int(256);
-            IsRecordingGuideShown = new Value.Boolean(false);
-            RecordingStartingFrame = new Value.Int(1);
-            RecordingEndingFrame = new Value.Int(30);
-            RecordingFrequency = new Value.Int(1);
-            RecordingHorizontalCount = new Value.Int(4);
-            RecordingExporter = new Value.Enum<RecordingExporterType>(Data.RecordingExporterType.Sprite);
-            RecordingTransparentMethod = new Value.Enum<RecordingTransparentMethodType>(Data.RecordingTransparentMethodType.None);
 
             // Switch the language according to the OS settings
             var culture = System.Globalization.CultureInfo.CurrentCulture;
@@ -7483,8 +8636,363 @@ namespace EffekseerTool.Data
 
 namespace EffekseerTool.Data
 {
+	public class RecordingValues
+	{
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		public Value.Int RecordingWidth { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		public Value.Int RecordingHeight { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Boolean IsRecordingGuideShown { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Int RecordingStartingFrame { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Int RecordingEndingFrame { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Int RecordingFrequency { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Int RecordingHorizontalCount { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Enum<RecordingExporterType> RecordingExporter { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Enum<RecordingTransparentMethodType> RecordingTransparentMethod { get; private set; }
+
+		[Undo(Undo = false)]
+		[Shown(Shown = false)]
+		[IO(Export = true, Import = true)]
+		public Value.Enum<RecordingStorageTargetTyoe> RecordingStorageTarget { get; private set; }
+		public RecordingValues()
+		{
+			RecordingWidth = new Value.Int(256);
+			RecordingHeight = new Value.Int(256);
+			IsRecordingGuideShown = new Value.Boolean(false);
+			RecordingStartingFrame = new Value.Int(1);
+			RecordingEndingFrame = new Value.Int(30);
+			RecordingFrequency = new Value.Int(1);
+			RecordingHorizontalCount = new Value.Int(4);
+			RecordingExporter = new Value.Enum<RecordingExporterType>(Data.RecordingExporterType.Sprite);
+			RecordingTransparentMethod = new Value.Enum<RecordingTransparentMethodType>(Data.RecordingTransparentMethodType.None);
+			RecordingStorageTarget = new Value.Enum<RecordingStorageTargetTyoe>(Data.RecordingStorageTargetTyoe.Global);
+		}
+	}
+}
+
+namespace EffekseerTool.Data
+{
+
+	public class MaterialFileParameter : IEditableValueCollection
+	{
+		[Shown(Shown = true)]
+		[Name(language = Language.Japanese, value = "パス")]
+		[Name(language = Language.English, value = "Path")]
+		public Value.PathForMaterial Path
+		{
+			get;
+			private set;
+		}
+
+		public Dictionary<string, object> KeyValues
+		{
+			get
+			{
+				return keyToValues;
+			}
+		}
+
+		Dictionary<string, object> keyToValues = new Dictionary<string, object>();
+
+		public MaterialFileParameter()
+		{
+			Path = new Value.PathForMaterial(".efkmat", true);
+			Path.OnChanged += Path_OnChanged;
+		}
+
+		private void Path_OnChanged(object sender, ChangedValueEventArgs e)
+		{
+			// Apply values
+			Utl.MaterialInformation info = new Utl.MaterialInformation();
+			info.Load(Path.GetAbsolutePath());
+
+			ApplyMaterial(info);
+		}
+
+		public EditableValue[] GetValues()
+		{
+			var ret = new List<EditableValue>();
+
+			// self
+			{
+				EditableValue ev = new EditableValue();
+				ev.Value = this;
+				ev.Title = "";
+				ev.Description = "";
+				ev.IsShown = true;
+				ev.IsUndoEnabled = false;
+				//ret.Add(ev);
+			}
+
+			// need to filter
+			var propPath = EditableValue.Create(Path, this.GetType().GetProperty("Path"));
+			ret.Add(propPath);
+
+			foreach(var kv in keyToValues)
+			{
+				EditableValue ev = new EditableValue();
+				var status = kv.Value as ValueStatus;
+				ev.Value = status.Value;
+				ev.Title = status.Name;
+				ev.Description = status.Description;
+				ev.IsShown = status.IsShown;
+				ev.IsUndoEnabled = true;
+				ret.Add(ev);
+
+			}
+
+			return ret.ToArray();
+		}
+
+		public void ApplyMaterial(Utl.MaterialInformation info)
+		{
+			bool isChanged = false;
+
+			var textureKeys = info.Textures.Select(_ => CreateKey(_)).ToList();
+
+			foreach (var kts in keyToValues)
+			{
+				if(!textureKeys.Contains(kts.Key))
+				{
+					var status = kts.Value as ValueStatus;
+					if(status.IsShown)
+					{
+						status.IsShown = false;
+						isChanged = true;
+					}
+				}
+			}
+
+			var uniformKeys = info.Uniforms.Select(_ => CreateKey(_)).ToList();
+
+			foreach (var kts in keyToValues)
+			{
+				if (!uniformKeys.Contains(kts.Key))
+				{
+					var status = kts.Value as ValueStatus;
+					if (status.IsShown)
+					{
+						status.IsShown = false;
+						isChanged = true;
+					}
+				}
+			}
+
+			foreach (var texture in info.Textures)
+			{
+				var key = CreateKey(texture);
+
+				if(keyToValues.ContainsKey(key))
+				{
+					var status = keyToValues[key] as ValueStatus;
+					if(status.IsShown != texture.IsParam)
+					{
+						status.IsShown = texture.IsParam;
+						isChanged = true;
+					}
+				}
+				else
+				{
+					var status = new ValueStatus();
+					var value = new Value.PathForImage(".png", false);
+					status.Key = key;
+					status.Value = value;
+					status.Name = texture.Name;
+					status.Description = "";
+					status.IsShown = texture.IsParam;
+					keyToValues.Add(key, status);
+					value.SetAbsolutePathDirectly(texture.DefaultPath);
+					isChanged = true;
+				}
+			}
+
+			foreach(var uniform in info.Uniforms)
+			{
+				var key = CreateKey(uniform);
+
+				if (keyToValues.ContainsKey(key))
+				{
+					var status = keyToValues[key] as ValueStatus;
+					if (!status.IsShown)
+					{
+						status.IsShown = true;
+						isChanged = true;
+					}
+				}
+				else
+				{
+					if(uniform.Type == 0)
+					{
+						var status = new ValueStatus();
+						status.Key = key;
+						status.Value = new Value.Float();
+						status.Name = uniform.Name;
+						status.Description = "";
+						status.IsShown = true;
+						keyToValues.Add(key, status);
+						isChanged = true;
+					}
+					else
+					{
+						var status = new ValueStatus();
+						status.Key = key;
+						status.Value = new Value.Vector4D();
+						status.Name = uniform.Name;
+						status.Description = "";
+						status.IsShown = true;
+						keyToValues.Add(key, status);
+						isChanged = true;
+					}
+				}
+			}
+
+			if(isChanged && OnChanged != null)
+			{
+				OnChanged(this, null);
+			}
+		}
+
+		public List<Tuple35<ValueStatus, bool>> GetTextures(Utl.MaterialInformation info)
+		{
+			var ret = new List<Tuple35<ValueStatus, bool>>();
+
+			foreach (var texture in info.Textures)
+			{
+				var key = CreateKey(texture);
+
+				if(texture.IsValueTexture)
+				{
+					if (keyToValues.ContainsKey(key))
+					{
+						ret.Add(Tuple35.Create(keyToValues[key] as ValueStatus, true));
+					}
+					else
+					{
+						ret.Add(Tuple35.Create((ValueStatus)(null), true));
+					}
+				}
+				else
+				{
+					if (keyToValues.ContainsKey(key))
+					{
+						ret.Add(Tuple35.Create(keyToValues[key] as ValueStatus, false));
+					}
+					else
+					{
+						ret.Add(Tuple35.Create((ValueStatus)(null), false));
+					}
+				}
+			}
+
+			return ret;
+		}
+
+		public List<ValueStatus> GetUniforms(Utl.MaterialInformation info)
+		{
+			var ret = new List<ValueStatus>();
+
+			foreach (var uniform in info.Uniforms)
+			{
+				var key = CreateKey(uniform);
+				if (keyToValues.ContainsKey(key))
+				{
+					ret.Add(keyToValues[key] as ValueStatus);
+				}
+				else
+				{
+					ret.Add(null);
+				}
+			}
+
+			return ret;
+		}
+
+		public string CreateKey<T>(string name)
+		{
+			if(typeof(T) == typeof(Value.Float))
+			{
+				return name + "__TYPE__U0";
+			}
+
+			if (typeof(T) == typeof(Value.Vector4D))
+			{
+				return name + "__TYPE__U3";
+			}
+
+			if (typeof(T) == typeof(Value.PathForImage))
+			{
+				return name + "__TYPE__T";
+			}
+
+			throw new Exception();
+		}
+		public string CreateKey(Utl.MaterialInformation.UniformInformation info)
+		{
+			return info.Name + "__TYPE__U" + info.Type;
+		}
+
+		public string CreateKey(Utl.MaterialInformation.TextureInformation info)
+		{
+			return info.Name + "__TYPE__T";
+		}
+
+		public class ValueStatus
+		{
+			public string Key = string.Empty;
+			public object Value = null;
+			public string Name = string.Empty;
+			public string Description = string.Empty;
+			public bool IsShown = false;
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+	}
+
 	public class RendererCommonValues
 	{
+#if MATERIAL_ENABLED
+		[Selector(ID = 3)]
+		[Name(language = Language.Japanese, value = "マテリアル")]
+		[Name(language = Language.English, value = "Material")]
+		public Value.Enum<MaterialType> Material
+		{
+			get;
+			private set;
+		}
+#endif
+
+		[Selected(ID = 3, Value = 0)]
 		[Name(language = Language.Japanese, value = "色/歪み画像")]
 		[Description(language = Language.Japanese, value = "色/歪みを表す画像")]
 		[Name(language = Language.English, value = "Texture")]
@@ -7494,6 +9002,16 @@ namespace EffekseerTool.Data
 			get;
 			private set;
 		}
+
+#if MATERIAL_ENABLED
+		[Selected(ID = 3, Value = 1)]
+		[IO(Export = true)]
+		public MaterialFileParameter MaterialFile
+		{
+			get;
+			private set;
+		}
+#endif
 
 		[Name(language = Language.Japanese, value = "ブレンド")]
 		[Name(language = Language.English, value = "Blend")]
@@ -7614,7 +9132,11 @@ namespace EffekseerTool.Data
 
 		internal RendererCommonValues()
 		{
-            ColorTexture = new Value.PathForImage(Resources.GetString("ImageFilter"), true, "");
+#if MATERIAL_ENABLED
+			Material = new Value.Enum<MaterialType>(MaterialType.Default);
+			MaterialFile = new MaterialFileParameter();
+#endif
+			ColorTexture = new Value.PathForImage(Resources.GetString("ImageFilter"), true, "");
 			
 			AlphaBlend = new Value.Enum<AlphaBlendType>(AlphaBlendType.Blend);
 			Filter = new Value.Enum<FilterType>(FilterType.Linear);
@@ -7826,6 +9348,18 @@ namespace EffekseerTool.Data
 			}
 		}
 
+#if MATERIAL_ENABLED
+		
+		public enum MaterialType : int
+		{
+			[Name(value = "標準", language = Language.Japanese)]
+			[Name(value = "Default", language = Language.English)]
+			Default,
+			[Name(value = "ファイル", language = Language.Japanese)]
+			[Name(value = "File", language = Language.English)]
+			File,
+		}
+#endif
 		public enum FadeType : int
 		{
 			[Name(value = "有り", language = Language.Japanese)]
@@ -10097,6 +11631,46 @@ namespace EffekseerTool.Data.Value
 
 namespace EffekseerTool.Data.Value
 {
+	public class DynamicEquationReference
+	{
+		public DynamicEquation Value
+		{
+			get;
+			private set;
+		}
+
+		public void SetValue(DynamicEquation param)
+		{
+			if (param == Value) return;
+
+			var old_value = Value;
+			var new_value = param;
+
+			var cmd = new Command.DelegateCommand(
+				() =>
+				{
+					Value = new_value;
+				},
+				() =>
+				{
+					Value = old_value;
+				});
+
+			Command.CommandManager.Execute(cmd);
+		}
+
+		public int Index
+		{
+			get
+			{
+				return Core.Dynamic.Equations.GetIndex(Value);
+			}
+		}
+	}
+}
+
+namespace EffekseerTool.Data.Value
+{
 	public class Enum<T> : EnumBase where T : struct, IComparable, IFormattable, IConvertible
 	{
 		T _value = default(T);
@@ -11550,6 +13124,18 @@ namespace EffekseerTool.Data.Value
 
 		public event ChangedValueEventHandler OnChanged;
 
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquation
+		{
+			get;
+			private set;
+		}
+
 		internal Float(float value = 0, float max = float.MaxValue, float min = float.MinValue, float step = 1.0f)
 		{
 			_max = max;
@@ -11557,6 +13143,9 @@ namespace EffekseerTool.Data.Value
 			_value = value.Clipping(_max, _min);
 			Step = step;
 			DefaultValue = _value;
+
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquation = new DynamicEquationReference();
 		}
 
 		protected void CallChanged(object value, ChangedValueType type)
@@ -11717,6 +13306,24 @@ namespace EffekseerTool.Data.Value
 
 		public event ChangedValueEventHandler OnChanged;
 
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquationMin
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquationMax
+		{
+			get;
+			private set;
+		}
+
 		internal float DefaultValueCenter { get; private set; }
 		internal float DefaultValueMax { get; private set; }
 		internal float DefaultValueMin { get; private set; }
@@ -11734,7 +13341,11 @@ namespace EffekseerTool.Data.Value
 			_value_center = value.Clipping(_max, _min);
 			_value_max = value.Clipping(_max, _min);
 			_value_min = value.Clipping(_max, _min);
-			
+
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquationMin = new DynamicEquationReference();
+			DynamicEquationMax = new DynamicEquationReference();
+
 			DrawnAs = drawnas;
 			Step = step;
 
@@ -12098,10 +13709,27 @@ namespace EffekseerTool.Data.Value
 			get { return Value.IsValueChangedFromDefault || Infinite.IsValueChangedFromDefault; }
 		}
 
+		public event ChangedValueEventHandler OnChanged;
+
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquation
+		{
+			get;
+			private set;
+		}
+
 		internal IntWithInifinite(int value = 0, bool infinite = false, int max = int.MaxValue, int min = int.MinValue, int step = 1)
 		{
 			Value = new Int(value, max, min, step);
 			Infinite = new Boolean(infinite);
+
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquation = new DynamicEquationReference();
 		}
 	}
 }
@@ -12198,6 +13826,24 @@ namespace EffekseerTool.Data.Value
 
 		public event ChangedValueEventHandler OnChanged;
 
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquationMin
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquationMax
+		{
+			get;
+			private set;
+		}
+
 		public bool IsValueChangedFromDefault
 		{
 			get { return Center != DefaultValueCenter || Min != DefaultValueMin || Max != DefaultValueMax || DrawnAs != DefaultDrawnAs; }
@@ -12212,6 +13858,10 @@ namespace EffekseerTool.Data.Value
 			_min = min;
 			DrawnAs = drawnas;
 			Step = step;
+
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquationMin = new DynamicEquationReference();
+			DynamicEquationMax = new DynamicEquationReference();
 
 			DefaultValueCenter = _value_center;
 			DefaultValueMax = _value_max;
@@ -12585,6 +14235,17 @@ namespace EffekseerTool.Data.Value
 
 namespace EffekseerTool.Data.Value
 {
+	public class PathForMaterial : Path
+	{
+		internal PathForMaterial(string filter, bool isRelativeSaved, string abspath = "")
+			: base(filter, isRelativeSaved, abspath)
+		{
+		}
+	}
+}
+
+namespace EffekseerTool.Data.Value
+{
 	public class PathForModel : Path
 	{
 		internal PathForModel(string filter, bool isRelativeSaved, string abspath = "")
@@ -12632,6 +14293,11 @@ namespace EffekseerTool.Data.Value
 		{
 			get { return Value != DefaultValue; }
 		}
+
+		/// <summary>
+		/// Is multiline on GUI
+		/// </summary>
+		public bool IsMultiLine = false;
 
 		internal String(string value = "")
 		{
@@ -12689,6 +14355,83 @@ namespace EffekseerTool.Data.Value
 		{
 			return value._value;
 		}
+	}
+}
+
+namespace EffekseerTool.Data.Value
+{
+	public class ValueList
+	{
+		public ICollection Values
+		{
+			get
+			{
+				return values;
+			}
+		}
+
+		List<object> values = new List<object>();
+
+		public void Add(object o)
+		{
+			var new_value = Clone(values);
+			var old_value = Clone(values);
+			new_value.Add(o);
+
+			ExecCommand(new_value, old_value);
+		}
+
+		public void Remove(object o)
+		{
+			var new_value = Clone(values);
+			var old_value = Clone(values);
+			new_value.Remove(o);
+
+			ExecCommand(new_value, old_value);
+		}
+
+		public void RemoveAt(int ind)
+		{
+			var new_value = Clone(values);
+			var old_value = Clone(values);
+			new_value.RemoveAt(ind);
+
+			ExecCommand(new_value, old_value);
+		}
+
+		List<object> Clone(List<object> list)
+		{
+			var ret = new List<object>();
+			ret.AddRange(list);
+			return ret;
+		}
+
+		void ExecCommand(List<object> new_value, List<object> old_value)
+		{
+			var cmd = new Command.DelegateCommand(
+	() =>
+	{
+		values = new_value;
+
+		if (OnChanged != null)
+		{
+			OnChanged(this, new ChangedValueEventArgs(new_value, ChangedValueType.Execute));
+		}
+	},
+	() =>
+	{
+		values = old_value;
+
+		if (OnChanged != null)
+		{
+			OnChanged(this, new ChangedValueEventArgs(old_value, ChangedValueType.Unexecute));
+		}
+	});
+
+			Command.CommandManager.Execute(cmd);
+		}
+
+		public event ChangedValueEventHandler OnChanged;
 	}
 }
 
@@ -12832,6 +14575,20 @@ namespace EffekseerTool.Data.Value
 			private set;
 		}
 
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquation
+		{
+			get;
+			private set;
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+
 		public bool IsValueChangedFromDefault
 		{
 			get { return X.IsValueChangedFromDefault || Y.IsValueChangedFromDefault || Z.IsValueChangedFromDefault; }
@@ -12855,6 +14612,9 @@ namespace EffekseerTool.Data.Value
 			X = new Float(x, x_max, x_min, x_step);
 			Y = new Float(y, y_max, y_min, y_step);
 			Z = new Float(z, z_max, z_min, z_step);
+
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquation = new DynamicEquationReference();
 		}
 
 		public static explicit operator byte[](Vector3D value)
@@ -12901,6 +14661,26 @@ namespace EffekseerTool.Data.Value
 
 		internal DrawnAs DefaultDrawnAs { get; private set; }
 
+		public Boolean IsDynamicEquationEnabled
+		{
+			get;
+			private set;
+		}
+		
+		public DynamicEquationReference DynamicEquationMin
+		{
+			get;
+			private set;
+		}
+
+		public DynamicEquationReference DynamicEquationMax
+		{
+			get;
+			private set;
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+
 		public bool IsValueChangedFromDefault
 		{
 			get { return X.IsValueChangedFromDefault || Y.IsValueChangedFromDefault || Z.IsValueChangedFromDefault || DrawnAs != DefaultDrawnAs; }
@@ -12924,6 +14704,9 @@ namespace EffekseerTool.Data.Value
 			X = new FloatWithRandom(x, x_max, x_min, drawnas, x_step);
 			Y = new FloatWithRandom(y, y_max, y_min, drawnas, y_step);
 			Z = new FloatWithRandom(z, z_max, z_min, drawnas, z_step);
+			IsDynamicEquationEnabled = new Boolean();
+			DynamicEquationMin = new DynamicEquationReference();
+			DynamicEquationMax = new DynamicEquationReference();
 			DrawnAs = drawnas;
 			DefaultDrawnAs = DrawnAs;
 		}
@@ -12943,6 +14726,154 @@ namespace EffekseerTool.Data.Value
 		public static explicit operator byte[](Vector3DWithRandom value)
 		{
 			return value.GetBytes();
+		}
+	}
+}
+
+namespace EffekseerTool.Data.Value
+{
+	public class Vector4D
+	{
+		public Float X
+		{
+			get;
+			private set;
+		}
+
+		public Float Y
+		{
+			get;
+			private set;
+		}
+
+		public Float Z
+		{
+			get;
+			private set;
+		}
+
+		public Float W
+		{
+			get;
+			private set;
+		}
+
+		bool isDynamicEquationEnabled = false;
+		public bool IsDynamicEquationEnabled
+		{
+			get
+			{
+				return isDynamicEquationEnabled;
+			}
+			set
+			{
+				var old_value = isDynamicEquationEnabled;
+				var new_value = value;
+
+				var cmd = new Command.DelegateCommand(
+					() =>
+					{
+						isDynamicEquationEnabled = new_value;
+
+						if (OnChanged != null)
+						{
+							OnChanged(this, new ChangedValueEventArgs(new_value, ChangedValueType.Execute));
+						}
+					},
+					() =>
+					{
+						isDynamicEquationEnabled = old_value;
+
+						if (OnChanged != null)
+						{
+							OnChanged(this, new ChangedValueEventArgs(old_value, ChangedValueType.Unexecute));
+						}
+					});
+
+				Command.CommandManager.Execute(cmd);
+			}
+		}
+		public DynamicEquation DynamicEquation
+		{
+			get;
+			private set;
+		}
+
+		public void SetDynamicEquation(DynamicEquation param)
+		{
+			if (param == DynamicEquation) return;
+
+			var old_value = DynamicEquation;
+			var new_value = param;
+
+			var cmd = new Command.DelegateCommand(
+				() =>
+				{
+					DynamicEquation = new_value;
+
+					if (OnChanged != null)
+					{
+						OnChanged(this, new ChangedValueEventArgs(new_value, ChangedValueType.Execute));
+					}
+				},
+				() =>
+				{
+					DynamicEquation = old_value;
+
+					if (OnChanged != null)
+					{
+						OnChanged(this, new ChangedValueEventArgs(old_value, ChangedValueType.Unexecute));
+					}
+				});
+
+			Command.CommandManager.Execute(cmd);
+		}
+
+		public event ChangedValueEventHandler OnChanged;
+
+		public bool IsValueChangedFromDefault
+		{
+			get { return X.IsValueChangedFromDefault || Y.IsValueChangedFromDefault || Z.IsValueChangedFromDefault; }
+		}
+
+
+		internal Vector4D(
+			float x = 0,
+			float y = 0,
+			float z = 0,
+			float w = 0,
+			float x_max = float.MaxValue,
+			float x_min = float.MinValue,
+			float y_max = float.MaxValue,
+			float y_min = float.MinValue,
+			float z_max = float.MaxValue,
+			float z_min = float.MinValue,
+			float w_max = float.MaxValue,
+			float w_min = float.MinValue,
+			float x_step = 1.0f,
+			float y_step = 1.0f,
+			float z_step = 1.0f,
+			float w_step = 1.0f)
+		{
+			X = new Float(x, x_max, x_min, x_step);
+			Y = new Float(y, y_max, y_min, y_step);
+			Z = new Float(z, z_max, z_min, z_step);
+			W = new Float(w, w_max, w_min, w_step);
+		}
+
+		public static explicit operator byte[] (Vector4D value)
+		{
+			byte[] values = new byte[sizeof(float) * 4];
+			byte[] x = BitConverter.GetBytes(value.X.GetValue());
+			byte[] y = BitConverter.GetBytes(value.Y.GetValue());
+			byte[] z = BitConverter.GetBytes(value.Z.GetValue());
+			byte[] w = BitConverter.GetBytes(value.W.GetValue());
+
+			x.CopyTo(values, 0);
+			y.CopyTo(values, sizeof(float) * 1);
+			z.CopyTo(values, sizeof(float) * 2);
+			w.CopyTo(values, sizeof(float) * 3);
+			return values;
 		}
 	}
 }
@@ -13000,6 +14931,170 @@ namespace EffekseerTool.Utl
 			Marshal.StructureToPtr(obj, gch.AddrOfPinnedObject(), false);
 			gch.Free();
 			return bytes;
+		}
+	}
+}
+
+namespace EffekseerTool.Utl
+{
+	public class MaterialInformation
+	{
+		public TextureInformation[] Textures = new TextureInformation[0];
+
+		public UniformInformation[] Uniforms = new UniformInformation[0];
+
+		public bool Load(string path)
+		{
+			if (string.IsNullOrEmpty(path))
+				return false;
+
+			System.IO.FileStream fs = null;
+			if (!System.IO.File.Exists(path)) return false;
+
+#if MATERIAL_ENABLED
+			try
+			{
+				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+			}
+			catch (System.IO.FileNotFoundException e)
+			{
+				return false;
+			}
+
+
+			var br = new System.IO.BinaryReader(fs);
+
+			var buf = new byte[1024];
+
+
+			if (br.Read(buf, 0, 16) != 16)
+			{
+				fs.Dispose();
+				br.Close();
+				return false;
+			}
+
+			if(buf[0] != 'e' ||
+				buf[1] != 'f' ||
+				buf[2] != 'k' ||
+				buf[3] != 'M')
+			{
+				return false;
+			}
+
+			int version = BitConverter.ToInt32(buf, 4);
+			UInt64 guid = BitConverter.ToUInt64(buf, 8);
+
+			while(true)
+			{
+				if (br.Read(buf, 0, 8) != 8)
+				{
+					fs.Dispose();
+					br.Close();
+					break;
+				}
+
+
+				if (buf[0] == 'g' &&
+				buf[1] == 'e' &&
+				buf[2] == 'n' &&
+				buf[3] == 'e')
+				{
+					var temp = new byte[BitConverter.ToInt32(buf, 4)];
+					if (br.Read(temp, 0, temp.Length) != temp.Length) return false;
+				}
+
+				if (buf[0] == 'd' &&
+				buf[1] == 'a' &&
+				buf[2] == 't' &&
+				buf[3] == 'a')
+				{
+					var temp = new byte[BitConverter.ToInt32(buf, 4)];
+					if (br.Read(temp, 0, temp.Length) != temp.Length) return false;
+
+					var jsonText = Encoding.UTF8.GetString(temp);
+
+					var parsed = JObject.Parse(jsonText);
+
+					var params_ = parsed["Params"];
+					var uniforms_ = params_["Uniforms"] as JArray;
+					var textures_ = params_["Textures"] as JArray;
+
+					List<TextureInformation> textures = new List<TextureInformation>();
+
+					foreach (var texture in textures_)
+					{
+						var name = texture["Name"].Value<string>();
+						var offset = texture["Index"].Value<double>();
+
+						var defaultPath = texture["DefaultPath"].Value<string>();
+
+						// convert a path into absolute
+						Uri basePath = new Uri(path);
+						Uri targetPath = new Uri(basePath, defaultPath);
+						defaultPath = targetPath.ToString();
+
+						var isParam = texture["IsParam"].Value<bool>();
+						var isValueTexture = texture["IsValueTexture"].Value<bool>();
+						var info = new TextureInformation();
+
+						info.Name = name;
+						info.Index = (int)offset;
+						info.DefaultPath = defaultPath;
+						info.IsParam = isParam;
+						info.IsValueTexture = isValueTexture;
+
+						textures.Add(info);
+					}
+
+					Textures = textures.ToArray();
+
+					List<UniformInformation> uniforms = new List<UniformInformation>();
+
+					foreach (var uniform in uniforms_)
+					{
+						var name = uniform["Name"].Value<string>();
+						var offset = uniform["Offset"].Value<double>();
+						var type = uniform["Type"].Value<double>();
+						var defaultValue1 = uniform["DefaultValue1"].Value<double>();
+						var defaultValue2 = uniform["DefaultValue2"].Value<double>();
+						var defaultValue3 = uniform["DefaultValue3"].Value<double>();
+						var defaultValue4 = uniform["DefaultValue4"].Value<double>();
+
+						var info = new UniformInformation();
+						info.Name = name;
+						info.Offset = (int)offset;
+						info.Type = (int)type;
+						info.DefaultValues[0] = (float)defaultValue1;
+						info.DefaultValues[1] = (float)defaultValue2;
+						info.DefaultValues[2] = (float)defaultValue3;
+						info.DefaultValues[3] = (float)defaultValue4;
+
+						uniforms.Add(info);
+					}
+
+					Uniforms = uniforms.ToArray();
+				}
+			}
+#endif
+			return true;
+		}
+
+		public class TextureInformation
+		{
+			public string Name;
+			public int Index;
+			public string DefaultPath;
+			public bool IsParam;
+			public bool IsValueTexture;
+		}
+
+		public class UniformInformation
+		{
+			public string Name;
+			public int Offset;
+			public int Type = 0;
+			public float[] DefaultValues = new float[4];
 		}
 	}
 }
@@ -13387,5 +15482,1759 @@ namespace EffekseerTool.Utl
 		}
 	}
 }
-#pragma warning restore
+
+namespace EffekseerTool.InternalScript
+{
+	enum OperatorType
+	{
+		Constant = 0,
+		Add = 1,
+		Sub = 2,
+		Mul = 3,
+		Div = 4,
+
+		UnaryAdd = 11,
+		UnarySub = 12,
+
+		Sine = 21,
+		Cos = 22,
+
+	}
+
+	public enum RunningPhaseType : int
+	{
+		Global,
+		Local,
+	}
+
+	class Operator
+	{
+		public OperatorType Type;
+		public List<string> Inputs = new List<string>();
+		public List<string> Outputs = new List<string>();
+		public Dictionary<string, object> Attributes = new Dictionary<string, object>();
+	}
+
+	public class CompileResult
+	{
+		public byte[] Bytecode = null;
+		public RunningPhaseType RunningPhase;
+		public CompileException Error;
+	}
+	public class Compiler
+	{
+		RunningPhaseType runningPhase;
+
+		public CompileResult Compile(string code)
+		{
+			CompileResult compileResult = new CompileResult();
+			runningPhase = RunningPhaseType.Global;
+			
+			if(string.IsNullOrEmpty(code))
+			{
+				return compileResult;
+			}
+
+			// export
+			List<byte[]> data = new List<byte[]>();
+
+			try
+			{
+				var lexer = new Lexer();
+				var tokens = lexer.Analyze(code);
+
+				var parser = new Parser();
+				var sentense = parser.Parse(tokens.Tokens);
+
+				var ssaGenerator = new SSAGenerator();
+				ssaGenerator.Eval(sentense);
+				var outputAttribute =ssaGenerator.RootTable.Tables["@O"].Value;
+				var outputValues = new SSAGenerator.Value[4];
+				if(outputAttribute is SSAGenerator.Value)
+				{
+					outputValues[0] = outputAttribute as SSAGenerator.Value;
+					outputValues[1] = outputAttribute as SSAGenerator.Value;
+					outputValues[2] = outputAttribute as SSAGenerator.Value;
+					outputValues[3] = outputAttribute as SSAGenerator.Value;
+				}
+				else if (outputAttribute is SSAGenerator.SymbolTable)
+				{
+					outputValues[0] = (outputAttribute as SSAGenerator.SymbolTable).Tables["x"].Value as SSAGenerator.Value;
+					outputValues[1] = (outputAttribute as SSAGenerator.SymbolTable).Tables["y"].Value as SSAGenerator.Value;
+					outputValues[2] = (outputAttribute as SSAGenerator.SymbolTable).Tables["z"].Value as SSAGenerator.Value;
+					outputValues[3] = (outputAttribute as SSAGenerator.SymbolTable).Tables["w"].Value as SSAGenerator.Value;
+				}
+
+				var nodes = ssaGenerator.GatherNodes(outputValues);
+
+				var registerOffset = 0;
+				var validNodeCount = 0;
+
+				foreach(var node in nodes)
+				{
+					if(node is SSAGenerator.NodePredefined)
+					{
+						var node_ = node as SSAGenerator.NodePredefined;
+						foreach (var v in node.Outputs)
+						{
+							v.RegisterIndex = GetInputIndex(node_.Value);
+						}
+					}
+					else
+					{
+						foreach(var v in node.Outputs)
+						{
+							v.RegisterIndex = registerOffset;
+							registerOffset += 1;
+						}
+						validNodeCount++;
+					}
+				}
+
+				// Operators
+				List<byte[]> dataOp = new List<byte[]>();
+
+				foreach (var node in nodes)
+				{
+					if(node is SSAGenerator.NodeConstantNumber)
+					{
+						var node_ = node as SSAGenerator.NodeConstantNumber;
+
+						dataOp.Add(BitConverter.GetBytes((int)OperatorType.Constant));
+						dataOp.Add(BitConverter.GetBytes((int)node.Inputs.Count));
+						dataOp.Add(BitConverter.GetBytes((int)node.Outputs.Count));
+						dataOp.Add(BitConverter.GetBytes(1));
+
+						foreach (var o in node.Inputs)
+						{
+							dataOp.Add(BitConverter.GetBytes((int)o.RegisterIndex));
+						}
+
+						foreach (var o in node.Outputs)
+						{
+							dataOp.Add(BitConverter.GetBytes((int)o.RegisterIndex));
+						}
+
+						dataOp.Add(BitConverter.GetBytes(node_.Value));
+					}
+					else if (node is SSAGenerator.NodePredefined)
+					{
+						continue;
+					}
+					else if (node is SSAGenerator.NodeOperator)
+					{
+						var node_ = node as SSAGenerator.NodeOperator;
+
+						dataOp.Add(BitConverter.GetBytes((int)node_.Type));
+						dataOp.Add(BitConverter.GetBytes((int)node.Inputs.Count));
+						dataOp.Add(BitConverter.GetBytes((int)node.Outputs.Count));
+						dataOp.Add(BitConverter.GetBytes(0));
+
+						foreach (var o in node.Inputs)
+						{
+							dataOp.Add(BitConverter.GetBytes((int)o.RegisterIndex));
+						}
+
+						foreach (var o in node.Outputs)
+						{
+							dataOp.Add(BitConverter.GetBytes((int)o.RegisterIndex));
+						}
+					}
+				}
+
+				int version = 0;
+				data.Add(BitConverter.GetBytes(version));
+				data.Add(BitConverter.GetBytes((int)runningPhase));
+				data.Add(BitConverter.GetBytes(registerOffset));
+				data.Add(BitConverter.GetBytes(validNodeCount));
+				data.Add(BitConverter.GetBytes(outputValues[0].RegisterIndex));
+				data.Add(BitConverter.GetBytes(outputValues[1].RegisterIndex));
+				data.Add(BitConverter.GetBytes(outputValues[2].RegisterIndex));
+				data.Add(BitConverter.GetBytes(outputValues[3].RegisterIndex));
+				data.Add(dataOp.SelectMany(_ => _).ToArray());
+
+				/*
+				Compile(sentense[0]);
+
+				Dictionary<string, int> variableList = new Dictionary<string, int>();
+				foreach (var opt in operators)
+				{
+					foreach (var o in opt.Inputs.Concat(opt.Outputs))
+					{
+						if (IsValidLabel(o)) continue;
+
+						if (!variableList.ContainsKey(o))
+						{
+							variableList.Add(o, variableList.Count);
+						}
+					}
+				}
+
+				int outputIndex = -1;
+
+				// Output register
+				var outputName = GetOutputName(sentense[0]);
+				if (variableList.ContainsKey(outputName))
+				{
+					outputIndex = variableList[outputName];
+				}
+				else
+				{
+					outputIndex = GetInputIndex(outputName);
+				}
+
+				// Operators
+				List<byte[]> dataOp = new List<byte[]>();
+
+				foreach (var op in operators)
+				{
+					dataOp.Add(BitConverter.GetBytes((int)op.Type));
+					dataOp.Add(BitConverter.GetBytes((int)op.Inputs.Count));
+					dataOp.Add(BitConverter.GetBytes((int)op.Outputs.Count));
+
+					// Attribute
+					if (op.Type == OperatorType.Constant)
+					{
+						dataOp.Add(BitConverter.GetBytes(1));
+					}
+					else
+					{
+						dataOp.Add(BitConverter.GetBytes(0));
+					}
+
+					foreach (var o in op.Inputs)
+					{
+						if (variableList.ContainsKey(o))
+						{
+							var index = variableList[o];
+							dataOp.Add(BitConverter.GetBytes(index));
+						}
+						else
+						{
+							var index = GetInputIndex(o);
+							dataOp.Add(BitConverter.GetBytes(index));
+						}
+					}
+
+					foreach (var o in op.Outputs)
+					{
+						if (variableList.ContainsKey(o))
+						{
+							var index = variableList[o];
+							dataOp.Add(BitConverter.GetBytes(index));
+						}
+						else
+						{
+							var index = GetInputIndex(o);
+							dataOp.Add(BitConverter.GetBytes(index));
+						}
+					}
+
+					// Attribute
+					if (op.Type == OperatorType.Constant)
+					{
+						var value = (float)op.Attributes["Constant"];
+						dataOp.Add(BitConverter.GetBytes(value));
+					}
+				}
+
+				int version = 0;
+				data.Add(BitConverter.GetBytes(version));
+				data.Add(BitConverter.GetBytes((int)runningPhase));
+				data.Add(BitConverter.GetBytes(variableList.Count));
+				data.Add(BitConverter.GetBytes(operators.Count));
+				data.Add(BitConverter.GetBytes(outputIndex));
+				data.Add(dataOp.SelectMany(_=>_).ToArray());
+				*/
+			}
+			catch (CompileException e)
+			{
+				compileResult.Error = e;
+				return compileResult;
+			}
+
+			compileResult.Bytecode = data.SelectMany(_ => _).ToArray();
+			compileResult.RunningPhase = runningPhase;
+			return compileResult;
+		}
+
+		/*
+		void Compile(Expression expr)
+		{
+			if (expr is BinOpExpression)
+			{
+				var e = expr as BinOpExpression;
+				var o = new Operator();
+				if (e.Operator == "+") o.Type = OperatorType.Add;
+				if (e.Operator == "-") o.Type = OperatorType.Sub;
+				if (e.Operator == "*") o.Type = OperatorType.Mul;
+				if (e.Operator == "/") o.Type = OperatorType.Div;
+
+				Compile(e.Lhs);
+				Compile(e.Rhs);
+
+				o.Inputs.Add(GetOutputName(e.Lhs));
+				o.Inputs.Add(GetOutputName(e.Rhs));
+				o.Outputs.Add(GetOutputName(e));
+				operators.Add(o);
+			}
+			else if (expr is UnaryOpExpression)
+			{
+				var e = expr as UnaryOpExpression;
+				var o = new Operator();
+				if (e.Operator == "+") o.Type = OperatorType.UnaryAdd;
+				if (e.Operator == "-") o.Type = OperatorType.UnarySub;
+
+				Compile(e.Expr);
+
+				o.Inputs.Add(GetOutputName(e.Expr));
+				o.Outputs.Add(GetOutputName(e));
+				operators.Add(o);
+			}
+			else if (expr is FunctionExpression)
+			{
+				var e = expr as FunctionExpression;
+
+				if(e.Value == "sin")
+				{
+					if (e.Args.Count() != 1) throw new ArgSizeException(e.Args.Count(), 1, e.Line);
+
+					Compile(e.Args[0]);
+
+					var o = new Operator();
+					o.Type = OperatorType.Sine;
+					o.Inputs.Add(GetOutputName(e.Args[0]));
+					o.Outputs.Add(GetOutputName(e));
+					operators.Add(o);
+				}
+				else if (e.Value == "cos")
+				{
+					if (e.Args.Count() != 1) throw new ArgSizeException(e.Args.Count(), 1, e.Line);
+
+					Compile(e.Args[0]);
+
+					var o = new Operator();
+					o.Type = OperatorType.Cos;
+					o.Inputs.Add(GetOutputName(e.Args[0]));
+					o.Outputs.Add(GetOutputName(e));
+					operators.Add(o);
+				}
+				else
+				{
+					throw new UnknownFunctionException(e.Value, e.Line);
+				}
+			}
+			else if (expr is LabelExpression)
+			{
+				var e = expr as LabelExpression;
+				if (!IsValidLabel(e.Value))
+				{
+					throw new CompileException(string.Format("Invalid label {0}", e.Value), e.Line);
+				}
+
+			}
+			else if (expr is NumberExpression)
+			{
+				var e = expr as NumberExpression;
+				var o = new Operator();
+				o.Type = OperatorType.Constant;
+				o.Outputs.Add(GetOutputName(e));
+				o.Attributes.Add("Constant", e.Value);
+				operators.Add(o);
+			}
+		}
+		*/
+		string GetOutputName(Expression expr)
+		{
+			if(expr is LabelExpression)
+			{
+				var e = expr as LabelExpression;
+				return e.Value;
+			}
+			else
+			{
+				return expr.Line.ToString();
+			}
+		}
+
+		bool IsValidLabel(string label)
+		{
+			HashSet<string> valid = new HashSet<string>();
+			valid.Add("@1");
+			valid.Add("@2");
+			valid.Add("@3");
+			valid.Add("@4");
+
+			valid.Add("@GTime");
+
+			valid.Add("@P.x");
+			valid.Add("@P.y");
+			valid.Add("@P.z");
+			valid.Add("@P.w");
+			valid.Add("@PTime");
+
+			return valid.Contains(label);
+		}
+
+		int GetInputIndex(string label)
+		{
+			if (label == "@1") return 0 + 0x1000;
+			if (label == "@2") return 1 + 0x1000;
+			if (label == "@3") return 2 + 0x1000;
+			if (label == "@4") return 3 + 0x1000;
+
+			if (label == "@GTime") return 0 + 0x1000 + 0x100;
+
+			runningPhase = RunningPhaseType.Local;
+
+			if (label == "@P.x") return 0 + 0x1000 + 0x200;
+			if (label == "@P.y") return 1 + 0x1000 + 0x200;
+			if (label == "@P.z") return 2 + 0x1000 + 0x200;
+			if (label == "@P.w") return 3 + 0x1000 + 0x200;
+			if (label == "@PTime") return 4 + 0x1000 + 0x200;
+
+			throw new Exception();
+		}
+	}
+}
+
+namespace EffekseerTool.InternalScript
+{
+	public class CompileException : System.Exception
+	{
+		public CompileException(string message, int line)
+			: base(message)
+		{
+			Line = line;
+		}
+		public int Line
+		{
+			get;
+			private set;
+		}
+	}
+
+	public class InvalidTokenException : CompileException
+	{
+		public InvalidTokenException(string message, int line)
+			: base(message, line)
+		{
+		}
+	}
+
+	public class InvalidEOFException : CompileException
+	{
+		public InvalidEOFException(int line)
+			: base("", line)
+		{
+		}
+	}
+
+	public class InvalidOperationException :CompileException
+	{
+		public InvalidOperationException(int line)
+			: base("", line)
+		{
+		}
+	}
+
+	public class ArgSizeException : CompileException
+	{
+		public ArgSizeException(int actual, int expected, int line)
+			: base("", line)
+		{
+			Actual = actual;
+			Expected = expected;
+		}
+
+		public int Actual = 0;
+		public int Expected = 0;
+	}
+
+	public class InvalidSubstitution : CompileException
+	{
+		public InvalidSubstitution(int line)
+		: base("", line)
+		{
+		}
+	}
+
+	public class UnknownFunctionException : CompileException
+	{
+		public UnknownFunctionException(string message, int line)
+			: base(message, line)
+		{
+		}
+	}
+
+	public class UnknownValueException : CompileException
+	{
+		public UnknownValueException(string message, int line)
+			: base(message, line)
+		{
+		}
+	}
+}
+
+namespace EffekseerTool.InternalScript
+{
+	enum TokenType
+	{
+		Digit,
+		Label,
+		Operator,
+		LeftParentheses,
+		RightParentheses,
+		Comma,
+		Equal,
+		Dot,
+		NewLine,
+	}
+	class Token
+	{
+		public TokenType Type;
+		public object Value;
+		public int Line = 0;
+	}
+
+	enum ErrorType
+	{
+		None,
+		InvalidCharacter,
+	}
+
+	class LexerResult
+	{
+		public List<Token> Tokens = new List<Token>();
+
+		public ErrorType Error = ErrorType.None;
+		public Dictionary<string, object> ErrorInfo = new Dictionary<string, object>();
+	}
+
+	class Lexer
+	{
+		public Lexer()
+		{
+			operators.Add('+');
+			operators.Add('-');
+			operators.Add('*');
+			operators.Add('/');
+		}
+
+		public LexerResult Analyze(string code)
+		{
+			List<Token> tokens = new List<Token>();
+
+			// check special case
+			// ..
+			if(code.Contains(".."))
+			{
+				throw new InvalidTokenException(".", code.IndexOf(".."));
+			}
+
+			int index = 0;
+		
+			while (index < code.Length)
+			{
+				var c = code[index];
+				var type = GetElemenetType(c);
+
+				if(type == ElementType.Connect)
+				{
+					if(index + 1 < code.Length && GetElemenetType(code[index]) == ElementType.NewLine)
+					{
+						index += 2;
+					}
+					else
+					{
+						index += 1;
+					}
+				}
+				else if(type == ElementType.NewLine)
+				{
+					var token = new Token();
+					token.Type = TokenType.NewLine;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else if (StartLabel(code, index))
+				{
+					var token = ParseLabel(code, ref index);
+					tokens.Add(token);
+				}
+				else if (StartOperator(code, index))
+				{
+					var token = ParseOperator(code, ref index);
+					tokens.Add(token);
+				}
+				else if (StartDigit(code, index))
+				{
+					var token = ParseDigit(code, ref index);
+					tokens.Add(token);
+				}
+				else if(type == ElementType.LeftParentheses)
+				{
+					var token = new Token();
+					token.Type = TokenType.LeftParentheses;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else if (type == ElementType.RightParentheses)
+				{
+					var token = new Token();
+					token.Type = TokenType.RightParentheses;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else if (type == ElementType.Comma)
+				{
+					var token = new Token();
+					token.Type = TokenType.Comma;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else if (type == ElementType.Equal)
+				{
+					var token = new Token();
+					token.Type = TokenType.Equal;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else if (type == ElementType.Dot)
+				{
+					var token = new Token();
+					token.Type = TokenType.Dot;
+					token.Line = index;
+					tokens.Add(token);
+					index++;
+				}
+				else
+				{
+					if(type == ElementType.Space)
+					{
+						index++;
+					}
+					else
+					{
+						LexerResult erroresult = new LexerResult();
+						erroresult.Error = ErrorType.InvalidCharacter;
+						erroresult.ErrorInfo.Add("Line", index);
+						erroresult.ErrorInfo.Add("Character", c.ToString());
+						return erroresult;
+					}
+				}
+			}
+
+			LexerResult result = new LexerResult();
+			result.Tokens = tokens;
+			return result;
+		}
+
+		bool StartLabel(string code, int index)
+		{
+			var c = code[index];
+			var type = GetElemenetType(c);
+			return type == ElementType.Alphabet || type == ElementType.SpecialLetter;
+		}
+
+		bool StartOperator(string code, int index)
+		{
+			var c = code[index];
+			var type = GetElemenetType(c);
+			return type == ElementType.Operator;
+		}
+
+		bool StartDigit(string code, int index)
+		{
+			var c = code[index];
+			var type = GetElemenetType(c);
+
+			if (type == ElementType.Digit) return true;
+
+			if (type == ElementType.Dot && index < code.Count() - 1 && GetElemenetType(code[index + 1]) == ElementType.Digit) return true;
+
+			return false;
+		}
+
+		Token ParseLabel(string code, ref int index)
+		{
+			var token = new Token();
+			token.Type = TokenType.Label;
+			token.Line = index;
+
+			string str = "";
+			
+			while (index < code.Length)
+			{
+				var c = code[index];
+				var type = GetElemenetType(c);
+
+				// if (type != ElementType.Alphabet && type != ElementType.Digit && type != ElementType.SpecialLetter && type != ElementType.Dot) break;
+				if (type != ElementType.Alphabet && type != ElementType.Digit && type != ElementType.SpecialLetter) break;
+
+				str += c;
+				index++;
+			}
+
+			token.Value = str;
+			return token;
+		}
+
+		Token ParseOperator(string code, ref int index)
+		{
+			var token = new Token();
+			token.Type = TokenType.Operator;
+			token.Line = index;
+
+			string str = "";
+
+			while (index < code.Length)
+			{
+				var c = code[index];
+				var type = GetElemenetType(c);
+
+				if (type != ElementType.Operator) break;
+				str += c;
+				index++;
+				break;
+			}
+
+			token.Value = str;
+			return token;
+		}
+
+		Token ParseDigit(string code, ref int index)
+		{
+			var token = new Token();
+			token.Type = TokenType.Digit;
+			token.Line = index;
+
+			string str = "";
+
+			bool hasDot = false;
+
+			while (index < code.Length)
+			{
+				var c = code[index];
+				var type = GetElemenetType(c);
+
+				if (type == ElementType.Space) break;
+				if (type == ElementType.Other) break;
+				if (type == ElementType.Operator) break;
+				if (type == ElementType.SpecialLetter) break;
+				if (type == ElementType.LeftParentheses) break;
+				if (type == ElementType.RightParentheses) break;
+				if (type == ElementType.Comma) break;
+				if (type == ElementType.Equal) break;
+				if (type == ElementType.NewLine) break;
+				if (type == ElementType.Connect) break;
+
+				if (type == ElementType.Dot)
+				{
+					if(hasDot)
+					{
+						throw new InvalidTokenException(".", index);
+					}
+					hasDot = true;
+				}
+
+				str += c;
+				index++;
+			}
+			
+			try
+			{
+				token.Value = float.Parse(str);
+			}
+			catch
+			{
+				throw new InvalidTokenException(".", index);
+			}
+
+			return token;
+		}
+
+		ElementType GetElemenetType(Char c)
+		{
+			if (c == '\n')
+				return ElementType.NewLine;
+			if (c == '\\') return ElementType.Connect;
+			if (Char.IsLetter(c)) return ElementType.Alphabet;
+			if (Char.IsDigit(c)) return ElementType.Digit;
+			if (Char.IsWhiteSpace(c)) return ElementType.Space;
+			if (operators.Contains(c)) return ElementType.Operator;
+			if (c == '(') return ElementType.LeftParentheses;
+			if (c == ')') return ElementType.RightParentheses;
+			if (c == '@') return ElementType.SpecialLetter;
+			if (c == '.') return ElementType.Dot;
+			if (c == ',') return ElementType.Comma;
+			if (c == '=') return ElementType.Equal;
+
+			return ElementType.Other;
+		}
+
+		HashSet<Char> operators = new HashSet<char>();
+		enum ElementType
+		{
+			Alphabet,
+			SpecialLetter,
+			Digit,
+			Space,
+			Operator,
+			Other,
+			LeftParentheses,
+			RightParentheses,
+			Dot,
+			Comma,
+			Equal,
+			NewLine,
+			Connect,
+		}
+	}
+}
+
+namespace EffekseerTool.InternalScript
+{
+	class Expression
+	{
+		public int Line = 0;
+	}
+
+	class BinOpExpression : Expression
+	{
+		public string Operator = "";
+		public Expression Lhs = null;
+		public Expression Rhs = null;
+	}
+
+	class UnaryOpExpression : Expression
+	{
+		public string Operator = "";
+		public Expression Expr = null;
+	}
+	class NumberExpression : Expression
+	{
+		public float Value;
+		public NumberExpression(float value)
+		{
+			Value = value;
+		}
+	}
+
+	class LabelExpression : Expression
+	{
+		public string Value;
+		public LabelExpression(string value)
+		{
+			Value = value;
+		}
+	}
+
+	class FunctionExpression : Expression
+	{
+		public string Value;
+		public Expression[] Args = new Expression[0];
+	}
+
+	class AttributeExpression : Expression
+	{
+		public Expression Value = null;
+		public string Attribute = null;
+	}
+
+	/// <summary>
+	/// Unimplemented
+	/// </summary>
+	class SubstitutionExpression : Expression
+	{
+		public Expression Target = null;
+		public Expression Value = null;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <remarks>
+	/// Expr = Term {+ Term, - Term}
+	/// Term = Group {* Group, / Group}
+	/// Group = (Expr), Number, Value {.Value}
+	/// Value = Label {Arg}
+	/// Arg = (Expr, Expr...)
+	/// Sentence = Expr {= Expr} { NL Sentence }
+	/// </remarks>
+	class Parser
+	{
+		List<Token> tokens = null;
+		int index = 0;
+
+		public Expression[] Parse(List<Token> tokens)
+		{
+			this.tokens = tokens;
+			index = 0;
+			return Sentence();
+		}
+
+		Expression[] Sentence()
+		{
+			List<Expression> sentences = new List<Expression>();
+
+			while (true)
+			{
+				var empty = Peek();
+				if (empty == null) break;
+				if(empty.Type == TokenType.NewLine)
+				{
+					Next();
+					continue;
+				}
+
+				var lhs = Expr();
+
+				var token = Peek();
+
+				if (token != null)
+				{
+					if(token.Type == TokenType.Equal)
+					{
+						Next();
+						var rhs = Expr();
+						var substitution = new SubstitutionExpression();
+						substitution.Target = lhs;
+						substitution.Value = rhs;
+						sentences.Add(substitution);
+					}
+					else
+					{
+						sentences.Add(lhs);
+					}
+				}
+				else
+				{
+					sentences.Add(lhs);
+					break;
+				}
+			}
+
+			return sentences.ToArray();
+		}
+
+		Expression Expr()
+		{
+			var lhs = Term();
+			
+			while (true)
+			{
+				var token = Peek();
+
+				if (token != null)
+				{
+					if (token.Type == TokenType.Operator && (string)token.Value == "+")
+					{
+						Next();
+						var rhs = Term();
+
+						var ret = new BinOpExpression();
+						ret.Line = token.Line;
+						ret.Lhs = lhs;
+						ret.Rhs = rhs;
+						ret.Operator = (string)token.Value;
+						lhs = ret;
+					}
+					else if (token.Type == TokenType.Operator && (string)token.Value == "-")
+					{
+						Next();
+						var rhs = Term();
+
+						var ret = new BinOpExpression();
+						ret.Line = token.Line;
+						ret.Lhs = lhs;
+						ret.Rhs = rhs;
+						ret.Operator = (string)token.Value;
+						lhs = ret;
+					}
+					else if (token.Type == TokenType.Operator)
+					{
+						break;
+					}
+					else if (token.Type == TokenType.RightParentheses)
+					{
+						break;
+					}
+					else if (token.Type == TokenType.Equal || token.Type == TokenType.NewLine)
+					{
+						break;
+					}
+					else
+					{
+						throw new CompileException(string.Format("Invalid token {0}", token.Type), token.Line);
+					}
+				}
+				else
+				{
+					return lhs;
+				}
+			}
+
+			return lhs;
+		}
+
+		Expression Term()
+		{
+			var lhs = Group();
+			
+			while (true)
+			{
+				var token = Peek();
+
+				if (token != null)
+				{
+					if (token.Type == TokenType.Operator && (string)token.Value == "*")
+					{
+						Next();
+						var rhs = Group();
+
+						var ret = new BinOpExpression();
+						ret.Line = token.Line;
+						ret.Lhs = lhs;
+						ret.Rhs = rhs;
+						ret.Operator = (string)token.Value;
+						lhs = ret;
+					}
+					else if (token.Type == TokenType.Operator && (string)token.Value == "/")
+					{
+						Next();
+						var rhs = Group();
+
+						var ret = new BinOpExpression();
+						ret.Line = token.Line;
+						ret.Lhs = lhs;
+						ret.Rhs = rhs;
+						ret.Operator = (string)token.Value;
+						lhs = ret;
+					}
+					else if (token.Type == TokenType.Operator)
+					{
+						break;
+					}
+					else if (token.Type == TokenType.RightParentheses)
+					{
+						break;
+					}
+					else if (token.Type == TokenType.Equal || token.Type == TokenType.NewLine)
+					{
+						break;
+					}
+					else
+					{
+						throw new CompileException(string.Format("Invalid token {0}", token.Type), token.Line);
+					}
+				}
+				else
+				{
+					return lhs;
+				}
+			}
+
+			return lhs;
+		}
+
+		Expression Group()
+		{
+			var token = Peek();
+			Expression value = null;
+
+			if(token != null)
+			{
+				if (token.Type == TokenType.LeftParentheses)
+				{
+					Next();
+					var center = Expr();
+					var right = Peek();
+
+					if (right != null && right.Type == TokenType.RightParentheses)
+					{
+						Next();
+						value = center;
+					}
+					else
+					{
+						if (token == null)
+						{
+							throw new InvalidEOFException(token.Line);
+						}
+
+						throw new CompileException(string.Format("Invalid token {0}", token), token.Line);
+					}
+				}
+				else if (token.Type == TokenType.Operator && ((string)token.Value == "+" || (string)token.Value == "-"))
+				{
+					Next();
+					var rhs = Group();
+
+					var ret = new UnaryOpExpression();
+					ret.Line = token.Line;
+					ret.Expr = rhs;
+					ret.Operator = (string)token.Value;
+					value = ret;
+				}
+				else if (token.Type == TokenType.Label)
+				{
+					var ret = Value();
+					ret.Line = token.Line;
+					value = ret;
+				}
+				else if (token.Type == TokenType.Digit)
+				{
+					Next();
+					var ret = new NumberExpression((float)token.Value);
+					ret.Line = token.Line;
+					value = ret;
+				}
+				else
+				{
+					throw new CompileException(string.Format("Invalid token {0}", token), token.Line);
+				}
+			}
+			else
+			{
+				throw new InvalidEOFException(token.Line);
+			}
+
+			while(true)
+			{
+				var dotToken = Peek();
+
+				if (dotToken != null && dotToken.Type == TokenType.Dot)
+				{
+					var next = Next();
+					if(next == null)
+					{
+						throw new InvalidEOFException(token.Line);
+					}
+					else if(next.Type != TokenType.Label)
+					{
+						throw new CompileException(string.Format("Invalid token {0}", token), token.Line);
+					}
+
+					var v_ = new AttributeExpression();
+					v_.Value = value;
+					v_.Attribute = (string)next.Value;
+					value = v_;
+
+					Next();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			return value;
+		}
+
+		Expression Value()
+		{
+			var token = Peek();
+
+			if (token != null)
+			{
+				var next = Next();
+
+				if(next == null || next.Type != TokenType.LeftParentheses)
+				{
+					var ret = new LabelExpression((string)token.Value);
+					ret.Line = token.Line;
+					return ret;
+				}
+				else
+				{
+					var ret = new FunctionExpression();
+					ret.Value = (string)token.Value;
+					ret.Args = Arg();
+					Next();
+					return ret;
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+
+		Expression[] Arg()
+		{
+			List<Expression> exps = new List<Expression>();
+
+			var token = Peek();
+
+			if (token != null)
+			{
+				while(true)
+				{
+					var next = Next();
+					var expr = Expr();
+					var next2 = Peek();
+
+					if (next2 == null)
+					{
+						throw new InvalidEOFException(token.Line);
+					}
+					else if (next2.Type == TokenType.Comma)
+					{
+						exps.Add(expr);
+					}
+					else if (next2.Type == TokenType.RightParentheses)
+					{
+						exps.Add(expr);
+						return exps.ToArray();
+					}
+				}
+
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+
+		Token Peek()
+		{
+			if(tokens.Count() > index)
+			{
+				return tokens[index];
+			}
+			return null;
+		}
+
+		Token Next()
+		{
+			index++;
+			return Peek();
+		}
+	}
+}
+
+namespace EffekseerTool.InternalScript
+{
+	/// <summary>
+	/// generate Static single assignment form
+	/// </summary>
+	/// <remarks>
+	/// https://en.wikipedia.org/wiki/Static_single_assignment_form
+	/// </remarks>
+	class SSAGenerator
+	{
+		public class Node
+		{
+			public Expression Expression;
+			public List<Value> Inputs = new List<Value>();
+			public List<Value> Outputs = new List<Value>();
+		}
+
+		public class NodeConstantNumber : Node
+		{
+			public float Value = 0.0f;
+		}
+
+		public class NodeOperator : Node
+		{
+			public OperatorType Type;
+		}
+
+		public class NodePredefined :Node
+		{
+			public string Value = string.Empty;
+
+			public NodePredefined(string value)
+			{
+				Value = value;
+			}
+		}
+
+		public class Value
+		{
+			public int Index = 0;
+			public Node Generator = null;
+			public int RegisterIndex = -1;
+		}
+
+		public class Attribute
+		{
+			public object Value = null;
+
+			public Attribute(object value = null)
+			{
+				Value = value;
+			}
+		}
+
+		public class SymbolTable
+		{
+			public Dictionary<string, Attribute> Tables = new Dictionary<string, Attribute>();
+
+			public SymbolTable Clone()
+			{
+				var ret = new SymbolTable();
+				foreach (var kv in Tables)
+				{
+					var value = kv.Value.Value;
+
+					if (value is Value)
+					{
+						ret.Tables.Add(kv.Key, new Attribute(value));
+					}
+
+					if (value is SymbolTable)
+					{
+						var table = value as SymbolTable;
+						ret.Tables.Add(kv.Key, new Attribute(table));
+					}
+				}
+
+				return ret;
+			}
+		}
+
+		class EvalOption
+		{
+			/// <summary>
+			/// Get value as writing target
+			/// </summary>
+			public bool ForWriting = false;
+		}
+
+		public SymbolTable RootTable = new SymbolTable();
+
+
+		object EvalAttribute(AttributeExpression expr, EvalOption option)
+		{
+			var value = Eval(expr.Value, option);
+			if (value is Attribute)
+			{
+				value = (value as Attribute).Value;
+			}
+
+			var table = value as SymbolTable;
+
+			if (table == null)
+			{
+				throw new UnknownValueException(expr.Attribute, expr.Line);
+			}
+
+			if (!table.Tables.ContainsKey(expr.Attribute))
+			{
+				throw new UnknownValueException(expr.Attribute, expr.Line);
+			}
+
+			return table.Tables[expr.Attribute];
+		}
+
+		void EvalSubstitution(SubstitutionExpression expr, EvalOption option)
+		{
+			option = new EvalOption();
+			option.ForWriting = true;
+
+			var target = Eval(expr.Target, option);
+			var value = Eval(expr.Value, null);
+			if (value is Attribute)
+			{
+				value = (value as Attribute).Value;
+			}
+
+			var targetAttribute = target as Attribute;
+			if (targetAttribute == null)
+			{
+				throw new InvalidSubstitution(expr.Line);
+			}
+
+			if (value is Value)
+			{
+				targetAttribute.Value = value;
+			}
+		}
+
+		object EvalLabel(LabelExpression expr, EvalOption option)
+		{
+			if (!RootTable.Tables.ContainsKey(expr.Value))
+			{
+				if (option != null && option.ForWriting)
+				{
+					var attribute = new Attribute();
+					RootTable.Tables[expr.Value] = attribute;
+				}
+				else
+				{
+					throw new UnknownValueException(expr.Value, expr.Line);
+				}
+			}
+
+			return RootTable.Tables[expr.Value];
+		}
+
+		object EvalFunction(FunctionExpression expr, EvalOption option)
+		{
+			var node = new NodeOperator();
+			node.Expression = expr;
+			if (expr.Value == "sin") node.Type = OperatorType.Sine;
+			if (expr.Value == "cos") node.Type = OperatorType.Cos;
+
+			if (expr.Args.Count() != 1) throw new ArgSizeException(expr.Args.Count(), 1, expr.Line);
+
+			var input = Eval(expr.Args[0], null);
+			if (input is Attribute)
+			{
+				input = (input as Attribute).Value;
+			}
+
+			if (input is SymbolTable)
+			{
+				var retTable = new SymbolTable();
+				int ind = 0;
+				foreach (var table in (input as SymbolTable).Tables)
+				{
+					var ret = new Value();
+					ret.Index = ind;
+					ret.Generator = node;
+
+					if (!(table.Value.Value is Value))
+					{
+						throw new InvalidOperationException(expr.Line);
+					}
+
+					node.Inputs.Add(table.Value.Value as Value);
+					node.Outputs.Add(ret);
+					retTable.Tables.Add(table.Key, new Attribute(ret));
+					ind++;
+				}
+				return retTable;
+			}
+			else if (input is Value)
+			{
+				var ret = new Value();
+				ret.Index = 0;
+				ret.Generator = node;
+				node.Inputs.Add(input as Value);
+				node.Outputs.Add(ret);
+				return ret;
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+
+		object Eval(Expression expression, EvalOption option)
+		{
+			if (expression is AttributeExpression)
+			{
+				return EvalAttribute(expression as AttributeExpression, option);
+			}
+			else if (expression is SubstitutionExpression)
+			{
+				EvalSubstitution(expression as SubstitutionExpression, option);
+				return null;
+			}
+			else if (expression is LabelExpression)
+			{
+				return EvalLabel(expression as LabelExpression, option);
+			}
+			else if (expression is NumberExpression)
+			{
+				var expr = expression as NumberExpression;
+				var value = new Value();
+				var node = new NodeConstantNumber();
+				node.Expression = expr;
+				node.Value = expr.Value;
+				node.Outputs.Add(value);
+				value.Generator = node;
+				value.Index = 0;
+				return value;
+			}
+			else if (expression is FunctionExpression)
+			{
+				return EvalFunction(expression as FunctionExpression, option);
+			}
+			else if (expression is BinOpExpression)
+			{
+				var expr = expression as BinOpExpression;
+				var node = new NodeOperator();
+				node.Expression = expr;
+				if (expr.Operator == "+") node.Type = OperatorType.Add;
+				if (expr.Operator == "-") node.Type = OperatorType.Sub;
+				if (expr.Operator == "*") node.Type = OperatorType.Mul;
+				if (expr.Operator == "/") node.Type = OperatorType.Div;
+
+
+				var lhs = Eval(expr.Lhs, null);
+				if (lhs is Attribute)
+				{
+					lhs = (lhs as Attribute).Value;
+				}
+
+				var rhs = Eval(expr.Rhs, null);
+				if (rhs is Attribute)
+				{
+					rhs = (rhs as Attribute).Value;
+				}
+
+				if (lhs is SymbolTable)
+				{
+					var retTable = new SymbolTable();
+					int ind = 0;
+					foreach (var table in (lhs as SymbolTable).Tables)
+					{
+						var ret = new Value();
+						ret.Index = ind;
+						ret.Generator = node;
+						node.Inputs.Add(table.Value.Value as Value);
+
+						if (!(table.Value.Value is Value))
+						{
+							throw new InvalidOperationException(expression.Line);
+						}
+
+						if (rhs is Value)
+						{
+							node.Inputs.Add(rhs as Value);
+						}
+						else if (rhs is SymbolTable)
+						{
+							var rhs_ = rhs as SymbolTable;
+							if (!rhs_.Tables.ContainsKey(table.Key))
+							{
+								throw new InvalidOperationException(expression.Line);
+							}
+
+							var value = rhs_.Tables[table.Key].Value as Value;
+							if (value == null)
+							{
+								throw new InvalidOperationException(expression.Line);
+							}
+
+							node.Inputs.Add(value);
+						}
+
+						node.Outputs.Add(ret);
+						retTable.Tables.Add(table.Key, new Attribute(ret));
+						ind++;
+					}
+					return retTable;
+				}
+				else if (lhs is Value)
+				{
+					if (!(rhs is Value))
+					{
+						throw new InvalidOperationException(expression.Line);
+					}
+
+					var ret = new Value();
+					ret.Index = 0;
+					ret.Generator = node;
+					node.Inputs.Add(lhs as Value);
+					node.Inputs.Add(rhs as Value);
+					node.Outputs.Add(ret);
+					return ret;
+				}
+			}
+			else if (expression is UnaryOpExpression)
+			{
+				var expr = expression as UnaryOpExpression;
+				var node = new NodeOperator();
+				if (expr.Operator == "+") node.Type = OperatorType.UnaryAdd;
+				if (expr.Operator == "-") node.Type = OperatorType.UnarySub;
+
+				var input = Eval(expr.Expr, null);
+				if (input is Attribute)
+				{
+					input = (input as Attribute).Value;
+				}
+
+				if (input is SymbolTable)
+				{
+					var retTable = new SymbolTable();
+					int ind = 0;
+					foreach (var table in (input as SymbolTable).Tables)
+					{
+						var ret = new Value();
+						ret.Index = ind;
+						ret.Generator = node;
+
+						if (!(table.Value.Value is Value))
+						{
+							throw new InvalidOperationException(expression.Line);
+						}
+
+						node.Inputs.Add(table.Value.Value as Value);
+						node.Outputs.Add(ret);
+						retTable.Tables.Add(table.Key, new Attribute(ret));
+						ind++;
+					}
+					return retTable;
+				}
+				else if (input is Value)
+				{
+					var ret = new Value();
+					ret.Index = 0;
+					ret.Generator = node;
+					node.Inputs.Add(input as Value);
+					node.Outputs.Add(ret);
+					return ret;
+				}
+			}
+
+			throw new Exception();
+		}
+
+		public void Eval(Expression[] expressions)
+		{
+			RootTable = new SymbolTable();
+
+			Func<string, Value> generatePredefined = (name) =>
+			{
+				var v = new Value();
+				var generator = new NodePredefined(name);
+				generator.Outputs.Add(v);
+				v.Generator = generator;
+				return v;
+			};
+
+			RootTable.Tables.Add("@1", new Attribute(generatePredefined("@1")));
+			RootTable.Tables.Add("@2", new Attribute(generatePredefined("@2")));
+			RootTable.Tables.Add("@3", new Attribute(generatePredefined("@3")));
+			RootTable.Tables.Add("@4", new Attribute(generatePredefined("@4")));
+			RootTable.Tables.Add("@GTime", new Attribute(generatePredefined("@GTime")));
+			RootTable.Tables.Add("@PTime", new Attribute(generatePredefined("@PTime")));
+
+			var localParam = new SymbolTable();
+			localParam.Tables.Add("x", new Attribute(generatePredefined("@P.x")));
+			localParam.Tables.Add("y", new Attribute(generatePredefined("@P.y")));
+			localParam.Tables.Add("z", new Attribute(generatePredefined("@P.z")));
+			localParam.Tables.Add("w", new Attribute(generatePredefined("@P.w")));
+
+			RootTable.Tables.Add("@P", new Attribute(localParam));
+
+			var outputParam = new SymbolTable();
+			outputParam.Tables.Add("x", new Attribute(generatePredefined("@P.x")));
+			outputParam.Tables.Add("y", new Attribute(generatePredefined("@P.y")));
+			outputParam.Tables.Add("z", new Attribute(generatePredefined("@P.z")));
+			outputParam.Tables.Add("w", new Attribute(generatePredefined("@P.w")));
+
+			RootTable.Tables.Add("@O", new Attribute(outputParam));
+
+			foreach (var expression in expressions)
+			{
+				Eval(expression, null);
+			}
+		}
+
+		public Node[] GatherNodes(Value[] values)
+		{
+			List<Value> enabledValues = new List<Value>();
+			List<Node> enabledNodes = new List<Node>();
+
+			Action<Value> collectValues = null;
+			collectValues = (Value value) =>
+			{
+				if (enabledValues.Contains(value))
+					return;
+
+				enabledValues.Add(value);
+				if (value.Generator != null)
+				{
+					enabledNodes.Add(value.Generator);
+
+					foreach (var input in value.Generator.Inputs)
+					{
+						collectValues(input);
+					}
+				}
+			};
+
+			foreach(var value in values)
+			{
+				collectValues(value);
+			}
+
+			// sort
+			List<Node> nodes = new List<Node>();
+
+			while (enabledNodes.Count > 0)
+			{
+				var usedForInput = enabledNodes.SelectMany(_ => _.Inputs).ToArray();
+				var restValues = enabledValues.Where(_ => !usedForInput.Contains(_)).ToArray();
+
+				foreach(var value in restValues)
+				{
+					if(value.Generator != null)
+					{
+						nodes.Add(value.Generator);
+					}
+					enabledNodes.Remove(value.Generator);
+					enabledValues.Remove(value);
+				}
+			}
+
+			nodes.Reverse();
+
+			return nodes.ToArray();
+		}
+	}
+}
+
+namespace EffekseerTool.InternalScript
+{
+	/// <summary>
+	/// It should be moved
+	/// </summary>
+	public class Tests
+	{
+		public Tests()
+		{
+			Compiler compiler = new Compiler();
+			Validate(compiler.Compile("1 + 2 + 3"), null);
+			Validate(compiler.Compile("1 * 2 + 3"), null);
+			Validate(compiler.Compile("1 * (2 + 3)"), null);
+
+			Validate(compiler.Compile("@O.x = 1 + 2 + 3"), null);
+			Validate(compiler.Compile("@O.x = 1 + 2 + 3\n@O.y = 1 + 2 + 3"), null);
+
+			Validate(compiler.Compile("@1"), null);
+			Validate(compiler.Compile("sin(1.0)"), null);
+			Validate(compiler.Compile("cos(2.0)"), null);
+			Validate(compiler.Compile(".1"), null);
+			//Validate(compiler.Compile("..1"), typeof(InvalidTokenException));
+			//Validate(compiler.Compile(".1.1"), typeof(InvalidTokenException));
+
+			/*
+
+			if (!Validate(compiler.Compile(".1"))) throw new Exception();
+			if (Validate(compiler.Compile("..1"))) throw new Exception();
+			if (Validate(compiler.Compile(".1.1"))) throw new Exception();
+
+			if (compiler.Compile("@P.x + @P.y").RunningPhase != RunningPhaseType.Local) throw new Exception();
+
+			*/
+
+		}
+
+		public bool Validate(CompileResult result, Type type)
+		{
+			if(type == null)
+			{
+				if (result.Error != null) throw result.Error;
+			}
+			else
+			{
+				if (result.Error == null) throw new Exception();
+				if(result.Error.GetType() != type) throw result.Error;
+			}
+			return true;
+		}
+	}
+}
 #endif
