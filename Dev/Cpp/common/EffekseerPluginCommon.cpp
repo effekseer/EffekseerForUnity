@@ -370,6 +370,7 @@ extern "C"
 	// ステレオレンダリング(VR)用行列設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetStereoRenderingMatrix(
 		int renderId, int renderType, 
+		float camCenterMat[],
 		float projMatL[], float projMatR[],
 		float camMatL[], float camMatR[])
 	{
@@ -378,6 +379,7 @@ extern "C"
 			settings.stereoEnabled = true;
 			settings.stereoRenderCount = 0;
 			settings.stereoRenderingType = (StereoRenderingType)renderType;
+			Array2Matrix(settings.cameraMatrix, camCenterMat);
 			Array2Matrix(settings.leftProjectionMatrix, projMatL);
 			Array2Matrix(settings.rightProjectionMatrix, projMatR);
 			Array2Matrix(settings.leftCameraMatrix, camMatL);
