@@ -15,6 +15,10 @@
 		2E1954E9223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954E3223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp */; };
 		2E1954EB223AB87E000BB4C4 /* EffekseerPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954EA223AB87E000BB4C4 /* EffekseerPlugin.cpp */; };
 		2E1954EC223AB87E000BB4C4 /* EffekseerPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954EA223AB87E000BB4C4 /* EffekseerPlugin.cpp */; };
+		2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
+		2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
+		2E64BCD222CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */; };
+		2E64BCD322CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */; };
 		2EB27C71222C27A100BF4C0E /* EffekseerRendererIndexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EB27C64222C27A000BF4C0E /* EffekseerRendererIndexBuffer.cpp */; };
 		2EB27C72222C27A100BF4C0E /* EffekseerRendererIndexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EB27C64222C27A000BF4C0E /* EffekseerRendererIndexBuffer.cpp */; };
 		2EB27C73222C27A100BF4C0E /* EffekseerRendererModelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EB27C66222C27A000BF4C0E /* EffekseerRendererModelLoader.cpp */; };
@@ -187,6 +191,10 @@
 		2E1954F1223AB8B9000BB4C4 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = ../unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		2E1954F2223AB8B9000BB4C4 /* IUnityApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityApplication.h; path = ../unity/IUnityApplication.h; sourceTree = "<group>"; };
 		2E1954F3223AB8B9000BB4C4 /* IUnityInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityInterface.h; path = ../unity/IUnityInterface.h; sourceTree = "<group>"; };
+		2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InternalScript.h; sourceTree = "<group>"; };
+		2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InternalScript.cpp; sourceTree = "<group>"; };
+		2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.CustomAllocator.cpp; sourceTree = "<group>"; };
+		2E64BCD122CE3B000054DB5B /* Effekseer.CustomAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.CustomAllocator.h; sourceTree = "<group>"; };
 		2EB27C63222C27A000BF4C0E /* EffekseerRendererRenderState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerRendererRenderState.h; path = ../renderer/EffekseerRendererRenderState.h; sourceTree = "<group>"; };
 		2EB27C64222C27A000BF4C0E /* EffekseerRendererIndexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EffekseerRendererIndexBuffer.cpp; path = ../renderer/EffekseerRendererIndexBuffer.cpp; sourceTree = "<group>"; };
 		2EB27C65222C27A000BF4C0E /* EffekseerRendererModelLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerRendererModelLoader.h; path = ../renderer/EffekseerRendererModelLoader.h; sourceTree = "<group>"; };
@@ -456,6 +464,10 @@
 		4861A2CB182F846200A8217D /* Effekseer */ = {
 			isa = PBXGroup;
 			children = (
+				2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */,
+				2E64BCD122CE3B000054DB5B /* Effekseer.CustomAllocator.h */,
+				2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */,
+				2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */,
 				4861A3F8182FDB9300A8217D /* Effekseer.h */,
 				4861A2CC182F846200A8217D /* Effekseer.Base.h */,
 				4861A2CD182F846200A8217D /* Effekseer.Base.Pre.h */,
@@ -758,6 +770,7 @@
 				684C1F7719F610BE00E32FEC /* EffekseerRendererGL.IndexBuffer.h in Sources */,
 				48DA21511C623ABD00CAA811 /* EffekseerPluginSound.cpp in Sources */,
 				684C1F6519F6106D00E32FEC /* EffekseerRendererGL.ModelLoader.cpp in Sources */,
+				2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */,
 				2E1954E8223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp in Sources */,
 				684C1F7819F610BE00E32FEC /* EffekseerRendererGL.ModelLoader.h in Sources */,
 				684C1F6619F6106D00E32FEC /* EffekseerRendererGL.ModelRenderer.cpp in Sources */,
@@ -798,6 +811,7 @@
 				4861A321182F846200A8217D /* Effekseer.EffectNodeRing.cpp in Sources */,
 				4861A322182F846200A8217D /* Effekseer.EffectNodeRoot.cpp in Sources */,
 				4861A323182F846200A8217D /* Effekseer.EffectNodeSprite.cpp in Sources */,
+				2E64BCD222CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */,
 				4861A324182F846200A8217D /* Effekseer.EffectNodeTrack.cpp in Sources */,
 				4861A325182F846200A8217D /* Effekseer.FCurves.cpp in Sources */,
 				4861A326182F846200A8217D /* Effekseer.Instance.cpp in Sources */,
@@ -894,8 +908,10 @@
 				2E1954EC223AB87E000BB4C4 /* EffekseerPlugin.cpp in Sources */,
 				48DA21A31C8C5C6B00CAA811 /* Effekseer.Matrix44.cpp in Sources */,
 				48DA21AE1C8C5C8B00CAA811 /* EffekseerPluginSound.cpp in Sources */,
+				2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */,
 				48DA21AA1C8C5C8B00CAA811 /* EffekseerPluginCommon.cpp in Sources */,
 				48DA21951C8C5C6B00CAA811 /* Effekseer.EffectNode.cpp in Sources */,
+				2E64BCD322CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */,
 				48DA21A21C8C5C6B00CAA811 /* Effekseer.Matrix43.cpp in Sources */,
 				48DA21A71C8C5C6B00CAA811 /* Effekseer.Socket.cpp in Sources */,
 				48DA219E1C8C5C6B00CAA811 /* Effekseer.InstanceContainer.cpp in Sources */,
