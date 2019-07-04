@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EffekseerProject>
+  <Root>
+    <Name>Root</Name>
+    <Children>
+      <Node>
+        <CommonValues>
+          <Life>
+            <Center>600</Center>
+            <Max>600</Max>
+            <Min>600</Min>
+          </Life>
+        </CommonValues>
+        <LocationValues>
+          <Fixed>
+            <Location>
+              <DynamicEquation>0</DynamicEquation>
+            </Location>
+          </Fixed>
+        </LocationValues>
+        <RendererCommonValues>
+          <MaterialFile />
+        </RendererCommonValues>
+        <Children />
+      </Node>
+    </Children>
+  </Root>
+  <Dynamic>
+    <Inputs>
+      <DynamicInput>
+        <Input>0</Input>
+      </DynamicInput>
+      <DynamicInput>
+        <Input>0</Input>
+      </DynamicInput>
+      <DynamicInput>
+        <Input>5</Input>
+      </DynamicInput>
+      <DynamicInput>
+        <Input>0</Input>
+      </DynamicInput>
+    </Inputs>
+    <Equations>
+      <DynamicEquation>
+        <Code>@O.x = @1
+@O.y = @2
+@O.z = @3
+</Code>
+      </DynamicEquation>
+    </Equations>
+  </Dynamic>
+  <ToolVersion>1.43b</ToolVersion>
+  <Version>3</Version>
+  <StartFrame>0</StartFrame>
+  <EndFrame>120</EndFrame>
+  <IsLoop>True</IsLoop>
+</EffekseerProject>
