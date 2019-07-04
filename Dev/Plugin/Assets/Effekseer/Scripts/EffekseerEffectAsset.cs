@@ -89,7 +89,7 @@ namespace Effekseer
 			{
 				if (EffekseerSystem.IsValid)
 				{
-					EffekseerSystem.Instance.GetEffectMagnification(this);
+					return EffekseerSystem.Instance.GetEffectMagnification(this);
 				}
 				return 0.0f;
 			}

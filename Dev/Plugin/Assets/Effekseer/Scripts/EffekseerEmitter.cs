@@ -66,9 +66,11 @@ namespace Effekseer
 		/// </summary>
 		public EffekseerHandle Play(EffekseerEffectAsset effectAsset)
 		{
+			var h = EffekseerSystem.PlayEffect(effectAsset, transform.position);
+
+			// must run after loading
 			cachedMagnification = effectAsset.Magnification;
 
-			var h = EffekseerSystem.PlayEffect(effectAsset, transform.position);
 			h.SetRotation(transform.rotation);
 			h.SetScale(transform.localScale);
 			if (speed != 1.0f) h.speed = speed;
@@ -220,7 +222,15 @@ namespace Effekseer
 		{
 			SetDynamicInput(0, localPos.x / cachedMagnification);
 			SetDynamicInput(1, localPos.y / cachedMagnification);
-			SetDynamicInput(2, localPos.z / cachedMagnification);
+
+			if (EffekseerSettings.Instance.isRightEffekseerHandledCoordinateSystem)
+			{
+				SetDynamicInput(2, localPos.z / cachedMagnification);
+			}
+			else
+			{
+				SetDynamicInput(2, -localPos.z / cachedMagnification);
+			}
 		}
 
 		/// <summary xml:lang="en">
