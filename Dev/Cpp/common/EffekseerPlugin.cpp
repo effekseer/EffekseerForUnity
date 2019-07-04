@@ -150,7 +150,7 @@ void InitRenderer()
 
 	// light a model
 	g_EffekseerRenderer->SetLightColor(Effekseer::Color(255, 255, 255, 255));
-	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1,1,-1));
+	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1, 1, -1));
 	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(40, 40, 40, 255));
 }
 
@@ -432,7 +432,7 @@ extern "C"
 		}
 
 		RenderSettings& settings = renderSettings[renderId];
-		Effekseer::Matrix44 projectionMatrix, cameraMatrix;
+		Effekseer::Matrix44 projectionMatrix, cameraMatrix, cameraPositionMatrix;
 
 		if (settings.stereoEnabled)
 		{
@@ -456,12 +456,15 @@ extern "C"
 					g_graphics->ShiftViewportForStereoSinglePass(true);
 				}
 			}
+			cameraPositionMatrix = settings.cameraMatrix;
+
 			settings.stereoRenderCount++;
 		}
 		else
 		{
 			projectionMatrix = settings.projectionMatrix;
 			cameraMatrix = settings.cameraMatrix;
+			cameraPositionMatrix = settings.cameraMatrix;
 		}
 
 		// if renderer is not opengl, render flipped image when render to a texture.
@@ -477,7 +480,7 @@ extern "C"
 		// convert a right hand into a left hand
 		::Effekseer::Vector3D cameraPosition;
 		::Effekseer::Vector3D cameraFrontDirection;
-		CalculateCameraDirectionAndPosition(cameraMatrix, cameraFrontDirection, cameraPosition);
+		CalculateCameraDirectionAndPosition(cameraPositionMatrix, cameraFrontDirection, cameraPosition);
 
 		// if (!g_isRightHandedCoordinate)
 		{
@@ -514,7 +517,7 @@ extern "C"
 		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
-		
+
 		if (g_isRightHandedCoordinate)
 		{
 			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
