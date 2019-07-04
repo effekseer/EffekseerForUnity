@@ -619,6 +619,18 @@ namespace Effekseer.Internal
 				}
 			}
 #endif
+			// check a culling mask
+			if ((camera.cullingMask & (1 << layer)) == 0)
+			{
+				if (renderPaths.ContainsKey(camera))
+				{
+					var path_ = renderPaths[camera];
+					path_.Dispose();
+					renderPaths.Remove(camera);
+				}
+				return;
+			}
+
 			// GC renderpaths
 			bool hasDisposed = false;
 			foreach (var path_ in renderPaths)
@@ -631,6 +643,7 @@ namespace Effekseer.Internal
 				}
 			}
 
+			// dispose renderpaths
 			if (hasDisposed)
 			{
 				List<Camera> removed = new List<Camera>();
@@ -648,18 +661,6 @@ namespace Effekseer.Internal
 			}
 
 			RenderPath path;
-
-			// check a culling mask
-			if ((camera.cullingMask & (1 << layer)) == 0)
-			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					path = renderPaths[camera];
-					path.Dispose();
-					renderPaths.Remove(camera);
-				}
-				return;
-			}
 
 			if (renderPaths.ContainsKey(camera))
 			{
@@ -680,7 +681,7 @@ namespace Effekseer.Internal
 			}
 
 			path.Update();
-			path.LifeTime = 5;
+			path.LifeTime = 60;
 
 			// assign a dinsotrion texture
 			if (path.renderTexture)
@@ -1184,6 +1185,19 @@ namespace Effekseer.Internal
 				}
 			}
 #endif
+
+			// check a culling mask
+			if ((camera.cullingMask & (1 << layer)) == 0)
+			{
+				if (renderPaths.ContainsKey(camera))
+				{
+					var path_ = renderPaths[camera];
+					path_.Dispose();
+					renderPaths.Remove(camera);
+				}
+				return;
+			}
+
 			// GC renderpaths
 			bool hasDisposed = false;
 			foreach (var path_ in renderPaths)
@@ -1196,6 +1210,7 @@ namespace Effekseer.Internal
 				}
 			}
 
+			// dispose renderpaths
 			if (hasDisposed)
 			{
 				List<Camera> removed = new List<Camera>();
@@ -1213,18 +1228,6 @@ namespace Effekseer.Internal
 			}
 
 			RenderPath path;
-
-			// check a culling mask
-			if ((camera.cullingMask & (1 << layer)) == 0)
-			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					path = renderPaths[camera];
-					path.Dispose();
-					renderPaths.Remove(camera);
-				}
-				return;
-			}
 
 			if (renderPaths.ContainsKey(camera))
 			{
@@ -1246,7 +1249,7 @@ namespace Effekseer.Internal
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, stereoRenderingType);
 			}
 
-			path.LifeTime = 5;
+			path.LifeTime = 60;
 
             // if LWRP
             if(dstID.HasValue || dstIdentifier.HasValue)
