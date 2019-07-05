@@ -238,6 +238,11 @@ namespace EffekseerTool
 		public static Action<string> OnOutputMessage;
 
 		/// <summary>
+		/// Output logs
+		/// </summary>
+		public static Action<LogLevel, string> OnOutputLog;
+
+		/// <summary>
 		/// 選択中のノード変更後イベント
 		/// </summary>
 		public static event EventHandler OnAfterSelectNode;
@@ -1242,10 +1247,34 @@ namespace EffekseerTool
 		English,
 	}
 
-    // アセンブリからリソースファイルをロードする
-    // Resources.GetString(...) に介して取得する場合、
-    // カルチャーによってローカライズ済の文字列が得られます。
-    public static class Resources
+	public enum LogLevel
+	{
+		Info,
+		Warning,
+	}
+
+	/// <summary>
+	/// a class for get default language
+	/// </summary>
+	public class LanguageGetter
+	{
+		public static Language GetLanguage()
+		{
+			// Switch the language according to the OS settings
+			var culture = System.Globalization.CultureInfo.CurrentCulture;
+			if (culture.Name == "ja-JP")
+			{
+				return Language.Japanese;
+			}
+
+			return Language.English;
+		}
+	}
+
+	// アセンブリからリソースファイルをロードする
+	// Resources.GetString(...) に介して取得する場合、
+	// カルチャーによってローカライズ済の文字列が得られます。
+	public static class Resources
     {
 		/* this implementation causes errors in mono
 		[DataContract]
@@ -1628,6 +1657,35 @@ namespace EffekseerTool.Binary
 			X = x;
 			Y = y;
 			Z = z;
+		}
+	}
+
+	class Utils
+	{
+		public static void LogFileNotFound(string path)
+		{
+			if (Core.OnOutputLog != null)
+			{
+				Language language = Language.English;
+
+				if (Core.Option != null && Core.Option.GuiLanguage != null)
+				{
+					language = Core.Option.GuiLanguage.Value;
+				}
+				else
+				{
+					language = LanguageGetter.GetLanguage();
+				}
+
+				if (language == Language.Japanese)
+				{
+					Core.OnOutputLog(LogLevel.Warning, path + " が見つかりません。");
+				}
+				else
+				{
+					Core.OnOutputLog(LogLevel.Warning, path + " is not found.");
+				}
+			}
 		}
 	}
 }
@@ -2403,11 +2461,19 @@ namespace EffekseerTool.Binary
 			if (value.Distortion.Value)
 			{
 				if (value.ColorTexture.RelativePath != string.Empty &&
-				distortionTexture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
-				texInfo.Load(value.ColorTexture.AbsolutePath))
+				distortionTexture_and_index.ContainsKey(value.ColorTexture.RelativePath))
 				{
-					data.Add(distortionTexture_and_index[value.ColorTexture.RelativePath].GetBytes());
-					hasTexture = true;
+					if (texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(distortionTexture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						Utils.LogFileNotFound(value.ColorTexture.AbsolutePath);
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
 				}
 				else
 				{
@@ -2418,11 +2484,19 @@ namespace EffekseerTool.Binary
 			else
 			{
 				if (value.ColorTexture.RelativePath != string.Empty &&
-					texture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
-					texInfo.Load(value.ColorTexture.AbsolutePath))
+					texture_and_index.ContainsKey(value.ColorTexture.RelativePath))
 				{
-					data.Add(texture_and_index[value.ColorTexture.RelativePath].GetBytes());
-					hasTexture = true;
+					if (texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(texture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						Utils.LogFileNotFound(value.ColorTexture.AbsolutePath);
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
 				}
 				else
 				{
@@ -2430,7 +2504,7 @@ namespace EffekseerTool.Binary
 					hasTexture = false;
 				}
 			}
-			
+
 
 			data.Add(value.AlphaBlend);
 			data.Add(value.Filter);
