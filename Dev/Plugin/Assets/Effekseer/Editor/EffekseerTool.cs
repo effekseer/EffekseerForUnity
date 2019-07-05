@@ -251,6 +251,11 @@ namespace EffekseerTool
 		public static Action<string> OnOutputMessage;
 
 		/// <summary>
+		/// Output logs
+		/// </summary>
+		public static Action<LogLevel, string> OnOutputLog;
+
+		/// <summary>
 		/// 選択中のノード変更後イベント
 		/// </summary>
 		public static event EventHandler OnAfterSelectNode;
@@ -1286,6 +1291,12 @@ namespace EffekseerTool
 		}
 	}
 
+	public enum LogLevel
+	{
+		Info,
+		Warning,
+	}
+
 	/// <summary>
 	/// 言語
 	/// </summary>
@@ -1297,6 +1308,24 @@ namespace EffekseerTool
         [Name(value = "英語", language = Language.Japanese)]
         [Name(value = "English", language = Language.English)]
 		English,
+	}
+
+	/// <summary>
+	/// a class for get default language
+	/// </summary>
+	public class LanguageGetter
+	{
+		public static Language GetLanguage()
+		{
+			// Switch the language according to the OS settings
+			var culture = System.Globalization.CultureInfo.CurrentCulture;
+			if (culture.Name == "ja-JP")
+			{
+				return Language.Japanese;
+			}
+
+			return Language.English;
+		}
 	}
 
     // アセンブリからリソースファイルをロードする
@@ -1701,6 +1730,35 @@ namespace EffekseerTool.Binary
 			X = x;
 			Y = y;
 			Z = z;
+		}
+	}
+
+	class Utils
+	{
+		public static void LogFileNotFound(string path)
+		{
+			if (Core.OnOutputLog != null)
+			{
+				Language language = Language.English;
+
+				if(Core.Option != null && Core.Option.GuiLanguage != null)
+				{
+					language = Core.Option.GuiLanguage.Value;
+				}
+				else
+				{
+					language = LanguageGetter.GetLanguage();
+				}
+
+				if(language == Language.Japanese)
+				{
+					Core.OnOutputLog(LogLevel.Warning, path + " が見つかりません。");
+				}
+				else
+				{
+					Core.OnOutputLog(LogLevel.Warning, path + " is not found.");
+				}
+			}
 		}
 	}
 }
@@ -2785,11 +2843,19 @@ texInfo.Load(texture_.AbsolutePath))
 			if (value.Distortion.Value)
 			{
 				if (value.ColorTexture.RelativePath != string.Empty &&
-				distortionTexture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
-				texInfo.Load(value.ColorTexture.AbsolutePath))
+				distortionTexture_and_index.ContainsKey(value.ColorTexture.RelativePath))
 				{
-					data.Add(distortionTexture_and_index[value.ColorTexture.RelativePath].GetBytes());
-					hasTexture = true;
+					if(texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(distortionTexture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						Utils.LogFileNotFound(value.ColorTexture.AbsolutePath);
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
 				}
 				else
 				{
@@ -2800,11 +2866,19 @@ texInfo.Load(texture_.AbsolutePath))
 			else
 			{
 				if (value.ColorTexture.RelativePath != string.Empty &&
-					texture_and_index.ContainsKey(value.ColorTexture.RelativePath) &&
-					texInfo.Load(value.ColorTexture.AbsolutePath))
+					texture_and_index.ContainsKey(value.ColorTexture.RelativePath))
 				{
-					data.Add(texture_and_index[value.ColorTexture.RelativePath].GetBytes());
-					hasTexture = true;
+					if(texInfo.Load(value.ColorTexture.AbsolutePath))
+					{
+						data.Add(texture_and_index[value.ColorTexture.RelativePath].GetBytes());
+						hasTexture = true;
+					}
+					else
+					{
+						Utils.LogFileNotFound(value.ColorTexture.AbsolutePath);
+						data.Add((-1).GetBytes());
+						hasTexture = false;
+					}
 				}
 				else
 				{
@@ -8397,16 +8471,8 @@ namespace EffekseerTool.Data
 
 			DistortionType = new Value.Enum<DistortionMethodType>(DistortionMethodType.Current);
 
-            // Switch the language according to the OS settings
-            var culture = System.Globalization.CultureInfo.CurrentCulture;
-            if (culture.Name == "ja-JP")
-            {
-                GuiLanguage = new Value.Enum<Language>(Language.Japanese);
-            }
-            else
-            {
-                GuiLanguage = new Value.Enum<Language>(Language.English);
-            }
+			// Switch the language according to the OS settings
+			GuiLanguage = new Value.Enum<Language>(LanguageGetter.GetLanguage());
 		}
 		
 		public enum RenderMode : int

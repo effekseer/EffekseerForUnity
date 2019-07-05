@@ -8,6 +8,23 @@ namespace Effekseer.Editor
 {
 	public class EffekseerAssetPostProcessor : AssetPostprocessor
 	{
+		static EffekseerAssetPostProcessor()
+		{
+			EffekseerTool.Core.OnOutputLog += OutputLog;
+		}
+
+		static void OutputLog(EffekseerTool.LogLevel logLevel, string message)
+		{
+			if (logLevel == EffekseerTool.LogLevel.Info)
+			{
+				UnityEngine.Debug.Log(message);
+			}
+			else if (logLevel == EffekseerTool.LogLevel.Warning)
+			{
+				UnityEngine.Debug.LogWarning(message);
+			}
+		}
+
 		static void OnPostprocessAllAssets(
 			string[] importedAssets,
 			string[] deletedAssets,
