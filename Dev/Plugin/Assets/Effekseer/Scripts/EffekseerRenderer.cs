@@ -1277,11 +1277,12 @@ namespace Effekseer.Internal
 				var stereoRenderType = StereoRendererUtil.GetStereoRenderingType();
 				if(stereoRenderType != StereoRendererUtil.StereoRenderingTypes.None)
 				{
+					float[] camCenterMat = Utility.Matrix2Array(camera.worldToCameraMatrix);
 					float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
 					float[] projMatR = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), false));
 					float[] camMatL = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left));
 					float[] camMatR = Utility.Matrix2Array(camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right));
-					Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, (int)stereoRenderType, projMatL, projMatR, camMatL, camMatR);
+					Plugin.EffekseerSetStereoRenderingMatrix(path.renderId, (int)stereoRenderType, camCenterMat, projMatL, projMatR, camMatL, camMatR);
 				}
 			}
 			else
