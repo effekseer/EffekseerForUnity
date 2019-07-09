@@ -3,6 +3,7 @@
 ## 1.43i
 
 - Fixed a fatal memory leak using reflection probe with a realtime flag
+- Fixed a bug exception is caused on UnityRenderer with playing distortion effects without distortion flag
 - Made a warning shown when loading a texture is failed
 
 ## 1.43h
