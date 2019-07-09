@@ -1,5 +1,10 @@
 ﻿# Release notes
 
+## 1.43i
+
+- Fixed a fatal memory leak using reflection probe with a realtime flag
+- Made a warning shown when loading a texture is failed
+
 ## 1.43h
 
 - Fixed a fatal memory leak on MacOS and distortion
