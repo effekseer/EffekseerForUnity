@@ -688,6 +688,10 @@ namespace Effekseer.Internal
 			{
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
 			}
+			else
+			{
+				Plugin.EffekseerSetBackGroundTexture(path.renderId, IntPtr.Zero);
+			}
 
 			// update view matrixes
 			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
@@ -838,11 +842,15 @@ namespace Effekseer.Internal
 								}
 
 								prop.SetTexture("_ColorTex", colorTexture);
-								prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
-								//Temp
-								//prop.SetTexture("_BackTex", background);
 
-								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], 1, prop);
+								if(background != null)
+								{
+									prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
+									//Temp
+									//prop.SetTexture("_BackTex", background);
+
+									commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], 1, prop);
+								}
 							}
 							else
 							{
@@ -921,11 +929,12 @@ namespace Effekseer.Internal
 							}
 
 							prop.SetTexture("_ColorTex", colorTexture);
-							prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
-							//Temp
-							//prop.SetTexture("_BackTex", background);
 
-							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+							if (background != null)
+							{
+								prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background));
+								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+							}
 						}
 						else
 						{

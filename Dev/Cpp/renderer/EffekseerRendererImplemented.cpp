@@ -431,6 +431,11 @@ Exit:;
 
 	if (m_isDistorting)
 	{
+		if (m_textures[1] == nullptr)
+		{
+			return;
+		}
+
 		auto intensity = ((float*)m_distortionShader->GetPixelConstantBuffer())[0];
 		SetDistortionIntensity(intensity);
 
@@ -552,6 +557,12 @@ void RendererImplemented::DrawModel(void* model,
 									std::vector<Effekseer::Color>& colors,
 									std::vector<int32_t>& times)
 {
+	if (m_isDistorting)
+	{
+		// TODO
+		return;
+	}
+
 	UnityRenderParameter rp;
 	rp.RenderMode = 1;
 	rp.IsDistortingMode = 0;
