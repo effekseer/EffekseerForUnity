@@ -600,7 +600,6 @@ namespace Effekseer.Internal
 		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
-			layer = settings.layer;
 
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)
@@ -1152,7 +1151,6 @@ namespace Effekseer.Internal
 		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
-			layer = settings.layer;
 
 #if UNITY_EDITOR
 			if (camera.cameraType == CameraType.SceneView)

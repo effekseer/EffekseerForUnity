@@ -17,15 +17,6 @@ namespace Effekseer
 	public class EffekseerSettings : ScriptableObject
 	{
 		/// <summary xml:lang="en">
-		/// Layer on which the effect is displayed
-		/// </summary>
-		/// <summary xml:lang="ja">
-		/// エフェクトが表示されるレイヤー
-		/// </summary>
-		[SerializeField]
-		public int layer = 0;
-
-		/// <summary xml:lang="en">
 		/// Whether it does draw in scene view for editor.
 		/// </summary>
 		/// <summary xml:lang="ja">
