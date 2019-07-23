@@ -19,6 +19,7 @@ namespace EffekseerPlugin
 	extern Effekseer::Manager*	g_EffekseerManager;
 
 	struct RenderSettings {
+		int32_t cameraCullingMask = 1;
 		Effekseer::Matrix44		cameraMatrix;
 		Effekseer::Matrix44		projectionMatrix;
 		bool					renderIntoTexture;

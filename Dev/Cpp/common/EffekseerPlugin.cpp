@@ -334,8 +334,10 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// 描画実行(全体)
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->Draw();
+		g_EffekseerManager->Draw(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		// 背景テクスチャを解除
@@ -349,10 +351,13 @@ extern "C"
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
-		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
+		RenderSettings& settings = renderSettings[renderId];
 
+		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawFront();
+		g_EffekseerManager->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		// 背景テクスチャを解除
@@ -452,8 +457,10 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// 描画実行(全体)
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawBack();
+		g_EffekseerManager->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 	}
 
