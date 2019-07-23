@@ -352,8 +352,10 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// render
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->Draw();
+		g_EffekseerManager->Draw(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		// 背景テクスチャを解除
@@ -367,17 +369,19 @@ extern "C"
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
-		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
+		RenderSettings& settings = renderSettings[renderId];
 
+		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawFront();
+		g_EffekseerManager->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
 
 		// Viewportを初期化
-		RenderSettings& settings = renderSettings[renderId];
 		if (settings.stereoRenderingType == StereoRenderingType::SinglePass)
 		{
 			g_graphics->ShiftViewportForStereoSinglePass(false);
@@ -493,8 +497,10 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// render
+		Effekseer::Manager::DrawParameter drawParameter;
+		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawBack();
+		g_EffekseerManager->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 	}
 

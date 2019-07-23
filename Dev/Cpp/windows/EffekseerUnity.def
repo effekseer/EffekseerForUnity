@@ -23,9 +23,11 @@ EXPORTS
   EffekseerSetStereoRenderingMatrix
   EffekseerSetBackGroundTexture
   EffekseerSetRenderSettings
+  EffekseerSetRenderingCameraCullingMask
   EffekseerPlayEffect
   EffekseerStopAllEffects
   EffekseerSetPausedToAllEffects
+  EffekseerGetCameraCullingMaskToShowAllEffects
   EffekseerUpdateHandle
   EffekseerStopEffect
   EffekseerStopRoot
@@ -41,6 +43,7 @@ EXPORTS
   EffekseerSetScale
   EffekseerSetAllColor
   EffekseerSetTargetLocation
+  EffekseerSetLayer
   EffekseerGetDynamicInput
   EffekseerSetDynamicInput
   EffekseerSetTextureLoaderEvent

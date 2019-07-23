@@ -212,6 +212,11 @@ extern "C"
 		g_EffekseerManager->SetPausedToAllEffects(paused != 0);
 	}
 	
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetCameraCullingMaskToShowAllEffects()
+	{
+		return g_EffekseerManager->GetCameraCullingMaskToShowAllEffects();
+	}
+
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetShown(int handle)
 	{
 		if (g_EffekseerManager == NULL) {
@@ -349,6 +354,16 @@ extern "C"
 		g_EffekseerManager->SetDynamicInput(handle, index, value);
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLayer(int handle, int layer)
+	{
+		if (g_EffekseerManager == NULL)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetLayer(handle, layer);
+	}
+
 	// プロジェクション行列設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProjectionMatrix(int renderId, float matrixArray[])
 	{
@@ -392,6 +407,14 @@ extern "C"
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
 			renderSettings[renderId].renderIntoTexture = renderIntoTexture;
+		}
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetRenderingCameraCullingMask(int renderId, int32_t cameraCullingMask)
+	{
+		if (renderId >= 0 && renderId < MAX_RENDER_PATH)
+		{
+			renderSettings[renderId].cameraCullingMask = cameraCullingMask;
 		}
 	}
 
