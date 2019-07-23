@@ -8,8 +8,6 @@ namespace Effekseer.Internal
 {
 	public interface IEffekseerRenderer
 	{
-		int layer { get; set; }
-
 		void SetVisible(bool visible);
 
 		void CleanUp();
@@ -557,8 +555,6 @@ namespace Effekseer.Internal
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
 
-		public int layer { get; set; }
-
 		public void SetVisible(bool visible)
 		{
 			if (visible)
@@ -614,7 +610,9 @@ namespace Effekseer.Internal
 			RenderPath path;
 
 			// check a culling mask
-			if ((camera.cullingMask & (1 << layer)) == 0)
+			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
+
+			if ((camera.cullingMask & mask) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
@@ -673,6 +671,7 @@ namespace Effekseer.Internal
 
 			path.Update();
 			path.LifeTime = 60;
+			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
 
 			// assign a dinsotrion texture
 			if (path.renderTexture)
@@ -1108,8 +1107,6 @@ namespace Effekseer.Internal
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
 
-		public int layer { get; set; }
-
 		public void SetVisible(bool visible)
 		{
 			if (visible)
@@ -1165,7 +1162,9 @@ namespace Effekseer.Internal
 			RenderPath path;
 
 			// check a culling mask
-			if ((camera.cullingMask & (1 << layer)) == 0)
+			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
+
+			if ((camera.cullingMask & mask) == 0)
 			{
 				if (renderPaths.ContainsKey(camera))
 				{
@@ -1223,6 +1222,7 @@ namespace Effekseer.Internal
 			}
 
 			path.LifeTime = 60;
+			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
 
             // if LWRP
             if(dstID.HasValue || dstIdentifier.HasValue)

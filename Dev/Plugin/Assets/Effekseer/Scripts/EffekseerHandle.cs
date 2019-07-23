@@ -15,6 +15,7 @@ namespace Effekseer
 		public EffekseerHandle(int handle = -1)
 		{
 			m_handle = handle;
+			layer_ = 0;
 		}
 
 		/// <summary>
@@ -114,6 +115,24 @@ namespace Effekseer
 			Plugin.EffekseerSetTargetLocation(m_handle, targetLocation.x, targetLocation.y, targetLocation.z);
 		}
 
+		int layer_;
+
+		/// <summary>
+		/// layer to show specified effect
+		/// </summary>
+		public int layer
+		{
+			get
+			{
+				return layer_;
+			}
+
+			set
+			{
+				layer_ = value;
+				Plugin.EffekseerSetLayer(m_handle, value);
+			}
+		}
 		/// <summary xml:lang="en">
 		/// Pausing the effect
 		/// <para>true:  It will update on Update()</para>

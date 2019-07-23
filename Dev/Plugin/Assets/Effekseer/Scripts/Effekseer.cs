@@ -77,7 +77,10 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetRenderSettings(int renderId, bool renderIntoTexture);
 
-        [DllImport(pluginName)]
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetRenderingCameraCullingMask(int renderId, int cullingMask);
+
+		[DllImport(pluginName)]
         public static extern void EffekseerSetIsTextureFlipped(int isFlipped);
 
         [DllImport(pluginName)]
@@ -117,6 +120,9 @@ namespace Effekseer
 		public static extern void EffekseerSetPausedToAllEffects(bool paused);
 
 		[DllImport(pluginName)]
+		public static extern int EffekseerGetCameraCullingMaskToShowAllEffects();
+
+		[DllImport(pluginName)]
 		public static extern bool EffekseerGetShown(int handle);
 
 		[DllImport(pluginName)]
@@ -151,6 +157,9 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetTargetLocation(int handle, float x, float y, float z);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetLayer(int handle, int layer);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetTextureLoaderEvent(
