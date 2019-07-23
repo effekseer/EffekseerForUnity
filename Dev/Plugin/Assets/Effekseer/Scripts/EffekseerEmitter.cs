@@ -73,6 +73,7 @@ namespace Effekseer
 
 			h.SetRotation(transform.rotation);
 			h.SetScale(transform.localScale);
+			h.layer = gameObject.layer;
 			if (speed != 1.0f) h.speed = speed;
 			if (paused) h.paused = paused;
 			if (shown) h.shown = shown;

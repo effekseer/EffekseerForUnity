@@ -15,6 +15,7 @@ namespace Effekseer
 		public EffekseerHandle(int handle = -1)
 		{
 			m_handle = handle;
+			layer_ = 0;
 		}
 
 		/// <summary>
@@ -138,6 +139,25 @@ namespace Effekseer
 		public void SetDynamicInput(int index, float value)
 		{
 			Plugin.EffekseerSetDynamicInput(m_handle, index, value);
+		}
+
+		int layer_;
+
+		/// <summary>
+		/// layer to show specified effect
+		/// </summary>
+		public int layer
+		{
+			get
+			{
+				return layer_;
+			}
+
+			set
+			{
+				layer_ = value;
+				Plugin.EffekseerSetLayer(m_handle, value);
+			}
 		}
 
 		/// <summary xml:lang="en">

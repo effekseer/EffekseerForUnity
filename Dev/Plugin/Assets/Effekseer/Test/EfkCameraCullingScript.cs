@@ -6,7 +6,7 @@ public class EfkCameraCullingScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		Effekseer.EffekseerSettings.Instance.layer = 1;
+		// Effekseer.EffekseerSettings.Instance.layer = 1;
 	}
 	
 	// Update is called once per frame
@@ -16,6 +16,6 @@ public class EfkCameraCullingScript : MonoBehaviour {
 
 	void OnDestroy()
 	{
-		Effekseer.EffekseerSettings.Instance.layer = 0;
+		// Effekseer.EffekseerSettings.Instance.layer = 0;
 	}
 }
