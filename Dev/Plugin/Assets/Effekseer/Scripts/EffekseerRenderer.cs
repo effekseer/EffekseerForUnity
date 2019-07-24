@@ -1089,7 +1089,6 @@ namespace Effekseer.Internal
 					if (this.renderTexture == null || !this.renderTexture.Create())
 					{
 						this.renderTexture = null;
-						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 						this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 						return;
