@@ -278,7 +278,59 @@ namespace Effekseer.Internal
 			}
 		}
 	}
-	
+
+	internal class BackgroundRenderTexture
+	{
+		public RenderTexture renderTexture = null;
+		public IntPtr ptr = IntPtr.Zero;
+
+		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format)
+		{
+			renderTexture = new RenderTexture(width, height, 0, format);
+		}
+
+		public bool Create()
+		{
+			// HACK for ZenPhone (cannot understand)
+			if (this.renderTexture == null || !this.renderTexture.Create())
+			{
+				this.renderTexture = null;
+				return false;
+			}
+
+			this.ptr = this.renderTexture.GetNativeTexturePtr();
+			return true;
+		}
+
+		public int width
+		{
+			get
+			{
+				if (renderTexture != null) return renderTexture.width;
+				return 0;
+			}
+		}
+
+		public int height
+		{
+			get
+			{
+				if (renderTexture != null) return renderTexture.height;
+				return 0;
+			}
+		}
+
+		public void Release()
+		{
+			if (renderTexture != null)
+			{
+				renderTexture.Release();
+				renderTexture = null;
+				ptr = IntPtr.Zero;
+			}
+		}
+	}
+
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
@@ -400,7 +452,7 @@ namespace Effekseer.Internal
 			public CommandBuffer commandBuffer;
 			public CameraEvent cameraEvent;
 			public int renderId;
-			public RenderTexture renderTexture;
+			public BackgroundRenderTexture renderTexture;
 			public ComputeBuffer computeBufferFront;
 			public ComputeBuffer computeBufferBack;
 			public byte[] computeBufferTemp;
@@ -446,7 +498,7 @@ namespace Effekseer.Internal
 #else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-					this.renderTexture = new RenderTexture(width, height, 0, format);
+					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format);
 	
 					// HACK for ZenPhone (cannot understand)
 					if(this.renderTexture == null || !this.renderTexture.Create())
@@ -687,9 +739,9 @@ namespace Effekseer.Internal
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
 
 			// assign a dinsotrion texture
-			if (path.renderTexture)
+			if (path.renderTexture != null)
 			{
-				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
+				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.ptr);
 			}
 			else
 			{
@@ -724,17 +776,17 @@ namespace Effekseer.Internal
 				// Add a blit command that copy to the distortion texture
 				if(dstID.HasValue)
 				{
-					path.commandBuffer.Blit(dstID.Value, path.renderTexture);
+					path.commandBuffer.Blit(dstID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(dstID.Value);
 				}
                 else if (dstIdentifier.HasValue)
                 {
-                    path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture);
+                    path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture.renderTexture);
                     path.commandBuffer.SetRenderTarget(dstIdentifier.Value);
                 }
 				else
 				{
-					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture);
+					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 				}
 			}
@@ -750,14 +802,14 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps, path.renderTexture);
 		}
 
-		Texture GetCachedTexture(IntPtr key, RenderTexture background)
+		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background)
 		{
-			if (background != null && background.GetNativeTexturePtr() == key) return background;
+			if (background != null && background.ptr == key) return background.renderTexture;
 
 			return EffekseerSystem.GetCachedTexture(key);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, RenderTexture background)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
@@ -996,7 +1048,7 @@ namespace Effekseer.Internal
 			public CommandBuffer commandBuffer;
 			public CameraEvent cameraEvent;
 			public int renderId;
-			public RenderTexture renderTexture;
+			public BackgroundRenderTexture renderTexture;
 			public int LifeTime = 5;
 
 			bool isDistortionEnabled = false;
@@ -1063,7 +1115,7 @@ namespace Effekseer.Internal
 #else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-					this.renderTexture = new RenderTexture(width, height, 0, format);
+					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format);
 
 					// HACK for ZenPhone (cannot understand)
 					if (this.renderTexture == null || !this.renderTexture.Create())
@@ -1075,22 +1127,22 @@ namespace Effekseer.Internal
 					}
 
 					// Add a blit command that copy to the distortion texture
-					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
 					this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 					if (dstID.HasValue)
 					{
-						this.commandBuffer.Blit(dstID.Value, this.renderTexture);
+						this.commandBuffer.Blit(dstID.Value, this.renderTexture.renderTexture);
 						this.commandBuffer.SetRenderTarget(dstID.Value);
 					}
 					else if (dstIdentifier.HasValue)
 					{
-						this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture);
+						this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture.renderTexture);
 						this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
 					}
 					else
 					{
-						this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture);
+						this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
 						this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 					}
 				}
@@ -1281,9 +1333,9 @@ namespace Effekseer.Internal
 			}
 
 			// assign a dinsotrion texture
-			if (path.renderTexture)
+			if (path.renderTexture != null)
 			{
-				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.GetNativeTexturePtr());
+				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.ptr);
 			}
 
 			// specify matrixes for stereo rendering
