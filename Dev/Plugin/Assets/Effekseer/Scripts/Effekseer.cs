@@ -223,6 +223,8 @@ namespace Effekseer
 
 			public int Culling;
 
+			public float DistortionIntensity;
+
 			//! Texture ptr
 			public IntPtr TexturePtrs0;
 			public IntPtr TexturePtrs1;

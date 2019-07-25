@@ -38,6 +38,8 @@ extern "C"
 
 		int Culling = 0;
 
+		float DistortionIntensity = 1.0f;
+
 		//! Texture ptr
 		void* TexturePtrs[4];
 

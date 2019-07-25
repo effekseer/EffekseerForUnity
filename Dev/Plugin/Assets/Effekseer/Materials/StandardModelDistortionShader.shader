@@ -72,6 +72,8 @@ Properties{
 		float buf_vertex_offset;
 		float buf_index_offset;
 
+		float distortionIntensity;
+
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
 			ps_input o;
@@ -109,7 +111,7 @@ Properties{
 
 		float4 frag(ps_input i) : COLOR
 		{
-			float2 g_scale = float2(1.0f, 1.0f);
+			float2 g_scale = float2(distortionIntensity, distortionIntensity);
 			float4 color = tex2D(_ColorTex, i.uv);
 			color.w = color.w * i.color.w;
 

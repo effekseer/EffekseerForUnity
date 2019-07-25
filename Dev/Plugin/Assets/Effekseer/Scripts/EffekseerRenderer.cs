@@ -875,7 +875,8 @@ namespace Effekseer.Internal
 								prop.SetVector("buf_color", modelParameters[mi].VColor);
 								prop.SetFloat("buf_vertex_offset", model.vertexOffsets[modelParameters[mi].Time]);
 								prop.SetFloat("buf_index_offset", model.indexOffsets[modelParameters[mi].Time]);
-								
+								prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
+
 								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 								if (parameter.TextureWrapTypes[0] == 0)
 								{
@@ -962,6 +963,7 @@ namespace Effekseer.Internal
 
 							prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDistortionSize);
 							prop.SetBuffer("buf_vertex", computeBuffer);
+							prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
 							var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 							if (parameter.TextureWrapTypes[0] == 0)

@@ -43,6 +43,8 @@
 		StructuredBuffer<SimpleVertex> buf_vertex;
 		float buf_offset;
 
+		float distortionIntensity;
+
 		struct ps_input
 		{
 			float4 pos : SV_POSITION;
@@ -96,7 +98,7 @@
 
 		float4 frag(ps_input i) : COLOR
 		{
-			float2 g_scale = float2(1.0f, 1.0f);
+			float2 g_scale = float2(distortionIntensity, distortionIntensity);
 			float4 color = tex2D(_ColorTex, i.uv);
             
 			color.w = color.w * i.color.w;
