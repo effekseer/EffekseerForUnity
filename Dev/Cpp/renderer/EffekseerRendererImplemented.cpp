@@ -128,13 +128,27 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	Effekseer::TextureData* textures[1];
 
-	if (parameter.ColorTextureIndex >= 0)
+	if (parameter.Distortion)
 	{
-		textures[0] = parameter.EffectPointer->GetColorImage(parameter.ColorTextureIndex);
+		if (parameter.ColorTextureIndex >= 0)
+		{
+			textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.ColorTextureIndex);
+		}
+		else
+		{
+			textures[0] = nullptr;
+		}
 	}
 	else
 	{
-		textures[0] = nullptr;
+		if (parameter.ColorTextureIndex >= 0)
+		{
+			textures[0] = parameter.EffectPointer->GetColorImage(parameter.ColorTextureIndex);
+		}
+		else
+		{
+			textures[0] = nullptr;
+		}
 	}
 
 	m_renderer->SetTextures(nullptr, textures, 1);
@@ -483,6 +497,7 @@ Exit:;
 		rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 		rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
 		rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
+		rp.DistortionIntensity = m_distortionIntensity;
 
 		rp.RenderMode = 0;
 		rp.IsDistortingMode = 1;
@@ -557,15 +572,9 @@ void RendererImplemented::DrawModel(void* model,
 									std::vector<Effekseer::Color>& colors,
 									std::vector<int32_t>& times)
 {
-	if (m_isDistorting)
-	{
-		// TODO
-		return;
-	}
-
 	UnityRenderParameter rp;
 	rp.RenderMode = 1;
-	rp.IsDistortingMode = 0;
+	rp.IsDistortingMode = m_isDistorting ? 1 : 0;
 	auto model_ = (Model*)model;
 
 	if (model != nullptr)
@@ -583,6 +592,15 @@ void RendererImplemented::DrawModel(void* model,
 	rp.TexturePtrs[0] = m_textures[0];
 	rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
 	rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
+
+	if (rp.IsDistortingMode)
+	{
+		rp.TexturePtrs[1] = m_textures[1];
+		
+		auto intensity = ((float*)m_distortionShader->GetPixelConstantBuffer())[0];
+		SetDistortionIntensity(intensity);
+	}
+
 	rp.ElementCount = matrixes.size();
 	rp.VertexBufferOffset = exportedInfoBuffer.size();
 
@@ -590,6 +608,7 @@ void RendererImplemented::DrawModel(void* model,
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
 	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
+	rp.DistortionIntensity = m_distortionIntensity;
 
 	for (int i = 0; i < matrixes.size(); i++)
 	{
