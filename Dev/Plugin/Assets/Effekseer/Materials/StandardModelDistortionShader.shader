@@ -66,11 +66,13 @@ Properties{
 			float4 color : COLOR0;
 		};
 
+		/*
 		float4x4 buf_matrix;
 		float4 buf_uv;
 		float4 buf_color;
 		float buf_vertex_offset;
 		float buf_index_offset;
+		*/
 
 		float distortionIntensity;
 
@@ -78,6 +80,12 @@ Properties{
 		{
 			ps_input o;
 			uint v_id = id;
+
+			float4x4 buf_matrix = buf_model_parameter[inst].Matrix;
+			float4 buf_uv = buf_model_parameter[inst].UV;
+			float4 buf_color = buf_model_parameter[inst].Color;
+			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
+			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
 
 			SimpleVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
