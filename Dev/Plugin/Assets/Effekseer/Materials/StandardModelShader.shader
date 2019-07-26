@@ -62,14 +62,6 @@ SubShader{
 		float4 color : COLOR0;
 	};
 
-	/*
-	float4x4 buf_matrix;
-	float4 buf_uv;
-	float4 buf_color;
-	float buf_vertex_offset;
-	float buf_index_offset;
-	*/
-
 	ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 	{
 		ps_input o;
