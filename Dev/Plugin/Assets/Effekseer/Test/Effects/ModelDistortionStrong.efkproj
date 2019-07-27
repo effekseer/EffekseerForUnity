@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EffekseerProject>
+  <Root>
+    <Name>Root</Name>
+    <Children>
+      <Node>
+        <ScalingValues>
+          <Fixed>
+            <Scale>
+              <X>0.01</X>
+              <Y>0.01</Y>
+              <Z>0.01</Z>
+            </Scale>
+          </Fixed>
+        </ScalingValues>
+        <RendererCommonValues>
+          <ColorTexture>Texture/Distortion1.png</ColorTexture>
+          <ZWrite>True</ZWrite>
+          <Distortion>True</Distortion>
+          <DistortionIntensity>2</DistortionIntensity>
+        </RendererCommonValues>
+        <DrawingValues>
+          <Type>5</Type>
+          <Model>
+            <Model>Model/block.efkmodel</Model>
+            <Culling>2</Culling>
+          </Model>
+        </DrawingValues>
+        <Name>Node</Name>
+        <Children />
+      </Node>
+    </Children>
+  </Root>
+  <ToolVersion>1.43d</ToolVersion>
+  <Version>3</Version>
+  <StartFrame>0</StartFrame>
+  <EndFrame>120</EndFrame>
+  <IsLoop>True</IsLoop>
+</EffekseerProject>
