@@ -403,7 +403,13 @@ namespace Effekseer
 				} else if(isLooping && handles.Count == 1)
 				{
 					handles.RemoveAt(i);
-					Play();
+					var newHandle = Play();
+
+					// avoid infinite loop
+					if (!newHandle.exists)
+					{
+						break;
+					}
 				}
 				else {
 					handles.RemoveAt(i);
