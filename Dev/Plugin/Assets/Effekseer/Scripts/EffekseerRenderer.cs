@@ -439,6 +439,66 @@ namespace Effekseer.Internal
 			}
 		}
 
+		class ModelBufferCollection
+		{
+			const int elementCount = 40;
+
+			List<ComputeBuffer> computeBuffers = new List<ComputeBuffer>();
+			List<Plugin.UnityRenderModelParameter[]> cpuBuffers = new List<Plugin.UnityRenderModelParameter[]>();
+			int bufferOffset = 0;
+
+			public ModelBufferCollection()
+			{
+				for (int i = 0; i < 10; i++)
+				{
+					computeBuffers.Add(new ComputeBuffer(elementCount, sizeof(int) * 25));
+					cpuBuffers.Add(new Plugin.UnityRenderModelParameter[elementCount]);
+				}
+			}
+
+			public void Reset()
+			{
+				bufferOffset = 0;
+			}
+
+			public unsafe int Allocate(Plugin.UnityRenderModelParameter* param, int offset, int count, ref ComputeBuffer computeBuffer)
+			{
+				if (bufferOffset >= computeBuffers.Count)
+				{
+					computeBuffers.Add(new ComputeBuffer(elementCount, sizeof(int) * 25));
+					cpuBuffers.Add(new Plugin.UnityRenderModelParameter[elementCount]);
+				}
+
+				computeBuffer = computeBuffers[bufferOffset];
+				var cpuBuffer = cpuBuffers[bufferOffset];
+				bufferOffset++;
+
+				if (count >= elementCount)
+				{
+					count = elementCount;
+				}
+
+				for (int i = 0; i < count; i++)
+				{
+					cpuBuffer[i] = param[offset + i];
+				}
+
+				computeBuffer.SetData(cpuBuffer, 0, 0, count);
+
+				return count;
+			}
+
+			public void Release()
+			{
+				for (int i = 0; i < computeBuffers.Count; i++)
+				{
+					computeBuffers[i].Release();
+				}
+				computeBuffers.Clear();
+				cpuBuffers.Clear();
+			}
+		}
+
 		class DelayEvent
 		{
 			public int RestTime = 0;
@@ -461,6 +521,7 @@ namespace Effekseer.Internal
 			bool isDistortionEnabled = false;
 
 			public MaterialPropCollection materiaProps = new MaterialPropCollection();
+			public ModelBufferCollection modelBuffers = new ModelBufferCollection();
 
 			List<DelayEvent> delayEvents = new List<DelayEvent>();
 			
@@ -561,6 +622,11 @@ namespace Effekseer.Internal
 				{
 					this.renderTexture.Release();
 					this.renderTexture = null;
+				}
+
+				if (this.modelBuffers != null)
+				{
+					this.modelBuffers.Release();
 				}
 
 				foreach (var e in delayEvents)
@@ -757,6 +823,7 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.commandBuffer.Clear();
 			path.materiaProps.Reset();
+			path.modelBuffers.Reset();
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
@@ -767,7 +834,7 @@ namespace Effekseer.Internal
 				path.ReallocateComputeBuffer();
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.renderTexture);
 
 			// Distortion
 			if (EffekseerRendererUtils.IsDistortionEnabled && 
@@ -799,7 +866,7 @@ namespace Effekseer.Internal
 				path.ReallocateComputeBuffer();
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.renderTexture);
 		}
 
 		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background)
@@ -809,7 +876,7 @@ namespace Effekseer.Internal
 			return EffekseerSystem.GetCachedTexture(key);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, BackgroundRenderTexture background)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
@@ -856,14 +923,18 @@ namespace Effekseer.Internal
 							key.Cull = (int)UnityEngine.Rendering.CullMode.Off;
 						}
 
-						
-						for(int mi = 0; mi < parameter.ElementCount; mi++)
-						{
-							var model = EffekseerSystem.GetCachedModel(parameter.ModelPtr);
-							if (model == null)
-								continue;
+						var model = EffekseerSystem.GetCachedModel(parameter.ModelPtr);
+						if (model == null)
+							continue;
 
+						var count = parameter.ElementCount;
+						var offset = 0;
+
+						while (count > 0)
+						{
 							var prop = matPropCol.GetNext();
+							ComputeBuffer computeBuf = null;
+							var allocated = modelBufferCol.Allocate(modelParameters, offset, count, ref computeBuf);
 
 							if (parameter.IsDistortingMode > 0)
 							{
@@ -871,12 +942,9 @@ namespace Effekseer.Internal
 
 								prop.SetBuffer("buf_vertex", model.VertexBuffer);
 								prop.SetBuffer("buf_index", model.IndexBuffer);
-								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
-								prop.SetVector("buf_uv", modelParameters[mi].UV);
-								prop.SetVector("buf_color", modelParameters[mi].VColor);
-								prop.SetFloat("buf_vertex_offset", model.vertexOffsets[modelParameters[mi].Time]);
-								prop.SetFloat("buf_index_offset", model.indexOffsets[modelParameters[mi].Time]);
-								prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
+								prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
+								prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
+								prop.SetBuffer("buf_model_parameter", computeBuf);
 
 								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 								if (parameter.TextureWrapTypes[0] == 0)
@@ -905,7 +973,7 @@ namespace Effekseer.Internal
 									//Temp
 									//prop.SetTexture("_BackTex", background);
 
-									commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], 1, prop);
+									commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 								}
 							}
 							else
@@ -914,13 +982,10 @@ namespace Effekseer.Internal
 
 								prop.SetBuffer("buf_vertex", model.VertexBuffer);
 								prop.SetBuffer("buf_index", model.IndexBuffer);
-								prop.SetMatrix("buf_matrix", modelParameters[mi].Matrix);
-								prop.SetVector("buf_uv", modelParameters[mi].UV);
-								prop.SetVector("buf_color", modelParameters[mi].VColor);
+								prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
+								prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
+								prop.SetBuffer("buf_model_parameter", computeBuf);
 
-								int modelTime = modelParameters[mi].Time;
-								prop.SetFloat("buf_vertex_offset", model.vertexOffsets[modelTime]);
-								prop.SetFloat("buf_index_offset", model.indexOffsets[modelTime]);
 
 								var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
 								if(parameter.TextureWrapTypes[0] == 0)
@@ -943,8 +1008,11 @@ namespace Effekseer.Internal
 
 								prop.SetTexture("_ColorTex", GetCachedTexture(parameter.TexturePtrs0, background));
 
-								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], 1, prop);
+								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 							}
+
+							offset += allocated;
+							count -= allocated;
 						}
 					}
 					else
