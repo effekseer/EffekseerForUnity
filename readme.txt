@@ -13,7 +13,7 @@ Unity packages
 Plugin and samples are stored.
 
 -Help
-Help written about how to use is saved.
+Help written about how to use on the online.
 
 
 ==== Japanese ====
@@ -31,4 +31,4 @@ Unityのパッケージ
 プラグインとサンプルが保存されています。
 
 -Help
-使い方について記述されているヘルプが保存されています。
+使い方について記述されているオンラインのヘルプです。
