@@ -14,6 +14,17 @@ class Renderer;
 namespace EffekseerPlugin
 {
 
+
+class RenderPath
+{
+public:
+	RenderPath() = default;
+	virtual ~RenderPath() = default;
+	virtual void Begin() {}
+	virtual void End() {}
+	virtual void Execute() {}
+};
+
 class Graphics
 {
 public:
@@ -43,7 +54,11 @@ public:
 
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 
-	virtual void StartRender(EffekseerRenderer::Renderer* renderer) {};
+	virtual RenderPath* CreateRenderPath() { return nullptr; }
+
+	virtual void SetRenderPath(EffekseerRenderer::Renderer* renderer, RenderPath* renderPath) {}
+
+	virtual void WaitFinish() {}
 };
 
 } // namespace EffekseerPlugin

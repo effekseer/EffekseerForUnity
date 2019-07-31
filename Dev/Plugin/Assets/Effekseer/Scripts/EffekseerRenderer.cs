@@ -250,7 +250,9 @@ namespace Effekseer.Internal
 
 	internal class EffekseerRendererUtils
 	{
-	    internal static int ScaledClamp(int value, float scale)
+		public const int RenderIDCount = 128;
+
+		internal static int ScaledClamp(int value, float scale)
 		{
 			var v = (int)(value * scale);
 			v = Math.Max(v, 1);
@@ -670,6 +672,7 @@ namespace Effekseer.Internal
 		MaterialCollection materialsDistortion = new MaterialCollection();
 		MaterialCollection materialsModel = new MaterialCollection();
 		MaterialCollection materialsModelDistortion = new MaterialCollection();
+		int nextRenderID = 0;
 
 		public EffekseerRendererUnity()
 		{
@@ -772,9 +775,10 @@ namespace Effekseer.Internal
 					if (path_.Value.LifeTime >= 0) continue;
 
 					removed.Add(path_.Key);
+					Plugin.EffekseerAddRemovingRenderPath(path_.Value.renderId);
 				}
 
-				foreach(var r in removed)
+				foreach (var r in removed)
 				{
 					renderPaths.Remove(r);
 				}
@@ -789,9 +793,10 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
-				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
+				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 				renderPaths.Add(camera, path);
+				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
 			if (!path.IsValid())
@@ -1264,6 +1269,7 @@ namespace Effekseer.Internal
 
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
+		int nextRenderID = 0;
 
 		public int layer { get; set; }
 
@@ -1355,6 +1361,7 @@ namespace Effekseer.Internal
 					if (path_.Value.LifeTime >= 0) continue;
 
 					removed.Add(path_.Key);
+					Plugin.EffekseerAddRemovingRenderPath(path_.Value.renderId);
 				}
 
 				foreach (var r in removed)
@@ -1372,10 +1379,11 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
-				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
+				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, stereoRenderingType);
 				renderPaths.Add(camera, path);
+				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
 			if (!path.IsValid())

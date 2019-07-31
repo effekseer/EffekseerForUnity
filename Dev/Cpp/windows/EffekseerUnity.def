@@ -64,3 +64,5 @@ EXPORTS
   StartNetwork
   StopNetwork
   UpdateNetwork
+
+  EffekseerAddRemovingRenderPath

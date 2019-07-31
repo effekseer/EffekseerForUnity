@@ -1,5 +1,7 @@
 ﻿
 #include <assert.h>
+#include <unordered_map>
+#include <mutex>
 
 #ifdef _WIN32
 #pragma warning(disable : 4005)
@@ -92,6 +94,13 @@ EffekseerRenderer::Renderer* g_EffekseerRenderer = NULL;
 
 bool g_isRunning = false;
 
+std::unordered_map<int, std::shared_ptr<RenderPath>> g_frontRenderPathes;
+std::unordered_map<int, std::shared_ptr<RenderPath>> g_backRenderPathes;
+std::unordered_map<int, std::shared_ptr<RenderPath>> g_renderPathes;
+
+std::vector<int32_t> g_removingRenderPathes;
+std::mutex g_removingRenderPathMutex;
+
 bool IsRequiredToInitOnRenderThread()
 {
 	if (g_rendererType == RendererType::Unity)
@@ -170,11 +179,24 @@ void TermRenderer()
 	}
 #endif
 
+	if (g_graphics != nullptr)
+	{
+		g_graphics->WaitFinish();
+	}
+
 	if (g_EffekseerRenderer != NULL)
 	{
 		g_EffekseerRenderer->Destroy();
 		g_EffekseerRenderer = NULL;
 	}
+
+	g_frontRenderPathes.clear();
+	g_backRenderPathes.clear();
+	g_renderPathes.clear();
+
+	g_removingRenderPathMutex.lock();
+	g_removingRenderPathes.clear();
+	g_removingRenderPathMutex.unlock();
 }
 
 void SetBackGroundTexture(void* backgroundTexture)
@@ -255,6 +277,19 @@ extern "C"
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
 
+	void TryToRemoveRenderPathes()
+	{
+		g_removingRenderPathMutex.lock();
+		for (auto id : g_removingRenderPathes)
+		{
+			g_renderPathes.erase(id);
+			g_frontRenderPathes.erase(id);
+			g_backRenderPathes.erase(id);
+		}
+		g_removingRenderPathes.clear();
+		g_removingRenderPathMutex.unlock();
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRender(int renderId)
 	{
 		if (!g_isRunning)
@@ -281,7 +316,9 @@ extern "C"
 			return;
 
 		assert(g_graphics != nullptr);
-		g_graphics->StartRender(g_EffekseerRenderer);
+		// g_graphics->StartRender(g_EffekseerRenderer);
+
+		TryToRemoveRenderPathes();
 
 		// assign flipped
 		if (g_isTextureFlipped)
@@ -352,11 +389,41 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// render
+
+		std::shared_ptr<RenderPath> renderPath = nullptr;
+		auto it = g_renderPathes.find(renderId);
+		if (it != g_renderPathes.end())
+		{
+			renderPath = it->second;
+		}
+		else
+		{
+			auto created = g_graphics->CreateRenderPath();
+			if (created != nullptr)
+			{
+				g_renderPathes[renderId] = std::shared_ptr<RenderPath>(created);
+				renderPath = g_renderPathes[renderId];
+			}
+		}
+
+		if (renderPath != nullptr)
+		{
+			renderPath->Begin();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+		}
+
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw(drawParameter);
 		g_EffekseerRenderer->EndRendering();
+
+		if (renderPath != nullptr)
+		{
+			renderPath->End();
+			renderPath->Execute();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+		}
 
 		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
@@ -371,12 +438,41 @@ extern "C"
 
 		RenderSettings& settings = renderSettings[renderId];
 
+		std::shared_ptr<RenderPath> renderPath = nullptr;
+		auto it = g_frontRenderPathes.find(renderId);
+		if (it != g_frontRenderPathes.end())
+		{
+			renderPath = it->second;
+		}
+		else
+		{
+			auto created = g_graphics->CreateRenderPath();
+			if (created != nullptr)
+			{
+				g_frontRenderPathes[renderId] = std::shared_ptr<RenderPath>(created);
+				renderPath = g_frontRenderPathes[renderId];
+			}
+		}
+
+		if (renderPath != nullptr)
+		{
+			renderPath->Begin();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+		}
+
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
+
+		if (renderPath != nullptr)
+		{
+			renderPath->End();
+			renderPath->Execute();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+		}
 
 		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
@@ -414,7 +510,9 @@ extern "C"
 			return;
 
 		assert(g_graphics != nullptr);
-		g_graphics->StartRender(g_EffekseerRenderer);
+		//g_graphics->StartRender(g_EffekseerRenderer);
+
+		TryToRemoveRenderPathes();
 
 		// assign flipped
 		if (g_isTextureFlipped)
@@ -496,12 +594,42 @@ extern "C"
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 
+		std::shared_ptr<RenderPath> renderPath = nullptr;
+		auto it = g_backRenderPathes.find(renderId);
+		if (it != g_backRenderPathes.end())
+		{
+			renderPath = it->second;
+		}
+		else
+		{
+			auto created = g_graphics->CreateRenderPath();
+			if (created != nullptr)
+			{
+				g_backRenderPathes[renderId] = std::shared_ptr<RenderPath>(created);
+				renderPath = g_backRenderPathes[renderId];
+			}
+		}
+
+		if (renderPath != nullptr)
+		{
+			renderPath->Begin();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+		}
+
+
 		// render
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();
+
+		if (renderPath != nullptr)
+		{
+			renderPath->End();
+			renderPath->Execute();
+			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+		}
 	}
 
 	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderFunc(int renderId) { return EffekseerRender; }
@@ -596,6 +724,13 @@ extern "C"
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetIsBackgroundTextureFlipped(int isFlipped)
 	{
 		g_isBackgroundTextureFlipped = isFlipped;
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerAddRemovingRenderPath(int renderID)
+	{
+		g_removingRenderPathMutex.lock();
+		g_removingRenderPathes.push_back(renderID);
+		g_removingRenderPathMutex.unlock();
 	}
 
 	Effekseer::TextureLoader* TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
