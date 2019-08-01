@@ -708,6 +708,7 @@ namespace Effekseer.Internal
 			foreach (var pair in renderPaths)
 			{
 				pair.Value.Dispose();
+				Plugin.EffekseerAddRemovingRenderPath(pair.Value.renderId);
 			}
 			renderPaths.Clear();
 		}
@@ -743,14 +744,9 @@ namespace Effekseer.Internal
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
 
-			if ((camera.cullingMask & mask) == 0)
+			// don't need to update because doesn't exists and need not to render
+			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					var path_ = renderPaths[camera];
-					path_.Dispose();
-					renderPaths.Remove(camera);
-				}
 				return;
 			}
 
@@ -808,6 +804,12 @@ namespace Effekseer.Internal
 			path.Update();
 			path.LifeTime = 60;
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
+
+			// effects shown don't exists
+			if ((camera.cullingMask & mask) == 0)
+			{
+				return;
+			}
 
 			// assign a dinsotrion texture
 			if (path.renderTexture != null)
@@ -1289,10 +1291,11 @@ namespace Effekseer.Internal
 
 		public void CleanUp()
 		{
-			// レンダーパスの全破棄
+			// dispose all path
 			foreach (var pair in renderPaths)
 			{
 				pair.Value.Dispose();
+				Plugin.EffekseerAddRemovingRenderPath(pair.Value.renderId);
 			}
 			renderPaths.Clear();
 		}
@@ -1328,15 +1331,10 @@ namespace Effekseer.Internal
 
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
-
-			if ((camera.cullingMask & mask) == 0)
+			
+			// don't need to update because doesn't exists and need not to render
+			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					var path_ = renderPaths[camera];
-					path_.Dispose();
-					renderPaths.Remove(camera);
-				}
 				return;
 			}
 
@@ -1395,6 +1393,12 @@ namespace Effekseer.Internal
 
 			path.LifeTime = 60;
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
+
+			// effects shown don't exists
+			if ((camera.cullingMask & mask) == 0)
+			{
+				return;
+			}
 
 			// if LWRP
 			if (dstID.HasValue || dstIdentifier.HasValue)
