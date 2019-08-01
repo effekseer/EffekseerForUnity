@@ -246,6 +246,8 @@ namespace Effekseer.Internal
 
 	internal class EffekseerRendererUtils
 	{
+		public const int RenderIDCount = 128;
+
 	    internal static int ScaledClamp(int value, float scale)
 		{
 			var v = (int)(value * scale);
@@ -660,6 +662,7 @@ namespace Effekseer.Internal
 		MaterialCollection materialsDistortion = new MaterialCollection();
 		MaterialCollection materialsModel = new MaterialCollection();
 		MaterialCollection materialsModelDistortion = new MaterialCollection();
+		int nextRenderID = 0;
 
 		public EffekseerRendererUnity()
 		{
@@ -730,14 +733,9 @@ namespace Effekseer.Internal
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
 
-			if ((camera.cullingMask & mask) == 0)
+			// don't need to update because doesn't exists and need not to render
+			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					path = renderPaths[camera];
-					path.Dispose();
-					renderPaths.Remove(camera);
-				}
 				return;
 			}
 
@@ -776,9 +774,10 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
-				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
+				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 				renderPaths.Add(camera, path);
+				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
 			if (!path.IsValid())
@@ -790,6 +789,11 @@ namespace Effekseer.Internal
 			path.Update();
 			path.LifeTime = 60;
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
+
+			if ((camera.cullingMask & mask) == 0)
+			{
+				return;
+			}
 
 			// assign a dinsotrion texture
 			if (path.renderTexture != null)
@@ -1231,6 +1235,7 @@ namespace Effekseer.Internal
 
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
+		int nextRenderID = 0;
 
 		public void SetVisible(bool visible)
 		{
@@ -1289,14 +1294,8 @@ namespace Effekseer.Internal
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
 
-			if ((camera.cullingMask & mask) == 0)
+			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
-				if (renderPaths.ContainsKey(camera))
-				{
-					path = renderPaths[camera];
-					path.Dispose();
-					renderPaths.Remove(camera);
-				}
 				return;
 			}
 
@@ -1335,9 +1334,10 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
-				path = new RenderPath(camera, cameraEvent, renderPaths.Count);
+				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
 				renderPaths.Add(camera, path);
+				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
 			if (!path.IsValid())
@@ -1348,6 +1348,11 @@ namespace Effekseer.Internal
 
 			path.LifeTime = 60;
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
+
+			if ((camera.cullingMask & mask) == 0)
+			{
+				return;
+			}
 
             // if LWRP
             if(dstID.HasValue || dstIdentifier.HasValue)
