@@ -528,6 +528,10 @@ namespace Effekseer.Internal
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
+
+#if DEBUG_RENDERPATH
+				Debug.Log(string.Format("Create RenderPath {0}", renderId));
+#endif
 			}
 
 			public void Init(bool enableDistortion)
@@ -626,6 +630,10 @@ namespace Effekseer.Internal
 					e.Event();
 				}
 				delayEvents.Clear();
+
+#if DEBUG_RENDERPATH
+				Debug.Log(string.Format("Dispose RenderPath {0}", renderId));
+#endif
 			}
 
 			public bool IsValid()
@@ -774,6 +782,28 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
+				while (true)
+				{
+					bool found = false;
+					foreach (var kv in renderPaths)
+					{
+						if (kv.Value.renderId == nextRenderID)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						nextRenderID++;
+					}
+					else
+					{
+						break;
+					}
+				}
+
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 				renderPaths.Add(camera, path);
@@ -1137,6 +1167,10 @@ namespace Effekseer.Internal
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
+
+#if DEBUG_RENDERPATH
+				Debug.Log(string.Format("Create RenderPath {0}", renderId));
+#endif
 			}
 
 			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
@@ -1215,6 +1249,10 @@ namespace Effekseer.Internal
 					this.renderTexture.Release();
 					this.renderTexture = null;
 				}
+
+#if DEBUG_RENDERPATH
+				Debug.Log(string.Format("Dispose RenderPath {0}", renderId));
+#endif
 			}
 
 			public bool IsValid()
@@ -1334,6 +1372,28 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
+				while(true)
+				{
+					bool found = false;
+					foreach(var kv in renderPaths)
+					{
+						if(kv.Value.renderId == nextRenderID)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if(found)
+					{
+						nextRenderID++;
+					}
+					else
+					{
+						break;
+					}
+				}
+
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
 				renderPaths.Add(camera, path);
