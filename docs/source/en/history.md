@@ -1,21 +1,21 @@
 ﻿# Release notes
 
+## 1.43k
+
+- Improved performance (Fixed discard timing of distorted texture)
+
 ## 1.43j
 
--Effekseer Emitter now supports Unity layers
--Improved performance (supports model instancing)
--Supports distortion by model
--Fixed a bug that freezes when running Unity game while previewing
+- Effekseer Emitter now supports Unity layers 
+- Improved performance (supports model instancing) 
+- Supports distortion by model 
+- Fixed a bug that freezes when running Unity game while previewing
 
 ## 1.43i
 
 - Fixed a fatal memory leak using reflection probe with a realtime flag
 - Fixed a bug exception is caused on UnityRenderer with playing distortion effects without distortion flag
 - Made a warning shown when loading a texture is failed
-
-## 1.43h
-
-- Fixed a fatal memory leak on MacOS and distortion
 
 ## 1.43g
 
