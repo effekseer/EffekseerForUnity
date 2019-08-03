@@ -789,6 +789,28 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
+				while (true)
+				{
+					bool found = false;
+					foreach (var kv in renderPaths)
+					{
+						if (kv.Value.renderId == nextRenderID)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						nextRenderID++;
+					}
+					else
+					{
+						break;
+					}
+				}
+
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
 				renderPaths.Add(camera, path);
@@ -1377,6 +1399,28 @@ namespace Effekseer.Internal
 			else
 			{
 				// render path doesn't exists, create a render path
+				while (true)
+				{
+					bool found = false;
+					foreach (var kv in renderPaths)
+					{
+						if (kv.Value.renderId == nextRenderID)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						nextRenderID++;
+					}
+					else
+					{
+						break;
+					}
+				}
+
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, stereoRenderingType);
