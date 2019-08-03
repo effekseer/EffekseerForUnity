@@ -81,13 +81,27 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 Effekseer は Light Weight Render Pipeline に対応しています。.
 LWRPはUnityでは標準に含まれていないため、 *ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
 
+![](../img/LWRP_Code.png)
+
 Effekseerのエフェクトを表示するために *Custom Forward Render* を使用します。
 
 *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
 
-*Pipeline Asset* から *Renderer Type* を *Custom* に変更します。 *Data* に先ほど作成した *Forward Render Asset* を設定します。
+![](../img/LWRP_ForwardRenderer1.png)
 
-*Forward Render Asset* の *Render Features* から *EffekseerRenderer* を追加します。
+![](../img/LWRP_ForwardRenderer2.png)
+
+現在使用している *Pipeline Asset* の *Renderer Type* を *Custom* に変更します。 *Data* に先ほど作成した *Forward Render Asset* を設定します。
+
+![](../img/LWRP_Custom1.png)
+
+![](../img/LWRP_Custom2.png)
+
+先ほど作成した *Forward Render Asset* の *Render Features* に *EffekseerRenderer* を追加します。
+
+![](../img/LWRP_RenderFeatures1.png)
+
+![](../img/LWRP_RenderFeatures2.png)
 
 古いLWRPでは、* Effekseer/Effekseer RendererLWRP * コンポーネントをカメラがあるGameObjectに設定してください。
 
