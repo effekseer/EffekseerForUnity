@@ -2,9 +2,10 @@
 
 ## サンプルプロジェクト
 
-下記の場所にEffekseerプラグインを使用したサンプルプロジェクトがあります。
+下記の場所にEffekseerプラグインを使用したサンプルシーンがあります。
 
-- GameEngine/Unity/SampleProject.zip
+- Example/EfkBasic
+- Example/EfkTimeline
 
 ![](../img/unity_example.png)
 

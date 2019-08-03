@@ -42,7 +42,7 @@ extensions = [
     'sphinxcontrib.rawfiles',
     'sphinx_markdown_tables',
 ]
-rawfiles = ['img', 'UnityAPIRef']
+rawfiles = ['UnityAPIRef']
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -113,7 +113,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'EffekseerDocdoc'
+htmlhelp_basename = 'EffekseerForUnityDocdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------

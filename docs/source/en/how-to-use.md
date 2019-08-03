@@ -2,9 +2,10 @@
 
 ## Sample Project
 
-There is a sample project using the Effekseer plugin in the following places.
+There is a sample scene using the Effekseer plugin in the following places.
 
-- GameEngine/Unity/SampleProject.zip
+- Example/EfkBasic
+- Example/EfkTimeline
 
 ![](../img/unity_example.png)
 
