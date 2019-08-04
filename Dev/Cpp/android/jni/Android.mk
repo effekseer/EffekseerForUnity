@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
+	$(LIB_SRC_PATH)/Effekseer.CustomAllocator.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
@@ -49,6 +50,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.InstanceContainer.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGlobal.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGroup.cpp \
+	$(LIB_SRC_PATH)/Effekseer.InternalScript.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Manager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix43.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix44.cpp \
@@ -87,6 +89,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.IndexBuffer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRendererGL.MaterialLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.RenderState.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Shader.cpp \
