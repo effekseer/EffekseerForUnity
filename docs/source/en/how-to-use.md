@@ -19,6 +19,13 @@ When importing the *.efk, efkproj file, EffectAsset is generated in addition of 
 It is no problem that you remove .efk, efkproj files.
 Please don't include .efk, efkproj in custom packages currently. 
 
+### Scale
+
+The loaded effect scale may be small. In that case, select EffectAssset and change the parameter of ** Scale **.
+You can also change the effect scale by changing the Scale of EffectEmitter, but this method may not be enlarged depending on the effect settings.
+
+![](../img/EffectAsset_Scale.png)
+
 ## Play by Emitter
 
 ### Introduction

@@ -14,9 +14,7 @@ Effekseerで作成したエフェクトをUnityで表示することができま
 
 ## Help
 
-- [English](https://effekseer.github.io/EffekseerForUnity/index_en.html)
-
-- [Japanese](https://effekseer.github.io/EffekseerForUnity/index_ja.html)
+- [Help](https://effekseer.github.io/Help_Unity/index.html)
 
 ## How to develop
 
