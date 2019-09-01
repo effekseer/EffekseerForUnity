@@ -12586,13 +12586,21 @@ namespace EffekseerTool.Data.Value
 			if (_abspath == string.Empty) return _abspath;
 			if (Core.FullPath == string.Empty) return _abspath;
 
-			Uri basepath = new Uri(Core.FullPath);
-			Uri path = new Uri(_abspath);
-			var relative_path = basepath.MakeRelativeUri(path).ToString();
+			Func<string, string> escape = (string s) =>
+			{
+				return s.Replace("%", "%25");
+			};
 
-#if ESCAPE_URI_ENABLED
-            relative_path = System.Web.HttpUtility.UrlDecode(relative_path);
-#endif
+			Func<string, string> unescape = (string s) =>
+			{
+				return s.Replace("%25", "%");
+			};
+
+
+			Uri basepath = new Uri(escape(Core.FullPath));
+			Uri path = new Uri(escape(_abspath));
+			var relative_path = unescape(Uri.UnescapeDataString(basepath.MakeRelativeUri(path).ToString()));
+			
             return relative_path;
 		}
 
@@ -12612,9 +12620,19 @@ namespace EffekseerTool.Data.Value
 				}
 				else
 				{
-					Uri basepath = new Uri(Core.FullPath);
-					Uri path = new Uri(basepath, relative_path);
-					var absolute_path = path.LocalPath;
+					Func<string, string> escape = (string s) =>
+					{
+						return s.Replace("%", "%25");
+					};
+
+					Func<string, string> unescape = (string s) =>
+					{
+						return s.Replace("%25", "%");
+					};
+
+					Uri basepath = new Uri(escape(Core.FullPath));
+					Uri path = new Uri(basepath, escape(relative_path));
+					var absolute_path = unescape(Uri.UnescapeDataString(path.LocalPath));
 					SetAbsolutePath(absolute_path);
 				}
 			}
