@@ -328,18 +328,6 @@ public:
 	*/
 	void SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) override;
 
-	int32_t GetDrawCallCount() const override { return 0; }
-
-	int32_t GetDrawVertexCount() const override { return 0; }
-
-	void ResetDrawCallCount() override {}
-
-	void ResetDrawVertexCount() override {}
-
-	void SetRenderMode(Effekseer::RenderMode renderMode) override {}
-
-	Effekseer::RenderMode GetRenderMode() override { return Effekseer::RenderMode::Normal; }
-
 	Effekseer::TextureData* GetBackground();
 
 	void SetBackground(void* image);

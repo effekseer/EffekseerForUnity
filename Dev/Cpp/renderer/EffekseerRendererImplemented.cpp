@@ -199,7 +199,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	m_distortionShader = new Shader();
 
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>(
-		this, m_stanShader, m_stanShader, m_distortionShader, m_distortionShader);
+		this, m_stanShader, m_distortionShader);
 
 	return true;
 }

@@ -23,8 +23,8 @@ public:
 	virtual ~VertexBuffer();
 
 	void Lock() override;
-	bool RingBufferLock(int32_t size, int32_t& offset, void*& data) override;
-	bool TryRingBufferLock(int32_t size, int32_t& offset, void*& data) override;
+	bool RingBufferLock(int32_t size, int32_t& offset, void*& data, int32_t alignment) override;
+	bool TryRingBufferLock(int32_t size, int32_t& offset, void*& data, int32_t alignment) override;
 	void Unlock() override;
 
 	uint8_t* GetResource() { return m_resource; }
