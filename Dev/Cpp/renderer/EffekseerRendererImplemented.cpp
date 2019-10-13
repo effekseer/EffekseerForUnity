@@ -123,16 +123,16 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
 	state.DepthTest = parameter.ZTest;
 	state.DepthWrite = parameter.ZWrite;
-	state.AlphaBlend = parameter.AlphaBlend;
+	state.AlphaBlend = parameter.BasicParameterPtr->AlphaBlend;
 	state.CullingType = parameter.Culling;
 
 	Effekseer::TextureData* textures[1];
 
-	if (parameter.Distortion)
+	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
 	{
-		if (parameter.ColorTextureIndex >= 0)
+		if (parameter.BasicParameterPtr->Texture1Index >= 0)
 		{
-			textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.ColorTextureIndex);
+			textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.BasicParameterPtr->Texture1Index);
 		}
 		else
 		{
@@ -141,9 +141,9 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	}
 	else
 	{
-		if (parameter.ColorTextureIndex >= 0)
+		if (parameter.BasicParameterPtr->Texture1Index >= 0)
 		{
-			textures[0] = parameter.EffectPointer->GetColorImage(parameter.ColorTextureIndex);
+			textures[0] = parameter.EffectPointer->GetColorImage(parameter.BasicParameterPtr->Texture1Index);
 		}
 		else
 		{
@@ -153,15 +153,15 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	m_renderer->SetTextures(nullptr, textures, 1);
 
-	state.TextureFilterTypes[0] = parameter.TextureFilter;
-	state.TextureWrapTypes[0] = parameter.TextureWrap;
-	state.TextureFilterTypes[1] = parameter.TextureFilter;
-	state.TextureWrapTypes[1] = parameter.TextureWrap;
+	state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
+	state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
+	state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
+	state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
 
 	m_renderer->GetRenderState()->Update(false);
-	m_renderer->SetIsLighting(parameter.Lighting);
-	m_renderer->SetIsDistorting(parameter.Distortion);
-	m_renderer->SetDistortionIntensity(parameter.DistortionIntensity);
+	m_renderer->SetIsLighting(parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::Lighting);
+	m_renderer->SetIsDistorting(parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion);
+	m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
 
 	m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times);
 
@@ -631,9 +631,9 @@ void RendererImplemented::DrawModel(void* model,
 	renderParameters.push_back(rp);
 }
 
-Shader* RendererImplemented::GetShader(bool useTexture, bool useDistortion) const
+Shader* RendererImplemented::GetShader(bool useTexture, ::Effekseer::RendererMaterialType type) const
 {
-	if (useDistortion)
+	if (type == ::Effekseer::RendererMaterialType::BackDistortion)
 		return m_distortionShader;
 	return m_stanShader;
 }

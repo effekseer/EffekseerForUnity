@@ -352,7 +352,7 @@ public:
 				   std::vector<Effekseer::Color>& colors,
 				   std::vector<int32_t>& times);
 
-	Shader* GetShader(bool useTexture, bool useDistortion) const;
+	Shader* GetShader(bool useTexture, ::Effekseer::RendererMaterialType type) const;
 
 	void BeginShader(Shader* shader);
 	void EndShader(Shader* shader);
