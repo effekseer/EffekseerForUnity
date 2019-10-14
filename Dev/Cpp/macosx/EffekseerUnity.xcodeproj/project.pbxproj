@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2E0B9C532352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C522352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp */; };
+		2E0B9C542352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C522352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp */; };
+		2E0B9C5C2352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C562352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp */; };
+		2E0B9C5D2352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C562352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp */; };
+		2E0B9C5E2352FC6500C85A3B /* Effekseer.Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C582352FC6500C85A3B /* Effekseer.Material.cpp */; };
+		2E0B9C5F2352FC6500C85A3B /* Effekseer.Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C582352FC6500C85A3B /* Effekseer.Material.cpp */; };
+		2E0B9C602352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C592352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp */; };
+		2E0B9C612352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C592352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp */; };
+		2E0B9C652352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C632352FC9C00C85A3B /* Effekseer.Parameters.cpp */; };
+		2E0B9C662352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C632352FC9C00C85A3B /* Effekseer.Parameters.cpp */; };
+		2E0B9C6C2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C6B2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp */; };
+		2E0B9C6D2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E0B9C6B2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp */; };
 		2E193C8822F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E193C8722F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp */; };
 		2E193C8922F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E193C8722F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp */; };
 		2E1954E4223AB83F000BB4C4 /* EffekseerPluginGraphicsGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954DF223AB83F000BB4C4 /* EffekseerPluginGraphicsGL.cpp */; };
@@ -180,6 +192,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2E0B9C512352FC5700C85A3B /* Effekseer.EfkEfcFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.EfkEfcFactory.h; sourceTree = "<group>"; };
+		2E0B9C522352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.EfkEfcFactory.cpp; sourceTree = "<group>"; };
+		2E0B9C562352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.MaterialCompiler.cpp; sourceTree = "<group>"; };
+		2E0B9C572352FC6500C85A3B /* Effekseer.CompiledMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.CompiledMaterial.h; sourceTree = "<group>"; };
+		2E0B9C582352FC6500C85A3B /* Effekseer.Material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.Material.cpp; sourceTree = "<group>"; };
+		2E0B9C592352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.CompiledMaterial.cpp; sourceTree = "<group>"; };
+		2E0B9C5A2352FC6500C85A3B /* Effekseer.MaterialCompiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.MaterialCompiler.h; sourceTree = "<group>"; };
+		2E0B9C5B2352FC6500C85A3B /* Effekseer.Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Material.h; sourceTree = "<group>"; };
+		2E0B9C632352FC9C00C85A3B /* Effekseer.Parameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.Parameters.cpp; sourceTree = "<group>"; };
+		2E0B9C642352FC9C00C85A3B /* Effekseer.Parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Parameters.h; sourceTree = "<group>"; };
+		2E0B9C6A2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EffekseerMaterialCompilerGL.h; sourceTree = "<group>"; };
+		2E0B9C6B2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerMaterialCompilerGL.cpp; sourceTree = "<group>"; };
 		2E193C8722F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.MaterialLoader.cpp; sourceTree = "<group>"; };
 		2E193C8A22F736C200C8E0D6 /* EffekseerRendererGL.MaterialLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.MaterialLoader.h; sourceTree = "<group>"; };
 		2E1954DE223AB83F000BB4C4 /* EffekseerPluginGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerPluginGraphics.h; path = ../graphicsAPI/EffekseerPluginGraphics.h; sourceTree = "<group>"; };
@@ -380,6 +404,55 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2E0B9C502352FC5700C85A3B /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				2E0B9C512352FC5700C85A3B /* Effekseer.EfkEfcFactory.h */,
+				2E0B9C522352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp */,
+			);
+			path = IO;
+			sourceTree = "<group>";
+		};
+		2E0B9C552352FC6500C85A3B /* Material */ = {
+			isa = PBXGroup;
+			children = (
+				2E0B9C562352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp */,
+				2E0B9C572352FC6500C85A3B /* Effekseer.CompiledMaterial.h */,
+				2E0B9C582352FC6500C85A3B /* Effekseer.Material.cpp */,
+				2E0B9C592352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp */,
+				2E0B9C5A2352FC6500C85A3B /* Effekseer.MaterialCompiler.h */,
+				2E0B9C5B2352FC6500C85A3B /* Effekseer.Material.h */,
+			);
+			path = Material;
+			sourceTree = "<group>";
+		};
+		2E0B9C622352FC9C00C85A3B /* Parameter */ = {
+			isa = PBXGroup;
+			children = (
+				2E0B9C632352FC9C00C85A3B /* Effekseer.Parameters.cpp */,
+				2E0B9C642352FC9C00C85A3B /* Effekseer.Parameters.h */,
+			);
+			path = Parameter;
+			sourceTree = "<group>";
+		};
+		2E0B9C682352FCEC00C85A3B /* EffekseerMaterialCompiler */ = {
+			isa = PBXGroup;
+			children = (
+				2E0B9C692352FCFC00C85A3B /* OpenGL */,
+			);
+			path = EffekseerMaterialCompiler;
+			sourceTree = "<group>";
+		};
+		2E0B9C692352FCFC00C85A3B /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				2E0B9C6A2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.h */,
+				2E0B9C6B2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp */,
+			);
+			name = OpenGL;
+			path = ../../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/OpenGL;
+			sourceTree = "<group>";
+		};
 		2E1954DD223AB791000BB4C4 /* graphicsAPI */ = {
 			isa = PBXGroup;
 			children = (
@@ -458,6 +531,7 @@
 		4861A2CA182F845000A8217D /* Effekseer */ = {
 			isa = PBXGroup;
 			children = (
+				2E0B9C682352FCEC00C85A3B /* EffekseerMaterialCompiler */,
 				4861A2CB182F846200A8217D /* Effekseer */,
 				4861A333182F847100A8217D /* EffekseerRendererCommon */,
 				684C1F2D19F6106D00E32FEC /* EffekseerRenderer */,
@@ -468,6 +542,9 @@
 		4861A2CB182F846200A8217D /* Effekseer */ = {
 			isa = PBXGroup;
 			children = (
+				2E0B9C622352FC9C00C85A3B /* Parameter */,
+				2E0B9C552352FC6500C85A3B /* Material */,
+				2E0B9C502352FC5700C85A3B /* IO */,
 				2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */,
 				2E64BCD122CE3B000054DB5B /* Effekseer.CustomAllocator.h */,
 				2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */,
@@ -735,6 +812,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 48B43FDB182F76F000B849F5;
@@ -770,6 +848,7 @@
 				2EB27C7D222C27A100BF4C0E /* EffekseerRendererShader.cpp in Sources */,
 				48383A901BE47C0B0019B4FF /* EffekseerPluginCommon.cpp in Sources */,
 				684C1F7519F610BE00E32FEC /* EffekseerRendererGL.DeviceObject.h in Sources */,
+				2E0B9C6C2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp in Sources */,
 				684C1F6319F6106D00E32FEC /* EffekseerRendererGL.GLExtension.cpp in Sources */,
 				684C1F7619F610BE00E32FEC /* EffekseerRendererGL.GLExtension.h in Sources */,
 				684C1F6419F6106D00E32FEC /* EffekseerRendererGL.IndexBuffer.cpp in Sources */,
@@ -785,6 +864,7 @@
 				684C1F6719F6106D00E32FEC /* EffekseerRendererGL.Renderer.cpp in Sources */,
 				48CF46F31B3EFACB005AD8C4 /* Culling3D.Vector3DF.cpp in Sources */,
 				684C1F7A19F610BE00E32FEC /* EffekseerRendererGL.Renderer.h in Sources */,
+				2E0B9C652352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */,
 				2EB27C82222C27D200BF4C0E /* EffekseerPluginNetwork.cpp in Sources */,
 				48CF46DF1B3EFA94005AD8C4 /* Effekseer.Setting.cpp in Sources */,
 				684C1F7B19F610BE00E32FEC /* EffekseerRendererGL.RendererImplemented.h in Sources */,
@@ -816,6 +896,7 @@
 				2EB27C8A222C2D4900BF4C0E /* EffekseerRenderer.CommonUtils.cpp in Sources */,
 				4861A321182F846200A8217D /* Effekseer.EffectNodeRing.cpp in Sources */,
 				4861A322182F846200A8217D /* Effekseer.EffectNodeRoot.cpp in Sources */,
+				2E0B9C532352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp in Sources */,
 				2E193C8822F736AA00C8E0D6 /* EffekseerRendererGL.MaterialLoader.cpp in Sources */,
 				4861A323182F846200A8217D /* Effekseer.EffectNodeSprite.cpp in Sources */,
 				2E64BCD222CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */,
@@ -829,11 +910,13 @@
 				4861A32B182F846200A8217D /* Effekseer.Matrix43.cpp in Sources */,
 				4861A32C182F846200A8217D /* Effekseer.Matrix44.cpp in Sources */,
 				4861A32D182F846200A8217D /* Effekseer.RectF.cpp in Sources */,
+				2E0B9C5C2352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp in Sources */,
 				4861A32E182F846200A8217D /* Effekseer.Server.cpp in Sources */,
 				2EB27C71222C27A100BF4C0E /* EffekseerRendererIndexBuffer.cpp in Sources */,
 				48CF46EF1B3EFACB005AD8C4 /* Culling3D.Layer.cpp in Sources */,
 				4861A32F182F846200A8217D /* Effekseer.Socket.cpp in Sources */,
 				4861A331182F846200A8217D /* Effekseer.Vector2D.cpp in Sources */,
+				2E0B9C602352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp in Sources */,
 				4861A332182F846200A8217D /* Effekseer.Vector3D.cpp in Sources */,
 				2EB27C7B222C27A100BF4C0E /* EffekseerRendererRenderState.cpp in Sources */,
 				4861A344182F847100A8217D /* EffekseerRenderer.IndexBufferBase.cpp in Sources */,
@@ -844,6 +927,7 @@
 				4861A348182F847100A8217D /* EffekseerRenderer.RingRendererBase.cpp in Sources */,
 				4861A349182F847100A8217D /* EffekseerRenderer.SpriteRendererBase.cpp in Sources */,
 				4861A34A182F847100A8217D /* EffekseerRenderer.TrackRendererBase.cpp in Sources */,
+				2E0B9C5E2352FC6500C85A3B /* Effekseer.Material.cpp in Sources */,
 				2E1954E6223AB83F000BB4C4 /* EffekseerPluginGraphicsUnity.cpp in Sources */,
 				4861A34B182F847100A8217D /* EffekseerRenderer.VertexBufferBase.cpp in Sources */,
 				2EB27C86222C280400BF4C0E /* EffekseerRenderer.Renderer_Impl.cpp in Sources */,
@@ -867,6 +951,7 @@
 				48DA21781C8C5C2C00CAA811 /* EffekseerRendererGL.GLExtension.cpp in Sources */,
 				2EB27C7E222C27A100BF4C0E /* EffekseerRendererShader.cpp in Sources */,
 				48DA21881C8C5C4200CAA811 /* EffekseerRenderer.ModelRendererBase.cpp in Sources */,
+				2E0B9C612352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp in Sources */,
 				4847B9281C8C6A79002723AE /* Culling3D.Layer.cpp in Sources */,
 				2EB27C74222C27A100BF4C0E /* EffekseerRendererModelLoader.cpp in Sources */,
 				48DA21A51C8C5C6B00CAA811 /* Effekseer.Server.cpp in Sources */,
@@ -880,12 +965,16 @@
 				48DA219A1C8C5C6B00CAA811 /* Effekseer.EffectNodeSprite.cpp in Sources */,
 				48DA21931C8C5C6B00CAA811 /* Effekseer.DefaultFile.cpp in Sources */,
 				48DA21791C8C5C2C00CAA811 /* EffekseerRendererGL.IndexBuffer.cpp in Sources */,
+				2E0B9C5F2352FC6500C85A3B /* Effekseer.Material.cpp in Sources */,
 				48DA21921C8C5C6B00CAA811 /* Effekseer.DefaultEffectLoader.cpp in Sources */,
+				2E0B9C5D2352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp in Sources */,
 				48DA219D1C8C5C6B00CAA811 /* Effekseer.Instance.cpp in Sources */,
+				2E0B9C6D2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp in Sources */,
 				48DA218C1C8C5C4200CAA811 /* EffekseerRenderer.SpriteRendererBase.cpp in Sources */,
 				2EB27C87222C280400BF4C0E /* EffekseerRenderer.Renderer_Impl.cpp in Sources */,
 				48DA21961C8C5C6B00CAA811 /* Effekseer.EffectNodeModel.cpp in Sources */,
 				2EB27C76222C27A100BF4C0E /* EffekseerRendererVertexBuffer.cpp in Sources */,
+				2E0B9C662352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */,
 				48DA219F1C8C5C6B00CAA811 /* Effekseer.InstanceGlobal.cpp in Sources */,
 				4847B92C1C8C6A79002723AE /* Culling3D.Vector3DF.cpp in Sources */,
 				48DA21901C8C5C6B00CAA811 /* Effekseer.Color.cpp in Sources */,
@@ -902,6 +991,7 @@
 				48DA21A41C8C5C6B00CAA811 /* Effekseer.RectF.cpp in Sources */,
 				48DA218B1C8C5C4200CAA811 /* EffekseerRenderer.RingRendererBase.cpp in Sources */,
 				48DA21841C8C5C2C00CAA811 /* EffekseerRendererGL.VertexArray.cpp in Sources */,
+				2E0B9C542352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp in Sources */,
 				48DA217B1C8C5C2C00CAA811 /* EffekseerRendererGL.ModelRenderer.cpp in Sources */,
 				48DA217C1C8C5C2C00CAA811 /* EffekseerRendererGL.Renderer.cpp in Sources */,
 				4847B92D1C8C6A79002723AE /* Culling3D.WorldInternal.cpp in Sources */,
