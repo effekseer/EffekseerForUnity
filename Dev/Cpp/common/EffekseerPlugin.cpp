@@ -290,7 +290,11 @@ extern "C"
 			break;
 		case kUnityRenderingExtEventBeforeDrawCall:
 			param = (UnityRenderingExtBeforeDrawCallParams*)data;
-			g_eyeIndex = param->eyeIndex;
+			if (param != nullptr)
+			{
+				g_eyeIndex = param->eyeIndex;
+			}
+
 			break;
 		case kUnityRenderingExtEventAfterDrawCall:
 			break;
