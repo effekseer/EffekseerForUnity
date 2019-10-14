@@ -14,6 +14,7 @@
 
 #include "../common/EffekseerPluginCommon.h"
 #include "../unity/IUnityGraphics.h"
+#include "../unity/IUnityRenderingExtensions.h"
 
 #ifdef __APPLE__
 #import <TargetConditionals.h>
@@ -240,6 +241,7 @@ using namespace EffekseerPlugin;
 extern "C"
 {
 	static bool g_IsEffekseerPluginRegistered = false;
+	static int g_eyeIndex = 0;
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API RegisterPlugin()
 	{
@@ -275,6 +277,24 @@ extern "C"
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
 	{
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
+	}
+
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityRenderingExtEvent(UnityRenderingExtEventType event, void* data)
+	{
+		UnityRenderingExtBeforeDrawCallParams* param = nullptr;
+		switch (event)
+		{
+		case kUnityRenderingExtEventSetStereoTarget:
+			break;
+		case kUnityRenderingExtEventSetStereoEye:
+			break;
+		case kUnityRenderingExtEventBeforeDrawCall:
+			param = (UnityRenderingExtBeforeDrawCallParams*)data;
+			g_eyeIndex = param->eyeIndex;
+			break;
+		case kUnityRenderingExtEventAfterDrawCall:
+			break;
+		}
 	}
 
 	void TryToRemoveRenderPathes()
