@@ -43,7 +43,7 @@ Properties{
 
 		struct ModelParameter
 		{
-			float4x4 Matrix;
+			float4x4 Mat;
 			float4 UV;
 			float4 Color;
 			int Time;
@@ -73,7 +73,7 @@ Properties{
 			ps_input o;
 			uint v_id = id;
 
-			float4x4 buf_matrix = buf_model_parameter[inst].Matrix;
+			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
 			float4 buf_uv = buf_model_parameter[inst].UV;
 			float4 buf_color = buf_model_parameter[inst].Color;
 			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
@@ -83,8 +83,8 @@ Properties{
 
 			float3 localPos = v.Position;
 			float4 vPos = mul(buf_matrix, float4(localPos, 1.0f));
-			float4 vBinormal = mul(buf_matrix, v.Binormal);
-			float4 vTangent = mul(buf_matrix, v.Tangent);
+			float4 vBinormal = mul(buf_matrix, float4(v.Binormal, 0.0f));
+			float4 vTangent = mul(buf_matrix, float4(v.Tangent, 0.0f));
 
 			float4 localBinormal = float4((vPos + vBinormal));
 			float4 localTangent = float4((vPos + vTangent));

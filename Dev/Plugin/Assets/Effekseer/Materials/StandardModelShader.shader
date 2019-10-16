@@ -42,7 +42,7 @@ SubShader{
 
 	struct ModelParameter
 	{
-		float4x4 Matrix;
+		float4x4 Mat;
 		float4 UV;
 		float4 Color;
 		int Time;
@@ -67,7 +67,7 @@ SubShader{
 		ps_input o;
 		uint v_id = id;
 
-		float4x4 buf_matrix = buf_model_parameter[inst].Matrix;
+		float4x4 buf_matrix = buf_model_parameter[inst].Mat;
 		float4 buf_uv = buf_model_parameter[inst].UV;
 		float4 buf_color = buf_model_parameter[inst].Color;
 		float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
