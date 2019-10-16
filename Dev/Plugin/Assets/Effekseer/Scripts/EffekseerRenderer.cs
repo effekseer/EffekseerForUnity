@@ -504,7 +504,26 @@ namespace Effekseer.Internal
 		class DelayEvent
 		{
 			public int RestTime = 0;
-			public Action Event;
+			public virtual void Call() { }
+		}
+
+		class DelayEventDisposeComputeBuffer : DelayEvent
+		{
+			ComputeBuffer cb = null;
+
+			public DelayEventDisposeComputeBuffer(ComputeBuffer cb)
+			{
+				this.cb = cb;
+			}
+
+			public override void Call()
+			{
+				if(cb != null)
+				{
+					cb.Dispose();
+					cb = null;
+				}
+			}
 		}
 
 		private class RenderPath : IDisposable
@@ -522,16 +541,19 @@ namespace Effekseer.Internal
 
 			bool isDistortionEnabled = false;
 
-			public MaterialPropCollection materiaProps = new MaterialPropCollection();
-			public ModelBufferCollection modelBuffers = new ModelBufferCollection();
+			public MaterialPropCollection materiaProps = null;
+			public ModelBufferCollection modelBuffers = null;
 
-			List<DelayEvent> delayEvents = new List<DelayEvent>();
+			List<DelayEvent> delayEvents = null;
 			
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
+				this.delayEvents = new List<DelayEvent>();
+				materiaProps = new MaterialPropCollection();
+				modelBuffers = new ModelBufferCollection();
 			}
 
 			public void Init(bool enableDistortion)
@@ -582,14 +604,8 @@ namespace Effekseer.Internal
 				var oldBufB = computeBufferBack;
 				var oldBufF = computeBufferFront;
 
-				var e = new DelayEvent();
-				e.RestTime = 5;
-				e.Event = () =>
-				{
-					oldBufB.Dispose();
-					oldBufF.Dispose();
-				};
-				delayEvents.Add(e);
+				delayEvents.Add(new DelayEventDisposeComputeBuffer(oldBufB));
+				delayEvents.Add(new DelayEventDisposeComputeBuffer(oldBufF));
 
 				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
 				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
@@ -633,7 +649,7 @@ namespace Effekseer.Internal
 
 				foreach (var e in delayEvents)
 				{
-					e.Event();
+					e.Call();
 				}
 				delayEvents.Clear();
 			}
@@ -660,7 +676,7 @@ namespace Effekseer.Internal
 					e.RestTime--;
 					if(e.RestTime <= 0)
 					{
-						e.Event();
+						e.Call();
 					}
 				}
 
