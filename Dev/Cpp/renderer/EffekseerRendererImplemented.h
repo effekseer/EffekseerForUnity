@@ -79,25 +79,8 @@ public:
 	void* InternalPtr = nullptr;
 };
 
-struct Vertex
-{
-	::Effekseer::Vector3D Pos;
-	::Effekseer::Color Col;
-	float UV[2];
-
-	void SetColor(const ::Effekseer::Color& color) { Col = color; }
-};
-
-struct VertexDistortion
-{
-	::Effekseer::Vector3D Pos;
-	::Effekseer::Color Col;
-	float UV[2];
-	::Effekseer::Vector3D Tangent;
-	::Effekseer::Vector3D Binormal;
-
-	void SetColor(const ::Effekseer::Color& color) { Col = color; }
-};
+using Vertex = EffekseerRenderer::SimpleVertex;
+using VertexDistortion = EffekseerRenderer::VertexDistortion;
 
 struct ModelParameter
 {
