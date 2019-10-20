@@ -1,6 +1,6 @@
 ﻿# Release notes
 
-## 1.43j (2019/10/21)
+## 1.43l (2019/10/21)
 
 -Fixed a bug that could not read image files containing spaces
 -Fixed a bug that dialogs could not be opened in rare cases
