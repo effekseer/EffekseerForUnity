@@ -70,8 +70,11 @@ namespace Effekseer.Editor
 			SceneView.RepaintAll();
 			var assembly = typeof(EditorWindow).Assembly;
 			var type = assembly.GetType("UnityEditor.GameView");
-			var gameview = EditorWindow.GetWindow(type);
-			gameview.Repaint();
+			var gameview = EditorWindow.GetWindow(type, false, null, false);
+			if (gameview != null)
+			{
+				gameview.Repaint();
+			}
 		}
 		
 		void OnSceneGUI()
@@ -102,10 +105,17 @@ namespace Effekseer.Editor
 				if (systemInitialized == false) {
 					InitSystem();
 				}
+
+				// avoid a bug playing effect sometimes causes craches after window size is changed.
+				// Unity, Effekseer, or driver bug
+				Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
 				emitter.Play();
 			}
 			if (GUILayout.Button("Stop")) {
 				emitter.StopImmediate();
+
+				// just in case
+				Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
 				RepaintEffect();
 			}
 			GUILayout.EndHorizontal();
