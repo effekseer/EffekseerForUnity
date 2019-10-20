@@ -204,6 +204,10 @@ extern "C"
 	
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetCameraCullingMaskToShowAllEffects()
 	{
+		if (g_EffekseerManager == NULL) {
+			return 0;
+		}
+
 		return g_EffekseerManager->GetCameraCullingMaskToShowAllEffects();
 	}
 
