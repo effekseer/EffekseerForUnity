@@ -178,9 +178,11 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 			srv = nullptr;
 			renderSettings[renderId].backgroundTexture = nullptr;
 		}
+
+		ES_SAFE_RELEASE(res);
 	}
 
-	if (srv == nullptr)
+	if (srv == nullptr && texture != nullptr)
 	{
 		D3D11_TEXTURE2D_DESC texDesc;
 		textureDX11->GetDesc(&texDesc);
