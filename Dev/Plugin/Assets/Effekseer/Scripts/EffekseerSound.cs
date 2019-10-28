@@ -37,7 +37,7 @@ namespace Effekseer.Internal
 
 #if UNITY_EDITOR
 		public static EffekseerSoundResource LoadAsset(string dirPath, string resPath) {
-			AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(dirPath + "/" + resPath);
+			AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
 
 			EffekseerSoundResource res = new EffekseerSoundResource();
 			res.path = resPath;

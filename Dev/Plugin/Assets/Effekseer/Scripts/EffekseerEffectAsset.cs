@@ -20,7 +20,7 @@ namespace Effekseer.Internal
 			
 #if UNITY_EDITOR
 		public static EffekseerTextureResource LoadAsset(string dirPath, string resPath) {
-			Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(dirPath + "/" + resPath);
+			Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
 
 			var res = new EffekseerTextureResource();
 			res.path = resPath;
@@ -321,6 +321,76 @@ namespace Effekseer
 			AssetDatabase.Refresh();
 		}
 
+		/// <summary>
+		/// 与えられたパス文字列を正規化し、カレントディレクトリ "." と親ディレクトリ ".." を解決する。
+		/// パス区切り文字は "/" に置き換えられる。連続するパス区切り文字は 1 文字に置き換えられる。
+		/// null か空文字列が指定された場合は、"." を返す。
+		/// </summary>
+		/// <param name="path">パス文字列</param>
+		/// <returns>正規化した文字列</returns>
+		public static string NormalizeAssetPath(string path)
+		{
+			if (string.IsNullOrEmpty(path))
+			{
+				return ".";
+			}
+
+			var leadingChar = path[0];
+			var isAbsolute = leadingChar == Path.DirectorySeparatorChar || leadingChar == Path.AltDirectorySeparatorChar;
+			if (isAbsolute && path.Length == 1)
+			{
+				return "/";
+			}
+
+			var trailingChar = path[path.Length - 1];
+			var hasTrailingSeparator = trailingChar == Path.DirectorySeparatorChar || trailingChar == Path.AltDirectorySeparatorChar;
+
+			var separator = Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar ? new char[] { Path.DirectorySeparatorChar } : new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+			var splitedEntries = path.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
+			var list = new System.Collections.Generic.LinkedList<string>();
+			foreach (var entry in splitedEntries)
+			{
+				if (entry == "..")
+				{
+					if (list.Count >= 1)
+					{
+						list.RemoveLast();
+					}
+				}
+				else if (entry != ".")
+				{
+					list.AddLast(entry);
+				}
+			}
+
+			if (list.Count == 0)
+			{
+				return isAbsolute ? "/" : ".";
+			}
+
+			var result = isAbsolute ? "/" : "";
+
+			bool firstEntry = true;
+			foreach (var entry in list)
+			{
+				if (firstEntry)
+				{
+					firstEntry = false;
+				}
+				else
+				{
+					result += "/";
+				}
+				result += entry;
+			}
+
+			if (hasTrailingSeparator)
+			{
+				result += "/";
+			}
+
+			return result;
+		}
 #endif
 	}
 }

@@ -21,7 +21,7 @@ namespace Effekseer.Internal
 		public static EffekseerModelResource LoadAsset(string dirPath, string resPath) {
 			resPath = Path.ChangeExtension(resPath, ".asset");
 
-			EffekseerModelAsset asset = AssetDatabase.LoadAssetAtPath<EffekseerModelAsset>(dirPath + "/" + resPath);
+			EffekseerModelAsset asset = AssetDatabase.LoadAssetAtPath<EffekseerModelAsset>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
 
 			var res = new EffekseerModelResource();
 			res.path = resPath;
