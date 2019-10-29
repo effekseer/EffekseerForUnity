@@ -324,6 +324,7 @@ namespace Effekseer
 		/// <summary>
 		/// 与えられたパス文字列を正規化し、カレントディレクトリ "." と親ディレクトリ ".." を解決する。
 		/// パス区切り文字は "/" に置き換えられる。連続するパス区切り文字は 1 文字に置き換えられる。
+		/// 末尾のパス区切り文字は保持される。
 		/// null か空文字列が指定された場合は、"." を返す。
 		/// </summary>
 		/// <param name="path">パス文字列</param>
@@ -335,26 +336,38 @@ namespace Effekseer
 				return ".";
 			}
 
-			var leadingChar = path[0];
-			var isAbsolute = leadingChar == Path.DirectorySeparatorChar || leadingChar == Path.AltDirectorySeparatorChar;
+			var separatorChars = Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar ? new char[] { Path.DirectorySeparatorChar } : new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+			var isAbsolute = ((IList<char>)separatorChars).Contains(path[0]);
 			if (isAbsolute && path.Length == 1)
 			{
 				return "/";
 			}
 
-			var trailingChar = path[path.Length - 1];
-			var hasTrailingSeparator = trailingChar == Path.DirectorySeparatorChar || trailingChar == Path.AltDirectorySeparatorChar;
+			var hasTrailingSeparator = ((IList<char>)separatorChars).Contains(path[path.Length - 1]);
 
-			var separator = Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar ? new char[] { Path.DirectorySeparatorChar } : new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-			var splitedEntries = path.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
-			var list = new System.Collections.Generic.LinkedList<string>();
-			foreach (var entry in splitedEntries)
+			var list = new LinkedList<string>();
+			foreach (var entry in path.Split(separatorChars, StringSplitOptions.RemoveEmptyEntries))
 			{
 				if (entry == "..")
 				{
-					if (list.Count >= 1)
+					if (isAbsolute)
 					{
-						list.RemoveLast();
+						if (list.Count >= 1)
+						{
+							list.RemoveLast();
+						}
+					}
+					else
+					{
+						if (list.Count >= 1 && list.Last.Value != "..")
+						{
+							list.RemoveLast();
+						}
+						else
+						{
+							list.AddLast(entry);
+						}
 					}
 				}
 				else if (entry != ".")
@@ -365,7 +378,7 @@ namespace Effekseer
 
 			if (list.Count == 0)
 			{
-				return isAbsolute ? "/" : ".";
+				return isAbsolute ? "/" : hasTrailingSeparator ? "./" : ".";
 			}
 
 			var result = isAbsolute ? "/" : "";
