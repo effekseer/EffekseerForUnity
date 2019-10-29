@@ -59,6 +59,8 @@ public:
 	virtual void SetRenderPath(EffekseerRenderer::Renderer* renderer, RenderPath* renderPath) {}
 
 	virtual void WaitFinish() {}
+
+	virtual bool IsRequiredToFlipVerticallyWhenRenderToTexture() const { return true; }
 };
 
 } // namespace EffekseerPlugin

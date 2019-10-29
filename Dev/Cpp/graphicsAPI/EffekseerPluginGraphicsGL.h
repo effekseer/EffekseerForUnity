@@ -40,6 +40,8 @@ public:
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
+
+	bool IsRequiredToFlipVerticallyWhenRenderToTexture() const override { return false; }
 };
 
 } // namespace EffekseerPlugin

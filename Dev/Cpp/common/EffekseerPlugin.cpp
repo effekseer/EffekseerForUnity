@@ -386,8 +386,8 @@ extern "C"
 			cameraMatrix = settings.cameraMatrix;
 		}
 
-		// if renderer is not opengl, render flipped image when render to a texture.
-		if (settings.renderIntoTexture && !IsOpenGLRenderer())
+		// if renderer is some backend, render flipped image when render to a texture.
+		if (settings.renderIntoTexture && g_graphics->IsRequiredToFlipVerticallyWhenRenderToTexture())
 		{
 			projectionMatrix.Values[1][1] = -projectionMatrix.Values[1][1];
 		}
@@ -593,8 +593,8 @@ extern "C"
 			cameraPositionMatrix = settings.cameraMatrix;
 		}
 
-		// if renderer is not opengl, render flipped image when render to a texture.
-		if (settings.renderIntoTexture && !IsOpenGLRenderer())
+		// if renderer is some backend, render flipped image when render to a texture.
+		if (settings.renderIntoTexture && g_graphics->IsRequiredToFlipVerticallyWhenRenderToTexture())
 		{
 			projectionMatrix.Values[1][1] = -projectionMatrix.Values[1][1];
 		}

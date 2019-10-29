@@ -272,7 +272,6 @@ namespace Effekseer
 					case GraphicsDeviceType.Vulkan:
 					case GraphicsDeviceType.XboxOne:
 					case GraphicsDeviceType.XboxOneD3D12:
-					case GraphicsDeviceType.PlayStation4:
 						if (RendererType == EffekseerRendererType.Native)
 						{
 							RendererType = EffekseerRendererType.Unity;
