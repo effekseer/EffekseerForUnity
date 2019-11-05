@@ -484,7 +484,7 @@ extern "C"
 			auto itb = g_backRenderPasses.find(renderId);
 			if (itb != g_backRenderPasses.end())
 			{
-				backRenderPass = it->second;
+				backRenderPass = itb->second;
 			}
 
 			renderPass->Begin(backRenderPass.get());
