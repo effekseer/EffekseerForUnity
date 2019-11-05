@@ -1,7 +1,7 @@
 ﻿
 #include <assert.h>
-#include <unordered_map>
 #include <mutex>
+#include <unordered_map>
 
 #ifdef _WIN32
 #pragma warning(disable : 4005)
@@ -95,9 +95,9 @@ EffekseerRenderer::Renderer* g_EffekseerRenderer = NULL;
 
 bool g_isRunning = false;
 
-std::unordered_map<int, std::shared_ptr<RenderPath>> g_frontRenderPathes;
-std::unordered_map<int, std::shared_ptr<RenderPath>> g_backRenderPathes;
-std::unordered_map<int, std::shared_ptr<RenderPath>> g_renderPathes;
+std::unordered_map<int, std::shared_ptr<RenderPass>> g_frontRenderPasses;
+std::unordered_map<int, std::shared_ptr<RenderPass>> g_backRenderPasses;
+std::unordered_map<int, std::shared_ptr<RenderPass>> g_renderPasses;
 
 std::vector<int32_t> g_removingRenderPathes;
 std::mutex g_removingRenderPathMutex;
@@ -191,9 +191,9 @@ void TermRenderer()
 		g_EffekseerRenderer = NULL;
 	}
 
-	g_frontRenderPathes.clear();
-	g_backRenderPathes.clear();
-	g_renderPathes.clear();
+	g_frontRenderPasses.clear();
+	g_backRenderPasses.clear();
+	g_renderPasses.clear();
 
 	g_removingRenderPathMutex.lock();
 	g_removingRenderPathes.clear();
@@ -306,9 +306,9 @@ extern "C"
 		g_removingRenderPathMutex.lock();
 		for (auto id : g_removingRenderPathes)
 		{
-			g_renderPathes.erase(id);
-			g_frontRenderPathes.erase(id);
-			g_backRenderPathes.erase(id);
+			g_renderPasses.erase(id);
+			g_frontRenderPasses.erase(id);
+			g_backRenderPasses.erase(id);
 		}
 		g_removingRenderPathes.clear();
 		g_removingRenderPathMutex.unlock();
@@ -414,25 +414,25 @@ extern "C"
 
 		// render
 
-		std::shared_ptr<RenderPath> renderPath = nullptr;
-		auto it = g_renderPathes.find(renderId);
-		if (it != g_renderPathes.end())
+		std::shared_ptr<RenderPass> renderPath = nullptr;
+		auto it = g_renderPasses.find(renderId);
+		if (it != g_renderPasses.end())
 		{
 			renderPath = it->second;
 		}
 		else
 		{
-			auto created = g_graphics->CreateRenderPath();
+			auto created = g_graphics->CreateRenderPass();
 			if (created != nullptr)
 			{
-				g_renderPathes[renderId] = std::shared_ptr<RenderPath>(created);
-				renderPath = g_renderPathes[renderId];
+				g_renderPasses[renderId] = std::shared_ptr<RenderPass>(created);
+				renderPath = g_renderPasses[renderId];
 			}
 		}
 
 		if (renderPath != nullptr)
 		{
-			renderPath->Begin();
+			renderPath->Begin(nullptr);
 			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
 		}
 
@@ -462,26 +462,33 @@ extern "C"
 
 		RenderSettings& settings = renderSettings[renderId];
 
-		std::shared_ptr<RenderPath> renderPath = nullptr;
-		auto it = g_frontRenderPathes.find(renderId);
-		if (it != g_frontRenderPathes.end())
+		std::shared_ptr<RenderPass> renderPass = nullptr;
+		auto it = g_frontRenderPasses.find(renderId);
+		if (it != g_frontRenderPasses.end())
 		{
-			renderPath = it->second;
+			renderPass = it->second;
 		}
 		else
 		{
-			auto created = g_graphics->CreateRenderPath();
+			auto created = g_graphics->CreateRenderPass();
 			if (created != nullptr)
 			{
-				g_frontRenderPathes[renderId] = std::shared_ptr<RenderPath>(created);
-				renderPath = g_frontRenderPathes[renderId];
+				g_frontRenderPasses[renderId] = std::shared_ptr<RenderPass>(created);
+				renderPass = g_frontRenderPasses[renderId];
 			}
 		}
 
-		if (renderPath != nullptr)
+		if (renderPass != nullptr)
 		{
-			renderPath->Begin();
-			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+			std::shared_ptr<RenderPass> backRenderPass = nullptr;
+			auto itb = g_backRenderPasses.find(renderId);
+			if (itb != g_backRenderPasses.end())
+			{
+				backRenderPass = it->second;
+			}
+
+			renderPass->Begin(backRenderPass.get());
+			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPass.get());
 		}
 
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
@@ -491,10 +498,10 @@ extern "C"
 		g_EffekseerManager->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
-		if (renderPath != nullptr)
+		if (renderPass != nullptr)
 		{
-			renderPath->End();
-			renderPath->Execute();
+			renderPass->End();
+			renderPass->Execute();
 			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
 		}
 
@@ -534,7 +541,7 @@ extern "C"
 			return;
 
 		assert(g_graphics != nullptr);
-		//g_graphics->StartRender(g_EffekseerRenderer);
+		// g_graphics->StartRender(g_EffekseerRenderer);
 
 		TryToRemoveRenderPathes();
 
@@ -618,28 +625,27 @@ extern "C"
 		// 背景テクスチャをセット
 		SetBackGroundTexture(settings.backgroundTexture);
 
-		std::shared_ptr<RenderPath> renderPath = nullptr;
-		auto it = g_backRenderPathes.find(renderId);
-		if (it != g_backRenderPathes.end())
+		std::shared_ptr<RenderPass> renderPath = nullptr;
+		auto it = g_backRenderPasses.find(renderId);
+		if (it != g_backRenderPasses.end())
 		{
 			renderPath = it->second;
 		}
 		else
 		{
-			auto created = g_graphics->CreateRenderPath();
+			auto created = g_graphics->CreateRenderPass();
 			if (created != nullptr)
 			{
-				g_backRenderPathes[renderId] = std::shared_ptr<RenderPath>(created);
-				renderPath = g_backRenderPathes[renderId];
+				g_backRenderPasses[renderId] = std::shared_ptr<RenderPass>(created);
+				renderPath = g_backRenderPasses[renderId];
 			}
 		}
 
 		if (renderPath != nullptr)
 		{
-			renderPath->Begin();
+			renderPath->Begin(nullptr);
 			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
 		}
-
 
 		// render
 		Effekseer::Manager::DrawParameter drawParameter;

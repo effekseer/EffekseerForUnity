@@ -8,7 +8,7 @@
 #endif
 
 #ifdef _PS4
-#include "../PS4/EffekseerRendererPS4.h"
+#include "../PS4/EffekseerPluginGraphicsPS4.h"
 #endif
 
 #ifdef _SWITCH

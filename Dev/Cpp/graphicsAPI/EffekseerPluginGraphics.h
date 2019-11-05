@@ -15,12 +15,14 @@ namespace EffekseerPlugin
 {
 
 
-class RenderPath
+class RenderPass
 {
 public:
-	RenderPath() = default;
-	virtual ~RenderPath() = default;
-	virtual void Begin() {}
+	RenderPass() = default;
+	virtual ~RenderPass() = default;
+
+	//! if this renderpass is front, back render pass is sent as an argument
+	virtual void Begin(RenderPass* backRenderPass) {}
 	virtual void End() {}
 	virtual void Execute() {}
 };
@@ -54,9 +56,9 @@ public:
 
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 
-	virtual RenderPath* CreateRenderPath() { return nullptr; }
+	virtual RenderPass* CreateRenderPass() { return nullptr; }
 
-	virtual void SetRenderPath(EffekseerRenderer::Renderer* renderer, RenderPath* renderPath) {}
+	virtual void SetRenderPath(EffekseerRenderer::Renderer* renderer, RenderPass* renderPath) {}
 
 	virtual void WaitFinish() {}
 
