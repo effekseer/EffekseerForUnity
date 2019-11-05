@@ -50,6 +50,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.InstanceContainer.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGlobal.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGroup.cpp \
+	$(LIB_SRC_PATH)/Effekseer.InstanceChunk.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InternalScript.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Manager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix43.cpp \
@@ -66,7 +67,16 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Culling/Culling3D.ObjectInternal.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.ReferenceObject.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Vector3DF.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.WorldInternal.cpp
+	$(LIB_SRC_PATH)/Culling/Culling3D.WorldInternal.cpp \
+	$(LIB_SRC_PATH)/IO/Effekseer.EfkEfcFactory.cpp \
+	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
+	$(LIB_SRC_PATH)/Material/Effekseer.Material.cpp \
+	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp
+
+LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
+LOCAL_SRC_FILES += \
+	$(LIB_SRC_PATH)/OpenGL/EffekseerMaterialCompilerGL.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
