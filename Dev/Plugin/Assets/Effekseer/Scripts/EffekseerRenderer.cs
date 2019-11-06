@@ -1206,8 +1206,8 @@ namespace Effekseer.Internal
 					}
 
 					// Add a blit command that copy to the distortion texture
-					this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
-					this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					// this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+					// this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
                     if (dstID.HasValue)
                     {
