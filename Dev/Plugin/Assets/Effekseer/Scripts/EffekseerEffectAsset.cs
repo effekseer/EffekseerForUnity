@@ -52,6 +52,7 @@ namespace Effekseer
 		public List<string> TexturePathList = new List<string>();
 		public List<string> SoundPathList = new List<string>();
 		public List<string> ModelPathList = new List<string>();
+		public List<string> MaterialPathList = new List<string>();
 	}
 
 
@@ -66,6 +67,8 @@ namespace Effekseer
 		public EffekseerSoundResource[] soundResources;
 		[SerializeField]
 		public EffekseerModelResource[] modelResources;
+		[SerializeField]
+		public EffekseerMaterialResource[] materialResources;
 
 		[SerializeField]
 		public float Scale = 1.0f;
@@ -177,6 +180,12 @@ namespace Effekseer
 			return (index >= 0) ? modelResources[index] : null;
 		}
 
+		public EffekseerMaterialResource FindMaterial(string path)
+		{
+			int index = Array.FindIndex(materialResources, (r) => (path == r.path));
+			return (index >= 0) ? materialResources[index] : null;
+		}
+
 		public static bool ReadResourcePath(byte[] data, ref EffekseerResourcePath resourcePath)
 		{
 			if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E')
@@ -245,6 +254,16 @@ namespace Effekseer
 				}
 			}
 
+			if (resourcePath.Version >= 15)
+			{
+				int materialCount = BitConverter.ToInt32(data, filepos);
+				filepos += 4;
+				for (int i = 0; i < materialCount; i++)
+				{
+					resourcePath.MaterialPathList.Add(ReadString(data, ref filepos));
+				}
+			}
+
 			return true;
 		}
 
@@ -305,6 +324,12 @@ namespace Effekseer
 			asset.modelResources = new EffekseerModelResource[resourcePath.ModelPathList.Count];
 			for (int i = 0; i < resourcePath.ModelPathList.Count; i++) {
 				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, resourcePath.ModelPathList[i]);
+			}
+
+			asset.materialResources = new EffekseerMaterialResource[resourcePath.MaterialPathList.Count];
+			for (int i = 0; i < resourcePath.MaterialPathList.Count; i++)
+			{
+				asset.materialResources[i] = EffekseerMaterialResource.LoadAsset(assetDir, resourcePath.MaterialPathList[i]);
 			}
 
 			asset.Scale = defaultScale;

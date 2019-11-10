@@ -133,7 +133,7 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 	return true;
 }
 
-void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface) {}
+void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface) { renderer_ = nullptr; }
 
 EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
@@ -141,6 +141,7 @@ EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool
 	squareMaxCount = 600;
 #endif
 	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, openglDeviceType);
+	renderer_ = renderer;
 	return renderer;
 }
 
@@ -161,6 +162,17 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 	auto loader = new ModelLoader(load, unload);
 	//auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
 	auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
+	loader->SetInternalLoader(internalLoader);
+	return loader;
+}
+
+Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	if (renderer_ == nullptr)
+		return nullptr;
+
+	auto loader = new MaterialLoader(load, unload);
+	auto internalLoader = renderer_->CreateMaterialLoader();
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }

@@ -4,12 +4,17 @@
 #include "EffekseerPluginSound.h"
 #include "EffekseerPluginNetwork.h"
 #include "Effekseer.h"
+#include "../graphicsAPI/EffekseerPluginGraphics.h"
 
 using namespace Effekseer;
 using namespace EffekseerPlugin;
 
 namespace EffekseerPlugin
 {
+
+extern Effekseer::Manager* g_EffekseerManager;
+extern Graphics* g_graphics;
+
 	RenderSettings renderSettings[MAX_RENDER_PATH] = {{}};
 
 	void Array2Matrix(Matrix44& matrix, float matrixArray[])
@@ -426,23 +431,51 @@ extern "C"
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)
 	{
-		if (g_EffekseerManager == NULL) {
+		if (g_EffekseerManager == nullptr)
+		{
 			return;
 		}
 
-		g_EffekseerManager->SetTextureLoader(EffekseerPlugin::TextureLoader::Create(load, unload));
+		if (g_graphics == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetTextureLoader(g_graphics->Create(load, unload));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetModelLoaderEvent(
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload)
 	{
-		if (g_EffekseerManager == NULL) {
+		if (g_EffekseerManager == nullptr)
+		{
 			return;
 		}
 
-		g_EffekseerManager->SetModelLoader(EffekseerPlugin::ModelLoader::Create(load, unload));
+		if (g_graphics == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetModelLoader(g_graphics->Create(load, unload));
 	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetMaterialLoaderEvent(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		if (g_graphics == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload));
+	}
+
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundLoaderEvent(
 		SoundLoaderLoad load,

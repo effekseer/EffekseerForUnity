@@ -32,12 +32,14 @@ files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/Command/*.cs')
 files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/Data/*.cs')
 files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/Data/Value/*.cs')
 files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/Utl/*.cs')
+files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/Utils/*.cs')
+files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/IO/*.cs')
 files += glob.glob('../Effekseer/Dev/Editor/EffekseerCore/InternalScript/*.cs')
 
 for file in files:
     effekseerCore.readLines(file)
 
-effekseerCore.lines = [l for l in effekseerCore.lines if not ('using ' in l)]
+effekseerCore.lines = [l for l in effekseerCore.lines if not ('using ' in l and not 'using (' in l)]
 effekseerCore.lines = [l.replace(
     'namespace Effekseer', 'namespace EffekseerTool') for l in effekseerCore.lines]
 

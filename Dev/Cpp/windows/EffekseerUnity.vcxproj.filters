@@ -52,6 +52,12 @@
     <ClCompile Include="..\common\EffekseerPlugin.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\EffekseerPluginMaterial.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\MemoryFile.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -115,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="..\graphicsAPI\EffekseerPluginGraphicsUnity.h">
       <Filter>graphicsAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EffekseerPluginMaterial.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\MemoryFile.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

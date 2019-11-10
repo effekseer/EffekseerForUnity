@@ -19,12 +19,41 @@ namespace Effekseer.Editor
 		}
 	}
 
+	[CustomEditor(typeof(EffekseerMaterialAsset))]
+	public class EffekseerMaterialAssetEditor : UnityEditor.Editor
+	{
+		public override void OnInspectorGUI()
+		{
+			var asset = target as EffekseerMaterialAsset;
+
+			if(asset.materialBuffers == null)
+			{
+				EditorGUILayout.LabelField("MaterialBuffer : None");
+			}
+			else
+			{
+				EditorGUILayout.LabelField("MaterialBuffer: ", asset.materialBuffers.Length.ToString() + " bytes");
+			}
+
+			if (asset.cachedMaterialBuffers == null)
+			{
+				EditorGUILayout.LabelField("CachedMaterialBuffer : None");
+			}
+			else
+			{
+				EditorGUILayout.LabelField("CachedMaterialBuffer: ", asset.cachedMaterialBuffers.Length.ToString() + " bytes");
+			}
+
+		}
+	}
+
 	[CustomEditor(typeof(EffekseerEffectAsset))]
 	public class EffekseerEffectAssetEditor : UnityEditor.Editor
 	{
 		bool textureVisible = true;
 		bool soundVisible = true;
 		bool modelVisible = true;
+		bool materialVisible = true;
 
 		public override void OnInspectorGUI()
 		{
@@ -67,6 +96,20 @@ namespace Effekseer.Editor
 				EditorGUI.indentLevel++;
 				foreach (var res in asset.modelResources) {
 					if (EffekseerModelResource.InspectorField(res)) {
+						EditorUtility.SetDirty(asset);
+					}
+				}
+				EditorGUI.indentLevel--;
+			}
+
+			materialVisible = EditorGUILayout.Foldout(modelVisible, "Material Resources: " + asset.materialResources.Length);
+			if (materialVisible)
+			{
+				EditorGUI.indentLevel++;
+				foreach (var res in asset.materialResources)
+				{
+					if (EffekseerMaterialResource.InspectorField(res))
+					{
 						EditorUtility.SetDirty(asset);
 					}
 				}
