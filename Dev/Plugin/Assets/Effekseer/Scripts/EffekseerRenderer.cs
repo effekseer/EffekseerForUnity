@@ -1471,7 +1471,11 @@ namespace Effekseer.Internal
             }
 			else
 			{
+#if UNITY_SWITCH && !UNITY_EDITOR
+				Plugin.EffekseerSetIsBackgroundTextureFlipped(1);
+#else
 				Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
+#endif
 			}
 
 			// assign a dinsotrion texture
