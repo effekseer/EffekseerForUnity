@@ -29,6 +29,10 @@
 		2E1954E9223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954E3223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp */; };
 		2E1954EB223AB87E000BB4C4 /* EffekseerPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954EA223AB87E000BB4C4 /* EffekseerPlugin.cpp */; };
 		2E1954EC223AB87E000BB4C4 /* EffekseerPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1954EA223AB87E000BB4C4 /* EffekseerPlugin.cpp */; };
+		2E1962CC237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1962CA237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp */; };
+		2E1962CD237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1962CA237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp */; };
+		2E1962D0237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1962CF237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp */; };
+		2E1962D1237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1962CF237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp */; };
 		2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E64BCD222CE3B010054DB5B /* Effekseer.CustomAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */; };
@@ -219,6 +223,10 @@
 		2E1954F1223AB8B9000BB4C4 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = ../unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		2E1954F2223AB8B9000BB4C4 /* IUnityApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityApplication.h; path = ../unity/IUnityApplication.h; sourceTree = "<group>"; };
 		2E1954F3223AB8B9000BB4C4 /* IUnityInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityInterface.h; path = ../unity/IUnityInterface.h; sourceTree = "<group>"; };
+		2E1962CA237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InstanceChunk.cpp; sourceTree = "<group>"; };
+		2E1962CB237FE8EE00A0649E /* Effekseer.InstanceChunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InstanceChunk.h; sourceTree = "<group>"; };
+		2E1962CE237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EffekseerRendererGL.DeviceObjectCollection.h; sourceTree = "<group>"; };
+		2E1962CF237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EffekseerRendererGL.DeviceObjectCollection.cpp; sourceTree = "<group>"; };
 		2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InternalScript.h; sourceTree = "<group>"; };
 		2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InternalScript.cpp; sourceTree = "<group>"; };
 		2E64BCD022CE3B000054DB5B /* Effekseer.CustomAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.CustomAllocator.cpp; sourceTree = "<group>"; };
@@ -584,6 +592,8 @@
 				4861A2ED182F846200A8217D /* Effekseer.File.h */,
 				4861A2EE182F846200A8217D /* Effekseer.Instance.cpp */,
 				4861A2EF182F846200A8217D /* Effekseer.Instance.h */,
+				2E1962CA237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp */,
+				2E1962CB237FE8EE00A0649E /* Effekseer.InstanceChunk.h */,
 				4861A2F0182F846200A8217D /* Effekseer.InstanceContainer.cpp */,
 				4861A2F1182F846200A8217D /* Effekseer.InstanceContainer.h */,
 				4861A2F2182F846200A8217D /* Effekseer.InstanceGlobal.cpp */,
@@ -730,6 +740,8 @@
 				2E193C8A22F736C200C8E0D6 /* EffekseerRendererGL.MaterialLoader.h */,
 				684C1F2E19F6106D00E32FEC /* EffekseerRendererGL.Base.h */,
 				684C1F2F19F6106D00E32FEC /* EffekseerRendererGL.Base.Pre.h */,
+				2E1962CF237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp */,
+				2E1962CE237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.h */,
 				684C1F3019F6106D00E32FEC /* EffekseerRendererGL.DeviceObject.cpp */,
 				684C1F3119F6106D00E32FEC /* EffekseerRendererGL.DeviceObject.h */,
 				684C1F3219F6106D00E32FEC /* EffekseerRendererGL.GLExtension.cpp */,
@@ -855,6 +867,7 @@
 				684C1F7719F610BE00E32FEC /* EffekseerRendererGL.IndexBuffer.h in Sources */,
 				48DA21511C623ABD00CAA811 /* EffekseerPluginSound.cpp in Sources */,
 				684C1F6519F6106D00E32FEC /* EffekseerRendererGL.ModelLoader.cpp in Sources */,
+				2E1962CC237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp in Sources */,
 				2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */,
 				2E1954E8223AB83F000BB4C4 /* EffekseerPluginGraphics.cpp in Sources */,
 				684C1F7819F610BE00E32FEC /* EffekseerRendererGL.ModelLoader.h in Sources */,
@@ -866,6 +879,7 @@
 				684C1F7A19F610BE00E32FEC /* EffekseerRendererGL.Renderer.h in Sources */,
 				2E0B9C652352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */,
 				2EB27C82222C27D200BF4C0E /* EffekseerPluginNetwork.cpp in Sources */,
+				2E1962D0237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp in Sources */,
 				48CF46DF1B3EFA94005AD8C4 /* Effekseer.Setting.cpp in Sources */,
 				684C1F7B19F610BE00E32FEC /* EffekseerRendererGL.RendererImplemented.h in Sources */,
 				684C1F6819F6106D00E32FEC /* EffekseerRendererGL.RenderState.cpp in Sources */,
@@ -980,6 +994,7 @@
 				48DA21901C8C5C6B00CAA811 /* Effekseer.Color.cpp in Sources */,
 				48DA218D1C8C5C4200CAA811 /* EffekseerRenderer.TrackRendererBase.cpp in Sources */,
 				48DA21AD1C8C5C8B00CAA811 /* EffekseerPluginModel.cpp in Sources */,
+				2E1962D1237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp in Sources */,
 				2EB27C8B222C2D4900BF4C0E /* EffekseerRenderer.CommonUtils.cpp in Sources */,
 				48DA21891C8C5C4200CAA811 /* EffekseerRenderer.RenderStateBase.cpp in Sources */,
 				48DA21971C8C5C6B00CAA811 /* Effekseer.EffectNodeRibbon.cpp in Sources */,
@@ -993,6 +1008,7 @@
 				48DA21841C8C5C2C00CAA811 /* EffekseerRendererGL.VertexArray.cpp in Sources */,
 				2E0B9C542352FC5700C85A3B /* Effekseer.EfkEfcFactory.cpp in Sources */,
 				48DA217B1C8C5C2C00CAA811 /* EffekseerRendererGL.ModelRenderer.cpp in Sources */,
+				2E1962CD237FE8EE00A0649E /* Effekseer.InstanceChunk.cpp in Sources */,
 				48DA217C1C8C5C2C00CAA811 /* EffekseerRendererGL.Renderer.cpp in Sources */,
 				4847B92D1C8C6A79002723AE /* Culling3D.WorldInternal.cpp in Sources */,
 				4847B92A1C8C6A79002723AE /* Culling3D.ObjectInternal.cpp in Sources */,
