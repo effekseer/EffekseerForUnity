@@ -14,7 +14,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 		
-		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier);
+		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier);
 
 		void OnPostRender(Camera camera);
 	}
@@ -719,10 +719,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null, null);
+			Render(camera, null, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
+		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -881,9 +881,17 @@ namespace Effekseer.Internal
 				}
                 else if (dstIdentifier.HasValue)
                 {
-                    path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture.renderTexture);
-                    path.commandBuffer.SetRenderTarget(dstIdentifier.Value);
-                }
+					path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture.renderTexture);
+
+					if (depthTargetIdentifier.HasValue)
+					{
+						path.commandBuffer.SetRenderTarget(dstIdentifier.Value, depthTargetIdentifier.Value);
+					}
+					else
+					{
+						path.commandBuffer.SetRenderTarget(dstIdentifier.Value);
+					}
+				}
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
@@ -1173,7 +1181,7 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier)
+			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier)
 			{
 				this.isDistortionEnabled = enableDistortion;
 
@@ -1216,9 +1224,17 @@ namespace Effekseer.Internal
                     }
                     else if (dstIdentifier.HasValue)
                     {
-                        this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture.renderTexture);
-                        this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
-                    }
+						this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture.renderTexture);
+
+						if (depthTargetIdentifier.HasValue)
+						{
+							this.commandBuffer.SetRenderTarget(dstIdentifier.Value, depthTargetIdentifier.Value);
+						}
+						else
+						{
+							this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
+						}
+					}
                     else
                     {
                         this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
@@ -1310,10 +1326,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null, null);
+			Render(camera, null, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier)
+		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -1395,7 +1411,7 @@ namespace Effekseer.Internal
 				}
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, depthTargetIdentifier);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -1403,7 +1419,7 @@ namespace Effekseer.Internal
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, depthTargetIdentifier);
 			}
 
 			path.LifeTime = 60;

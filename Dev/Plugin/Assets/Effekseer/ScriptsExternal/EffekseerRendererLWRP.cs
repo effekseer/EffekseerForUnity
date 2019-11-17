@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.LWRP;
 
+
 namespace Effekseer
 {
     public class EffekseerRendererLWRP : ScriptableRendererFeature
@@ -27,7 +28,7 @@ namespace Effekseer
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            var pass = new EffekseerRenderPassLWRP(renderer.cameraColorTarget);
+            var pass = new EffekseerRenderPassLWRP(renderer.cameraColorTarget, renderer.cameraDepth);
             renderer.EnqueuePass(pass);
         }
     }
@@ -35,10 +36,12 @@ namespace Effekseer
     class EffekseerRenderPassLWRP : ScriptableRenderPass
     {
         RenderTargetIdentifier cameraColorTarget;
+		RenderTargetIdentifier cameraDepthTarget;
 
-        public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget)
+		public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
         {
             this.cameraColorTarget = cameraColorTarget;
+			this.cameraDepthTarget = cameraDepthTarget;
             this.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
         }
 
@@ -46,7 +49,7 @@ namespace Effekseer
         {
             if (EffekseerSystem.Instance == null) return;
 
-            EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, null, this.cameraColorTarget);
+            EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, null, this.cameraColorTarget, this.cameraDepthTarget);
             var commandBuffer = EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
             if (commandBuffer != null)
@@ -58,6 +61,7 @@ namespace Effekseer
     }
 }
 */
+
 
 // Before 5.7
 /*
