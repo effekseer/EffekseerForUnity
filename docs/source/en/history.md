@@ -1,11 +1,17 @@
 ﻿# Release notes
 
+## 1.43m (2019/11/20)
+
+- Fixed a bug that could not read image files containing ..
+- Fixed a bug that Z buffer is disabled with LWRP and PostEffect
+- Fixed a bug that a color is wrong with Distortion, LWRP, DirectX11 and NativeRenderer
+
 ## 1.43l (2019/10/21)
 
--Fixed a bug that could not read image files containing spaces
--Fixed a bug that dialogs could not be opened in rare cases
--Fixed Emitter GUI behavior
--Fixed memory leak (Win)
+- Fixed a bug that could not read image files containing spaces
+- Fixed a bug that dialogs could not be opened in rare cases
+- Fixed Emitter GUI behavior
+- Fixed memory leak (Win)
 
 ## 1.43k
 
