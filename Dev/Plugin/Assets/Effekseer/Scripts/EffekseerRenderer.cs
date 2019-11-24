@@ -6,6 +6,27 @@ using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
+	public class RenderTargetProperty
+	{
+		public RenderTargetIdentifier colorTargetIdentifier;
+		public RenderTargetIdentifier? depthTargetIdentifier;
+		public RenderTextureDescriptor colorTargetDescriptor;
+
+		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
+		{
+			cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+
+			if (depthTargetIdentifier.HasValue)
+			{
+				cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
+			}
+			else
+			{
+				cb.SetRenderTarget(colorTargetIdentifier);
+			}
+		}
+	}
+
 	public interface IEffekseerRenderer
 	{
 		int layer { get; set; }
@@ -16,7 +37,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 		
-		void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier);
+		void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty);
 
 		void OnPostRender(Camera camera);
 	}
@@ -284,11 +305,24 @@ namespace Effekseer.Internal
 	internal class BackgroundRenderTexture
 	{
 		public RenderTexture renderTexture = null;
+		public RenderTexture renderTextureMSAA = null;
+
 		public IntPtr ptr = IntPtr.Zero;
 
-		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format)
+		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format, RenderTargetProperty renderTargetProperty)
 		{
+#if UNITY_STANDALONE_WIN
+			if(renderTargetProperty != null)
+			{
+				renderTexture = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear);
+			}
+			else
+			{
+				renderTexture = new RenderTexture(width, height, 0, format);
+			}
+#else
 			renderTexture = new RenderTexture(width, height, 0, format);
+#endif
 		}
 
 		public bool Create()
@@ -556,9 +590,14 @@ namespace Effekseer.Internal
 				modelBuffers = new ModelBufferCollection();
 			}
 
-			public void Init(bool enableDistortion)
+			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty)
 			{
 				isDistortionEnabled = enableDistortion;
+
+				if(enableDistortion && renderTargetProperty != null && renderTargetProperty.colorTargetDescriptor.msaaSamples > 1)
+				{
+					Debug.LogError("[Effekseer] Effekseer(LWRP) not supported a distortion with MSAA");
+				}
 
 				// Create a command buffer that is effekseer renderer
 				this.commandBuffer = new CommandBuffer();
@@ -583,7 +622,7 @@ namespace Effekseer.Internal
 #else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format);
+					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
 	
 					// HACK for ZenPhone (cannot understand)
 					if(this.renderTexture == null || !this.renderTexture.Create())
@@ -740,10 +779,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null, null, null);
+			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier)
+		public void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -828,7 +867,7 @@ namespace Effekseer.Internal
 				}
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -836,7 +875,7 @@ namespace Effekseer.Internal
 			if (!path.IsValid())
 			{
 				path.Dispose();
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty);
 			}
 
 			path.Update();
@@ -883,7 +922,7 @@ namespace Effekseer.Internal
 
 			// Distortion
 			if (EffekseerRendererUtils.IsDistortionEnabled && 
-				(path.renderTexture != null || dstID.HasValue || dstIdentifier.HasValue))
+				(path.renderTexture != null || dstID.HasValue || renderTargetProperty != null))
 			{
 				// Add a blit command that copy to the distortion texture
 				if(dstID.HasValue)
@@ -891,18 +930,9 @@ namespace Effekseer.Internal
 					path.commandBuffer.Blit(dstID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(dstID.Value);
 				}
-                else if (dstIdentifier.HasValue)
+                else if (renderTargetProperty != null)
                 {
-                    path.commandBuffer.Blit(dstIdentifier.Value, path.renderTexture.renderTexture);
-
-					if (depthTargetIdentifier.HasValue)
-					{
-						path.commandBuffer.SetRenderTarget(dstIdentifier.Value, depthTargetIdentifier.Value);
-					}
-					else
-					{
-						path.commandBuffer.SetRenderTarget(dstIdentifier.Value);
-					}
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
 				}
 				else
 				{
@@ -1188,11 +1218,16 @@ namespace Effekseer.Internal
 				this.cameraEvent = cameraEvent;
 			}
 
-			public void Init(bool enableDistortion, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier
+			public void Init(bool enableDistortion, int? dstID, RenderTargetProperty renderTargetProperty
 				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
 				isDistortionMakeDisabledForcely = false;
+
+				if (enableDistortion && renderTargetProperty != null && renderTargetProperty.colorTargetDescriptor.msaaSamples > 1)
+				{
+					Debug.LogError("[Effekseer] Effekseer(LWRP) not supported a distortion with MSAA");
+				}
 
 				if (this.renderTexture != null)
 				{
@@ -1204,7 +1239,7 @@ namespace Effekseer.Internal
 				this.commandBuffer = new CommandBuffer();
 				this.commandBuffer.name = "Effekseer Rendering";
 
-				SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, dstIdentifier, depthTargetIdentifier);
+				SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, renderTargetProperty);
 
 				if (stereoRenderingType == StereoRendererUtil.StereoRenderingTypes.SinglePass)
 				{
@@ -1212,7 +1247,7 @@ namespace Effekseer.Internal
 					this.isDistortionEnabled = false;
 					this.isDistortionMakeDisabledForcely = true;
 
-					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, dstID, dstIdentifier, depthTargetIdentifier);
+					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, dstID, renderTargetProperty);
 				}
 
 				// register the command to a camera
@@ -1223,8 +1258,7 @@ namespace Effekseer.Internal
 				CommandBuffer commandBuffer,
 				bool enableDistortion,
 				int? dstID,
-				RenderTargetIdentifier? dstIdentifier,
-				RenderTargetIdentifier? depthTargetIdentifier)
+				RenderTargetProperty renderTargetProperty)
 			{
 				// add a command to render effects.
 				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
@@ -1239,7 +1273,7 @@ namespace Effekseer.Internal
 #else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format);
+					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
 
 					// HACK for ZenPhone (cannot understand)
 					if (this.renderTexture == null || !this.renderTexture.Create())
@@ -1259,18 +1293,9 @@ namespace Effekseer.Internal
 						this.commandBuffer.Blit(dstID.Value, this.renderTexture.renderTexture);
 						this.commandBuffer.SetRenderTarget(dstID.Value);
 					}
-					else if (dstIdentifier.HasValue)
+					else if (renderTargetProperty != null)
 					{
-						this.commandBuffer.Blit(dstIdentifier.Value, this.renderTexture.renderTexture);
-
-						if (depthTargetIdentifier.HasValue)
-						{
-							this.commandBuffer.SetRenderTarget(dstIdentifier.Value, depthTargetIdentifier.Value);
-						}
-						else
-						{
-							this.commandBuffer.SetRenderTarget(dstIdentifier.Value);
-						}
+						renderTargetProperty.ApplyToCommandBuffer(this.commandBuffer, this.renderTexture);
 					}
 					else
 					{
@@ -1366,10 +1391,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null, null, null);
+			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetIdentifier? dstIdentifier, RenderTargetIdentifier? depthTargetIdentifier)
+		public void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -1456,7 +1481,7 @@ namespace Effekseer.Internal
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID);
 				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, depthTargetIdentifier, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, renderTargetProperty, stereoRenderingType);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -1465,7 +1490,7 @@ namespace Effekseer.Internal
 			{
 				path.Dispose();
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, dstIdentifier, depthTargetIdentifier, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, renderTargetProperty, stereoRenderingType);
 			}
 
 			path.LifeTime = 60;
@@ -1478,7 +1503,7 @@ namespace Effekseer.Internal
 			}
 
 			// if LWRP
-			if (dstID.HasValue || dstIdentifier.HasValue)
+			if (dstID.HasValue || renderTargetProperty != null)
             {
 				// flip a rendertaget
 				// Direct11 : OK (2019, LWRP 5.13)

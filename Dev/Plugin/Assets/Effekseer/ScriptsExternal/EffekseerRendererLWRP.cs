@@ -38,20 +38,26 @@ namespace Effekseer
         RenderTargetIdentifier cameraColorTarget;
 		RenderTargetIdentifier cameraDepthTarget;
 
+		Effekseer.Internal.RenderTargetProperty prop = new Internal.RenderTargetProperty();
+
 		public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
         {
             this.cameraColorTarget = cameraColorTarget;
 			this.cameraDepthTarget = cameraDepthTarget;
             this.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
+
+			prop.colorTargetIdentifier = cameraColorTarget;
+			prop.depthTargetIdentifier = cameraDepthTarget;
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             if (EffekseerSystem.Instance == null) return;
+			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 
-            EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, null, this.cameraColorTarget, this.cameraDepthTarget);
+            EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, null, prop);
             var commandBuffer = EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
-
+			
             if (commandBuffer != null)
             {
                 context.ExecuteCommandBuffer(commandBuffer);

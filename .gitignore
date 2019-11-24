@@ -50,3 +50,5 @@ Sample/*/Assets/Plugins/
 Sample/*/Temp/
 Sample/*/*.sln
 Sample/*/*.csproj
+
+Tests/LWRPTests/Assets/Effekseer/
