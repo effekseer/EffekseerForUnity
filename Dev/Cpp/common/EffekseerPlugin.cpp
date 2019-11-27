@@ -61,10 +61,10 @@ extern "C" void UnityRegisterRenderingPluginV5(PluginLoadFunc loadPlugin, Plugin
 extern "C"
 {
 	// Unity plugin load event
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces);
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnityPluginLoad(IUnityInterfaces* unityInterfaces);
 
 	// Unity plugin unload event
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload();
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnityPluginUnload();
 }
 
 namespace EffekseerPlugin
@@ -249,9 +249,9 @@ extern "C"
 			return;
 
 #if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
-		UnityRegisterRenderingPluginV5(UnityPluginLoad, UnityPluginUnload);
+		UnityRegisterRenderingPluginV5(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
 #elif defined(EMSCRIPTEN) || defined(_SWITCH)
-		UnityRegisterRenderingPlugin(UnityPluginLoad, UnityPluginUnload);
+		UnityRegisterRenderingPlugin(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
 #else
 		printf("Warning : Check preprocesser.\n");
 #endif
@@ -260,7 +260,7 @@ extern "C"
 	}
 
 	// Unity plugin load event
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnityPluginLoad(IUnityInterfaces* unityInterfaces)
 	{
 		g_UnityInterfaces = unityInterfaces;
 		g_UnityGraphics = g_UnityInterfaces->Get<IUnityGraphics>();
@@ -274,10 +274,21 @@ extern "C"
 	}
 
 	// Unity plugin unload event
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnityPluginUnload()
 	{
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
+
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(EMSCRIPTEN) || defined(_SWITCH)
+	// None
+#else
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+	{
+		EffekseerUnityPluginLoad(unityInterfaces);
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload() { EffekseerUnityPluginUnload(); }
+#endif
 
 	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityRenderingExtEvent(UnityRenderingExtEventType event, void* data)
 	{
