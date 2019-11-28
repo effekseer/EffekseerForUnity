@@ -240,8 +240,7 @@ namespace Effekseer
 
 				if (SystemInfo.supportsComputeShaders)
 				{
-					if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
-						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
+					if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore)
 					{
 						Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" has many limitations with ComputeShader. Renderer is changed into Native.");
 						RendererType = EffekseerRendererType.Native;
