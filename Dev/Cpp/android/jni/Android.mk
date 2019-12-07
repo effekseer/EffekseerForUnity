@@ -32,7 +32,6 @@ LOCAL_SRC_FILES := \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
-	$(LIB_SRC_PATH)/Effekseer.CustomAllocator.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
@@ -72,6 +71,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.Material.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
+	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler

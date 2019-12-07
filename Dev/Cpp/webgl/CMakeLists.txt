@@ -1,4 +1,4 @@
-# =========================
+﻿# =========================
 # Effekseer UnityPlugin for WebGL
 # 
 # ■ Emscripten と CMake のセットアップ＆ビルド方法について
@@ -49,6 +49,7 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/IO/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Parameter/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Material/*.cpp
+	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Utils/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer/*.cpp
 	${PROJECT_SOURCE_DIR}/../common/*.cpp
