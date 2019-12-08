@@ -26,8 +26,6 @@ namespace EffekseerPlugin
 
 	const int MAX_RENDER_PATH = 128;
 
-	extern Effekseer::Manager*	g_EffekseerManager;
-
 	struct RenderSettings {
 		int32_t cameraCullingMask = 1;
 		Effekseer::Matrix44		cameraMatrix;

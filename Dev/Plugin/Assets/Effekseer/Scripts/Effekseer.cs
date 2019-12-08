@@ -188,6 +188,15 @@ namespace Effekseer
 		public delegate void EffekseerModelLoaderUnload(IntPtr path, IntPtr modelPtr);
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerSetMaterialLoaderEvent(
+	EffekseerMaterialLoaderLoad load,
+	EffekseerMaterialLoaderUnload unload);
+		public delegate IntPtr EffekseerMaterialLoaderLoad(IntPtr path,
+			IntPtr materialBuffer, int materialBufferSize, ref int requiredMaterialBufferSize,
+			IntPtr cachedMaterialBuffer, int cachedMaterialBufferSize, ref int requiredCachedMaterialBufferSize);
+		public delegate void EffekseerMaterialLoaderUnload(IntPtr path, IntPtr modelPtr);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundLoaderEvent(
 			EffekseerSoundLoaderLoad load,
 			EffekseerSoundLoaderUnload unload);

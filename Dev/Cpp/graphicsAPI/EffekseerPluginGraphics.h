@@ -3,6 +3,7 @@
 
 #include "../common/EffekseerPluginModel.h"
 #include "../common/EffekseerPluginTexture.h"
+#include "../common/EffekseerPluginMaterial.h"
 #include "../unity/IUnityGraphics.h"
 #include "Effekseer.h"
 
@@ -53,6 +54,8 @@ public:
 	virtual Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
 
 	virtual Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
+
+	virtual Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
 
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 

@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <Effekseer.h>
+#include "MemoryFile.h"
 #include "EffekseerPluginCommon.h"
 #include "../unity/IUnityInterface.h"
 
@@ -19,34 +20,13 @@ namespace EffekseerPlugin
 		ModelLoaderLoad load;
 		ModelLoaderUnload unload;
 		
-		class MemoryFileReader : public Effekseer::FileReader {
-			uint8_t* data;
-			size_t length;
-			int position;
-		public:
-			MemoryFileReader(uint8_t* data, size_t length);
-			size_t Read( void* buffer, size_t size );
-			void Seek( int position );
-			int GetPosition();
-			size_t GetLength();
-		};
-
-		class MemoryFile : public Effekseer::FileInterface {
-		public:
-			std::vector<uint8_t> loadbuffer;
-			size_t loadsize = 0;
-			explicit MemoryFile( size_t bufferSize );
-			void Resize(size_t bufferSize);
-			Effekseer::FileReader* OpenRead( const EFK_CHAR* path );
-			Effekseer::FileWriter* OpenWrite( const EFK_CHAR* path );
-		};
-
 		struct ModelResource {
 			int referenceCount = 1;
 			void* internalData;
 		};
 		std::map<std::u16string, ModelResource> resources;
 		MemoryFile memoryFile;
+
 		std::unique_ptr<Effekseer::ModelLoader> internalLoader;
 		
 	public:

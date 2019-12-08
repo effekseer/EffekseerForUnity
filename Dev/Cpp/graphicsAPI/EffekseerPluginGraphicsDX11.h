@@ -12,6 +12,7 @@ class GraphicsDX11 : public Graphics
 private:
 	ID3D11Device* d3d11Device = nullptr;
 	ID3D11DeviceContext* d3d11Context = nullptr;
+	EffekseerRendererDX11::Renderer* renderer_ = nullptr;
 
 public:
 	GraphicsDX11();
@@ -33,6 +34,8 @@ public:
 	Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+
+	Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };

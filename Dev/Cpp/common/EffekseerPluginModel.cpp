@@ -3,49 +3,6 @@
 
 namespace EffekseerPlugin
 {
-	ModelLoader::MemoryFileReader::MemoryFileReader(uint8_t* data, size_t length)
-		: data(data), length(length), position(0)
-	{
-	}
-
-	size_t ModelLoader::MemoryFileReader::Read( void* buffer, size_t size )
-	{
-		if (size >= length - position) {
-			size = length - position;
-		}
-		memcpy(buffer, &data[position], size);
-		position += (int)size;
-		return size;
-	}
-
-	void ModelLoader::MemoryFileReader::Seek( int position )
-	{
-		this->position = position;
-	}
-	int ModelLoader::MemoryFileReader::GetPosition()
-	{
-		return position;
-	}
-	size_t ModelLoader::MemoryFileReader::GetLength()
-	{
-		return length;
-	}
-
-	ModelLoader::MemoryFile::MemoryFile( size_t bufferSize ) {
-		loadbuffer.resize(bufferSize);
-	}
-
-	void ModelLoader::MemoryFile::Resize(size_t bufferSize) {
-		loadbuffer.resize(bufferSize);
-	}
-
-	Effekseer::FileReader* ModelLoader::MemoryFile::OpenRead( const EFK_CHAR* path ) {
-		return new MemoryFileReader(&loadbuffer[0], loadsize);
-	}
-	Effekseer::FileWriter* ModelLoader::MemoryFile::OpenWrite( const EFK_CHAR* path ) {
-		return nullptr;
-	}
-
 	ModelLoader::ModelLoader(
 		ModelLoaderLoad load,
 		ModelLoaderUnload unload ) 
@@ -65,7 +22,7 @@ namespace EffekseerPlugin
 		// Load with unity
 		ModelResource res;
 		int requiredDataSize = 0;
-		auto modelPtr = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
+		auto modelPtr = load((const char16_t*)path, &memoryFile.LoadedBuffer[0], (int)memoryFile.LoadedBuffer.size(), requiredDataSize);
 
 		if (requiredDataSize == 0)
 		{
@@ -79,7 +36,7 @@ namespace EffekseerPlugin
 			memoryFile.Resize(requiredDataSize);
 
 			// Load with unity
-			modelPtr = load((const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size(), requiredDataSize);
+			modelPtr = load((const char16_t*)path, &memoryFile.LoadedBuffer[0], (int)memoryFile.LoadedBuffer.size(), requiredDataSize);
 
 			if(modelPtr == nullptr)
 			{
@@ -89,7 +46,7 @@ namespace EffekseerPlugin
 		}
 
 		// 内部ローダに渡してロード処理する
-		memoryFile.loadsize = (size_t)requiredDataSize;
+		memoryFile.LoadedSize = (size_t)requiredDataSize;
 		res.internalData = internalLoader->Load( path );
 			
 		resources.insert( std::make_pair(

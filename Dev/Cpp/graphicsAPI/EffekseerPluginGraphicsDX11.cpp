@@ -1,8 +1,8 @@
 ﻿
 #include "EffekseerPluginGraphicsDX11.h"
-#include "../unity/IUnityInterface.h"
 #include "../unity/IUnityGraphics.h"
 #include "../unity/IUnityGraphicsD3D11.h"
+#include "../unity/IUnityInterface.h"
 #include <algorithm>
 #include <assert.h>
 
@@ -144,16 +144,18 @@ void GraphicsDX11::AfterReset(IUnityInterfaces* unityInterface)
 	d3d11Device->GetImmediateContext(&d3d11Context);
 }
 
-void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface) { 
-	ES_SAFE_RELEASE(d3d11Context); 
+void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface)
+{
+	renderer_ = nullptr;
+	ES_SAFE_RELEASE(d3d11Context);
 	ES_SAFE_RELEASE(d3d11Device);
 }
 
 EffekseerRenderer::Renderer* GraphicsDX11::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
-
 	const D3D11_COMPARISON_FUNC depthFunc = (reversedDepth) ? D3D11_COMPARISON_GREATER_EQUAL : D3D11_COMPARISON_LESS_EQUAL;
 	auto renderer = EffekseerRendererDX11::Renderer::Create(d3d11Device, d3d11Context, squareMaxCount, depthFunc);
+	renderer_ = renderer;
 	return renderer;
 }
 
@@ -224,6 +226,17 @@ Effekseer::ModelLoader* GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUn
 {
 	auto loader = new ModelLoader(load, unload);
 	auto internalLoader = EffekseerRendererDX11::CreateModelLoader(d3d11Device, loader->GetFileInterface());
+	loader->SetInternalLoader(internalLoader);
+	return loader;
+}
+
+Effekseer::MaterialLoader* GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	if (renderer_ == nullptr)
+		return nullptr;
+
+	auto loader = new MaterialLoader(load, unload);
+	auto internalLoader = renderer_->CreateMaterialLoader();
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }

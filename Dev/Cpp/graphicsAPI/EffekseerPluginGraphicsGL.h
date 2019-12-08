@@ -18,6 +18,8 @@ class GraphicsGL : public Graphics
 {
 private:
 	UnityGfxRenderer gfxRenderer;
+	EffekseerRendererGL::Renderer* renderer_ = nullptr;
+
 	EffekseerRendererGL::OpenGLDeviceType openglDeviceType = EffekseerRendererGL::OpenGLDeviceType::OpenGL2;
 
 public:
@@ -38,6 +40,8 @@ public:
 	Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+
+	Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 

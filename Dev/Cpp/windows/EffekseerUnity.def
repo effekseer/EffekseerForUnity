@@ -48,6 +48,7 @@ EXPORTS
   EffekseerSetDynamicInput
   EffekseerSetTextureLoaderEvent
   EffekseerSetModelLoaderEvent
+  EffekseerSetMaterialLoaderEvent
   EffekseerSetSoundLoaderEvent
   EffekseerSetSoundPlayerEvent
 
