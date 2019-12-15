@@ -431,6 +431,7 @@ namespace Effekseer.Internal
 			int VertexMaxCount = 8192 * 4 * 2;
 			public Camera camera;
 			public CommandBuffer commandBuffer;
+			public bool isCommandBufferFromExternal = false;
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public BackgroundRenderTexture renderTexture;
@@ -446,14 +447,43 @@ namespace Effekseer.Internal
 
 			List<DelayEvent> delayEvents = null;
 			
-			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
+			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
 				this.delayEvents = new List<DelayEvent>();
+				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
 				materiaProps = new MaterialPropCollection();
 				modelBuffers = new ModelBufferCollection();
+			}
+
+			private void SetupBackgroundBuffer(bool enableDistortion, RenderTargetProperty renderTargetProperty)
+			{
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
+				}
+
+				if (enableDistortion)
+				{
+					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
+					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+
+#if UNITY_IOS || UNITY_ANDROID
+					RenderTextureFormat format = RenderTextureFormat.ARGB32;
+#else
+					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+#endif
+					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
+
+					// HACK for ZenPhone
+					if (this.renderTexture == null || !this.renderTexture.Create())
+					{
+						this.renderTexture = null;
+					}
+				}
 			}
 
 			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty)
@@ -465,36 +495,16 @@ namespace Effekseer.Internal
 					Debug.LogError("[Effekseer] Effekseer(LWRP) not supported a distortion with MSAA");
 				}
 
+				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
+
 				// Create a command buffer that is effekseer renderer
-				this.commandBuffer = new CommandBuffer();
-				this.commandBuffer.name = "Effekseer Rendering";
-
-				if (this.renderTexture != null)
+				if(!isCommandBufferFromExternal)
 				{
-					this.renderTexture.Release();
-					this.renderTexture = null;
-				}
+					this.commandBuffer = new CommandBuffer();
+					this.commandBuffer.name = "Effekseer Rendering";
 
-				// register the command to a camera
-				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
-
-				if (enableDistortion)
-				{
-					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale );
-					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
-
-#if UNITY_IOS || UNITY_ANDROID
-					RenderTextureFormat format = RenderTextureFormat.ARGB32;
-#else
-					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#endif
-					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
-	
-					// HACK for ZenPhone (cannot understand)
-					if(this.renderTexture == null || !this.renderTexture.Create())
-					{
-						this.renderTexture = null;
-					}
+					// register the command to a camera
+					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 				}
 
 				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
@@ -519,7 +529,7 @@ namespace Effekseer.Internal
 
 			public void Dispose()
 			{
-				if (this.commandBuffer != null)
+				if (this.commandBuffer != null && !isCommandBufferFromExternal)
 				{
 					if (this.camera != null)
 					{
@@ -587,6 +597,16 @@ namespace Effekseer.Internal
 
 				delayEvents.RemoveAll(_ => _.RestTime <= 0);
 			}
+
+			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer)
+			{
+				if(!isCommandBufferFromExternal)
+				{
+					Debug.LogError("External command buffer is assigned even if isCommandBufferFromExternal is true.");
+				}
+
+				this.commandBuffer = commandBuffer;
+			}
 		};
 
 		MaterialCollection materials = new MaterialCollection();
@@ -648,7 +668,7 @@ namespace Effekseer.Internal
 			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -732,7 +752,7 @@ namespace Effekseer.Internal
 					}
 				}
 
-				path = new RenderPath(camera, cameraEvent, nextRenderID);
+				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
@@ -752,6 +772,11 @@ namespace Effekseer.Internal
 			if ((camera.cullingMask & mask) == 0)
 			{
 				return;
+			}
+
+			if(path.isCommandBufferFromExternal)
+			{
+				path.AssignExternalCommandBuffer(targetCommandBuffer);
 			}
 
 			// assign a dinsotrion texture
@@ -788,13 +813,13 @@ namespace Effekseer.Internal
 
 			// Distortion
 			if (EffekseerRendererUtils.IsDistortionEnabled && 
-				(path.renderTexture != null || dstID.HasValue || renderTargetProperty != null))
+				(path.renderTexture != null || renderTargetProperty != null))
 			{
 				// Add a blit command that copy to the distortion texture
-				if(dstID.HasValue)
+				if(renderTargetProperty.colorBufferID.HasValue)
 				{
-					path.commandBuffer.Blit(dstID.Value, path.renderTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(dstID.Value);
+					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
+					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
 				}
                 else if (renderTargetProperty != null)
                 {

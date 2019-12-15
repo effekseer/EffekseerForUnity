@@ -8,6 +8,7 @@ namespace Effekseer.Internal
 {
 	public class RenderTargetProperty
 	{
+		public int? colorBufferID = null;
 		public RenderTargetIdentifier colorTargetIdentifier;
 		public RenderTargetIdentifier? depthTargetIdentifier;
 		public RenderTextureDescriptor colorTargetDescriptor;
@@ -37,7 +38,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 		
-		void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty);
+		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer);
 
 		void OnPostRender(Camera camera);
 	}

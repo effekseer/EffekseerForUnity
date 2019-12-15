@@ -14,6 +14,7 @@ namespace Effekseer.Internal
 		{
 			public Camera camera;
 			public CommandBuffer commandBuffer;
+			public bool isCommandBufferFromExternal = false;
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public BackgroundRenderTexture renderTexture;
@@ -26,14 +27,15 @@ namespace Effekseer.Internal
 			/// </summary>
 			bool isDistortionMakeDisabledForcely = false;
 
-			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId)
+			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
+				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
 			}
 
-			public void Init(bool enableDistortion, int? dstID, RenderTargetProperty renderTargetProperty
+			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty
 				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
@@ -44,39 +46,41 @@ namespace Effekseer.Internal
 					Debug.LogError("[Effekseer] Effekseer(LWRP) not supported a distortion with MSAA");
 				}
 
-				if (this.renderTexture != null)
-				{
-					this.renderTexture.Release();
-					this.renderTexture = null;
-				}
-
 				// Create a command buffer that is effekseer renderer
-				this.commandBuffer = new CommandBuffer();
-				this.commandBuffer.name = "Effekseer Rendering";
-
-				SetupEffekseerRenderCommandBuffer(commandBuffer, enableDistortion, dstID, renderTargetProperty);
+				if (!isCommandBufferFromExternal)
+				{
+					this.commandBuffer = new CommandBuffer();
+					this.commandBuffer.name = "Effekseer Rendering";
+				}
 
 				if (stereoRenderingType == StereoRendererUtil.StereoRenderingTypes.SinglePass)
 				{
 					// In SinglePass Stereo Rendering, draw eyes twice on the left and right with one CommandBuffer
 					this.isDistortionEnabled = false;
 					this.isDistortionMakeDisabledForcely = true;
+				}
 
-					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, dstID, renderTargetProperty);
+				SetupBackgroundBuffer(this.isDistortionEnabled, renderTargetProperty);
+
+				if(!isCommandBufferFromExternal)
+				{
+					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty);
 				}
 
 				// register the command to a camera
-				this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
+				if (!isCommandBufferFromExternal)
+				{
+					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
+				}
 			}
 
-			private void SetupEffekseerRenderCommandBuffer(
-				CommandBuffer commandBuffer,
-				bool enableDistortion,
-				int? dstID,
-				RenderTargetProperty renderTargetProperty)
+			private void SetupBackgroundBuffer(bool enableDistortion, RenderTargetProperty renderTargetProperty)
 			{
-				// add a command to render effects.
-				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
+				if (this.renderTexture != null)
+				{
+					this.renderTexture.Release();
+					this.renderTexture = null;
+				}
 
 				if (enableDistortion)
 				{
@@ -90,41 +94,53 @@ namespace Effekseer.Internal
 #endif
 					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
 
-					// HACK for ZenPhone (cannot understand)
+					// HACK for ZenPhone
 					if (this.renderTexture == null || !this.renderTexture.Create())
 					{
 						this.renderTexture = null;
-						this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
-						this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
-						return;
 					}
+				}
+			}
 
+			private void SetupEffekseerRenderCommandBuffer(
+				CommandBuffer cmbBuf,
+				bool enableDistortion,
+				RenderTargetProperty renderTargetProperty)
+			{
+				// add a command to render effects.
+				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
+
+				if (this.renderTexture != null)
+				{
 					// Add a blit command that copy to the distortion texture
 					// this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
 					// this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-					if (dstID.HasValue)
+					if (renderTargetProperty != null)
 					{
-						this.commandBuffer.Blit(dstID.Value, this.renderTexture.renderTexture);
-						this.commandBuffer.SetRenderTarget(dstID.Value);
-					}
-					else if (renderTargetProperty != null)
-					{
-						renderTargetProperty.ApplyToCommandBuffer(this.commandBuffer, this.renderTexture);
+						if(renderTargetProperty.colorBufferID.HasValue)
+						{
+							cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
+							cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
+						}
+						else
+						{
+							renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture);
+						}
 					}
 					else
 					{
-						this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
-						this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+						cmbBuf.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 					}
 				}
 
-				this.commandBuffer.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
+				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 			}
 
 			public void Dispose()
 			{
-				if (this.commandBuffer != null)
+				if (this.commandBuffer != null && !isCommandBufferFromExternal)
 				{
 					if (this.camera != null)
 					{
@@ -162,7 +178,18 @@ namespace Effekseer.Internal
 				}
 				return true;
 			}
-		};
+
+			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer, RenderTargetProperty renderTargetProperty)
+			{
+				if (!isCommandBufferFromExternal)
+				{
+					Debug.LogError("External command buffer is assigned even if isCommandBufferFromExternal is true.");
+				}
+
+				this.commandBuffer = commandBuffer;
+				SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty);
+			}
+		}
 
 		// RenderPath per Camera
 		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
@@ -209,7 +236,7 @@ namespace Effekseer.Internal
 			Render(camera, null, null);
 		}
 
-		public void Render(Camera camera, int? dstID, RenderTargetProperty renderTargetProperty)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -294,9 +321,9 @@ namespace Effekseer.Internal
 					}
 				}
 
-				path = new RenderPath(camera, cameraEvent, nextRenderID);
+				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
 				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty, stereoRenderingType);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -305,7 +332,7 @@ namespace Effekseer.Internal
 			{
 				path.Dispose();
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, dstID, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty, stereoRenderingType);
 			}
 
 			path.LifeTime = 60;
@@ -317,8 +344,13 @@ namespace Effekseer.Internal
 				return;
 			}
 
+			if(path.isCommandBufferFromExternal)
+			{
+				path.AssignExternalCommandBuffer(targetCommandBuffer, renderTargetProperty);
+			}
+
 			// if LWRP
-			if (dstID.HasValue || renderTargetProperty != null)
+			if (renderTargetProperty.colorBufferID.HasValue || renderTargetProperty != null)
             {
 				// flip a rendertaget
 				// Direct11 : OK (2019, LWRP 5.13)
