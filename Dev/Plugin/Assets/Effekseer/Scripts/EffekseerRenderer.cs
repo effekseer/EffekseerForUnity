@@ -12,6 +12,7 @@ namespace Effekseer.Internal
 		public RenderTargetIdentifier colorTargetIdentifier;
 		public RenderTargetIdentifier? depthTargetIdentifier;
 		public RenderTextureDescriptor colorTargetDescriptor;
+		public Rect Viewport;
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
 		{

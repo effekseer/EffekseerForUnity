@@ -108,6 +108,11 @@ namespace Effekseer.Internal
 				RenderTargetProperty renderTargetProperty)
 			{
 				// add a command to render effects.
+				if(cmbBuf == null)
+				{
+					return;
+				}
+
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
 				if (this.renderTexture != null)
@@ -122,10 +127,20 @@ namespace Effekseer.Internal
 						{
 							cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
 							cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
+
+							if(renderTargetProperty.Viewport.width > 0)
+							{
+								cmbBuf.SetViewport(renderTargetProperty.Viewport);
+							}
 						}
 						else
 						{
 							renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture);
+
+							if (renderTargetProperty.Viewport.width > 0)
+							{
+								cmbBuf.SetViewport(renderTargetProperty.Viewport);
+							}
 						}
 					}
 					else

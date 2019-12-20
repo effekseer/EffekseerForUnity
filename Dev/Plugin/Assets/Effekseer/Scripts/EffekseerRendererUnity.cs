@@ -820,10 +820,20 @@ namespace Effekseer.Internal
 				{
 					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
+
+					if (renderTargetProperty.Viewport.width > 0)
+					{
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+					}
 				}
                 else if (renderTargetProperty != null)
                 {
 					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
+
+					if (renderTargetProperty.Viewport.width > 0)
+					{
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+					}
 				}
 				else
 				{
