@@ -365,7 +365,7 @@ namespace Effekseer.Internal
 			}
 
 			// if LWRP
-			if (renderTargetProperty.colorBufferID.HasValue || renderTargetProperty != null)
+			if (renderTargetProperty != null)
             {
 				// flip a rendertaget
 				// Direct11 : OK (2019, LWRP 5.13)
