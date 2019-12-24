@@ -607,6 +607,17 @@ namespace Effekseer.Internal
 
 				this.commandBuffer = commandBuffer;
 			}
+
+			public void ResetBuffers()
+			{
+				if(!isCommandBufferFromExternal)
+				{
+					commandBuffer.Clear();
+				}
+
+				materiaProps.Reset();
+				modelBuffers.Reset();
+			}
 		};
 
 		MaterialCollection materials = new MaterialCollection();
@@ -688,6 +699,10 @@ namespace Effekseer.Internal
 			// don't need to update because doesn't exists and need not to render
 			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
+				if(renderPaths.ContainsKey(camera))
+				{
+					renderPaths[camera].ResetBuffers();
+				}
 				return;
 			}
 
@@ -771,6 +786,7 @@ namespace Effekseer.Internal
 			// effects shown don't exists
 			if ((camera.cullingMask & mask) == 0)
 			{
+				path.ResetBuffers();
 				return;
 			}
 
@@ -796,9 +812,7 @@ namespace Effekseer.Internal
 				camera.worldToCameraMatrix));
 
 			// Reset command buffer
-			path.commandBuffer.Clear();
-			path.materiaProps.Reset();
-			path.modelBuffers.Reset();
+			path.ResetBuffers();
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
@@ -816,7 +830,7 @@ namespace Effekseer.Internal
 				(path.renderTexture != null || renderTargetProperty != null))
 			{
 				// Add a blit command that copy to the distortion texture
-				if(renderTargetProperty.colorBufferID.HasValue)
+				if(renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
 					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
