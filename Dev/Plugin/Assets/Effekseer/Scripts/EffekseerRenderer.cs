@@ -701,6 +701,13 @@ namespace Effekseer.Internal
 
 				delayEvents.RemoveAll(_ => _.RestTime <= 0);
 			}
+
+			public void ResetBuffers()
+			{
+				commandBuffer.Clear();
+				materiaProps.Reset();
+				modelBuffers.Reset();
+			}
 		};
 
 		MaterialCollection materials = new MaterialCollection();
@@ -715,7 +722,6 @@ namespace Effekseer.Internal
 			materialsDistortion.Shader = EffekseerSettings.Instance.standardDistortionShader;
 			materialsModel.Shader = EffekseerSettings.Instance.standardModelShader;
 			materialsModelDistortion.Shader = EffekseerSettings.Instance.standardModelDistortionShader;
-
 		}
 
 		// RenderPath per Camera
@@ -781,6 +787,10 @@ namespace Effekseer.Internal
 			// don't need to update because doesn't exists and need not to render
 			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
+				if (renderPaths.ContainsKey(camera))
+				{
+					renderPaths[camera].ResetBuffers();
+				}
 				return;
 			}
 
@@ -859,6 +869,7 @@ namespace Effekseer.Internal
 
 			if ((camera.cullingMask & mask) == 0)
 			{
+				path.ResetBuffers();
 				return;
 			}
 
@@ -891,9 +902,7 @@ namespace Effekseer.Internal
 			}
 
 			// Reset command buffer
-			path.commandBuffer.Clear();
-			path.materiaProps.Reset();
-			path.modelBuffers.Reset();
+			path.ResetBuffers();
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
