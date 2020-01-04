@@ -44,6 +44,7 @@ namespace Effekseer.Editor
 				EditorGUILayout.LabelField("CachedMaterialBuffer: ", asset.cachedMaterialBuffers.Length.ToString() + " bytes");
 			}
 
+			EditorGUILayout.ObjectField(asset.shader, typeof(Shader), false);
 		}
 	}
 

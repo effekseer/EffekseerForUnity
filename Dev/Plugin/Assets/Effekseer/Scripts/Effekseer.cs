@@ -220,15 +220,21 @@ namespace Effekseer
 
 		#region UnityRenderer
 
-		
+		public enum RendererMaterialType : int
+		{
+			Default = 0,
+			BackDistortion = 6,
+			Lighting = 7,
+			File = 128,
+		}
+
 		[StructLayout(LayoutKind.Sequential)]
 		public unsafe struct UnityRenderParameter
 		{
 			//! 0 - procedual, 1 - model
 			public int RenderMode;
 
-			//! 0 - False, 1 - True 
-			public int IsDistortingMode;
+			public RendererMaterialType MaterialType;
 
 			//! VertexBuffer 
 			public int VertexBufferOffset;
@@ -251,10 +257,16 @@ namespace Effekseer
 			public IntPtr TexturePtrs1;
 			public IntPtr TexturePtrs2;
 			public IntPtr TexturePtrs3;
+			public IntPtr TexturePtrs4;
+			public IntPtr TexturePtrs5;
+			public IntPtr TexturePtrs6;
+			public IntPtr TexturePtrs7;
 
-			public fixed int TextureFilterTypes[4];
+			public fixed int TextureFilterTypes[8];
 
-			public fixed int TextureWrapTypes[4];
+			public fixed int TextureWrapTypes[8];
+
+			public int TextureCount;
 
 			//! Material ptr
 			public IntPtr MaterialPtr;
@@ -287,8 +299,6 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern IntPtr GetUnityRenderInfoBuffer();
 
-		[DllImport(pluginName)]
-		public static extern void SetMaterial(IntPtr material);
 		#endregion
 
 		#region Network

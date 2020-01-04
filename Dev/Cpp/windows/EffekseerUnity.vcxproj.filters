@@ -58,6 +58,9 @@
     <ClCompile Include="..\common\MemoryFile.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\renderer\EffekseerRendererMaterialLoader.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="..\common\MemoryFile.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\renderer\EffekseerRendererMaterialLoader.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@
 #include "../renderer/EffekseerRendererImplemented.h"
 #include "../renderer/EffekseerRendererModelLoader.h"
 #include "../renderer/EffekseerRendererTextureLoader.h"
+#include "../renderer/EffekseerRendererMaterialLoader.h"
 #include <algorithm>
 #include <assert.h>
 
@@ -48,6 +49,11 @@ Effekseer::TextureLoader* GraphicsUnity::Create(TextureLoaderLoad load, TextureL
 Effekseer::ModelLoader* GraphicsUnity::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
 	return new EffekseerRendererUnity::ModelLoader(load, unload);
+}
+
+Effekseer::MaterialLoader* GraphicsUnity::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	return new EffekseerRendererUnity::MaterialLoader(load, unload);
 }
 
 void GraphicsUnity::ShiftViewportForStereoSinglePass(bool isShift) 

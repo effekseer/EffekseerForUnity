@@ -130,7 +130,11 @@ namespace Effekseer
 
 		private static Dictionary<IntPtr, UnityRendererModel> cachedModels = new Dictionary<IntPtr, UnityRendererModel>();
 
-		private static Dictionary<IntPtr, Material> cachedMaterials = new Dictionary<IntPtr, Material>();
+		private static int materialIDCounter = 0;
+
+		private static Dictionary<IntPtr, UnityRendererMaterial> cachedMaterials = new Dictionary<IntPtr, UnityRendererMaterial>();
+
+		private static Dictionary<EffekseerMaterialAsset, IntPtr> cachedMaterialIDs = new Dictionary<EffekseerMaterialAsset, IntPtr>();
 
 		private void ReloadEffects()
 		{
@@ -450,7 +454,7 @@ namespace Effekseer
 			return null;
 		}
 
-		internal static Material GetCachedMaterial(IntPtr key)
+		internal static UnityRendererMaterial GetCachedMaterial(IntPtr key)
 		{
 			if (cachedMaterials.ContainsKey(key))
 			{
@@ -594,17 +598,30 @@ namespace Effekseer
 			{
 				if (Instance.RendererType == EffekseerRendererType.Unity)
 				{
-					var unityRendererMaterial = new Material("");
-
-					IntPtr ptr = IntPtr.Zero;
-					if (!cachedMaterials.ContainsKey(ptr))
+					if (cachedMaterialIDs.ContainsKey(material))
 					{
-						cachedMaterials.Add(ptr, unityRendererMaterial);
+						return cachedMaterialIDs[material];
 					}
+					else
+					{
+						var ptr = new IntPtr();
+						do
+						{
+							materialIDCounter++;
+							if (materialIDCounter > int.MaxValue / 2)
+							{
+								materialIDCounter = 0;
+							}
+							ptr = new IntPtr(materialIDCounter);
+						}
+						while (cachedMaterials.ContainsKey(ptr));
 
-					throw new Exception("Unimplemented");
+						var unityRendererMaterial = new UnityRendererMaterial(material);
 
-					return ptr;
+						cachedMaterials.Add(ptr, unityRendererMaterial);
+						cachedMaterialIDs.Add(material, ptr);
+						return ptr;
+					}
 				}
 				else
 				{
@@ -650,6 +667,7 @@ namespace Effekseer
 				{
 					var material = cachedMaterials[materialPtr];
 					cachedMaterials.Remove(materialPtr);
+					cachedMaterialIDs.Remove(material.asset);
 				}
 				throw new Exception("Unimplemented");
 			}

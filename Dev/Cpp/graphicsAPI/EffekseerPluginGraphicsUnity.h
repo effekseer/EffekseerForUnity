@@ -30,6 +30,8 @@ public:
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
 
+	Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
+
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };
 

@@ -11,7 +11,7 @@
 #include <EffekseerRenderer.TrackRendererBase.h>
 
 #include <map>
-
+#include <memory>
 #include "../unity/IUnityInterface.h"
 
 extern "C"
@@ -21,8 +21,7 @@ extern "C"
 		//! 0 - procedual, 1 - model
 		int RenderMode = 0;
 
-		//! 0 - False, 1 - True
-		int IsDistortingMode = 0;
+		Effekseer::RendererMaterialType MaterialType = Effekseer::RendererMaterialType::Default;
 
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
@@ -41,11 +40,13 @@ extern "C"
 		float DistortionIntensity = 1.0f;
 
 		//! Texture ptr
-		void* TexturePtrs[4];
+		std::array<void*, Effekseer::TextureSlotMax> TexturePtrs;
 
-		int TextureFilterTypes[4];
+		std::array<int, Effekseer::TextureSlotMax> TextureFilterTypes;
 
-		int TextureWrapTypes[4];
+		std::array<int, Effekseer::TextureSlotMax> TextureWrapTypes;
+
+		int32_t TextureCount = 0;
 
 		//! Material ptr
 		void* MaterialPtr = nullptr;
@@ -121,16 +122,12 @@ protected:
 	::Effekseer::Color m_lightAmbient;
 	int32_t m_squareMaxCount;
 
-	::Effekseer::Matrix44 m_proj;
-	::Effekseer::Matrix44 m_camera;
-	::Effekseer::Matrix44 m_cameraProj;
-
-	::Effekseer::Vector3D m_cameraPosition;
-	::Effekseer::Vector3D m_cameraFrontDirection;
-
 	VertexBuffer* m_vertexBuffer = nullptr;
-	Shader* m_stanShader = nullptr;
-	Shader* m_distortionShader = nullptr;
+
+	std::unique_ptr<Shader> stanShader_;
+	std::unique_ptr<Shader> backDistortedShader_;
+	std::unique_ptr<Shader> lightingShader_;
+
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;
 
@@ -139,9 +136,8 @@ protected:
 	std::vector<UnityRenderParameter> renderParameters;
 	std::vector<ModelParameter> modelParameters;
 
-	bool m_isDistorting = false;
+	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
 	float m_distortionIntensity = 0.0f;
-	bool m_isLighting = false;
 
 	std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
@@ -220,46 +216,6 @@ public:
 	int32_t GetSquareMaxCount() const override;
 
 	/**
-	@brief	投影行列を取得する。
-	*/
-	const ::Effekseer::Matrix44& GetProjectionMatrix() const override;
-
-	/**
-	@brief	投影行列を設定する。
-	*/
-	void SetProjectionMatrix(const ::Effekseer::Matrix44& mat) override;
-
-	/**
-	@brief	カメラ行列を取得する。
-	*/
-	const ::Effekseer::Matrix44& GetCameraMatrix() const override;
-
-	/**
-	@brief	カメラ行列を設定する。
-	*/
-	void SetCameraMatrix(const ::Effekseer::Matrix44& mat) override;
-
-	/**
-	@brief	カメラプロジェクション行列を取得する。
-	*/
-	::Effekseer::Matrix44& GetCameraProjectionMatrix() override;
-
-	::Effekseer::Vector3D GetCameraFrontDirection() const override;
-
-	/**
-	@brief	Get a position of camera
-	*/
-	::Effekseer::Vector3D GetCameraPosition() const override;
-
-	/**
-	@brief	Set a front direction and position of camera manually
-	@note
-	These are set based on camera matrix automatically.
-	It is failed on some platform.
-	*/
-	void SetCameraParameter(const ::Effekseer::Vector3D& front, const ::Effekseer::Vector3D& position) override;
-
-	/**
 	@brief	スプライトレンダラーを生成する。
 	*/
 	::Effekseer::SpriteRenderer* CreateSpriteRenderer() override;
@@ -295,7 +251,7 @@ public:
 	::Effekseer::ModelLoader* CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
 	::Effekseer::MaterialLoader* CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
-	
+
 	/**
 	@brief	レンダーステートを強制的にリセットする。
 	*/
@@ -345,12 +301,7 @@ public:
 	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
 	void SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count);
-	void SetIsLighting(bool value) { m_isLighting = value; }
-	void SetIsDistorting(bool value) { m_isDistorting = value; }
 	void SetDistortionIntensity(float value) { m_distortionIntensity = value; }
-
-	void* FindMaterial();
-	void SetMaterial(void* material);
 
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
 	std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
