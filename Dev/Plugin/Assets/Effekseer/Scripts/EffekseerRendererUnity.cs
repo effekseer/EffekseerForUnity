@@ -6,6 +6,108 @@ using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
+	enum AlphaBlendType : int
+	{
+		Opacity = 0,
+		Blend = 1,
+		Add = 2,
+		Sub = 3,
+		Mul = 4,
+	}
+
+	struct MaterialKey
+	{
+		public bool ZTest;
+		public bool ZWrite;
+		public AlphaBlendType Blend;
+		public int Cull;
+
+		public int GetKey()
+		{
+			return (int)Blend +
+				(ZTest ? 1 : 0) << 4 +
+				(ZWrite ? 1 : 0) << 5 +
+				Cull << 6;
+		}
+	}
+	class MaterialCollection
+	{
+		public Shader Shader;
+		Dictionary<int, Material> materials = new Dictionary<int, Material>();
+
+		public Material GetMaterial(ref MaterialKey key)
+		{
+			var id = key.GetKey();
+
+			if (materials.ContainsKey(id)) return materials[id];
+
+			var material = new Material(Shader);
+
+			if (key.Blend == AlphaBlendType.Opacity)
+			{
+				material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.One);
+				material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.Zero);
+				material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+			}
+			else if (key.Blend == AlphaBlendType.Blend)
+			{
+				material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+				material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+				material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+			}
+			else if (key.Blend == AlphaBlendType.Add)
+			{
+				material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+				material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.One);
+				material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+			}
+			else if (key.Blend == AlphaBlendType.Mul)
+			{
+				material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.Zero);
+				material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.SrcColor);
+				material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+			}
+			else if (key.Blend == AlphaBlendType.Sub)
+			{
+				material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+				material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.One);
+				material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.ReverseSubtract);
+			}
+
+			material.SetFloat("_ZTest", key.ZTest ? (float)UnityEngine.Rendering.CompareFunction.LessEqual : (float)UnityEngine.Rendering.CompareFunction.Disabled);
+			material.SetFloat("_ZWrite", key.ZWrite ? 1.0f : 0.0f);
+			material.SetFloat("_Cull", key.Cull);
+
+			materials.Add(id, material);
+
+			return material;
+		}
+	}
+
+	struct UnityRendererMaterialUniformParameter
+	{
+		public string Name;
+		public int Offset;
+		public int Count;
+	}
+
+	struct UnityRendererMaterialTextureParameter
+	{
+		public string Name;
+	}
+
+	class UnityRendererMaterial
+	{
+		internal EffekseerMaterialAsset asset;
+		internal MaterialCollection materials = new MaterialCollection();
+
+		public UnityRendererMaterial(EffekseerMaterialAsset asset)
+		{
+			this.asset = asset;
+			materials.Shader = asset.shader;
+		}
+	}
+
 	class UnityRendererModel : IDisposable
 	{
 		public ComputeBuffer VertexBuffer;
@@ -238,85 +340,7 @@ namespace Effekseer.Internal
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
 		const int VertexSize = 36;
 		const int VertexDistortionSize = 36 + 4 * 6;
-
-		public enum AlphaBlendType : int
-		{
-			Opacity = 0,
-			Blend = 1,
-			Add = 2,
-			Sub = 3,
-			Mul = 4,
-		}
-
-		struct MaterialKey
-		{
-			public bool ZTest;
-			public bool ZWrite;
-			public AlphaBlendType Blend;
-			public int Cull;
-
-			public int GetKey()
-			{
-				return (int)Blend +
-					(ZTest ? 1 : 0) << 4 +
-					(ZWrite ? 1 : 0) << 5 +
-					Cull << 6;
-			}
-		}
-
-		class MaterialCollection
-		{
-			public Shader Shader;
-			Dictionary<int, Material> materials = new Dictionary<int, Material>();
-
-			public Material GetMaterial(ref MaterialKey key)
-			{
-				var id = key.GetKey();
-
-				if (materials.ContainsKey(id)) return materials[id];
-
-				var material = new Material(Shader);
-
-				if (key.Blend == AlphaBlendType.Opacity)
-				{
-					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.One);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.Zero);
-					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
-				}
-				else if (key.Blend == AlphaBlendType.Blend)
-				{
-					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
-				}
-				else if (key.Blend == AlphaBlendType.Add)
-				{
-					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.One);
-					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
-				}
-				else if (key.Blend == AlphaBlendType.Mul)
-				{
-					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.Zero);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.SrcColor);
-					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
-				}
-				else if (key.Blend == AlphaBlendType.Sub)
-				{
-					material.SetFloat("_BlendSrc", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-					material.SetFloat("_BlendDst", (float)UnityEngine.Rendering.BlendMode.One);
-					material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.ReverseSubtract);
-				}
-
-				material.SetFloat("_ZTest", key.ZTest ? (float)UnityEngine.Rendering.CompareFunction.LessEqual : (float)UnityEngine.Rendering.CompareFunction.Disabled);
-				material.SetFloat("_ZWrite", key.ZWrite ? 1.0f : 0.0f);
-				material.SetFloat("_Cull", key.Cull);
-
-				materials.Add(id, material);
-
-				return material;
-			}
-		}
+		const int VertexDynamicSize = 4 * 17;
 
 		class MaterialPropCollection
 		{
@@ -934,7 +958,15 @@ namespace Effekseer.Internal
 							ComputeBuffer computeBuf = null;
 							var allocated = modelBufferCol.Allocate(modelParameters, offset, count, ref computeBuf);
 
-							if (parameter.IsDistortingMode > 0)
+							if (parameter.MaterialType == Plugin.RendererMaterialType.File)
+							{
+								// TODO
+							}
+							else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
+							{
+								// TODO
+							}
+							else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
 							{
 								var material = materialsModelDistortion.GetMaterial(ref key);
 
@@ -1022,9 +1054,49 @@ namespace Effekseer.Internal
 						key.ZTest = parameter.ZTest > 0;
 						key.ZWrite = parameter.ZWrite > 0;
 						key.Cull = (int)UnityEngine.Rendering.CullMode.Off;
-						
 
-						if (parameter.IsDistortingMode > 0)
+
+						if (parameter.MaterialType == Plugin.RendererMaterialType.File)
+						{
+							var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
+							if(efkMaterial == null)
+							{
+								continue;
+							}
+
+							var material = efkMaterial.materials.GetMaterial(ref key);
+
+							prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDynamicSize);
+							prop.SetBuffer("buf_vertex", computeBuffer);
+
+							var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
+							if (parameter.TextureWrapTypes[0] == 0)
+							{
+								colorTexture.wrapMode = TextureWrapMode.Repeat;
+							}
+							else
+							{
+								colorTexture.wrapMode = TextureWrapMode.Clamp;
+							}
+
+							if (parameter.TextureFilterTypes[0] == 0)
+							{
+								colorTexture.filterMode = FilterMode.Point;
+							}
+							else
+							{
+								colorTexture.filterMode = FilterMode.Bilinear;
+							}
+
+							prop.SetTexture("_ColorTex", colorTexture);
+
+							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+						}
+						else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
+						{
+							// TODO
+						}
+						else if(parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
 						{
 							var material = materialsDistortion.GetMaterial(ref key);
 

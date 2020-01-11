@@ -32,6 +32,24 @@ namespace Effekseer.Editor
 			string[] movedAssets,
 			string[] movedFromPaths)
 		{
+			// Hack for EffekseerMaterial
+
+			if (importedAssets.Any(_ => System.IO.Path.GetExtension(_) == ".asset"))
+			{
+				foreach (string assetPath in importedAssets)
+				{
+					if (Path.GetExtension(assetPath) == ".asset")
+					{
+						var asset = AssetDatabase.LoadAssetAtPath<EffekseerMaterialAsset>(assetPath);
+
+						if(asset !=null)
+						{
+							asset.AttachShader(assetPath);
+						}
+					}
+				}
+			}
+		
 			foreach (string assetPath in importedAssets)
 			{
 				if (Path.GetExtension(assetPath) == ".efk")
@@ -44,11 +62,39 @@ namespace Effekseer.Editor
 				}
 				if (Path.GetExtension(assetPath) == ".efkmat")
 				{
-					EffekseerMaterialAsset.CreateAsset(assetPath, false);
+					EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
+					importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
+					importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
+					var info = new EffekseerTool.Utl.MaterialInformation();
+					info.Load( System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
+
+					foreach(var u in info.Uniforms)
+					{
+						var up = new EffekseerMaterialAsset.UniformProperty();
+						up.Name = u.Name;
+						up.Count = u.Type;
+						importingAsset.Uniforms.Add(up);
+					}
+
+					foreach (var t in info.Textures)
+					{
+						var tp = new EffekseerMaterialAsset.TextureProperty();
+						tp.Name = t.Name;
+						importingAsset.Textures.Add(tp);
+					}
+
+					importingAsset.IsCacheFile = false;
+					importingAsset.Code = info.Code;
+
+					EffekseerMaterialAsset.CreateAsset(assetPath, importingAsset);
 				}
 				if (Path.GetExtension(assetPath) == ".efkmatd")
 				{
-					EffekseerMaterialAsset.CreateAsset(assetPath, true);
+					EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
+					importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
+					importingAsset.IsCacheFile = true;
+
+					EffekseerMaterialAsset.CreateAsset(assetPath, importingAsset);
 				}
 				if (Path.GetExtension(assetPath) == ".efkproj")
 				{

@@ -18,7 +18,7 @@ namespace EffekseerTool
 {
 	public class Core
 	{
-		public const string Version = "1.50β1";
+		public const string Version = "1.50β5";
 
 		public const string OptionFilePath = "config.option.xml";
 
@@ -244,6 +244,11 @@ namespace EffekseerTool
 				}
 			}
 		}
+
+		/// <summary>
+		/// A callback when it is required to load a file
+		/// </summary>
+		public static Func<string, byte[]> OnFileLoaded;
 
 		/// <summary>
 		/// Output message
@@ -1116,7 +1121,7 @@ namespace EffekseerTool
 				{
 					fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
 				}
-				catch (System.IO.FileNotFoundException e)
+				catch
 				{
 					return false;
 				}
@@ -1602,6 +1607,37 @@ namespace EffekseerTool
 
 
 			return getParameterTreeNodes(Root);
+		}
+
+		/// <summary>
+		/// Update resource paths in all nodes
+		/// </summary>
+		/// <param name="path"></param>
+		public static void UpdateResourcePaths(string path)
+		{
+			Action<Data.NodeBase> convert = null;
+			convert = (node) =>
+			{
+				var n = node as Data.Node;
+
+				if(n != null)
+				{
+					if (n.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File && n.RendererCommonValues.MaterialFile.Path.GetAbsolutePath().Replace('\\', '/') == path)
+					{
+						Utl.MaterialInformation info = new Utl.MaterialInformation();
+						info.Load(path);
+
+						n.RendererCommonValues.MaterialFile.ApplyMaterial(info);
+					}
+				}
+
+				for (int i = 0; i < node.Children.Count; i++)
+				{
+					convert(node.Children[i]);
+				}
+			};
+
+			convert(Root as Data.NodeBase);
 		}
 	}
 }
@@ -2361,7 +2397,7 @@ namespace EffekseerTool.Binary
 							}
 							else
 							{
-								relative_path = System.IO.Path.GetDirectoryName(relative_path) + "/" + System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
+								relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
 							}
 
 							if (relative_path != string.Empty)
@@ -2387,7 +2423,7 @@ namespace EffekseerTool.Binary
 							}
 							else
 							{
-								relative_path = System.IO.Path.GetDirectoryName(relative_path) + "/" + System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
+								relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
 							}
 
 							if (relative_path != string.Empty)
@@ -2787,7 +2823,7 @@ namespace EffekseerTool.Binary
 					}
 					else
 					{
-						relative_path = System.IO.Path.GetDirectoryName(relative_path) + "/" + System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
+						relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
 					}
 
 					if (model_and_index.ContainsKey(relative_path))
@@ -3909,7 +3945,7 @@ namespace EffekseerTool.Binary
 					}
 					else
 					{
-						relative_path = System.IO.Path.GetDirectoryName(relative_path) + "/" + System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
+						relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
 					}
 
 					data.Add(model_and_index[relative_path].GetBytes());
@@ -6912,24 +6948,32 @@ namespace EffekseerTool.Data
 
 				foreach(var uniform in uniforms.Where(_=>_.Item1 != null))
 				{
-					var status = uniform;
+					var status = uniform.Item1;
 
-					if (status.Item1.Value is Data.Value.Vector4D)
+					if (status.Value is Data.Value.Vector4D)
 					{
-						var v = status.Item1.Value as Data.Value.Vector4D;
-						var v_e = SaveToElement(doc, uniform.Item1.Key, v, isClip);
+						var v = status.Value as Data.Value.Vector4D;
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
 						if(v_e != null)
 						{
-							e_float4.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_float4.AppendChild(e_root);
 						}
 					}
-					else if (status.Item1.Value is Data.Value.Float)
+					else if (status.Value is Data.Value.Float)
 					{
-						var v = status.Item1.Value as Data.Value.Float;
-						var v_e = SaveToElement(doc, uniform.Item1.Key, v, isClip);
+						var v = status.Value as Data.Value.Float;
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
 						if (v_e != null)
 						{
-							e_float1.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_float1.AppendChild(e_root);
 						}
 					}
 				}
@@ -6950,51 +6994,64 @@ namespace EffekseerTool.Data
 					if (status.Value is Data.Value.PathForImage)
 					{
 						var v = status.Value as Data.Value.PathForImage;
-						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
 						if (v_e != null)
 						{
-							e_texture.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_texture.AppendChild(e_root);
 						}
 					}
 				}
 			}
 			else
 			{
-				foreach(var kv in mfp.KeyValues)
+				foreach(var status in mfp.GetValueStatus())
 				{
-					var key = kv.Key;
-					var status = kv.Value as MaterialFileParameter.ValueStatus;
-
 					if(status.Value is Data.Value.Vector4D)
 					{
 						var v = status.Value as Data.Value.Vector4D;
-						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
 						if (v_e != null)
 						{
-							e_float4.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_float4.AppendChild(e_root);
 						}
 					}
 					else if (status.Value is Data.Value.Float)
 					{
 						var v = status.Value as Data.Value.Float;
-						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
 						if (v_e != null)
 						{
-							e_float1.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_float1.AppendChild(e_root);
 						}
 					}
 					else if (status.Value is Data.Value.PathForImage)
 					{
-						var v = status.Value as Data.Value.PathForImage;
-
 						// regard as defalt texture
 						if (!status.IsShown)
 							continue;
 
-						var v_e = SaveToElement(doc, status.Key, v, isClip);
+						var v = status.Value as Data.Value.PathForImage;
+						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
+						var v_e = SaveToElement(doc, "Value", v, isClip);
+
 						if (v_e != null)
 						{
-							e_texture.AppendChild(v_e);
+							var e_root = doc.CreateElement("KeyValue");
+							e_root.AppendChild(v_k);
+							e_root.AppendChild(v_e);
+							e_texture.AppendChild(e_root);
 						}
 					}
 				}
@@ -7586,18 +7643,36 @@ namespace EffekseerTool.Data
 			var e_float4 = e["Float4"] as XmlElement;
 			var e_texture = e["Texture"] as XmlElement;
 
-			var kv = mfp.KeyValues;
-
 			if (e_float1 != null)
 			{
 				for (var i = 0; i < e_float1.ChildNodes.Count; i++)
 				{
 					var e_child = e_float1.ChildNodes[i] as XmlElement;
-					if (kv.ContainsKey((e_child.Name)))
+
+					// compatibility
+					string key = string.Empty;
+					XmlElement valueElement = null;
+					if(MaterialFileParameter.GetVersionOfKey(e_child.Name) == 0)
 					{
-						var vs = kv[e_child.Name] as MaterialFileParameter.ValueStatus;
+						key = e_child.Name;
+						valueElement = e_child;
+					}
+					else
+					{
+						var e_k = e_child["Key"] as XmlElement;
+						valueElement = e_child["Value"] as XmlElement;
+						
+						if(e_k != null)
+						{
+							key = e_k.GetText();
+						}
+					}
+
+					var vs = mfp.FindValue(key, null, false);
+					if (vs != null)
+					{
 						var v = vs.Value as Value.Float;
-						LoadFromElement(e_child, v, isClip);
+						LoadFromElement(valueElement, v, isClip);
 					}
 				}
 			}
@@ -7607,11 +7682,31 @@ namespace EffekseerTool.Data
 				for (var i = 0; i < e_float4.ChildNodes.Count; i++)
 				{
 					var e_child = e_float4.ChildNodes[i] as XmlElement;
-					if (kv.ContainsKey(e_child.Name))
+
+					// compatibility
+					string key = string.Empty;
+					XmlElement valueElement = null;
+					if (MaterialFileParameter.GetVersionOfKey(e_child.Name) == 0)
 					{
-						var vs = kv[e_child.Name] as MaterialFileParameter.ValueStatus;
+						key = e_child.Name;
+						valueElement = e_child;
+					}
+					else
+					{
+						var e_k = e_child["Key"] as XmlElement;
+						valueElement = e_child["Value"] as XmlElement;
+
+						if (e_k != null)
+						{
+							key = e_k.GetText();
+						}
+					}
+
+					var vs = mfp.FindValue(key, null, false);
+					if (vs != null)
+					{
 						var v = vs.Value as Value.Vector4D;
-						LoadFromElement(e_child, v, isClip);
+						LoadFromElement(valueElement, v, isClip);
 					}
 				}
 			}
@@ -7621,11 +7716,31 @@ namespace EffekseerTool.Data
 				for (var i = 0; i < e_texture.ChildNodes.Count; i++)
 				{
 					var e_child = e_texture.ChildNodes[i] as XmlElement;
-					if (kv.ContainsKey(e_child.Name))
+
+					// compatibility
+					string key = string.Empty;
+					XmlElement valueElement = null;
+					if (MaterialFileParameter.GetVersionOfKey(e_child.Name) == 0)
 					{
-						var vs = kv[e_child.Name] as MaterialFileParameter.ValueStatus;
+						key = e_child.Name;
+						valueElement = e_child;
+					}
+					else
+					{
+						var e_k = e_child["Key"] as XmlElement;
+						valueElement = e_child["Value"] as XmlElement;
+
+						if (e_k != null)
+						{
+							key = e_k.GetText();
+						}
+					}
+
+					var vs = mfp.FindValue(key, null, false);
+					if (vs != null)
+					{
 						var v = vs.Value as Value.PathForImage;
-						LoadFromElement(e_child, v, isClip);
+						LoadFromElement(valueElement, v, isClip);
 					}
 				}
 			}
@@ -9703,16 +9818,26 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		public Dictionary<string, object> KeyValues
+		List<ValueStatus> valueStatuses = new List<ValueStatus>();
+		RendererCommonValues rcValues = null;
+
+		public ValueStatus[] GetValueStatus()
 		{
-			get
-			{
-				return keyToValues;
-			}
+			return valueStatuses.ToArray();
 		}
 
-		Dictionary<string, object> keyToValues = new Dictionary<string, object>();
-		RendererCommonValues rcValues = null;
+		public ValueStatus FindValue(string key, HashSet<ValueStatus> blacklist = null, bool withName = false)
+		{
+			var statusKey = StatusKey.From(key);
+
+			foreach(var kv in valueStatuses)
+			{
+				if (blacklist != null && blacklist.Contains(kv)) continue;
+				if (kv.Key.IsSame(statusKey, withName)) return kv;
+			}
+
+			return null;
+		}
 
 		public MaterialFileParameter(RendererCommonValues rcValues)
 		{
@@ -9731,7 +9856,7 @@ namespace EffekseerTool.Data
 
 			if(info.CustomData.Count() > 0)
 			{
-				rcValues.CustomData1.Name = info.CustomData[0].Names[Core.Language];
+				rcValues.CustomData1.Name = info.CustomData[0].Summaries[Core.Language];
 				rcValues.CustomData1.Desc = info.CustomData[0].Descriptions[Core.Language];
 			}
 			else
@@ -9742,7 +9867,7 @@ namespace EffekseerTool.Data
 
 			if (info.CustomData.Count() > 1)
 			{
-				rcValues.CustomData2.Name = info.CustomData[1].Names[Core.Language];
+				rcValues.CustomData2.Name = info.CustomData[1].Summaries[Core.Language];
 				rcValues.CustomData2.Desc = info.CustomData[1].Descriptions[Core.Language];
 			}
 			else
@@ -9784,7 +9909,7 @@ namespace EffekseerTool.Data
 
 			ret.Add(propPath);
 
-			foreach (var v in keyToValues.Values.OrderBy(_ => (_ as ValueStatus).Priority))
+			foreach (var v in valueStatuses.OrderBy(_ => (_ as ValueStatus).Priority))
 			{
 				EditableValue ev = new EditableValue();
 				var status = v as ValueStatus;
@@ -9802,6 +9927,9 @@ namespace EffekseerTool.Data
 		public void ApplyMaterial(Utl.MaterialInformation info)
 		{
 			bool isChanged = false;
+
+			var previous_selfSummary = selfSummary;
+			var previous_selfDetail = selfDetail;
 
 			if (info.Names.ContainsKey(Core.Language))
 			{
@@ -9822,29 +9950,210 @@ namespace EffekseerTool.Data
 				selfDetail = "";
 			}
 
+			if (previous_selfSummary != selfSummary) isChanged = true;
+			if (previous_selfDetail != selfDetail) isChanged = true;
 
-			var textureKeys = info.Textures.Select(_ => CreateKey(_)).ToList();
-
-			foreach (var kts in keyToValues)
+			HashSet<ValueStatus> usedValueStatuses = new HashSet<ValueStatus>();
+			HashSet<object> finished = new HashSet<object>();
+			
+			foreach (var withNameFlag in new[] { false, true} )
 			{
-				if(!textureKeys.Contains(kts.Key))
+				foreach (var texture in info.Textures)
 				{
-					var status = kts.Value as ValueStatus;
-					if(status.IsShown)
+					if (finished.Contains(texture)) continue;
+
+					var key = StatusKey.From(texture);
+
+					Func<string> getName = () =>
 					{
-						status.IsShown = false;
+						var ret = "";
+						if (texture.Summaries.ContainsKey(Core.Language))
+						{
+							ret = texture.Summaries[Core.Language];
+						}
+
+						if (string.IsNullOrEmpty(ret))
+						{
+							ret = texture.Name;
+						}
+
+						if (string.IsNullOrEmpty(ret))
+						{
+							ret = texture.UniformName;
+						}
+
+						return ret;
+					};
+
+					Func<string> getDesc = () =>
+					{
+						var ret = "";
+						if (texture.Descriptions.ContainsKey(Core.Language))
+						{
+							ret = texture.Descriptions[Core.Language];
+						}
+
+						return ret;
+					};
+
+					ValueStatus status = null;
+
+					var foundValue = FindValue(key.ToString(), usedValueStatuses, withNameFlag);
+					if (foundValue != null)
+					{
+						status = foundValue;
+						if (status.IsShown != texture.IsParam)
+						{
+							status.IsShown = texture.IsParam;
+							isChanged = true;
+						}
+
+						// update default path
+						if(texture.IsParam)
+						{
+							if ((foundValue.Value as Value.PathForImage).AbsolutePath == string.Empty)
+							{
+								(foundValue.Value as Value.PathForImage).SetAbsolutePathDirectly(texture.DefaultPath);
+								isChanged = true;
+							}
+						}
+						else
+						{
+							if((foundValue.Value as Value.PathForImage).AbsolutePath != texture.DefaultPath)
+							{
+								(foundValue.Value as Value.PathForImage).SetAbsolutePathDirectly(texture.DefaultPath);
+								isChanged = true;
+							}
+						}
+					}
+					else
+					{
+						// create only when value is not found even if withName flag is true
+						if (!withNameFlag) continue;
+
+						status = new ValueStatus();
+						var value = new Value.PathForImage(Resources.GetString("ImageFilter"), true);
+						status.Value = value;
+						status.IsShown = texture.IsParam;
+						status.Priority = texture.Priority;
+						valueStatuses.Add(status);
+
+						if(!string.IsNullOrEmpty(texture.DefaultPath))
+						{
+							value.SetAbsolutePathDirectly(texture.DefaultPath);
+						}
+
 						isChanged = true;
 					}
+
+					if (status.Name != getName()) isChanged = true;
+					if (status.Description != getDesc()) isChanged = true;
+
+					status.Key = key;
+					status.Name = getName();
+					status.Description = getDesc();
+					usedValueStatuses.Add(status);
+					finished.Add(texture);
+				}
+
+				foreach (var uniform in info.Uniforms)
+				{
+					if (finished.Contains(uniform)) continue;
+
+					var key = StatusKey.From(uniform);
+
+					Func<string> getName = () =>
+					{
+						var ret = "";
+						if (uniform.Summaries.ContainsKey(Core.Language))
+						{
+							ret = uniform.Summaries[Core.Language];
+						}
+
+						if (string.IsNullOrEmpty(ret))
+						{
+							ret = uniform.Name;
+						}
+
+						if (string.IsNullOrEmpty(ret))
+						{
+							ret = uniform.UniformName;
+						}
+
+						return ret;
+					};
+
+					Func<string> getDesc = () =>
+					{
+						var ret = "";
+						if (uniform.Descriptions.ContainsKey(Core.Language))
+						{
+							ret = uniform.Descriptions[Core.Language];
+						}
+
+						return ret;
+					};
+
+					ValueStatus status = null;
+
+					var foundValue = FindValue(key.ToString(), usedValueStatuses, withNameFlag);
+					if (foundValue != null)
+					{
+						status = foundValue;
+						if (!status.IsShown)
+						{
+							status.IsShown = true;
+							isChanged = true;
+						}
+					}
+					else
+					{
+						// create only when value is not found even if withName flag is true
+						if (!withNameFlag) continue;
+
+						if (uniform.Type == 0)
+						{
+							status = new ValueStatus();
+							var value = new Value.Float();
+							value.SetValueDirectly(uniform.DefaultValues[0]);
+							status.Value = value;
+							status.IsShown = true;
+							status.Priority = uniform.Priority;
+							valueStatuses.Add(status);
+							isChanged = true;
+						}
+						else
+						{
+							status = new ValueStatus();
+							var value = new Value.Vector4D();
+							value.X.SetValueDirectly(uniform.DefaultValues[0]);
+							value.Y.SetValueDirectly(uniform.DefaultValues[1]);
+							value.Z.SetValueDirectly(uniform.DefaultValues[2]);
+							value.W.SetValueDirectly(uniform.DefaultValues[3]);
+							status.Value = value;
+							status.IsShown = true;
+							status.Priority = uniform.Priority;
+							valueStatuses.Add(status);
+							isChanged = true;
+						}
+					}
+
+					if (status.Name != getName()) isChanged = true;
+					if (status.Description != getDesc()) isChanged = true;
+
+					status.Key = key;
+					status.Name = getName();
+					status.Description = getDesc();
+					usedValueStatuses.Add(status);
+					finished.Add(uniform);
 				}
 			}
 
-			var uniformKeys = info.Uniforms.Select(_ => CreateKey(_)).ToList();
-
-			foreach (var kts in keyToValues)
+			foreach (var kts in valueStatuses)
 			{
-				if (!uniformKeys.Contains(kts.Key))
+				if(!usedValueStatuses.Contains(kts))
 				{
-					var status = kts.Value as ValueStatus;
+					var status = kts;
 					if (status.IsShown)
 					{
 						status.IsShown = false;
@@ -9853,139 +10162,7 @@ namespace EffekseerTool.Data
 				}
 			}
 
-			foreach (var texture in info.Textures)
-			{
-				var key = CreateKey(texture);
-
-				Func<string> getName = () =>
-				{
-					var ret = "";
-					if (texture.Names.ContainsKey(Core.Language))
-					{
-						ret = texture.Names[Core.Language];
-					}
-
-					if (string.IsNullOrEmpty(ret))
-					{
-						ret = texture.Name;
-					}
-
-					return ret;
-				};
-
-				Func<string> getDesc = () =>
-				{
-					var ret = "";
-					if (texture.Descriptions.ContainsKey(Core.Language))
-					{
-						ret = texture.Descriptions[Core.Language];
-					}
-
-					return ret;
-				};
-
-				if (keyToValues.ContainsKey(key))
-				{
-					var status = keyToValues[key] as ValueStatus;
-					if(status.IsShown != texture.IsParam)
-					{
-						status.IsShown = texture.IsParam;
-						isChanged = true;
-					}
-				}
-				else
-				{
-					var status = new ValueStatus();
-					var value = new Value.PathForImage(Resources.GetString("ImageFilter"), true);
-					status.Key = key;
-					status.Value = value;
-					status.Name = getName();
-					status.Description = getDesc();
-					status.IsShown = texture.IsParam;
-					status.Priority = texture.Priority;
-					keyToValues.Add(key, status);
-					value.SetAbsolutePathDirectly(texture.DefaultPath);
-					isChanged = true;
-				}
-			}
-
-			foreach(var uniform in info.Uniforms)
-			{
-				var key = CreateKey(uniform);
-
-				Func<string> getName = () =>
-				{
-					var ret = "";
-					if(uniform.Names.ContainsKey(Core.Language))
-					{
-						ret = uniform.Names[Core.Language];
-					}
-
-					if(string.IsNullOrEmpty(ret))
-					{
-						ret = uniform.Name;
-					}
-
-					return ret;
-				};
-
-				Func<string> getDesc = () =>
-				{
-					var ret = "";
-					if (uniform.Descriptions.ContainsKey(Core.Language))
-					{
-						ret = uniform.Descriptions[Core.Language];
-					}
-
-					return ret;
-				};
-
-				if (keyToValues.ContainsKey(key))
-				{
-					var status = keyToValues[key] as ValueStatus;
-					if (!status.IsShown)
-					{
-						status.IsShown = true;
-						isChanged = true;
-					}
-				}
-				else
-				{
-					if(uniform.Type == 0)
-					{
-						var value = new Value.Float();
-						value.SetValueDirectly(uniform.DefaultValues[0]);
-						var status = new ValueStatus();
-						status.Key = key;
-						status.Value = value;
-						status.Name = getName();
-						status.Description = getDesc();
-						status.IsShown = true;
-						status.Priority = uniform.Priority;
-						keyToValues.Add(key, status);
-						isChanged = true;
-					}
-					else
-					{
-						var value = new Value.Vector4D();
-						value.X.SetValueDirectly(uniform.DefaultValues[0]);
-						value.Y.SetValueDirectly(uniform.DefaultValues[1]);
-						value.Z.SetValueDirectly(uniform.DefaultValues[2]);
-						value.W.SetValueDirectly(uniform.DefaultValues[3]);
-						var status = new ValueStatus();
-						status.Key = key;
-						status.Value = value;
-						status.Name = getName();
-						status.Description = getDesc();
-						status.IsShown = true;
-						status.Priority = uniform.Priority;
-						keyToValues.Add(key, status);
-						isChanged = true;
-					}
-				}
-			}
-
-			if(isChanged && OnChanged != null)
+			if (isChanged && OnChanged != null)
 			{
 				OnChanged(this, null);
 			}
@@ -9995,13 +10172,17 @@ namespace EffekseerTool.Data
 		{
 			var ret = new List<Tuple35<ValueStatus, Utl.MaterialInformation.TextureInformation>>();
 
+			HashSet<ValueStatus> usedValueStatuses = new HashSet<ValueStatus>();
+
 			foreach (var texture in info.Textures)
 			{
-				var key = CreateKey(texture);
+				var key = StatusKey.From(texture);
+				var value = FindValue(key.ToString(), usedValueStatuses);
 
-				if (keyToValues.ContainsKey(key))
+				if (value != null)
 				{
-					ret.Add(Tuple35.Create(keyToValues[key] as ValueStatus, texture));
+					ret.Add(Tuple35.Create(value, texture));
+					usedValueStatuses.Add(value);
 				}
 				else
 				{
@@ -10018,10 +10199,12 @@ namespace EffekseerTool.Data
 
 			foreach (var uniform in info.Uniforms)
 			{
-				var key = CreateKey(uniform);
-				if (keyToValues.ContainsKey(key))
+				var key = StatusKey.From(uniform);
+				var value = FindValue(key.ToString());
+
+				if (value != null)
 				{
-					ret.Add(Tuple35.Create(keyToValues[key] as ValueStatus, uniform));
+					ret.Add(Tuple35.Create(value, uniform));
 				}
 				else
 				{
@@ -10032,43 +10215,104 @@ namespace EffekseerTool.Data
 			return ret;
 		}
 
-		public string CreateKey<T>(string name)
+		/// <summary>
+		/// Get key version. For compatiblity
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		public static int GetVersionOfKey(string key)
 		{
-			if(typeof(T) == typeof(Value.Float))
-			{
-				return name + "__TYPE__U0";
-			}
-
-			if (typeof(T) == typeof(Value.Vector4D))
-			{
-				return name + "__TYPE__U3";
-			}
-
-			if (typeof(T) == typeof(Value.PathForImage))
-			{
-				return name + "__TYPE__T";
-			}
-
-			throw new Exception();
-		}
-		public string CreateKey(Utl.MaterialInformation.UniformInformation info)
-		{
-			return info.Name + "__TYPE__U" + info.Type;
-		}
-
-		public string CreateKey(Utl.MaterialInformation.TextureInformation info)
-		{
-			return info.Name + "__TYPE__T";
+			if (key.EndsWith("__TYPE__U0")) return 0;
+			if (key.EndsWith("__TYPE__U1")) return 0;
+			if (key.EndsWith("__TYPE__U2")) return 0;
+			if (key.EndsWith("__TYPE__U3")) return 0;
+			if (key.EndsWith("__TYPE__U4")) return 0;
+			if (key.EndsWith("__TYPE__T")) return 0;
+			return 1;
 		}
 
 		public class ValueStatus
 		{
-			public string Key = string.Empty;
+			public StatusKey Key = new StatusKey();
 			public object Value = null;
 			public string Name = string.Empty;
 			public string Description = string.Empty;
 			public bool IsShown = false;
 			public int Priority = 1;
+		}
+
+		public class StatusKey
+		{
+			public string Name = string.Empty;
+			public string UniformName = string.Empty;
+			public string Footer = string.Empty;
+
+			public static StatusKey From(string key)
+			{
+				var version = GetVersionOfKey(key);
+
+				StatusKey status = new StatusKey();
+
+				if(version > 0)
+				{
+					var labels = key.Split(' ');
+					status.Name = System.Net.WebUtility.UrlDecode(labels[0]);
+					status.UniformName = System.Net.WebUtility.UrlDecode(labels[1]);
+					status.Footer = labels[2];
+					return status;
+				}
+				else
+				{
+					if (key.EndsWith("__TYPE__U0")) status.Footer = "TYPE_U0";
+					if (key.EndsWith("__TYPE__U1")) status.Footer = "TYPE_U1";
+					if (key.EndsWith("__TYPE__U2")) status.Footer = "TYPE_U2";
+					if (key.EndsWith("__TYPE__U3")) status.Footer = "TYPE_U3";
+					if (key.EndsWith("__TYPE__U4")) status.Footer = "TYPE_U4";
+					if (key.EndsWith("__TYPE__T")) status.Footer = "TYPE_T";
+
+					key = key.Replace("__TYPE__U0", "");
+					key = key.Replace("__TYPE__U1", "");
+					key = key.Replace("__TYPE__U2", "");
+					key = key.Replace("__TYPE__U3", "");
+					key = key.Replace("__TYPE__U4", "");
+					key = key.Replace("__TYPE__T", "");
+
+					status.Name = key;
+					status.UniformName = key;
+					return status;
+				}
+			}
+
+			public static StatusKey From(Utl.MaterialInformation.UniformInformation info)
+			{
+				StatusKey status = new StatusKey();
+				status.Name = info.Name;
+				status.UniformName = info.UniformName;
+				status.Footer = "TYPE_U" + info.Type;
+				return status;
+			}
+
+			public static StatusKey From(Utl.MaterialInformation.TextureInformation info)
+			{
+				StatusKey status = new StatusKey();
+				status.Name = info.Name;
+				status.UniformName = info.UniformName;
+				status.Footer = "TYPE_T";
+				return status;
+			}
+
+			public bool IsSame(StatusKey statusKey, bool withName)
+			{
+				if (Footer != statusKey.Footer) return false;
+				if (UniformName == statusKey.UniformName) return true;
+				if (withName && Name == statusKey.Name) return true;
+				return false;
+			}
+
+			public override string ToString()
+			{
+				return System.Net.WebUtility.UrlEncode(Name) + " " + System.Net.WebUtility.UrlEncode(UniformName) + " " + Footer;
+			}
 		}
 
 		public event ChangedValueEventHandler OnChanged;
@@ -16404,7 +16648,7 @@ namespace EffekseerTool.Utl
 			{
 				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
 			}
-			catch (System.IO.FileNotFoundException e)
+			catch
 			{
 				return false;
 			}
@@ -16466,32 +16710,39 @@ namespace EffekseerTool.Utl
 
 		public Dictionary<Language, string> Descriptions = new Dictionary<Language, string>();
 
+		public string Code = string.Empty;
+
 		public bool Load(string path)
 		{
 			if (string.IsNullOrEmpty(path))
 				return false;
 
-			System.IO.FileStream fs = null;
-			if (!System.IO.File.Exists(path)) return false;
+			byte[] file = null;
 
-			try
+			if(Core.OnFileLoaded != null)
 			{
-				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+				file = Core.OnFileLoaded(path);
+				if (file == null) return false;
 			}
-			catch (System.IO.FileNotFoundException e)
+			else
 			{
-				return false;
+				if (!System.IO.File.Exists(path)) return false;
+
+				try
+				{
+					file = System.IO.File.ReadAllBytes(path);
+				}
+				catch
+				{
+					return false;
+				}
 			}
 
-
-			var br = new System.IO.BinaryReader(fs);
-
+			var br = new System.IO.BinaryReader(new System.IO.MemoryStream(file));
 			var buf = new byte[1024];
-
 
 			if (br.Read(buf, 0, 16) != 16)
 			{
-				fs.Dispose();
 				br.Close();
 				return false;
 			}
@@ -16511,7 +16762,6 @@ namespace EffekseerTool.Utl
 			{
 				if (br.Read(buf, 0, 8) != 8)
 				{
-					fs.Dispose();
 					br.Close();
 					break;
 				}
@@ -16577,6 +16827,17 @@ namespace EffekseerTool.Utl
 						TextureInformation info = new TextureInformation();
 
 						reader.Get(ref info.Name, Encoding.UTF8);
+
+						// name is for human, uniformName is a variable name after 3
+						if (version >= 3)
+						{
+							reader.Get(ref info.UniformName, Encoding.UTF8);
+						}
+						else
+						{
+							info.UniformName = info.Name;
+						}
+
 						reader.Get(ref info.DefaultPath, Encoding.UTF8);
 						reader.Get(ref info.Index);
 						reader.Get(ref info.Priority);
@@ -16612,6 +16873,17 @@ namespace EffekseerTool.Utl
 						UniformInformation info = new UniformInformation();
 
 						reader.Get(ref info.Name, Encoding.UTF8);
+
+						// name is for human, uniformName is a variable name after 3
+						if (version >= 3)
+						{
+							reader.Get(ref info.UniformName, Encoding.UTF8);
+						}
+						else
+						{
+							info.UniformName = info.Name;
+						}
+
 						reader.Get(ref info.Offset);
 						reader.Get(ref info.Priority);
 						reader.Get(ref info.Type);
@@ -16635,7 +16907,7 @@ namespace EffekseerTool.Utl
 
 					var reader = new BinaryReader(temp);
 
-					if(version >= 2)
+					if (version >= 2)
 					{
 						int customDataCount = 0;
 						reader.Get(ref customDataCount);
@@ -16657,7 +16929,7 @@ namespace EffekseerTool.Utl
 								reader.Get(ref lang);
 								reader.Get(ref name, Encoding.UTF8);
 								reader.Get(ref desc, Encoding.UTF8);
-								CustomData[j].Names.Add((Language)lang, name);
+								CustomData[j].Summaries.Add((Language)lang, name);
 								CustomData[j].Descriptions.Add((Language)lang, desc);
 							}
 						}
@@ -16679,7 +16951,7 @@ namespace EffekseerTool.Utl
 							reader.Get(ref lang);
 							reader.Get(ref name, Encoding.UTF8);
 							reader.Get(ref desc, Encoding.UTF8);
-							Textures[j].Names.Add((Language)lang, name);
+							Textures[j].Summaries.Add((Language)lang, name);
 							Textures[j].Descriptions.Add((Language)lang, desc);
 						}
 					}
@@ -16700,10 +16972,23 @@ namespace EffekseerTool.Utl
 							reader.Get(ref lang);
 							reader.Get(ref name, Encoding.UTF8);
 							reader.Get(ref desc, Encoding.UTF8);
-							Uniforms[j].Names.Add((Language)lang, name);
+							Uniforms[j].Summaries.Add((Language)lang, name);
 							Uniforms[j].Descriptions.Add((Language)lang, desc);
 						}
 					}
+				}
+
+				if (buf[0] == 'G' &&
+				buf[1] == 'E' &&
+				buf[2] == 'N' &&
+				buf[3] == 'E')
+				{
+					var temp = new byte[BitConverter.ToInt32(buf, 4)];
+					if (br.Read(temp, 0, temp.Length) != temp.Length) return false;
+
+					var reader = new BinaryReader(temp);
+
+					reader.Get(ref Code, Encoding.UTF8);
 				}
 			}
 
@@ -16712,7 +16997,7 @@ namespace EffekseerTool.Utl
 
 		public class CustomDataInformation
 		{
-			public Dictionary<Language, string> Names = new Dictionary<Language, string>();
+			public Dictionary<Language, string> Summaries = new Dictionary<Language, string>();
 			public Dictionary<Language, string> Descriptions = new Dictionary<Language, string>();
 		}
 
@@ -16720,25 +17005,27 @@ namespace EffekseerTool.Utl
 		public class TextureInformation
 		{
 			public string Name;
+			public string UniformName;
 			public int Index;
 			public string DefaultPath;
 			public bool IsParam;
 			public TextureType Type = TextureType.Color;
 			public int Priority = 1;
 
-			public Dictionary<Language, string> Names = new Dictionary<Language, string>();
+			public Dictionary<Language, string> Summaries = new Dictionary<Language, string>();
 			public Dictionary<Language, string> Descriptions = new Dictionary<Language, string>();
 		}
 
 		public class UniformInformation
 		{
 			public string Name;
+			public string UniformName;
 			public int Offset;
 			public int Type = 0;
 			public float[] DefaultValues = new float[4];
 			public int Priority = 1;
 
-			public Dictionary<Language, string> Names = new Dictionary<Language, string>();
+			public Dictionary<Language, string> Summaries = new Dictionary<Language, string>();
 			public Dictionary<Language, string> Descriptions = new Dictionary<Language, string>();
 		}
 	}
@@ -16822,7 +17109,7 @@ namespace EffekseerTool.Utl
 			{
 				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
 			}
-			catch (System.IO.FileNotFoundException e)
+			catch
 			{
 				return false;
 			}
@@ -17030,7 +17317,7 @@ namespace EffekseerTool.Utl
 			{
 				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
 			}
-			catch(System.IO.FileNotFoundException e)
+			catch
 			{
 				return false;
 			}
@@ -17366,19 +17653,23 @@ namespace EffekseerTool.Utils
 		}
 		public static string GetAbsolutePath(string basePath, string path)
 		{
-			Func<string, string> escape = (string s) =>
+			Func<string, string> doubleBackslashToSlash = (string s) =>
 			{
-				return s.Replace("%", "%25");
+				string input = s;
+				string pattern = @"\\";
+				string replacement = @"/";
+				string result = System.Text.RegularExpressions.Regex.Replace(input, pattern, replacement);
+				return result;
 			};
 
-			Func<string, string> unescape = (string s) =>
-			{
-				return s.Replace("%25", "%");
-			};
-
-			Uri escaped = new Uri(escape(basePath));
-			Uri targetPath = new Uri(escaped, escape(path));
-			return unescape(Uri.UnescapeDataString(targetPath.LocalPath));
+			var basePath_ecs = new Uri(basePath, UriKind.Relative);
+			var path_ecs = new Uri(path, UriKind.Relative);
+			var basePath_slash = doubleBackslashToSlash(basePath_ecs.ToString());
+			var basePath_uri = new Uri(basePath_slash, UriKind.Absolute);
+			var path_uri = new Uri(path_ecs.ToString(), UriKind.Relative);
+			var targetPath = new Uri(basePath_uri, path_uri);
+			var ret = targetPath.LocalPath.ToString();
+			return ret;
 		}
 	}
 }

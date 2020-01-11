@@ -175,6 +175,7 @@
     <ClCompile Include="..\graphicsAPI\EffekseerPluginGraphicsUnity.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererImplemented.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererIndexBuffer.cpp" />
+    <ClCompile Include="..\renderer\EffekseerRendererMaterialLoader.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererModelLoader.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererRenderState.cpp" />
     <ClCompile Include="..\renderer\EffekseerRendererShader.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="..\graphicsAPI\EffekseerPluginGraphicsUnity.h" />
     <ClInclude Include="..\renderer\EffekseerRendererImplemented.h" />
     <ClInclude Include="..\renderer\EffekseerRendererIndexBuffer.h" />
+    <ClInclude Include="..\renderer\EffekseerRendererMaterialLoader.h" />
     <ClInclude Include="..\renderer\EffekseerRendererModelLoader.h" />
     <ClInclude Include="..\renderer\EffekseerRendererRenderState.h" />
     <ClInclude Include="..\renderer\EffekseerRendererShader.h" />
