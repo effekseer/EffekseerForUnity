@@ -9,4 +9,6 @@ git clone https://github.com/effekseer/TestData.git TestProject/Resources/TestDa
 python3 test_tools.py
 
 $UNITY_PATH -projectPath $PROJECT_PATH -quit -batchmode -logFile log -importPackage `pwd`/../Effekseer.unitypackage
+cat $PROJECT_PATH/log
 $UNITY_PATH -projectPath $PROJECT_PATH -quit -batchmode -logFile log -executeMethod BuildClass.Build
+cat $PROJECT_PATH/log
