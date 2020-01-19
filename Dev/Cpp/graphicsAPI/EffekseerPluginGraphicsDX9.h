@@ -3,7 +3,13 @@
 #pragma once
 
 #include "EffekseerPluginGraphics.h"
+
+
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRendererDX9/EffekseerRendererDX9.h>
+#else
 #include "EffekseerRendererDX9.h"
+#endif
 
 namespace EffekseerPlugin
 {

@@ -1,10 +1,25 @@
-@echo off
+cd /d %~dp0
 
-rem Enable Visual Studio 2015 environment
-call "%VS140COMNTOOLS% \VsDevCmd.bat"
+mkdir ..\build_x86
 
-msbuild EffekseerUnity.sln /t:rebuild /property:Configuration=Release /p:platform=x86
-msbuild EffekseerUnity.sln /t:rebuild /property:Configuration=Release /p:platform=x64
+cd /d ..\build_x86
 
-copy Win32\Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86\
-copy x64\Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86_64\
+cmake -A Win32 ../
+cmake --build . --config Release
+
+copy Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86\
+
+cd /d %~dp0
+
+mkdir ..\build_x64
+
+cd /d ..\build_x64
+
+cmake -A x64 ../
+cmake --build . --config Release
+
+copy Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86_64\
+
+
+
+pause

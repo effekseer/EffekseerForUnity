@@ -10,9 +10,9 @@
 #include <EffekseerRenderer.StandardRenderer.h>
 #include <EffekseerRenderer.TrackRendererBase.h>
 
+#include "../unity/IUnityInterface.h"
 #include <map>
 #include <memory>
-#include "../unity/IUnityInterface.h"
 
 extern "C"
 {
@@ -25,6 +25,15 @@ extern "C"
 
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
+
+		//! For model
+		int CustomData1BufferOffset = 0;
+
+		//! For model
+		int CustomData2BufferOffset = 0;
+
+		//! For model
+		int UniformBufferOffset = 0;
 
 		//! Element count (Triangle) or instance
 		int32_t ElementCount;
@@ -145,6 +154,8 @@ protected:
 	Effekseer::TextureData backgroundData;
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* m_standardRenderer = nullptr;
+
+	int32_t AddInfoBuffer(const void* data, int32_t size);
 
 public:
 	static RendererImplemented* Create();
@@ -289,7 +300,9 @@ public:
 				   std::vector<Effekseer::Matrix44>& matrixes,
 				   std::vector<Effekseer::RectF>& uvs,
 				   std::vector<Effekseer::Color>& colors,
-				   std::vector<int32_t>& times);
+				   std::vector<int32_t>& times,
+				   std::vector<std::array<float, 4>>& customData1,
+				   std::vector<std::array<float, 4>>& customData2);
 
 	Shader* GetShader(bool useTexture, ::Effekseer::RendererMaterialType type) const;
 

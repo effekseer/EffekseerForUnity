@@ -1,7 +1,12 @@
 ﻿
 #pragma once
 
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRendererDX11/EffekseerRendererDX11.h>
+#else
 #include "EffekseerRendererDX11.h"
+#endif
+
 #include "EffekseerPluginGraphics.h"
 
 namespace EffekseerPlugin

@@ -3,7 +3,6 @@
 #include "EffekseerPluginModel.h"
 #include "EffekseerPluginSound.h"
 #include "EffekseerPluginNetwork.h"
-#include "Effekseer.h"
 #include "../graphicsAPI/EffekseerPluginGraphics.h"
 
 using namespace Effekseer;

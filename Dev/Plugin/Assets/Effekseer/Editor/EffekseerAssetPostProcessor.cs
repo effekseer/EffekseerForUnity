@@ -68,7 +68,10 @@ namespace Effekseer.Editor
 					var info = new EffekseerTool.Utl.MaterialInformation();
 					info.Load( System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
 
-					foreach(var u in info.Uniforms)
+					importingAsset.CustomData1Count = info.CustomData1Count;
+					importingAsset.CustomData2Count = info.CustomData2Count;
+
+					foreach (var u in info.Uniforms)
 					{
 						var up = new EffekseerMaterialAsset.UniformProperty();
 						up.Name = u.Name;

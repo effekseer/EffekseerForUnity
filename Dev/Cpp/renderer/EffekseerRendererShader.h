@@ -12,6 +12,7 @@ class Shader
 {
 private:
 	EffekseerRenderer::MaterialShaderParameterGenerator parameterGenerator_;
+	std::shared_ptr<Effekseer::Material> material_;
 	void* unityMaterial_ = nullptr;
 	Effekseer::RendererMaterialType type_;
 	std::vector<uint8_t> vertexConstantBuffer;
@@ -21,7 +22,7 @@ public:
 	/**
 		@brief	Constructor for material
 	*/
-	Shader(void* unityMaterial, Effekseer::Material* material, bool isModel, bool isRefraction);
+	Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> material, bool isModel, bool isRefraction);
 
 	Shader(Effekseer::RendererMaterialType type);
 
@@ -36,6 +37,10 @@ public:
 	Effekseer::RendererMaterialType GetType() const;
 
 	void* GetUnityMaterial() const;
+
+	const std::shared_ptr<Effekseer::Material>& GetMaterial() { return material_; }
+
+	const EffekseerRenderer::MaterialShaderParameterGenerator* GetParameterGenerator() const { return &parameterGenerator_; }
 };
 
 } // namespace EffekseerRendererUnity

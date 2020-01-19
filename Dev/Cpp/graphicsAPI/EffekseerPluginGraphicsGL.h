@@ -8,8 +8,11 @@
 #define EGL_EGLEXT_PROTOTYPES
 #endif // EMSCRIPTEN
 
-#include <Effekseer.h>
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRendererGL/EffekseerRendererGL.h>
+#else
 #include <EffekseerRendererGL.h>
+#endif
 
 namespace EffekseerPlugin
 {

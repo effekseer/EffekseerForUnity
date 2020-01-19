@@ -6059,6 +6059,15 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
+		[Name(language = Language.Japanese, value = "再生速度")]
+		[Name(language = Language.English, value = "Playback Speed")]
+		[Undo(Undo = false)]
+		public Value.Float PlaybackSpeed
+		{
+			get;
+			private set;
+		}
+
 		[Name(language = Language.Japanese, value = "ターゲット位置")]
 		[Description(language = Language.Japanese, value = "ターゲット位置または引力位置")]
 		[Name(language = Language.English, value = "Point of\nAttraction")]
@@ -6092,6 +6101,8 @@ namespace EffekseerTool.Data
 			ColorAll = new Value.Color(255, 255, 255, 255);
 
 			TargetLocation = new Value.Vector3D();
+
+			PlaybackSpeed = new Value.Float(1.0f, float.MaxValue, 0.0f, 0.1f);
 		}
 
 		/// <summary>
@@ -6138,6 +6149,8 @@ namespace EffekseerTool.Data
 			ColorAll.G.SetValueDirectly(255);
 			ColorAll.B.SetValueDirectly(255);
 			ColorAll.A.SetValueDirectly(255);
+
+			PlaybackSpeed.SetValueDirectly(1);
 
 			TargetLocation.X.SetValueDirectly(0.0f);
 			TargetLocation.Y.SetValueDirectly(0.0f);
@@ -16706,6 +16719,12 @@ namespace EffekseerTool.Utl
 
 		public UInt64 GUID;
 
+		public int CustomData1Count = 0;
+
+		public int CustomData2Count = 0;
+
+		public bool HasRefraction = false;
+
 		public Dictionary<Language, string> Names = new Dictionary<Language, string>();
 
 		public Dictionary<Language, string> Descriptions = new Dictionary<Language, string>();
@@ -16808,14 +16827,11 @@ namespace EffekseerTool.Utl
 					bool hasNormal = false;
 					reader.Get(ref hasNormal);
 
-					bool hasReflection = false;
-					reader.Get(ref hasReflection);
+					reader.Get(ref HasRefraction);
 
-					int customData1Count = 0;
-					reader.Get(ref customData1Count);
+					reader.Get(ref CustomData1Count);
 
-					int customData2Count = 0;
-					reader.Get(ref customData2Count);
+					reader.Get(ref CustomData2Count);
 
 					int textureCount = 0;
 					reader.Get(ref textureCount);

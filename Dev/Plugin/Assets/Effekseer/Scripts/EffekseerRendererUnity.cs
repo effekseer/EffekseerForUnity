@@ -33,6 +33,8 @@ namespace Effekseer.Internal
 	class MaterialCollection
 	{
 		public Shader Shader;
+		public string[] Keywords = new string[0];
+
 		Dictionary<int, Material> materials = new Dictionary<int, Material>();
 
 		public Material GetMaterial(ref MaterialKey key)
@@ -78,6 +80,11 @@ namespace Effekseer.Internal
 			material.SetFloat("_ZWrite", key.ZWrite ? 1.0f : 0.0f);
 			material.SetFloat("_Cull", key.Cull);
 
+			foreach(var keyword in Keywords)
+			{
+				material.EnableKeyword(keyword);
+			}
+
 			materials.Add(id, material);
 
 			return material;
@@ -100,11 +107,14 @@ namespace Effekseer.Internal
 	{
 		internal EffekseerMaterialAsset asset;
 		internal MaterialCollection materials = new MaterialCollection();
+		internal MaterialCollection materialsModel = new MaterialCollection();
 
 		public UnityRendererMaterial(EffekseerMaterialAsset asset)
 		{
 			this.asset = asset;
 			materials.Shader = asset.shader;
+			materialsModel.Shader = asset.shader;
+			materialsModel.Keywords = new string[] { "_Model"};
 		}
 	}
 
@@ -917,6 +927,8 @@ namespace Effekseer.Internal
 					computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
 				}
 
+				var infoBuffer = Plugin.GetUnityRenderInfoBuffer();
+
 				for (int i = 0; i < renderParameterCount; i++)
 				{
 					Plugin.GetUnityRenderParameter(ref parameter, i);
@@ -924,7 +936,6 @@ namespace Effekseer.Internal
 					if(parameter.RenderMode == 1)
 					{
 						// Draw model
-						var infoBuffer = Plugin.GetUnityRenderInfoBuffer();
 						var modelParameters = ((Plugin.UnityRenderModelParameter*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
 
 						MaterialKey key = new MaterialKey();
@@ -960,7 +971,42 @@ namespace Effekseer.Internal
 
 							if (parameter.MaterialType == Plugin.RendererMaterialType.File)
 							{
-								// TODO
+								var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
+								if (efkMaterial == null)
+								{
+									continue;
+								}
+
+								var material = efkMaterial.materialsModel.GetMaterial(ref key);
+
+								prop.SetBuffer("buf_vertex", model.VertexBuffer);
+								prop.SetBuffer("buf_index", model.IndexBuffer);
+								prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
+								prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
+								prop.SetBuffer("buf_model_parameter", computeBuf);
+
+								for (int ti = 0; ti < efkMaterial.asset.textures.Count; ti++)
+								{
+									var ptr = parameter.GetTexturePtr(ti);
+									var texture = GetCachedTexture(ptr, background);
+									if (texture != null)
+									{
+										prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
+										texture.wrapMode = TextureWrapMode.Repeat;
+										texture.filterMode = FilterMode.Bilinear;
+									}
+								}
+
+								for (int ui = 0; ui < efkMaterial.asset.uniforms.Count; ui++)
+								{
+									var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
+									prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
+								}
+
+								// TODO CustomData
+								// TODO Refraction
+
+								commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 							}
 							else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
 							{
@@ -1069,26 +1115,26 @@ namespace Effekseer.Internal
 							prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDynamicSize);
 							prop.SetBuffer("buf_vertex", computeBuffer);
 
-							var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background);
-							if (parameter.TextureWrapTypes[0] == 0)
+							for(int ti = 0; ti < efkMaterial.asset.textures.Count; ti++)
 							{
-								colorTexture.wrapMode = TextureWrapMode.Repeat;
-							}
-							else
-							{
-								colorTexture.wrapMode = TextureWrapMode.Clamp;
-							}
-
-							if (parameter.TextureFilterTypes[0] == 0)
-							{
-								colorTexture.filterMode = FilterMode.Point;
-							}
-							else
-							{
-								colorTexture.filterMode = FilterMode.Bilinear;
+								var ptr = parameter.GetTexturePtr(ti);
+								var texture = GetCachedTexture(ptr, background);
+								if(texture != null)
+								{
+									prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
+									texture.wrapMode = TextureWrapMode.Repeat;
+									texture.filterMode = FilterMode.Bilinear;
+								}
 							}
 
-							prop.SetTexture("_ColorTex", colorTexture);
+							for (int ui = 0; ui < efkMaterial.asset.uniforms.Count; ui++)
+							{
+								var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
+								prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
+							}
+
+							// TODO CustomData
+							// TODO Refraction
 
 							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 						}

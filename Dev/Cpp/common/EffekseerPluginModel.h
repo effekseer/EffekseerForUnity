@@ -5,7 +5,13 @@
 #include <string>
 #include <map>
 #include <memory>
+
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <Effekseer/Effekseer.h>
+#else
 #include <Effekseer.h>
+#endif
+
 #include "MemoryFile.h"
 #include "EffekseerPluginCommon.h"
 #include "../unity/IUnityInterface.h"

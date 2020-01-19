@@ -10,7 +10,11 @@
 #pragma comment(lib, "shlwapi.lib")
 #endif
 
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <Effekseer/Effekseer.h>
+#else
 #include "Effekseer.h"
+#endif
 
 #include "../common/EffekseerPluginCommon.h"
 #include "../unity/IUnityGraphics.h"
@@ -22,13 +26,22 @@
 
 // OpenGL
 #if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRendererGL/EffekseerRendererGL.h>
+#else
 #include "EffekseerRendererGL.h"
+#endif
 #endif
 
 // DirectX
 #ifdef _WIN32
-#include "EffekseerRendererDX11.h"
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRendererDX9/EffekseerRendererDX9.h>
+#include <EffekseerRendererDX11/EffekseerRendererDX11.h>
+#else
 #include "EffekseerRendererDX9.h"
+#include "EffekseerRendererDX11.h"
+#endif
 #endif
 
 #ifdef _PS4

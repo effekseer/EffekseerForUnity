@@ -239,6 +239,14 @@ namespace Effekseer
 			//! VertexBuffer 
 			public int VertexBufferOffset;
 
+			//! For model
+			public int CustomData1BufferOffset;
+
+			//! For model
+			public int CustomData2BufferOffset;
+
+			public int UniformBufferOffset;
+
 			//! Element count (Triangle) or instance
 			public int ElementCount;
 
@@ -261,6 +269,19 @@ namespace Effekseer
 			public IntPtr TexturePtrs5;
 			public IntPtr TexturePtrs6;
 			public IntPtr TexturePtrs7;
+
+			public IntPtr GetTexturePtr(int i)
+			{
+				if (i == 0) return TexturePtrs0;
+				if (i == 1) return TexturePtrs1;
+				if (i == 2) return TexturePtrs2;
+				if (i == 3) return TexturePtrs3;
+				if (i == 4) return TexturePtrs4;
+				if (i == 5) return TexturePtrs5;
+				if (i == 6) return TexturePtrs6;
+				if (i == 7) return TexturePtrs7;
+				return IntPtr.Zero;
+			}
 
 			public fixed int TextureFilterTypes[8];
 

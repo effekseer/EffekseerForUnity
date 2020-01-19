@@ -66,33 +66,33 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 	{
 		memoryFile_.LoadedSize = static_cast<size_t>(requiredDataSize);
 
-		Effekseer::Material material;
-		material.Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), memoryFile_.LoadedBuffer.size());
+		std::shared_ptr<Effekseer::Material> material = std::make_shared<Effekseer::Material>();
+		material->Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), memoryFile_.LoadedBuffer.size());
 
 		res.internalData = new ::Effekseer::MaterialData();
 
 		auto materialData = res.internalData;
 
-		materialData->IsSimpleVertex = material.GetIsSimpleVertex();
-		materialData->IsRefractionRequired = material.GetHasRefraction();
-		materialData->CustomData1 = material.GetCustomData1Count();
-		materialData->CustomData2 = material.GetCustomData2Count();
-		materialData->TextureCount = std::min(material.GetTextureCount(), Effekseer::UserTextureSlotMax);
-		materialData->UniformCount = material.GetUniformCount();
-		materialData->ShadingModel = material.GetShadingModel();
+		materialData->IsSimpleVertex = material->GetIsSimpleVertex();
+		materialData->IsRefractionRequired = material->GetHasRefraction();
+		materialData->CustomData1 = material->GetCustomData1Count();
+		materialData->CustomData2 = material->GetCustomData2Count();
+		materialData->TextureCount = std::min(material->GetTextureCount(), Effekseer::UserTextureSlotMax);
+		materialData->UniformCount = material->GetUniformCount();
+		materialData->ShadingModel = material->GetShadingModel();
 
 		for (int32_t i = 0; i < materialData->TextureCount; i++)
 		{
-			materialData->TextureWrapTypes.at(i) = material.GetTextureWrap(i);
+			materialData->TextureWrapTypes.at(i) = material->GetTextureWrap(i);
 		}
 
-		materialData->UserPtr = new Shader(materialPtr, &material, false, false);
-		materialData->ModelUserPtr = new Shader(materialPtr, &material, true, false);
+		materialData->UserPtr = new Shader(materialPtr, material, false, false);
+		materialData->ModelUserPtr = new Shader(materialPtr, material, true, false);
 
-		if (material.GetHasRefraction())
+		if (material->GetHasRefraction())
 		{
-			materialData->RefractionUserPtr = new Shader(materialPtr, &material, false, true);
-			materialData->RefractionModelUserPtr = new Shader(materialPtr, &material, true, true);		
+			materialData->RefractionUserPtr = new Shader(materialPtr, material, false, true);
+			materialData->RefractionModelUserPtr = new Shader(materialPtr, material, true, true);		
 		}
 
 		resources.insert(std::make_pair((const char16_t*)path, res));
