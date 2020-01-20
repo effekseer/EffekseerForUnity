@@ -3,10 +3,11 @@
 namespace EffekseerRendererUnity
 {
 
-Shader::Shader(void* unityMaterial, Effekseer::Material* material, bool isModel, bool isRefraction)
+Shader::Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> material, bool isModel, bool isRefraction)
 	: unityMaterial_(unityMaterial)
 	, parameterGenerator_(*material, isModel, isRefraction ? 1 : 0, 1)
 	, type_(Effekseer::RendererMaterialType::File)
+	, material_(material)
 {
 	vertexConstantBuffer.resize(parameterGenerator_.VertexShaderUniformBufferSize);
 	pixelConstantBuffer.resize(parameterGenerator_.PixelShaderUniformBufferSize);

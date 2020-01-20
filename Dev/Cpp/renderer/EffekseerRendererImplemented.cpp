@@ -90,6 +90,51 @@ struct UnityModelParameter
 
 static int GetAlignedOffset(int offset, int size) { return ((offset + (size - 1)) / size) * size; }
 
+void ExtractTextures(const Effekseer::Effect* effect,
+					 const Effekseer::NodeRendererBasicParameter* param,
+					 std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax>& textures,
+					 int32_t& textureCount)
+{
+	if (param->MaterialType == Effekseer::RendererMaterialType::File)
+	{
+		auto materialParam = param->MaterialParameterPtr;
+
+		textureCount = 0;
+		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
+
+		if (materialParam->MaterialTextures.size() > 0)
+		{
+			textureCount = Effekseer::Min(materialParam->MaterialTextures.size(), ::Effekseer::UserTextureSlotMax);
+
+			for (size_t i = 0; i < textureCount; i++)
+			{
+				if (materialParam->MaterialTextures[i].Type == 1)
+				{
+					if (materialParam->MaterialTextures[i].Index >= 0)
+					{
+						textures[i] = effect->GetNormalImage(materialParam->MaterialTextures[i].Index);
+					}
+					else
+					{
+						textures[i] = nullptr;
+					}
+				}
+				else
+				{
+					if (materialParam->MaterialTextures[i].Index >= 0)
+					{
+						textures[i] = effect->GetColorImage(materialParam->MaterialTextures[i].Index);
+					}
+					else
+					{
+						textures[i] = nullptr;
+					}
+				}
+			}
+		}
+	}
+}
+
 ModelRenderer::ModelRenderer(RendererImplemented* renderer) : m_renderer(renderer) {}
 
 ModelRenderer::~ModelRenderer() {}
@@ -154,7 +199,19 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	Effekseer::TextureData* textures[1];
 
-	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
+	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
+	{
+		int32_t textureCount = 0;
+		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
+
+		ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
+
+		if (textureCount > 0)
+		{
+			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
+		}
+	}
+	else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
 	{
 		if (parameter.BasicParameterPtr->Texture1Index >= 0)
 		{
@@ -187,11 +244,20 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	m_renderer->GetRenderState()->Update(false);
 	m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
 
-	m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times);
+	m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times, customData1_, customData2_);
 
 	m_renderer->EndShader(shader);
 
 	m_renderer->GetRenderState()->Pop();
+}
+
+int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size) {
+
+	auto ret = exportedInfoBuffer.size();
+
+	exportedInfoBuffer.resize(exportedInfoBuffer.size() + size);
+	memcpy(exportedInfoBuffer.data() + ret, data, size);
+	return ret;
 }
 
 RendererImplemented* RendererImplemented::Create() { return new RendererImplemented(); }
@@ -355,13 +421,31 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
 	{
-		// TODO
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 
-		auto vs = (EffekseerRenderer::DynamicVertex*)m_vertexBuffer->GetResource();
+		const auto& nativeMaterial = m_currentShader->GetMaterial();
+		assert(!nativeMaterial->GetIsSimpleVertex());
 
-		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDynamicVertex)));
+		auto* origin = (uint8_t*)m_vertexBuffer->GetResource();
+
+		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
+
+		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDynamicVertex) + customDataStride));
 		int32_t startOffset = exportedVertexBuffer.size();
+
+		const int32_t stride = (int32_t)sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
+		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
+		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
+			origin + sizeof(EffekseerRenderer::DynamicVertex), stride, vertexOffset + spriteCount * 4);
+		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom2(origin + sizeof(EffekseerRenderer::DynamicVertex) +
+																					sizeof(float) * nativeMaterial->GetCustomData1Count(),
+																				stride,
+																				vertexOffset + spriteCount * 4);
+
+		// Uniform
+		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
+		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount());
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
@@ -378,8 +462,31 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			unity_v.Tangent = UnpackVector3DF(v.Tangent);
 			unity_v.Normal = UnpackVector3DF(v.Normal);
 			auto targetOffset = exportedVertexBuffer.size();
-			exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityDynamicVertex));
+			exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityDynamicVertex) + customDataStride);
 			memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityDynamicVertex));
+
+			if (nativeMaterial->GetCustomData1Count() > 0)
+			{
+				std::array<float, 4> customData1;
+				auto c = (float*)(&custom1[vi]);
+				memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
+
+				memcpy(exportedVertexBuffer.data() + targetOffset + sizeof(UnityDynamicVertex),
+					   customData1.data(),
+					   sizeof(float) * nativeMaterial->GetCustomData1Count());
+			}
+
+			if (nativeMaterial->GetCustomData2Count() > 0)
+			{
+				std::array<float, 4> customData2;
+				auto c = (float*)(&custom2[vi]);
+				memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
+
+				memcpy(exportedVertexBuffer.data() + targetOffset + sizeof(UnityDynamicVertex) +
+						   sizeof(float) * nativeMaterial->GetCustomData2Count(),
+					   customData2.data(),
+					   sizeof(float) * nativeMaterial->GetCustomData2Count());
+			}
 		}
 
 		rp.VertexBufferOffset = startOffset;
@@ -391,8 +498,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		renderParameters.push_back(rp);
 		return;
 	}
-	
-		// is single ring?
+
+	// is single ring?
 	Effekseer::Matrix44 stanMat;
 
 	stanMat = ((Effekseer::Matrix44*)m_currentShader->GetVertexConstantBuffer())[0];
@@ -532,7 +639,9 @@ void RendererImplemented::DrawModel(void* model,
 									std::vector<Effekseer::Matrix44>& matrixes,
 									std::vector<Effekseer::RectF>& uvs,
 									std::vector<Effekseer::Color>& colors,
-									std::vector<int32_t>& times)
+									std::vector<int32_t>& times,
+									std::vector<std::array<float, 4>>& customData1,
+									std::vector<std::array<float, 4>>& customData2)
 {
 	UnityRenderParameter rp;
 	rp.RenderMode = 1;
@@ -554,7 +663,6 @@ void RendererImplemented::DrawModel(void* model,
 
 	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
 	{
-		// TODO
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 	}
 	else
@@ -574,6 +682,8 @@ void RendererImplemented::DrawModel(void* model,
 
 	rp.ElementCount = matrixes.size();
 	rp.VertexBufferOffset = exportedInfoBuffer.size();
+	rp.CustomData1BufferOffset = 0;
+	rp.CustomData2BufferOffset = 0;
 
 	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
@@ -583,10 +693,6 @@ void RendererImplemented::DrawModel(void* model,
 
 	for (int i = 0; i < matrixes.size(); i++)
 	{
-		int offset = exportedInfoBuffer.size();
-
-		exportedInfoBuffer.resize(exportedInfoBuffer.size() + sizeof(UnityModelParameter));
-
 		UnityModelParameter modelParameter;
 		modelParameter.Matrix = matrixes[i];
 		modelParameter.UV = uvs[i];
@@ -596,7 +702,28 @@ void RendererImplemented::DrawModel(void* model,
 		modelParameter.VColor[3] = colors[i].A / 255.0f;
 		modelParameter.Time = times[i] % model_->GetFrameCount();
 
-		*(UnityModelParameter*)(exportedInfoBuffer.data() + offset) = modelParameter;
+		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter));
+	}
+
+	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
+	{
+		const auto& nativeMaterial = m_currentShader->GetMaterial();
+		assert(!nativeMaterial->GetIsSimpleVertex());
+
+		// Uniform
+		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
+		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount());
+
+		if (nativeMaterial->GetCustomData1Count() > 0)
+		{
+			rp.CustomData1BufferOffset = AddInfoBuffer(customData1.data(), sizeof(std::array<float, 4>) * customData1.size());
+		}
+
+		if (nativeMaterial->GetCustomData2Count() > 0)
+		{
+			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(),  sizeof(std::array<float, 4>) * customData2.size());
+		}
 	}
 
 	renderParameters.push_back(rp);

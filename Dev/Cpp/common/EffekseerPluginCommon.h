@@ -3,7 +3,13 @@
 #define __EFFEKSEER_PLUGIN_COMMON_H__
 
 #include <vector>
+
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <Effekseer/Effekseer.h>
+#else
 #include "Effekseer.h"
+#endif
+
 #include "../unity/IUnityInterface.h"
 
 namespace EffekseerPlugin

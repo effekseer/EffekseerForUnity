@@ -65,6 +65,8 @@ namespace Effekseer
 			public byte[] Data = new byte[0];
 			public string Code = string.Empty;
 			public bool IsCacheFile = false;
+			public int CustomData1Count = 0;
+			public int CustomData2Count = 0;
 			public int UserTextureSlotMax = 6;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
@@ -134,7 +136,43 @@ namespace Effekseer
 
 		static string CreateMainShaderCode(ImportingAsset importingAsset, int stage)
 		{
-			var baseCode = importingAsset.Code;
+			var baseCode = "";
+
+			if (stage == 0)
+			{
+				if (importingAsset.CustomData1Count > 0)
+				{
+					baseCode += "#if _MODEL";
+					baseCode += string.Format("float{0} customData1 = buf_customData1[inst];", importingAsset.CustomData1Count);
+					baseCode += "#else";
+					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
+					baseCode += "#endif";
+				}
+
+				if (importingAsset.CustomData2Count > 0)
+				{
+					baseCode += "#if _MODEL";
+					baseCode += string.Format("float{0} customData2 = buf_customData2[inst];", importingAsset.CustomData2Count);
+					baseCode += "#else";
+					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
+					baseCode += "#endif";
+				}
+			}
+			else if (stage == 1)
+			{
+				if (importingAsset.CustomData1Count > 0)
+				{
+					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
+				}
+
+				if (importingAsset.CustomData2Count > 0)
+				{
+					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
+				}
+			}
+
+			baseCode += importingAsset.Code;
+
 			baseCode = baseCode.Replace("$F1$", "float");
 			baseCode = baseCode.Replace("$F2$", "float2");
 			baseCode = baseCode.Replace("$F3$", "float3");
@@ -177,6 +215,19 @@ namespace Effekseer
 				baseCode = baseCode.Replace(keyS, ",0.0,1.0)");
 			}
 
+			if (stage == 0)
+			{
+				if (importingAsset.CustomData1Count > 0)
+				{
+					baseCode += "Output.CustomData1 = customData1;";
+				}
+
+				if (importingAsset.CustomData2Count > 0)
+				{
+					baseCode += "Output.CustomData2 = customData2;";
+				}
+			}
+
 			return baseCode;
 		}
 		static Shader CreateShader(string path, ImportingAsset importingAsset)
@@ -189,6 +240,7 @@ namespace Effekseer
 
 			string codeProperty = string.Empty;
 			string codeVariable = string.Empty;
+			string codeUniforms = string.Empty;
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
 
@@ -198,11 +250,31 @@ namespace Effekseer
 				codeVariable += "sampler2D " + importingAsset.Textures[i].Name + ";" + nl;
 			}
 
+			for(int i = 0; i < importingAsset.Uniforms.Count; i++)
+			{
+				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
+			}
+
 			code = code.Replace("%TEX_PROPERTY%", codeProperty);
 			code = code.Replace("%TEX_VARIABLE%", codeVariable);
+			code = code.Replace("%UNIFORMS%", codeUniforms);
 			code = code.Replace("%VSCODE%", mainVSCode);
 			code = code.Replace("%PSCODE%", mainPSCode);
 			code = code.Replace("%MATERIAL_NAME%", System.IO.Path.GetFileNameWithoutExtension(path));
+
+			if(importingAsset.CustomData1Count > 0)
+			{
+				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float{0}> buf_customData1;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD7;", importingAsset.CustomData1Count));
+			}
+
+			if (importingAsset.CustomData2Count > 0)
+			{
+				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float{0}> buf_customData2;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
+			}
 
 			AssetDatabase.StartAssetEditing();
 
@@ -250,10 +322,45 @@ Cull[_Cull]
 		#pragma target 5.0
 		#pragma vertex vert
 		#pragma fragment frag
+		#pragma multi_compile _ _Model
 
 		#include ""UnityCG.cginc""
 
 		%TEX_VARIABLE%
+
+		%UNIFORMS%
+
+		#if _Model
+
+		struct SimpleVertex
+		{
+			float3 Position;
+			float3 Normal;
+			float3 Binormal;
+			float3 Tangent;
+			float2 UV;
+			float4 Color;
+		};
+	
+		struct ModelParameter
+		{
+			float4x4 Mat;
+			float4 UV;
+			float4 Color;
+			int Time;
+		};
+	
+		//%CUSTOM_BUF1%
+		//%CUSTOM_BUF2%
+
+		StructuredBuffer<SimpleVertex> buf_vertex;
+		StructuredBuffer<int> buf_index;
+	
+		StructuredBuffer<ModelParameter> buf_model_parameter;
+		StructuredBuffer<int> buf_vertex_offsets;
+		StructuredBuffer<int> buf_index_offsets;
+
+		#else
 
 		struct Vertex
 		{
@@ -263,12 +370,14 @@ Cull[_Cull]
 			float3 Tangent;
 			float2 UV1;
 			float2 UV2;
-			// Custom1
-			// Custom2
+			//%CUSTOM_VS_INPUT1%
+			//%CUSTOM_VS_INPUT2%
 		};
 
 		StructuredBuffer<Vertex> buf_vertex;
 		float buf_offset;
+
+		#endif
 
 		struct ps_input
 		{
@@ -281,8 +390,8 @@ Cull[_Cull]
 			float3 WorldT : TEXCOORD4;
 			float3 WorldB : TEXCOORD5;
 			float2 ScreenUV : TEXCOORD6;
-			//$C_OUT1$
-			//$C_OUT2$
+			//%CUSTOM_VSPS_INOUT1%
+			//%CUSTOM_VSPS_INOUT2%
 		};
 
 		float2 GetUV(float2 uv)
@@ -299,6 +408,21 @@ Cull[_Cull]
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
+
+			#if _Model
+
+			uint v_id = id;
+	
+			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
+			float4 buf_uv = buf_model_parameter[inst].UV;
+			float4 buf_color = buf_model_parameter[inst].Color;
+			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
+			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
+	
+			SimpleVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+
+			#else
+
 			int qind = (id) / 6;
 			int vind = (id) % 6;
 
@@ -312,6 +436,8 @@ Cull[_Cull]
 
 			Vertex Input = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
 
+			#endif
+
 			ps_input Output;
 			float3 worldPos = Input.Pos;
 			float3 worldNormal = Input.Normal;
@@ -319,18 +445,26 @@ Cull[_Cull]
 			float3 worldBinormal = cross(worldNormal, worldTangent);
 		
 			// UV
+			#if _Model
+			float2 uv1 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
+			float2 uv2 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
+			#else
 			float2 uv1 = Input.UV1;
 			float2 uv2 = Input.UV2;
-			//uv1.y = mUVInversed.x + mUVInversed.y * uv1.y;
-			//uv2.y = mUVInversed.x + mUVInversed.y * uv2.y;
-		
+			#endif
+
 			// NBT
 			Output.WorldN = worldNormal;
 			Output.WorldB = worldBinormal;
 			Output.WorldT = worldTangent;
 		
 			float3 pixelNormalDir = worldNormal;
+
+			#if _Model
+			float4 vcolor = Input.Color * buf_color;
+			#else
 			float4 vcolor = Input.Color;
+			#endif
 
 			%VSCODE%
 
@@ -425,7 +559,7 @@ Cull[_Cull]
 		
 			%PSCODE%
 
-			/*
+			#ifdef _MATERIAL_LIT_
 			float3 viewDir = normalize(cameraPosition.xyz - worldPos);
 			float3 diffuse = calcDirectionalLightDiffuseColor(baseColor, pixelNormalDir, lightDirection.xyz, ambientOcclusion);
 			float3 specular = lightColor.xyz * lightScale * calcLightingGGX(worldNormal, viewDir, lightDirection.xyz, roughness, 0.9);
@@ -437,9 +571,9 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 		
 			return Output;
-			*/
+			#endif
 
-			/*
+			#ifdef _MATERIAL_REFRACTION_
 			float airRefraction = 1.0;
 			float3 dir = mul((float3x3)cameraMat, pixelNormalDir);
 			dir.y = -dir.y;
@@ -456,7 +590,7 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 
 			return Output;
-			*/
+			#endif
 
 			float4 Output = float4(emissive, opacity);
 		

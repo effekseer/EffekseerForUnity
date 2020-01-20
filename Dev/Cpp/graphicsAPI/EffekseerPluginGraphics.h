@@ -5,7 +5,12 @@
 #include "../common/EffekseerPluginTexture.h"
 #include "../common/EffekseerPluginMaterial.h"
 #include "../unity/IUnityGraphics.h"
+
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <Effekseer/Effekseer.h>
+#else
 #include "Effekseer.h"
+#endif
 
 namespace EffekseerRenderer
 {
