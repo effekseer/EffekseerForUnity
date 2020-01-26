@@ -239,6 +239,9 @@ namespace Effekseer
 			//! VertexBuffer 
 			public int VertexBufferOffset;
 
+			//! VertexBuffer 
+			public int VertexBufferStride;
+
 			//! For model
 			public int CustomData1BufferOffset;
 

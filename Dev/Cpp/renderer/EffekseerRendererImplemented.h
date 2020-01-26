@@ -26,6 +26,9 @@ extern "C"
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
 
+		//! Stride for material
+		int VertexBufferStride = 0;
+
 		//! For model
 		int CustomData1BufferOffset = 0;
 

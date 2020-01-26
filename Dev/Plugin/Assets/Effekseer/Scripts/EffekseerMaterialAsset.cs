@@ -87,6 +87,12 @@ namespace Effekseer
 		[SerializeField]
 		public List<UniformProperty> uniforms = new List<UniformProperty>();
 
+		[SerializeField]
+		public int CustomData1Count = 0;
+
+		[SerializeField]
+		public int CustomData2Count = 0;
+
 #if UNITY_EDITOR
 		/// <summary>
 		/// to avoid unity bug
@@ -126,6 +132,8 @@ namespace Effekseer
 				asset.materialBuffers = importingAsset.Data;
 				asset.uniforms = importingAsset.Uniforms;
 				asset.textures = importingAsset.Textures;
+				asset.CustomData1Count = importingAsset.CustomData1Count;
+				asset.CustomData2Count = importingAsset.CustomData2Count;
 				asset.shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
 			}
 
@@ -143,7 +151,7 @@ namespace Effekseer
 				if (importingAsset.CustomData1Count > 0)
 				{
 					baseCode += "#if _MODEL";
-					baseCode += string.Format("float{0} customData1 = buf_customData1[inst];", importingAsset.CustomData1Count);
+					baseCode += string.Format("float4 customData1 = buf_customData1[inst];", importingAsset.CustomData1Count);
 					baseCode += "#else";
 					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
 					baseCode += "#endif";
@@ -152,7 +160,7 @@ namespace Effekseer
 				if (importingAsset.CustomData2Count > 0)
 				{
 					baseCode += "#if _MODEL";
-					baseCode += string.Format("float{0} customData2 = buf_customData2[inst];", importingAsset.CustomData2Count);
+					baseCode += string.Format("float4} customData2 = buf_customData2[inst];", importingAsset.CustomData2Count);
 					baseCode += "#else";
 					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
 					baseCode += "#endif";

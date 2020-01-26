@@ -431,9 +431,11 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
 
 		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDynamicVertex) + customDataStride));
-		int32_t startOffset = exportedVertexBuffer.size();
+		int32_t startOffset = sizeof(UnityDynamicVertex) + customDataStride;
 
 		const int32_t stride = (int32_t)sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
+		rp.VertexBufferStride = stride;
+
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
 			origin + sizeof(EffekseerRenderer::DynamicVertex), stride, vertexOffset + spriteCount * 4);
@@ -541,6 +543,7 @@ Exit:;
 		VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
 		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDistortionVertex)));
+		rp.VertexBufferStride = sizeof(UnityDistortionVertex);
 		int32_t startOffset = exportedVertexBuffer.size();
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -595,6 +598,7 @@ Exit:;
 		Vertex* vs = (Vertex*)m_vertexBuffer->GetResource();
 
 		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
+		rp.VertexBufferStride = sizeof(UnityVertex);
 		int32_t startOffset = exportedVertexBuffer.size();
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
