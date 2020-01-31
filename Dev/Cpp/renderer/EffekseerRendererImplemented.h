@@ -51,6 +51,9 @@ extern "C"
 
 		float DistortionIntensity = 1.0f;
 
+		//! for material
+		int IsRefraction = 0;
+
 		//! Texture ptr
 		std::array<void*, Effekseer::TextureSlotMax> TexturePtrs;
 

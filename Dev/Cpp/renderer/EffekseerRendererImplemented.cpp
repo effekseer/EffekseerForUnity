@@ -422,6 +422,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
 	{
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
+		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
 
 		const auto& nativeMaterial = m_currentShader->GetMaterial();
 		assert(!nativeMaterial->GetIsSimpleVertex());
@@ -668,6 +669,7 @@ void RendererImplemented::DrawModel(void* model,
 	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
 	{
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
+		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
 	}
 	else
 	{

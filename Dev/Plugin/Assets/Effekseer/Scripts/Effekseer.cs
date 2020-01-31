@@ -263,6 +263,9 @@ namespace Effekseer
 
 			public float DistortionIntensity;
 
+			//! for material
+			public int IsRefraction;
+
 			//! Texture ptr
 			public IntPtr TexturePtrs0;
 			public IntPtr TexturePtrs1;
