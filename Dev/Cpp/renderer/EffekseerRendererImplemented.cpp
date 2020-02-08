@@ -250,7 +250,8 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	m_renderer->GetRenderState()->Pop();
 }
 
-int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size) {
+int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
+{
 
 	auto ret = exportedInfoBuffer.size();
 
@@ -435,7 +436,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		const int32_t stride = (int32_t)sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
-		
 
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
@@ -493,10 +493,14 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 
 		rp.VertexBufferOffset = startOffset;
-		rp.TexturePtrs[0] = m_textures[0];
-		rp.TexturePtrs[1] = m_textures[1];
-		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
-		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
+
+		for (int32_t i = 0; i < textureCount_; i++)
+		{
+			rp.TexturePtrs[i] = m_textures[i];
+			rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
+			rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
+		}
+
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
 		return;
@@ -670,6 +674,13 @@ void RendererImplemented::DrawModel(void* model,
 	{
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
+
+		for (int32_t i = 0; i < textureCount_; i++)
+		{
+			rp.TexturePtrs[i] = m_textures[i];
+			rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
+			rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
+		}
 	}
 	else
 	{
@@ -728,7 +739,7 @@ void RendererImplemented::DrawModel(void* model,
 
 		if (nativeMaterial->GetCustomData2Count() > 0)
 		{
-			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(),  sizeof(std::array<float, 4>) * customData2.size());
+			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(), sizeof(std::array<float, 4>) * customData2.size());
 		}
 	}
 
@@ -774,6 +785,7 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count)
 {
+	textureCount_ = count;
 	if (count > 0)
 	{
 		for (int i = 0; i < count; i++)

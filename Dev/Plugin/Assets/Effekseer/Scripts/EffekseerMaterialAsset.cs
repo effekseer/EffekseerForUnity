@@ -171,7 +171,7 @@ namespace Effekseer
 			{
 				if (importingAsset.CustomData1Count > 0)
 				{
-					baseCode += "#if _MODEL\n";
+					baseCode += "#if _MODEL_\n";
 					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n");
 					baseCode += "#else\n";
 					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
@@ -180,7 +180,7 @@ namespace Effekseer
 
 				if (importingAsset.CustomData2Count > 0)
 				{
-					baseCode += "#if _MODEL\n";
+					baseCode += "#if _MODEL_\n";
 					baseCode += string.Format("float4 customData2 = buf_customData2[inst];\n");
 					baseCode += "#else\n";
 					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
@@ -356,7 +356,7 @@ Cull[_Cull]
 		#pragma target 5.0
 		#pragma vertex vert
 		#pragma fragment frag
-		#pragma multi_compile _ _Model
+		#pragma multi_compile _ _MODEL_
 		//PRAGMA_REFRACTION_FLAG
 
 		#include ""UnityCG.cginc""
@@ -365,7 +365,7 @@ Cull[_Cull]
 
 		%UNIFORMS%
 
-		#if _Model
+		#if _MODEL_
 
 		struct SimpleVertex
 		{
@@ -444,7 +444,7 @@ Cull[_Cull]
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
 
-			#if _Model
+			#if _MODEL_
 
 			uint v_id = id;
 	
@@ -455,6 +455,10 @@ Cull[_Cull]
 			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
 	
 			SimpleVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+
+
+			float3 localPos = Input.Pos;
+			
 
 			#else
 
@@ -474,13 +478,19 @@ Cull[_Cull]
 			#endif
 
 			ps_input Output;
+
+			#if _MODEL_
+			float3 worldPos = mul(buf_matrix, float4(localPos, 1.0f)).xyz;
+			#else
 			float3 worldPos = Input.Pos;
+			#endif
+
 			float3 worldNormal = Input.Normal;
 			float3 worldTangent = Input.Tangent;
 			float3 worldBinormal = cross(worldNormal, worldTangent);
 		
 			// UV
-			#if _Model
+			#if _MODEL_
 			float2 uv1 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
 			float2 uv2 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
 			#else
@@ -495,7 +505,7 @@ Cull[_Cull]
 		
 			float3 pixelNormalDir = worldNormal;
 
-			#if _Model
+			#if _MODEL_
 			float4 vcolor = Input.Color * buf_color;
 			#else
 			float4 vcolor = Input.Color;
