@@ -332,7 +332,7 @@ bool RendererImplemented::EndRendering()
 	return true;
 }
 
-const ::Effekseer::Vector3D& RendererImplemented::GetLightDirection() const { return m_lightDirection; }
+::Effekseer::Vector3D RendererImplemented::GetLightDirection() const { return m_lightDirection; }
 
 void RendererImplemented::SetLightDirection(const ::Effekseer::Vector3D& direction) { m_lightDirection = direction; }
 

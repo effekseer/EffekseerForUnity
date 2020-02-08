@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <Effekseer.Internal.h>
 #include <EffekseerRenderer.ModelRendererBase.h>
 #include <EffekseerRenderer.RenderStateBase.h>
 #include <EffekseerRenderer.Renderer.h>
@@ -200,7 +201,7 @@ public:
 	/**
 	@brief	ライトの方向を取得する。
 	*/
-	const ::Effekseer::Vector3D& GetLightDirection() const override;
+	::Effekseer::Vector3D GetLightDirection() const override;
 
 	/**
 	@brief	ライトの方向を設定する。

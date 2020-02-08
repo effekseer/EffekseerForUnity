@@ -28,6 +28,4 @@ void* Shader::GetUnityMaterial() const { return unityMaterial_; }
 
 bool Shader::GetIsRefraction() const { return isRefraction_; };
 
-}
-
 } // namespace EffekseerRendererUnity
