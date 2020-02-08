@@ -113,6 +113,13 @@ namespace Effekseer
 		}
 		public static void CreateAsset(string path, ImportingAsset importingAsset)
 		{
+			// modify
+			if(importingAsset.CustomData1Count > 0)
+				importingAsset.CustomData1Count = Math.Max(2, importingAsset.CustomData1Count);
+	
+			if(importingAsset.CustomData2Count > 0)
+				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
+
 			string assetPath = Path.ChangeExtension(path, ".asset");
 
 			var asset = AssetDatabase.LoadAssetAtPath<EffekseerMaterialAsset>(assetPath);
@@ -165,7 +172,7 @@ namespace Effekseer
 				if (importingAsset.CustomData1Count > 0)
 				{
 					baseCode += "#if _MODEL\n";
-					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n", importingAsset.CustomData1Count);
+					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n");
 					baseCode += "#else\n";
 					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
 					baseCode += "#endif\n";
@@ -174,7 +181,7 @@ namespace Effekseer
 				if (importingAsset.CustomData2Count > 0)
 				{
 					baseCode += "#if _MODEL\n";
-					baseCode += string.Format("float4} customData2 = buf_customData2[inst];\n", importingAsset.CustomData2Count);
+					baseCode += string.Format("float4 customData2 = buf_customData2[inst];\n");
 					baseCode += "#else\n";
 					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
 					baseCode += "#endif\n";
@@ -300,7 +307,7 @@ namespace Effekseer
 			{
 				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float{0}> buf_customData2;", importingAsset.CustomData2Count));
 				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
 			}
 
 			AssetDatabase.StartAssetEditing();
@@ -362,7 +369,7 @@ Cull[_Cull]
 
 		struct SimpleVertex
 		{
-			float3 Position;
+			float3 Pos;
 			float3 Normal;
 			float3 Binormal;
 			float3 Tangent;

@@ -430,11 +430,12 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
 
-		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDynamicVertex) + customDataStride));
-		int32_t startOffset = sizeof(UnityDynamicVertex) + customDataStride;
+		rp.VertexBufferStride = sizeof(UnityDynamicVertex) + customDataStride;
+		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), rp.VertexBufferStride));
+		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		const int32_t stride = (int32_t)sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
-		rp.VertexBufferStride = stride;
+		
 
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(

@@ -30,7 +30,7 @@ class MaterialLoader : public Effekseer::MaterialLoader
 public:
 	MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, EffekseerPlugin::MaterialLoaderUnload unload);
 
-	virtual ~MaterialLoader() = default;
+	virtual ~MaterialLoader();
 	Effekseer::MaterialData* Load(const EFK_CHAR* path) override;
 	void Unload(Effekseer::MaterialData* data) override;
 };

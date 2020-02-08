@@ -11,6 +11,10 @@ MaterialLoader::MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, Effekse
 {
 }
 
+MaterialLoader::~MaterialLoader() {
+
+}
+
 Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 {
 	auto it = resources.find((const char16_t*)path);
@@ -91,7 +95,7 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 		if (material->GetHasRefraction())
 		{
 			materialData->RefractionUserPtr = new Shader(materialPtr, material, false, true);
-			materialData->RefractionModelUserPtr = new Shader(materialPtr, material, true, true);		
+			materialData->RefractionModelUserPtr = new Shader(materialPtr, material, true, true);
 		}
 
 		resources.insert(std::make_pair((const char16_t*)path, res));

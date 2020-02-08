@@ -684,7 +684,6 @@ namespace Effekseer
 					cachedMaterials.Remove(materialPtr);
 					cachedMaterialIDs.Remove(material.asset);
 				}
-				throw new Exception("Unimplemented");
 			}
 		}
 
