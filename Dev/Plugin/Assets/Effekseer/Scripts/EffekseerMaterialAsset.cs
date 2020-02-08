@@ -455,6 +455,8 @@ Cull[_Cull]
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
+			// Unity
+			float4 cameraPosition = float4(UNITY_MATRIX_V[3].xyzw);
 
 			#if _MODEL_
 
@@ -501,6 +503,16 @@ Cull[_Cull]
 			float3 worldTangent = Input.Tangent;
 			float3 worldBinormal = cross(worldNormal, worldTangent);
 		
+			#if _MODEL_
+			float3x3 matRotModel = (float3x3)buf_matrix;
+			float3 objectScale = float3(1.0, 1.0, 1.0);
+			objectScale.x = length(mul(matRotModel, float3(1.0, 0.0, 0.0)));
+			objectScale.y = length(mul(matRotModel, float3(0.0, 1.0, 0.0)));
+			objectScale.z = length(mul(matRotModel, float3(0.0, 0.0, 1.0)));
+			#else
+			float3 objectScale = float3(1.0, 1.0, 1.0);
+			#endif
+
 			// UV
 			#if _MODEL_
 			float2 uv1 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
@@ -604,6 +616,7 @@ Cull[_Cull]
 		float4 frag(ps_input Input) : COLOR
 		{
 			// Unity
+			float4 cameraPosition = float4(UNITY_MATRIX_V[3].xyzw);
 			float4x4 cameraMat = UNITY_MATRIX_V;
 
 			float2 uv1 = Input.UV1;
