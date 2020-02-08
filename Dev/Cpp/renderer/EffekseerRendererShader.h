@@ -17,6 +17,7 @@ private:
 	Effekseer::RendererMaterialType type_;
 	std::vector<uint8_t> vertexConstantBuffer;
 	std::vector<uint8_t> pixelConstantBuffer;
+	bool isRefraction_;
 
 public:
 	/**
@@ -41,6 +42,8 @@ public:
 	const std::shared_ptr<Effekseer::Material>& GetMaterial() { return material_; }
 
 	const EffekseerRenderer::MaterialShaderParameterGenerator* GetParameterGenerator() const { return &parameterGenerator_; }
+
+	bool GetIsRefraction() const;
 };
 
 } // namespace EffekseerRendererUnity

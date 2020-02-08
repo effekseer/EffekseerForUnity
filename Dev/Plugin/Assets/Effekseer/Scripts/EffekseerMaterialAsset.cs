@@ -68,6 +68,7 @@ namespace Effekseer
 			public int CustomData1Count = 0;
 			public int CustomData2Count = 0;
 			public int UserTextureSlotMax = 6;
+			public bool HasRefraction = false;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
 		}
@@ -93,6 +94,9 @@ namespace Effekseer
 		[SerializeField]
 		public int CustomData2Count = 0;
 
+		[SerializeField]
+		public bool HasRefraction = false;
+
 #if UNITY_EDITOR
 		/// <summary>
 		/// to avoid unity bug
@@ -117,10 +121,12 @@ namespace Effekseer
 			}
 
 			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
+			bool isNewAsset = false;
 
 			if (asset == null)
 			{
 				asset = CreateInstance<EffekseerMaterialAsset>();
+				isNewAsset = true;
 			}
 
 			if(importingAsset.IsCacheFile)
@@ -134,10 +140,18 @@ namespace Effekseer
 				asset.textures = importingAsset.Textures;
 				asset.CustomData1Count = importingAsset.CustomData1Count;
 				asset.CustomData2Count = importingAsset.CustomData2Count;
+				asset.HasRefraction = importingAsset.HasRefraction;
 				asset.shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
 			}
 
-			AssetDatabase.CreateAsset(asset, assetPath);
+			if(isNewAsset)
+			{
+				AssetDatabase.CreateAsset(asset, assetPath);
+			}
+			else
+			{
+				EditorUtility.SetDirty(asset);
+			}
 
 			AssetDatabase.Refresh();
 		}
@@ -150,20 +164,20 @@ namespace Effekseer
 			{
 				if (importingAsset.CustomData1Count > 0)
 				{
-					baseCode += "#if _MODEL";
-					baseCode += string.Format("float4 customData1 = buf_customData1[inst];", importingAsset.CustomData1Count);
-					baseCode += "#else";
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
-					baseCode += "#endif";
+					baseCode += "#if _MODEL\n";
+					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n", importingAsset.CustomData1Count);
+					baseCode += "#else\n";
+					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
+					baseCode += "#endif\n";
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
-					baseCode += "#if _MODEL";
-					baseCode += string.Format("float4} customData2 = buf_customData2[inst];", importingAsset.CustomData2Count);
-					baseCode += "#else";
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
-					baseCode += "#endif";
+					baseCode += "#if _MODEL\n";
+					baseCode += string.Format("float4} customData2 = buf_customData2[inst];\n", importingAsset.CustomData2Count);
+					baseCode += "#else\n";
+					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
+					baseCode += "#endif\n";
 				}
 			}
 			else if (stage == 1)
@@ -201,8 +215,8 @@ namespace Effekseer
 				{
 					baseCode = baseCode.Replace(
 									   keyP,
-									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",GetUV(");
-					baseCode =baseCode.Replace(keyS, "))");
+									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",float4(GetUV(");
+					baseCode =baseCode.Replace(keyS, "),0,0))");
 				}
 				else
 				{
@@ -270,7 +284,12 @@ namespace Effekseer
 			code = code.Replace("%PSCODE%", mainPSCode);
 			code = code.Replace("%MATERIAL_NAME%", System.IO.Path.GetFileNameWithoutExtension(path));
 
-			if(importingAsset.CustomData1Count > 0)
+			if(importingAsset.HasRefraction)
+			{
+				code = code.Replace("//PRAGMA_REFRACTION_FLAG", "#pragma multi_compile _ _MATERIAL_REFRACTION_");
+			}
+
+			if (importingAsset.CustomData1Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float{0}> buf_customData1;", importingAsset.CustomData1Count));
 				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
@@ -331,6 +350,7 @@ Cull[_Cull]
 		#pragma vertex vert
 		#pragma fragment frag
 		#pragma multi_compile _ _Model
+		//PRAGMA_REFRACTION_FLAG
 
 		#include ""UnityCG.cginc""
 
@@ -579,9 +599,8 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 		
 			return Output;
-			#endif
 
-			#ifdef _MATERIAL_REFRACTION_
+			#elif _MATERIAL_REFRACTION_
 			float airRefraction = 1.0;
 			float3 dir = mul((float3x3)cameraMat, pixelNormalDir);
 			dir.y = -dir.y;
@@ -598,7 +617,7 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 
 			return Output;
-			#endif
+			#else
 
 			float4 Output = float4(emissive, opacity);
 		
@@ -606,6 +625,7 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 		
 			return Output;
+			#endif
 		}
 
 		ENDCG

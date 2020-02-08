@@ -108,6 +108,8 @@ namespace Effekseer.Internal
 		internal EffekseerMaterialAsset asset;
 		internal MaterialCollection materials = new MaterialCollection();
 		internal MaterialCollection materialsModel = new MaterialCollection();
+		internal MaterialCollection materialsRefraction = null;
+		internal MaterialCollection materialsModelRefraction = null;
 
 		public UnityRendererMaterial(EffekseerMaterialAsset asset)
 		{
@@ -115,6 +117,18 @@ namespace Effekseer.Internal
 			materials.Shader = asset.shader;
 			materialsModel.Shader = asset.shader;
 			materialsModel.Keywords = new string[] { "_Model"};
+
+			if(asset.HasRefraction)
+			{
+				materialsRefraction = new MaterialCollection();
+				materialsModelRefraction = new MaterialCollection();
+				materialsRefraction.Shader = asset.shader;
+				materialsRefraction.Keywords = new string[] { "_Model", "_MATERIAL_REFRACTION_" };
+				materialsModelRefraction.Shader = asset.shader;
+				materialsModelRefraction.Keywords = new string[] { "_Model", "_MATERIAL_REFRACTION_" };
+
+
+			}
 		}
 	}
 
@@ -1042,8 +1056,16 @@ namespace Effekseer.Internal
 				{
 					return;
 				}
+				Material material = null;
 
-				var material = efkMaterial.materials.GetMaterial(ref key);
+				if(parameter.IsRefraction > 0)
+				{
+					material = efkMaterial.materialsRefraction.GetMaterial(ref key);
+				}
+				else
+				{
+					material = efkMaterial.materials.GetMaterial(ref key);
+				}
 
 				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 				prop.SetBuffer("buf_vertex", computeBuffer);
@@ -1185,7 +1207,16 @@ namespace Effekseer.Internal
 						continue;
 					}
 
-					var material = efkMaterial.materialsModel.GetMaterial(ref key);
+					Material material = null;
+
+					if (parameter.IsRefraction > 0)
+					{
+						material = efkMaterial.materialsModelRefraction.GetMaterial(ref key);
+					}
+					else
+					{
+						material = efkMaterial.materialsModel.GetMaterial(ref key);
+					}
 
 					prop.SetBuffer("buf_vertex", model.VertexBuffer);
 					prop.SetBuffer("buf_index", model.IndexBuffer);
