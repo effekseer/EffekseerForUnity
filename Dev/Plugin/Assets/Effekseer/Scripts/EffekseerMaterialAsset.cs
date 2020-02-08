@@ -121,10 +121,12 @@ namespace Effekseer
 			}
 
 			string assetDir = assetPath.Substring(0, assetPath.LastIndexOf('/'));
+			bool isNewAsset = false;
 
 			if (asset == null)
 			{
 				asset = CreateInstance<EffekseerMaterialAsset>();
+				isNewAsset = true;
 			}
 
 			if(importingAsset.IsCacheFile)
@@ -142,7 +144,14 @@ namespace Effekseer
 				asset.shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
 			}
 
-			AssetDatabase.CreateAsset(asset, assetPath);
+			if(isNewAsset)
+			{
+				AssetDatabase.CreateAsset(asset, assetPath);
+			}
+			else
+			{
+				EditorUtility.SetDirty(asset);
+			}
 
 			AssetDatabase.Refresh();
 		}
@@ -155,20 +164,20 @@ namespace Effekseer
 			{
 				if (importingAsset.CustomData1Count > 0)
 				{
-					baseCode += "#if _MODEL";
-					baseCode += string.Format("float4 customData1 = buf_customData1[inst];", importingAsset.CustomData1Count);
-					baseCode += "#else";
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
-					baseCode += "#endif";
+					baseCode += "#if _MODEL\n";
+					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n", importingAsset.CustomData1Count);
+					baseCode += "#else\n";
+					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
+					baseCode += "#endif\n";
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
-					baseCode += "#if _MODEL";
-					baseCode += string.Format("float4} customData2 = buf_customData2[inst];", importingAsset.CustomData2Count);
-					baseCode += "#else";
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
-					baseCode += "#endif";
+					baseCode += "#if _MODEL\n";
+					baseCode += string.Format("float4} customData2 = buf_customData2[inst];\n", importingAsset.CustomData2Count);
+					baseCode += "#else\n";
+					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
+					baseCode += "#endif\n";
 				}
 			}
 			else if (stage == 1)
@@ -206,8 +215,8 @@ namespace Effekseer
 				{
 					baseCode = baseCode.Replace(
 									   keyP,
-									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",GetUV(");
-					baseCode =baseCode.Replace(keyS, "))");
+									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",float4(GetUV(");
+					baseCode =baseCode.Replace(keyS, "),0,0))");
 				}
 				else
 				{
