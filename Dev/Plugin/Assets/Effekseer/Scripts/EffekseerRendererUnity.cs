@@ -1204,7 +1204,8 @@ namespace Effekseer.Internal
 					var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
 					if (efkMaterial == null)
 					{
-						continue;
+						offset += allocated;
+						count -= allocated;
 					}
 
 					Material material = null;

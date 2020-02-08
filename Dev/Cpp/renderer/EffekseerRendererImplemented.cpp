@@ -197,19 +197,13 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	m_renderer->BeginShader(shader);
 
-	Effekseer::TextureData* textures[1];
+	int32_t textureCount = 0;
+	std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
+	textures.fill(nullptr);
 
 	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 	{
-		int32_t textureCount = 0;
-		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
-
 		ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
-
-		if (textureCount > 0)
-		{
-			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
-		}
 	}
 	else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
 	{
@@ -221,6 +215,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		{
 			textures[0] = nullptr;
 		}
+		textureCount = 1;
 	}
 	else
 	{
@@ -232,9 +227,13 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		{
 			textures[0] = nullptr;
 		}
+		textureCount = 1;
 	}
 
-	m_renderer->SetTextures(nullptr, textures, 1);
+	if (textureCount > 0)
+	{
+		m_renderer->SetTextures(nullptr, textures.data(), textureCount);
+	}
 
 	state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
 	state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;

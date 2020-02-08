@@ -26,10 +26,10 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 	int requiredCachedDataSize = 0;
 
 	auto materialPtr = load_((const char16_t*)path,
-							 &memoryFile_.LoadedBuffer[0],
+							 memoryFile_.LoadedBuffer.data(),
 							 (int)memoryFile_.LoadedBuffer.size(),
 							 requiredDataSize,
-							 &memoryFileForCache_.LoadedBuffer[0],
+							 memoryFileForCache_.LoadedBuffer.data(),
 							 (int)memoryFileForCache_.LoadedBuffer.size(),
 							 requiredCachedDataSize);
 
@@ -39,7 +39,6 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 		return nullptr;
 	}
 
-	if (materialPtr == nullptr)
 	{
 		// Lack of memory
 		memoryFileForCache_.Resize(requiredCachedDataSize);
@@ -47,10 +46,10 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 
 		// Load with unity
 		materialPtr = load_((const char16_t*)path,
-							&memoryFile_.LoadedBuffer[0],
+							memoryFile_.LoadedBuffer.data(),
 							(int)memoryFile_.LoadedBuffer.size(),
 							requiredDataSize,
-							&memoryFileForCache_.LoadedBuffer[0],
+							memoryFileForCache_.LoadedBuffer.data(),
 							(int)memoryFileForCache_.LoadedBuffer.size(),
 							requiredCachedDataSize);
 

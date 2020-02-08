@@ -604,6 +604,21 @@ namespace Effekseer
 					}
 					else
 					{
+						int status = 0;
+
+						if (requiredMaterialBufferSize == 0 && material.materialBuffers != null)
+						{
+							requiredMaterialBufferSize = material.materialBuffers.Length;
+
+							if (material.materialBuffers.Length <= materialBufferSize)
+							{
+								Marshal.Copy(material.materialBuffers, 0, materialBuffer, material.materialBuffers.Length);
+							}
+
+							status += 1;
+							return new IntPtr(status);
+						}
+
 						var ptr = new IntPtr();
 						do
 						{
