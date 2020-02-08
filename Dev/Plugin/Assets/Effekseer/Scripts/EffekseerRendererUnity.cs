@@ -123,7 +123,7 @@ namespace Effekseer.Internal
 				materialsRefraction = new MaterialCollection();
 				materialsModelRefraction = new MaterialCollection();
 				materialsRefraction.Shader = asset.shader;
-				materialsRefraction.Keywords = new string[] { "_MODEL_", "_MATERIAL_REFRACTION_" };
+				materialsRefraction.Keywords = new string[] { "_MATERIAL_REFRACTION_" };
 				materialsModelRefraction.Shader = asset.shader;
 				materialsModelRefraction.Keywords = new string[] { "_MODEL_", "_MATERIAL_REFRACTION_" };
 
@@ -1088,6 +1088,11 @@ namespace Effekseer.Internal
 					prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
 				}
 
+				if (parameter.IsRefraction > 0 && background != null)
+				{
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Count), background));
+				}
+
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
 			else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
@@ -1256,6 +1261,11 @@ namespace Effekseer.Internal
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, count, ref cb);
 						if (all != allocated) throw new Exception();
 						prop.SetBuffer("buf_customData2", computeBuf);
+					}
+
+					if (parameter.IsRefraction > 0 && background != null)
+					{
+						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Count), background));
 					}
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);

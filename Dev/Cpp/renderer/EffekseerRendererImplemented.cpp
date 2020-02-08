@@ -169,85 +169,113 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	SortTemporaryValues(m_renderer, parameter);
 
-	Shader* shader = nullptr;
-	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
+	bool fileRefraction = false;
+
+	if (parameter.BasicParameterPtr->MaterialParameterPtr != nullptr &&
+		parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex >= 0 &&
+		parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex) != nullptr)
 	{
-		if (parameter.BasicParameterPtr->MaterialParameterPtr != nullptr &&
-			parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex >= 0 &&
-			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex) != nullptr)
+		fileRefraction =
+			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)->IsRefractionRequired;
+	}
+
+	int stageCount = 1;
+	if (fileRefraction)
+	{
+		stageCount = 2;
+	}
+
+	for (int stageInd = 0; stageInd < stageCount; stageInd++)
+	{
+
+		Shader* shader = nullptr;
+		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 		{
-			shader = (Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
-						 ->ModelUserPtr;
+			if (parameter.BasicParameterPtr->MaterialParameterPtr != nullptr &&
+				parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex >= 0 &&
+				parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex) != nullptr)
+			{
+				if (fileRefraction && stageInd == 0)
+				{
+					shader = (Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
+								 ->RefractionModelUserPtr;
+				}
+				else
+				{
+					shader = (Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
+								 ->ModelUserPtr;
+				}
+			}
+			else
+			{
+				return;
+			}
 		}
 		else
 		{
-			return;
+			shader = m_renderer->GetShader(true, parameter.BasicParameterPtr->MaterialType);
 		}
-	}
-	else
-	{
-		shader = m_renderer->GetShader(true, parameter.BasicParameterPtr->MaterialType);
-	}
 
-	::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
-	state.DepthTest = parameter.ZTest;
-	state.DepthWrite = parameter.ZWrite;
-	state.AlphaBlend = parameter.BasicParameterPtr->AlphaBlend;
-	state.CullingType = parameter.Culling;
+		::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
+		state.DepthTest = parameter.ZTest;
+		state.DepthWrite = parameter.ZWrite;
+		state.AlphaBlend = parameter.BasicParameterPtr->AlphaBlend;
+		state.CullingType = parameter.Culling;
 
-	m_renderer->BeginShader(shader);
+		m_renderer->BeginShader(shader);
 
-	int32_t textureCount = 0;
-	std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
-	textures.fill(nullptr);
+		int32_t textureCount = 0;
+		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
+		textures.fill(nullptr);
 
-	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
-	{
-		ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
-	}
-	else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
-	{
-		if (parameter.BasicParameterPtr->Texture1Index >= 0)
+		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 		{
-			textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.BasicParameterPtr->Texture1Index);
+			ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
+		}
+		else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
+		{
+			if (parameter.BasicParameterPtr->Texture1Index >= 0)
+			{
+				textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.BasicParameterPtr->Texture1Index);
+			}
+			else
+			{
+				textures[0] = nullptr;
+			}
+			textureCount = 1;
 		}
 		else
 		{
-			textures[0] = nullptr;
+			if (parameter.BasicParameterPtr->Texture1Index >= 0)
+			{
+				textures[0] = parameter.EffectPointer->GetColorImage(parameter.BasicParameterPtr->Texture1Index);
+			}
+			else
+			{
+				textures[0] = nullptr;
+			}
+			textureCount = 1;
 		}
-		textureCount = 1;
-	}
-	else
-	{
-		if (parameter.BasicParameterPtr->Texture1Index >= 0)
+
+		if (textureCount > 0)
 		{
-			textures[0] = parameter.EffectPointer->GetColorImage(parameter.BasicParameterPtr->Texture1Index);
+			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
 		}
-		else
-		{
-			textures[0] = nullptr;
-		}
-		textureCount = 1;
+
+		state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
+		state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
+		state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
+		state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
+
+		m_renderer->GetRenderState()->Update(false);
+		m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
+
+		m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times, customData1_, customData2_);
+
+		m_renderer->EndShader(shader);
+
+		m_renderer->GetRenderState()->Pop();
 	}
-
-	if (textureCount > 0)
-	{
-		m_renderer->SetTextures(nullptr, textures.data(), textureCount);
-	}
-
-	state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
-	state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
-	state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
-	state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
-
-	m_renderer->GetRenderState()->Update(false);
-	m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
-
-	m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times, customData1_, customData2_);
-
-	m_renderer->EndShader(shader);
-
-	m_renderer->GetRenderState()->Pop();
 }
 
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)

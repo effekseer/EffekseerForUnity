@@ -246,15 +246,23 @@ namespace Effekseer
 
 			if (stage == 0)
 			{
-				if (importingAsset.CustomData1Count > 0)
-				{
+				if (importingAsset.CustomData1Count == 1)
 					baseCode += "Output.CustomData1 = customData1;";
-				}
+				if (importingAsset.CustomData1Count == 2)
+					baseCode += "Output.CustomData1 = customData1.xy;";
+				if (importingAsset.CustomData1Count == 3)
+					baseCode += "Output.CustomData1 = customData1.xyz;";
+				if (importingAsset.CustomData1Count == 4)
+					baseCode += "Output.CustomData1 = customData1.xyzw;";
 
-				if (importingAsset.CustomData2Count > 0)
-				{
+				if (importingAsset.CustomData2Count == 1)
 					baseCode += "Output.CustomData2 = customData2;";
-				}
+				if (importingAsset.CustomData2Count == 2)
+					baseCode += "Output.CustomData2 = customData2.xy;";
+				if (importingAsset.CustomData2Count == 3)
+					baseCode += "Output.CustomData2 = customData2.xyz;";
+				if (importingAsset.CustomData2Count == 4)
+					baseCode += "Output.CustomData2 = customData2.xyzw;";
 			}
 
 			return baseCode;
@@ -298,14 +306,14 @@ namespace Effekseer
 
 			if (importingAsset.CustomData1Count > 0)
 			{
-				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float{0}> buf_customData1;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float4> buf_customData1;"));
 				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
 				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD7;", importingAsset.CustomData1Count));
 			}
 
 			if (importingAsset.CustomData2Count > 0)
 			{
-				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float{0}> buf_customData2;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float4> buf_customData2;"));
 				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
 				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
 			}
@@ -360,6 +368,10 @@ Cull[_Cull]
 		//PRAGMA_REFRACTION_FLAG
 
 		#include ""UnityCG.cginc""
+
+		#if _MATERIAL_REFRACTION_
+		sampler2D _BackTex;
+		#endif
 
 		%TEX_VARIABLE%
 
@@ -437,7 +449,7 @@ Cull[_Cull]
 		
 		float2 GetUVBack(float2 uv)
 		{
-			uv.y = 1.0 - uv.y;
+			uv.y = uv.y;
 			return uv;
 		}
 
@@ -591,6 +603,8 @@ Cull[_Cull]
 		
 		float4 frag(ps_input Input) : COLOR
 		{
+			// Unity
+			float4x4 cameraMat = UNITY_MATRIX_V;
 
 			float2 uv1 = Input.UV1;
 			float2 uv2 = Input.UV2;
@@ -627,7 +641,7 @@ Cull[_Cull]
 			distortUV += Input.ScreenUV;
 			distortUV = GetUVBack(distortUV);	
 
-			float4 bg = background_texture.Sample(background_sampler, distortUV);
+			float4 bg = tex2D(_BackTex, distortUV);
 			float4 Output = bg;
 
 			if(opacityMask <= 0.0) discard;
