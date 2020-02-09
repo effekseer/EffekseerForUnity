@@ -494,17 +494,19 @@ Cull[_Cull]
 			ps_input Output;
 
 			#if _MODEL_
+			float3x3 matRotModel = (float3x3)buf_matrix;
 			float3 worldPos = mul(buf_matrix, float4(localPos, 1.0f)).xyz;
+			float3 worldNormal = normalize(mul(matRotModel, Input.Normal));
+			float3 worldTangent = normalize(mul(matRotModel, Input.Tangent));
+			float3 worldBinormal = cross(worldNormal, worldTangent);
 			#else
 			float3 worldPos = Input.Pos;
-			#endif
-
 			float3 worldNormal = Input.Normal;
 			float3 worldTangent = Input.Tangent;
 			float3 worldBinormal = cross(worldNormal, worldTangent);
+			#endif
 		
 			#if _MODEL_
-			float3x3 matRotModel = (float3x3)buf_matrix;
 			float3 objectScale = float3(1.0, 1.0, 1.0);
 			objectScale.x = length(mul(matRotModel, float3(1.0, 0.0, 0.0)));
 			objectScale.y = length(mul(matRotModel, float3(0.0, 1.0, 0.0)));
