@@ -75,7 +75,7 @@ namespace Effekseer.Editor
 					foreach (var u in info.Uniforms)
 					{
 						var up = new EffekseerMaterialAsset.UniformProperty();
-						up.Name = u.Name;
+						up.Name = u.UniformName;
 						up.Count = u.Type;
 						importingAsset.Uniforms.Add(up);
 					}
@@ -83,7 +83,7 @@ namespace Effekseer.Editor
 					foreach (var t in info.Textures)
 					{
 						var tp = new EffekseerMaterialAsset.TextureProperty();
-						tp.Name = t.Name;
+						tp.Name = t.UniformName;
 						importingAsset.Textures.Add(tp);
 					}
 
