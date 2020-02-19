@@ -80,16 +80,18 @@ If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
 
-## Light Weight Render Pipeline
+## Universal(Light Weight) Render Pipeline
 
-Effekseer supports LightWeightRenderPipeline.
-Please remove comment out from *ScriptsExternal/EffekseerRendererLWRP.cs* because LWRP is not contained in Unity with default settings at first.
+Effekseer supports Universal(LightWeight)RenderPipeline.
+Please remove comment out from *ScriptsExternal/EffekseerURPRenderPassFeature.cs* in the case of URP, *ScriptsExternal/EffekseerRendererLWRP.cs* in the case of LWRP because URP(LWRP) is not contained in Unity with default settings at first.
 
 ![](../img/LWRP_Code.png)
 
 *Custom Forward Render* is used to show effects of Effekseer.
 
-Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render*.
+*URP* Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Universal Render Pipeline -> Forward Render*.
+
+*LWRP* Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render*.
 
 ![](../img/LWRP_ForwardRenderer1.png)
 
@@ -106,8 +108,6 @@ Add EffekseerRenderer to *Render Features* in created *Forward Render Asset*.
 ![](../img/LWRP_RenderFeatures1.png)
 
 ![](../img/LWRP_RenderFeatures2.png)
-
-Add * Effekseer/Effekseer RendererLWRP * component to GameObject with Camera in old LWRP.
 
 ## High Definition Render Pipeline
 

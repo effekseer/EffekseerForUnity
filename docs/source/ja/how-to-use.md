@@ -85,16 +85,18 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。
 
-## Light Weight Render Pipeline
+## Universal (Light Weight) Render Pipeline
 
-Effekseer は Light Weight Render Pipeline に対応しています。.
-LWRPはUnityでは標準に含まれていないため、 *ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
+Effekseer は Universal(Light Weight) Render Pipeline に対応しています。.
+URP(LWRP)はUnityでは標準に含まれていないため、URPの場合、*ScriptsExternal/EffekseerURPRenderPassFeature.cs*  LWRPの場合、*ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
 
 ![](../img/LWRP_Code.png)
 
 Effekseerのエフェクトを表示するために *Custom Forward Render* を使用します。
 
-*Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
+*URP*  *Assets -> Create -> Rendering -> Universal Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
+
+*LWRP*  *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
 
 ![](../img/LWRP_ForwardRenderer1.png)
 
@@ -111,8 +113,6 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 ![](../img/LWRP_RenderFeatures1.png)
 
 ![](../img/LWRP_RenderFeatures2.png)
-
-古いLWRPでは、* Effekseer/Effekseer RendererLWRP * コンポーネントをカメラがあるGameObjectに設定してください。
 
 ## High Definition Render Pipeline
 
