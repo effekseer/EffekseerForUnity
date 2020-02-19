@@ -360,18 +360,6 @@ bool RendererImplemented::EndRendering()
 	return true;
 }
 
-::Effekseer::Vector3D RendererImplemented::GetLightDirection() const { return m_lightDirection; }
-
-void RendererImplemented::SetLightDirection(const ::Effekseer::Vector3D& direction) { m_lightDirection = direction; }
-
-const ::Effekseer::Color& RendererImplemented::GetLightColor() const { return m_lightColor; }
-
-void RendererImplemented::SetLightColor(const ::Effekseer::Color& color) { m_lightColor = color; }
-
-const ::Effekseer::Color& RendererImplemented::GetLightAmbientColor() const { return m_lightAmbient; }
-
-void RendererImplemented::SetLightAmbientColor(const ::Effekseer::Color& color) { m_lightAmbient = color; }
-
 int32_t RendererImplemented::GetSquareMaxCount() const { return m_squareMaxCount; }
 
 ::Effekseer::SpriteRenderer* RendererImplemented::CreateSpriteRenderer()

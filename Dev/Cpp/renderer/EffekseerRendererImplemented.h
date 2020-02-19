@@ -133,9 +133,6 @@ public:
 class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effekseer::ReferenceObject
 {
 protected:
-	::Effekseer::Vector3D m_lightDirection;
-	::Effekseer::Color m_lightColor;
-	::Effekseer::Color m_lightAmbient;
 	int32_t m_squareMaxCount;
 
 	VertexBuffer* m_vertexBuffer = nullptr;
@@ -198,36 +195,6 @@ public:
 	@brief	描画を終了する時に実行する。
 	*/
 	bool EndRendering() override;
-
-	/**
-	@brief	ライトの方向を取得する。
-	*/
-	::Effekseer::Vector3D GetLightDirection() const override;
-
-	/**
-	@brief	ライトの方向を設定する。
-	*/
-	void SetLightDirection(const ::Effekseer::Vector3D& direction) override;
-
-	/**
-	@brief	ライトの色を取得する。
-	*/
-	const ::Effekseer::Color& GetLightColor() const override;
-
-	/**
-	@brief	ライトの色を設定する。
-	*/
-	void SetLightColor(const ::Effekseer::Color& color) override;
-
-	/**
-	@brief	ライトの環境光の色を取得する。
-	*/
-	const ::Effekseer::Color& GetLightAmbientColor() const override;
-
-	/**
-	@brief	ライトの環境光の色を設定する。
-	*/
-	void SetLightAmbientColor(const ::Effekseer::Color& color) override;
 
 	/**
 	@brief	最大描画スプライト数を取得する。
