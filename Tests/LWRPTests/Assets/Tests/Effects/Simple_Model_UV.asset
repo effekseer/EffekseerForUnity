@@ -20,4 +20,5 @@ MonoBehaviour:
   modelResources:
   - path: Model/Arrow.asset
     asset: {fileID: 11400000, guid: 78dda502572ce774886dee1c060dea2b, type: 2}
+  materialResources: []
   Scale: 1

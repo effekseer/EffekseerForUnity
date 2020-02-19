@@ -24,4 +24,5 @@ MonoBehaviour:
   - path: Sound/Laser.wav
     clip: {fileID: 8300000, guid: c686b01b94fa30c499fe459f72030512, type: 3}
   modelResources: []
+  materialResources: []
   Scale: 1

@@ -16,4 +16,5 @@ MonoBehaviour:
   textureResources: []
   soundResources: []
   modelResources: []
+  materialResources: []
   Scale: 0.5

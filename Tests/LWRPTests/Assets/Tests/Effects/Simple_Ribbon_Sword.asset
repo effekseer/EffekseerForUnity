@@ -18,4 +18,5 @@ MonoBehaviour:
     texture: {fileID: 2800000, guid: a770e6e4e172bf141b70b355dc40aa40, type: 3}
   soundResources: []
   modelResources: []
+  materialResources: []
   Scale: 1
