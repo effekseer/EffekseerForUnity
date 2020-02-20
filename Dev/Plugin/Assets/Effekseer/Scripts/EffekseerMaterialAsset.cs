@@ -630,6 +630,8 @@ Cull[_Cull]
 		
 			float3 pixelNormalDir = worldNormal;
 			float4 vcolor = Input.VColor;
+
+			float3 objectScale = float3(1.0, 1.0, 1.0);
 		
 			%PSCODE%
 
