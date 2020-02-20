@@ -29,13 +29,11 @@ namespace Effekseer
 			
 			prop.colorTargetIdentifier = new RenderTargetIdentifier(colorBuffer);
 			prop.depthTargetIdentifier = new RenderTargetIdentifier(depthBuffer);
-
+			prop.colorTargetRenderTexture = (UnityEngine.RenderTexture)colorBuffer;
 			prop.Viewport = hdCamera.finalViewport;
-
-			// TODO : improve it
-			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(colorBuffer.rt.width, colorBuffer.rt.height, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
+			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(hdCamera.actualWidth, hdCamera.actualHeight, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
-
+			prop.isColorTargetArray = true;
 			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd);
 		}
 

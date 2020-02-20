@@ -8,15 +8,45 @@ namespace Effekseer.Internal
 {
 	public class RenderTargetProperty
 	{
+		/// <summary>
+		/// Ring buffer (it should be better implement)
+		/// </summary>
+		const int MaterialRingCount = 4;
+
 		public int? colorBufferID = null;
 		public RenderTargetIdentifier colorTargetIdentifier;
 		public RenderTargetIdentifier? depthTargetIdentifier;
 		public RenderTextureDescriptor colorTargetDescriptor;
 		public Rect Viewport;
+		public bool isColorTargetArray = false;
+		public RenderTexture colorTargetRenderTexture = null;
+
+		int blitMaterialOffset = 0;
+		List<Material> blitMaterials = new List<Material>();
+
+		public RenderTargetProperty()
+		{
+		}
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
 		{
-			cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+			if(isColorTargetArray)
+			{
+				var m = AllocateBlitMaterial();
+				m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
+				m.SetVector("textureArea", new Vector4(
+					Viewport.width / colorTargetRenderTexture.width, 
+					Viewport.height / colorTargetRenderTexture.height,
+					Viewport.x / colorTargetRenderTexture.width, 
+					Viewport.y / colorTargetRenderTexture.height));
+				cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
+				cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
+				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+			}
+			else
+			{
+				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+			}
 
 			if (depthTargetIdentifier.HasValue)
 			{
@@ -26,6 +56,21 @@ namespace Effekseer.Internal
 			{
 				cb.SetRenderTarget(colorTargetIdentifier);
 			}
+		}
+
+		Material AllocateBlitMaterial()
+		{
+			if(blitMaterials.Count == 0)
+			{
+				for(int i = 0; i < MaterialRingCount; i++)
+				{
+					blitMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DArrayBlitMaterial));
+				}
+			}
+
+			blitMaterialOffset++;
+			blitMaterialOffset %= MaterialRingCount;
+			return blitMaterials[blitMaterialOffset];
 		}
 	}
 
@@ -98,6 +143,10 @@ namespace Effekseer.Internal
 #else
 			renderTexture = new RenderTexture(width, height, 0, format);
 #endif
+			if(renderTexture != null)
+			{
+				renderTexture.name = "EffekseerBackground";
+			}
 		}
 
 		public bool Create()

@@ -118,6 +118,9 @@ namespace Effekseer
 		[SerializeField]
 		public Shader standardModelDistortionShader = null;
 
+		[SerializeField]
+		public Shader texture2DArrayBlitMaterial = null;
+
 		#region Network
 		/// <summary xml:lang="en">
 		/// A network port to edit effects from remote
@@ -172,6 +175,7 @@ namespace Effekseer
 				asset.standardDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardDistortionShader.shader");
 				asset.standardModelShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelShader.shader");
 				asset.standardModelDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelDistortionShader.shader");
+				asset.texture2DArrayBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DArrayBlitShader.shader");
 
 				AssetDatabase.CreateAsset(asset, assetPath);
 				AssetDatabase.Refresh();
