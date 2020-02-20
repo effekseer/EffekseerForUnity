@@ -116,7 +116,24 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 
 ## High Definition Render Pipeline
 
-対応予定です。
+Effekseer は High Definition Render Pipeline に対応しています。.
+HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerRendererHDRP.cs* からコメントアウトを外してください。
+
+![](../img/HDRP/Code.png)
+
+カメラに *CustomPassVolume* コンポーネントを追加します。
+
+![](../img/HDRP/CustomPassVolume.png)
+
+*CustomPasses* に *EffekseerRendererHDRP* を追加します。
+
+![](../img/HDRP/CustomPassVolumeSelect.png)
+
+![](../img/HDRP/CustomPassVolumeAdd.png)
+
+*Injection Point* を *Before Post Process* に変更します。
+
+![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
 
 ## モバイル環境
 

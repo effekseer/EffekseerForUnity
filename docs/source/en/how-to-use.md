@@ -111,7 +111,24 @@ Add EffekseerRenderer to *Render Features* in created *Forward Render Asset*.
 
 ## High Definition Render Pipeline
 
-I will support it.
+Effekseer supports High Definition Render Pipeline.
+Please remove comment out from *ScriptsExternal/EffekseerRendererHDRP.cs* because URP(LWRP) is not contained in Unity with default settings at first.
+
+![](../img/HDRP/Code.png)
+
+You add *CustomPassVolume* Component to a camera.
+
+![](../img/HDRP/CustomPassVolume.png)
+
+You add  *EffekseerRendererHDRP* to *CustomPasses*.
+
+![](../img/HDRP/CustomPassVolumeSelect.png)
+
+![](../img/HDRP/CustomPassVolumeAdd.png)
+
+You change *Injection Point* into *Before Post Process*.
+
+![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
 
 ## Mobile environment
 
