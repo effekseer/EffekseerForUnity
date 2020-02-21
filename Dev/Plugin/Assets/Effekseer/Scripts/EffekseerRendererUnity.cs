@@ -1060,6 +1060,11 @@ namespace Effekseer.Internal
 
 				if(parameter.IsRefraction > 0)
 				{
+					if(efkMaterial.materialsRefraction == null)
+					{
+						return;
+					}
+
 					material = efkMaterial.materialsRefraction.GetMaterial(ref key);
 				}
 				else

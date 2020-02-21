@@ -278,6 +278,15 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	}
 }
 
+int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
+{
+	auto ret = exportedVertexBuffer.size();
+
+	exportedVertexBuffer.resize(exportedVertexBuffer.size() + size);
+	memcpy(exportedVertexBuffer.data() + ret, data, size);
+	return ret;
+}
+
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
 
@@ -286,6 +295,10 @@ int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 	exportedInfoBuffer.resize(exportedInfoBuffer.size() + size);
 	memcpy(exportedInfoBuffer.data() + ret, data, size);
 	return ret;
+}
+
+void RendererImplemented::AlignVertexBuffer(int32_t alignment) {
+	exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), alignment));
 }
 
 RendererImplemented* RendererImplemented::Create() { return new RendererImplemented(); }
@@ -321,6 +334,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	m_standardRenderer =
 		new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>(this, nullptr, nullptr);
 
+	exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
 	return true;
 }
 
@@ -335,7 +349,7 @@ bool RendererImplemented::BeginRendering()
 {
 	::Effekseer::Matrix44::Mul(GetCameraProjectionMatrix(), GetCameraMatrix(), GetProjectionMatrix());
 
-	// レンダラーリセット
+	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
 	// GLCheckError();
@@ -351,11 +365,11 @@ bool RendererImplemented::EndRendering()
 {
 	//		GLCheckError();
 
-	// レンダラーリセット
+	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
 	// ForUnity
-	exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
+	AlignVertexBuffer(sizeof(UnityVertex));
 
 	return true;
 }
@@ -448,10 +462,11 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex) + customDataStride;
-		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), rp.VertexBufferStride));
+		AlignVertexBuffer(rp.VertexBufferStride);
+
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
-		const int32_t stride = (int32_t)sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
+		const int32_t stride = static_cast<int>(sizeof(EffekseerRenderer::DynamicVertex)) + customDataStride;
 
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
@@ -464,7 +479,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		// Uniform
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount());
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
@@ -474,15 +489,16 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			unity_v.Pos = v.Pos;
 			unity_v.UV1[0] = v.UV1[0];
 			unity_v.UV1[1] = v.UV1[1];
+			unity_v.UV2[0] = v.UV2[0];
+			unity_v.UV2[1] = v.UV2[1];
 			unity_v.Col[0] = v.Col.R / 255.0f;
 			unity_v.Col[1] = v.Col.G / 255.0f;
 			unity_v.Col[2] = v.Col.B / 255.0f;
 			unity_v.Col[3] = v.Col.A / 255.0f;
 			unity_v.Tangent = UnpackVector3DF(v.Tangent);
 			unity_v.Normal = UnpackVector3DF(v.Normal);
-			auto targetOffset = exportedVertexBuffer.size();
-			exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityDynamicVertex) + customDataStride);
-			memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityDynamicVertex));
+
+			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
 
 			if (nativeMaterial->GetCustomData1Count() > 0)
 			{
@@ -490,9 +506,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				auto c = (float*)(&custom1[vi]);
 				memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
 
-				memcpy(exportedVertexBuffer.data() + targetOffset + sizeof(UnityDynamicVertex),
-					   customData1.data(),
-					   sizeof(float) * nativeMaterial->GetCustomData1Count());
+				AddVertexBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
 			}
 
 			if (nativeMaterial->GetCustomData2Count() > 0)
@@ -501,10 +515,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				auto c = (float*)(&custom2[vi]);
 				memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
 
-				memcpy(exportedVertexBuffer.data() + targetOffset + sizeof(UnityDynamicVertex) +
-						   sizeof(float) * nativeMaterial->GetCustomData2Count(),
-					   customData2.data(),
-					   sizeof(float) * nativeMaterial->GetCustomData2Count());
+				AddVertexBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
 			}
 		}
 
@@ -563,8 +574,8 @@ Exit:;
 
 		VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
-		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityDistortionVertex)));
 		rp.VertexBufferStride = sizeof(UnityDistortionVertex);
+		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = exportedVertexBuffer.size();
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -595,9 +606,7 @@ Exit:;
 			unity_v.Tangent = v.Tangent;
 			unity_v.Binormal = v.Binormal;
 
-			auto targetOffset = exportedVertexBuffer.size();
-			exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityDistortionVertex));
-			memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityDistortionVertex));
+			AddVertexBuffer(&unity_v, sizeof(UnityDistortionVertex));
 		}
 
 		rp.DistortionIntensity = m_distortionIntensity;
@@ -618,8 +627,8 @@ Exit:;
 	{
 		Vertex* vs = (Vertex*)m_vertexBuffer->GetResource();
 
-		exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), sizeof(UnityVertex)));
 		rp.VertexBufferStride = sizeof(UnityVertex);
+		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = exportedVertexBuffer.size();
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -645,9 +654,7 @@ Exit:;
 			unity_v.Col[2] = v.Col[2] / 255.0f;
 			unity_v.Col[3] = v.Col[3] / 255.0f;
 
-			auto targetOffset = exportedVertexBuffer.size();
-			exportedVertexBuffer.resize(exportedVertexBuffer.size() + sizeof(UnityVertex));
-			memcpy(exportedVertexBuffer.data() + targetOffset, &unity_v, sizeof(UnityVertex));
+			AddVertexBuffer(&unity_v, sizeof(UnityVertex));
 		}
 
 		rp.VertexBufferOffset = startOffset;
@@ -746,7 +753,7 @@ void RendererImplemented::DrawModel(void* model,
 		// Uniform
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount());
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);
 
 		if (nativeMaterial->GetCustomData1Count() > 0)
 		{

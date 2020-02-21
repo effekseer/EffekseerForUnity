@@ -160,7 +160,10 @@ protected:
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* m_standardRenderer = nullptr;
 
+	int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
+	void AlignVertexBuffer(int32_t alignment);
+
 
 public:
 	static RendererImplemented* Create();

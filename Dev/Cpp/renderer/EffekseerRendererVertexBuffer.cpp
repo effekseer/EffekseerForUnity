@@ -31,6 +31,8 @@ bool VertexBuffer::RingBufferLock(int32_t size, int32_t& offset, void*& data, in
 	if (size > m_size)
 		return false;
 
+	m_vertexRingOffset = (m_vertexRingOffset + alignment - 1) / alignment * alignment;
+
 	if ((int32_t)m_vertexRingOffset + size > m_size)
 	{
 		offset = 0;
