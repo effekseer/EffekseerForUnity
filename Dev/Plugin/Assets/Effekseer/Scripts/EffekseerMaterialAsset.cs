@@ -46,12 +46,14 @@ namespace Effekseer
 {
 	public class EffekseerMaterialAsset : ScriptableObject
 	{
-		public struct TextureProperty
+		[System.Serializable]
+		public class TextureProperty
 		{
 			[SerializeField]
 			public string Name;
 		}
-		public struct UniformProperty
+		[System.Serializable]
+		public class UniformProperty
 		{
 			[SerializeField]
 			public string Name;
@@ -83,10 +85,10 @@ namespace Effekseer
 		public Shader shader = null;
 
 		[SerializeField]
-		public List<TextureProperty> textures = new List<TextureProperty>();
+		public TextureProperty[] textures = new TextureProperty[0];
 
 		[SerializeField]
-		public List<UniformProperty> uniforms = new List<UniformProperty>();
+		public UniformProperty[] uniforms = new UniformProperty[0];
 
 		[SerializeField]
 		public int CustomData1Count = 0;
@@ -143,8 +145,8 @@ namespace Effekseer
 			else
 			{
 				asset.materialBuffers = importingAsset.Data;
-				asset.uniforms = importingAsset.Uniforms;
-				asset.textures = importingAsset.Textures;
+				asset.uniforms = importingAsset.Uniforms.ToArray();
+				asset.textures = importingAsset.Textures.ToArray();
 				asset.CustomData1Count = importingAsset.CustomData1Count;
 				asset.CustomData2Count = importingAsset.CustomData2Count;
 				asset.HasRefraction = importingAsset.HasRefraction;

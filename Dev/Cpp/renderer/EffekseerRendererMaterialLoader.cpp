@@ -30,11 +30,11 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 	int requiredCachedDataSize = 0;
 
 	auto materialPtr = load_((const char16_t*)path,
-							 memoryFile_.LoadedBuffer.data(),
-							 (int)memoryFile_.LoadedBuffer.size(),
+							 nullptr,
+							 0,
 							 requiredDataSize,
-							 memoryFileForCache_.LoadedBuffer.data(),
-							 (int)memoryFileForCache_.LoadedBuffer.size(),
+							 nullptr,
+							 0,
 							 requiredCachedDataSize);
 
 	if (requiredDataSize == 0 && requiredCachedDataSize == 0)
@@ -70,7 +70,7 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 		memoryFile_.LoadedSize = static_cast<size_t>(requiredDataSize);
 
 		std::shared_ptr<Effekseer::Material> material = std::make_shared<Effekseer::Material>();
-		material->Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), memoryFile_.LoadedBuffer.size());
+		material->Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), static_cast<int32_t>(memoryFile_.LoadedBuffer.size()));
 
 		res.internalData = new ::Effekseer::MaterialData();
 

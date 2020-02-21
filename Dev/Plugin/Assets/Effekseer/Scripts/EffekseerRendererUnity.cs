@@ -1075,7 +1075,7 @@ namespace Effekseer.Internal
 				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 				prop.SetBuffer("buf_vertex", computeBuffer);
 
-				for (int ti = 0; ti < efkMaterial.asset.textures.Count; ti++)
+				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 				{
 					var ptr = parameter.GetTexturePtr(ti);
 					var texture = GetCachedTexture(ptr, background);
@@ -1087,7 +1087,7 @@ namespace Effekseer.Internal
 					}
 				}
 
-				for (int ui = 0; ui < efkMaterial.asset.uniforms.Count; ui++)
+				for (int ui = 0; ui < efkMaterial.asset.uniforms.Length; ui++)
 				{
 					var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
 					prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
@@ -1095,7 +1095,7 @@ namespace Effekseer.Internal
 
 				if (parameter.IsRefraction > 0 && background != null)
 				{
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Count), background));
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background));
 				}
 
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
@@ -1233,7 +1233,7 @@ namespace Effekseer.Internal
 					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 					prop.SetBuffer("buf_model_parameter", computeBuf);
 
-					for (int ti = 0; ti < efkMaterial.asset.textures.Count; ti++)
+					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 					{
 						var ptr = parameter.GetTexturePtr(ti);
 						var texture = GetCachedTexture(ptr, background);
@@ -1245,7 +1245,7 @@ namespace Effekseer.Internal
 						}
 					}
 
-					for (int ui = 0; ui < efkMaterial.asset.uniforms.Count; ui++)
+					for (int ui = 0; ui < efkMaterial.asset.uniforms.Length; ui++)
 					{
 						var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
 						prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
@@ -1270,7 +1270,7 @@ namespace Effekseer.Internal
 
 					if (parameter.IsRefraction > 0 && background != null)
 					{
-						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Count), background));
+						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background));
 					}
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);

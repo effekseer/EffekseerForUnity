@@ -610,13 +610,13 @@ namespace Effekseer
 						{
 							requiredMaterialBufferSize = material.materialBuffers.Length;
 
-							if (material.materialBuffers.Length <= materialBufferSize)
-							{
-								Marshal.Copy(material.materialBuffers, 0, materialBuffer, material.materialBuffers.Length);
-							}
-
 							status += 1;
 							return new IntPtr(status);
+						}
+
+						if (material.materialBuffers.Length <= materialBufferSize)
+						{
+							Marshal.Copy(material.materialBuffers, 0, materialBuffer, material.materialBuffers.Length);
 						}
 
 						var ptr = new IntPtr();
