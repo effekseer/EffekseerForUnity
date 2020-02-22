@@ -118,6 +118,7 @@ namespace Effekseer
 				handle.UpdateHandle(1);
 			}
 			handles.Clear();
+			Plugin.EffekseerResetTime();
 		}
 	
 		/// <summary xml:lang="en">

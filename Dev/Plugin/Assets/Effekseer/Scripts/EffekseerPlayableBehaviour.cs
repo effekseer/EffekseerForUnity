@@ -91,6 +91,7 @@ namespace Effekseer
 			}
 			handle.Stop();
 			handle.UpdateHandle(1.0f);
+			Effekseer.Plugin.EffekseerResetTime();
 		}
 
 		private void SetTime() {

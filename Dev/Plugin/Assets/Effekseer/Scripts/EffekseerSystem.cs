@@ -424,6 +424,13 @@ namespace Effekseer
 			Plugin.EffekseerSetMaterialLoaderEvent(null, null);
 		}
 
+#if UNITY_EDITOR
+		public void UpdateTime(float deltaTime)
+		{
+			Plugin.EffekseerUpdateTime(deltaTime);
+		}
+#endif
+
 		float restFrames = 0;
 
 		internal void Update(float deltaTime) {
@@ -431,6 +438,7 @@ namespace Effekseer
 			restFrames += deltaFrames;
 			int updateCount = Mathf.RoundToInt(restFrames);
 			for (int i = 0; i < updateCount; i++) {
+				Plugin.EffekseerUpdateTime(1);
 				Plugin.EffekseerUpdate(1);
 			}
 			restFrames -= updateCount;

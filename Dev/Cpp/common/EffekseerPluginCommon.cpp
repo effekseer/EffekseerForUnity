@@ -57,7 +57,16 @@ extern float g_time;
 
 extern "C"
 {
-	// フレームの更新
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateTime(float deltaFrame) 
+	{
+		g_time += deltaFrame * 60.0f / 1000.0f;
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerResetTime()
+	{
+		g_time = 0.0f; 
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdate(float deltaFrame)
 	{
 		if (g_EffekseerManager == NULL) {
@@ -65,10 +74,9 @@ extern "C"
 		}
 		
 		g_EffekseerManager->Update(deltaFrame);
-		g_time += deltaFrame * 60.0f / 1000.0f;
+		
 	}
 	
-	// エフェクトのロード
 	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffect(const EFK_CHAR* path, float magnification)
 	{
 		if (g_EffekseerManager == NULL) {

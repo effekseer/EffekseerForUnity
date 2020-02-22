@@ -42,6 +42,12 @@ namespace Effekseer
 		public static extern void EffekseerTerm();
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerResetTime();
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerUpdateTime(float deltaTime);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerUpdate(float deltaTime);
 
 		[DllImport(pluginName)]
