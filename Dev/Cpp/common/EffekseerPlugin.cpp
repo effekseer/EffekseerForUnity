@@ -105,6 +105,7 @@ Graphics* g_graphics = nullptr;
 
 Effekseer::Manager* g_EffekseerManager = NULL;
 EffekseerRenderer::Renderer* g_EffekseerRenderer = NULL;
+float g_time = 0.0f;
 
 bool g_isRunning = false;
 
@@ -462,6 +463,7 @@ extern "C"
 
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw(drawParameter);
 		g_EffekseerRenderer->EndRendering();
@@ -518,6 +520,7 @@ extern "C"
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
@@ -674,6 +677,7 @@ extern "C"
 		// render
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();
@@ -714,6 +718,8 @@ extern "C"
 		{
 			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
 		}
+
+		g_time = 0.0f;
 
 		assert(g_graphics == nullptr);
 		if (g_rendererType == RendererType::Native)

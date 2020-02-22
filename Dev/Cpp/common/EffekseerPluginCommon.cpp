@@ -13,6 +13,7 @@ namespace EffekseerPlugin
 
 extern Effekseer::Manager* g_EffekseerManager;
 extern Graphics* g_graphics;
+extern float g_time;
 
 	RenderSettings renderSettings[MAX_RENDER_PATH] = {{}};
 
@@ -64,6 +65,7 @@ extern "C"
 		}
 		
 		g_EffekseerManager->Update(deltaFrame);
+		g_time += deltaFrame * 60.0f / 1000.0f;
 	}
 	
 	// エフェクトのロード
