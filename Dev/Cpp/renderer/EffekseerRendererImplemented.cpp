@@ -100,7 +100,6 @@ void ExtractTextures(const Effekseer::Effect* effect,
 		auto materialParam = param->MaterialParameterPtr;
 
 		textureCount = 0;
-		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
 
 		if (materialParam->MaterialTextures.size() > 0)
 		{
@@ -231,6 +230,14 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 		{
 			ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
+
+			for (int i = 0; i < textureCount; i++)
+			{
+				state.TextureFilterTypes[i] = Effekseer::TextureFilterType::Linear;
+				state.TextureWrapTypes[i] =
+					parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
+						->TextureWrapTypes[i];
+			}
 		}
 		else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
 		{
@@ -242,6 +249,12 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			{
 				textures[0] = nullptr;
 			}
+
+			state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
+			state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
+			state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
+			state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
+
 			textureCount = 1;
 		}
 		else
@@ -254,6 +267,12 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			{
 				textures[0] = nullptr;
 			}
+
+			state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
+			state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
+			state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
+			state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
+
 			textureCount = 1;
 		}
 
@@ -262,10 +281,18 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
 		}
 
-		state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
-		state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
-		state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
-		state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
+		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
+		{
+			float* cutomData1Ptr = nullptr;
+			float* cutomData2Ptr = nullptr;
+
+			Effekseer::MaterialParameter* materialParam = parameter.BasicParameterPtr->MaterialParameterPtr;
+			Effekseer::MaterialData* material =
+				parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex);
+
+			StoreFileUniform<RendererImplemented, Shader, 1>(
+				m_renderer, shader, material, materialParam, parameter, stageInd, cutomData1Ptr, cutomData2Ptr);
+		}
 
 		m_renderer->GetRenderState()->Update(false);
 		m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
@@ -297,7 +324,8 @@ int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 	return ret;
 }
 
-void RendererImplemented::AlignVertexBuffer(int32_t alignment) {
+void RendererImplemented::AlignVertexBuffer(int32_t alignment)
+{
 	exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), alignment));
 }
 

@@ -1248,7 +1248,8 @@ namespace Effekseer.Internal
 					for (int ui = 0; ui < efkMaterial.asset.uniforms.Length; ui++)
 					{
 						var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
-						prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]));
+						var uniform = new Vector4(f[ui * 4 + 0], f[ui * 4 + 1], f[ui * 4 + 2], f[ui * 4 + 3]);
+						prop.SetVector(efkMaterial.asset.uniforms[ui].Name, uniform);
 					}
 
 					// CustomData
