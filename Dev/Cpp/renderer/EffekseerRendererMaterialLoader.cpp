@@ -11,9 +11,7 @@ MaterialLoader::MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, Effekse
 {
 }
 
-MaterialLoader::~MaterialLoader() {
-
-}
+MaterialLoader::~MaterialLoader() {}
 
 Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 {
@@ -29,13 +27,7 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 	int requiredDataSize = 0;
 	int requiredCachedDataSize = 0;
 
-	auto materialPtr = load_((const char16_t*)path,
-							 nullptr,
-							 0,
-							 requiredDataSize,
-							 nullptr,
-							 0,
-							 requiredCachedDataSize);
+	auto materialPtr = load_((const char16_t*)path, nullptr, 0, requiredDataSize, nullptr, 0, requiredCachedDataSize);
 
 	if (requiredDataSize == 0 && requiredCachedDataSize == 0)
 	{
@@ -127,13 +119,19 @@ void MaterialLoader::Unload(Effekseer::MaterialData* data)
 		auto srs = static_cast<Shader*>(it->second.internalData->RefractionUserPtr);
 		auto srm = static_cast<Shader*>(it->second.internalData->RefractionModelUserPtr);
 
+		void* ptr = nullptr;
+		if (ss != nullptr)
+		{
+			ptr = ss->GetUnityMaterial();
+		}
+
 		ES_SAFE_DELETE(ss);
 		ES_SAFE_DELETE(sm);
 		ES_SAFE_DELETE(srs);
 		ES_SAFE_DELETE(srm);
 		ES_SAFE_DELETE(it->second.internalData);
 
-		unload_(it->first.c_str(), nullptr);
+		unload_(it->first.c_str(), ptr);
 		resources.erase(it);
 	}
 }

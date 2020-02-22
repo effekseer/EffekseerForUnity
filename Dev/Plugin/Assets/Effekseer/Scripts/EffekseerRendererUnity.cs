@@ -1258,7 +1258,7 @@ namespace Effekseer.Internal
 						ComputeBuffer cb = null;
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, count, ref cb);
 						if (all != allocated) throw new Exception();
-						prop.SetBuffer("buf_customData1", computeBuf);
+						prop.SetBuffer("buf_customData1", cb);
 					}
 
 					if (efkMaterial.asset.CustomData2Count > 0)
@@ -1266,7 +1266,7 @@ namespace Effekseer.Internal
 						ComputeBuffer cb = null;
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, count, ref cb);
 						if (all != allocated) throw new Exception();
-						prop.SetBuffer("buf_customData2", computeBuf);
+						prop.SetBuffer("buf_customData2", cb);
 					}
 
 					if (parameter.IsRefraction > 0 && background != null)
