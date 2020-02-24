@@ -59,7 +59,7 @@ extern "C"
 {
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateTime(float deltaFrame) 
 	{
-		g_time += deltaFrame * 60.0f / 1000.0f;
+		g_time += deltaFrame * (1.0f / 60.0f);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerResetTime()
