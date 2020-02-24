@@ -71,6 +71,7 @@ namespace Effekseer.Editor
 					importingAsset.CustomData1Count = info.CustomData1Count;
 					importingAsset.CustomData2Count = info.CustomData2Count;
 					importingAsset.HasRefraction = info.HasRefraction;
+					importingAsset.ShadingModel = info.ShadingModel;
 
 					foreach (var u in info.Uniforms)
 					{

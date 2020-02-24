@@ -14,6 +14,9 @@ namespace EffekseerPlugin
 extern Effekseer::Manager* g_EffekseerManager;
 extern Graphics* g_graphics;
 extern float g_time;
+extern Effekseer::Vector3D g_lightDirection;
+extern Effekseer::Color g_lightColor;
+extern Effekseer::Color g_lightAmbientColor;
 
 	RenderSettings renderSettings[MAX_RENDER_PATH] = {{}};
 
@@ -382,7 +385,28 @@ extern "C"
 		g_EffekseerManager->SetLayer(handle, layer);
 	}
 
-	// プロジェクション行列設定
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightDirection(float x, float y, float z)
+	{
+		g_lightDirection.X = x;
+		g_lightDirection.Y = y;
+		g_lightDirection.Z = z;
+	}
+
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightColor(int32_t r, int32_t g, int32_t b)
+	{ 
+		g_lightColor.R = r;
+		g_lightColor.G = g;
+		g_lightColor.B = b;
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightAmbientColor(int32_t r, int32_t g, int32_t b)
+	{
+		g_lightAmbientColor.R = r;
+		g_lightAmbientColor.G = g;
+		g_lightAmbientColor.B = b;
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProjectionMatrix(int renderId, float matrixArray[])
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
@@ -391,7 +415,6 @@ extern "C"
 		}
 	}
 	
-	// ビュー行列設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetCameraMatrix(int renderId, float matrixArray[])
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {
@@ -400,7 +423,6 @@ extern "C"
 		}
 	}
 
-	// ステレオレンダリング(VR)用行列設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetStereoRenderingMatrix(
 		int renderId, int renderType, 
 		float camCenterMat[],
@@ -420,7 +442,6 @@ extern "C"
 		}
 	}
 
-	// 描画設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetRenderSettings(int renderId, bool renderIntoTexture)
 	{
 		if (renderId >= 0 && renderId < MAX_RENDER_PATH) {

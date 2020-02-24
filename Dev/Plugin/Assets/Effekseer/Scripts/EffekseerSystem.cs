@@ -13,6 +13,12 @@ namespace Effekseer
 {
 	using Internal;
 
+	enum DummyTextureType
+	{
+		White,
+		Normal,
+	}
+
 	[Serializable]
 	public class EffekseerSystem
 	{
@@ -136,6 +142,40 @@ namespace Effekseer
 
 		private static Dictionary<EffekseerMaterialAsset, IntPtr> cachedMaterialIDs = new Dictionary<EffekseerMaterialAsset, IntPtr>();
 
+		static Vector3 lightDirection = new Vector3(1, 1, -1);
+
+		static Color lightColor = new Color(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+
+		static Color lightAmbientColor = new Color(40.0f / 255.0f, 40.0f / 255.0f, 40.0f / 255.0f);
+
+		static Texture2D normalTexture = null;
+
+		public static Vector3 LightDirection
+		{
+			get { return lightDirection; }
+			set
+			{
+				lightDirection = value;
+			}
+		}
+
+		public static Color LightColor
+		{
+			get { return lightColor; }
+			set
+			{
+				lightColor = value;
+			}
+		}
+
+		public static Color LightAmbientColor
+		{
+			get { return lightAmbientColor; }
+			set
+			{
+				lightAmbientColor = value;
+			}
+		}
 		private void ReloadEffects()
 		{
 			foreach (var weakEffectAsset in EffekseerEffectAsset.enabledAssets)
@@ -319,6 +359,15 @@ namespace Effekseer
 			{
 				StartNetwork();
 			}
+
+			// Create dummy texture
+			normalTexture = new Texture2D(16, 16);
+			Color[] normalColor = new Color[16 * 16];
+			for(int i = 0; i < normalColor.Length; i++)
+			{
+				normalColor[i] = new Color(0.5f, 0.5f, 1.0f);
+			}
+			normalTexture.SetPixels(0, 0, 16, 16, normalColor);
 		}
 
 		/// <summary>
@@ -442,15 +491,43 @@ namespace Effekseer
 				Plugin.EffekseerUpdate(1);
 			}
 			restFrames -= updateCount;
+
+			ApplyLightingToNative();
 		}
 
-		internal static Texture GetCachedTexture(IntPtr key)
+		/// <summary>
+		/// Don't touch it!!
+		/// </summary>
+		public void ApplyLightingToNative()
+		{
+			var lr = (int)Math.Max(Math.Min(255, lightColor.r * 255), 0);
+			var lg = (int)Math.Max(Math.Min(255, lightColor.g * 255), 0);
+			var lb = (int)Math.Max(Math.Min(255, lightColor.b * 255), 0);
+			var lar = (int)Math.Max(Math.Min(255, lightAmbientColor.r * 255), 0);
+			var lag = (int)Math.Max(Math.Min(255, lightAmbientColor.g * 255), 0);
+			var lab = (int)Math.Max(Math.Min(255, lightAmbientColor.b * 255), 0);
+			var direction = LightDirection.normalized;
+
+			Plugin.EffekseerSetLightDirection(direction.x, direction.y, direction.z);
+			Plugin.EffekseerSetLightColor(lr, lg, lb);
+			Plugin.EffekseerSetLightAmbientColor(lar, lab, lag);
+		}
+
+		internal static Texture GetCachedTexture(IntPtr key, DummyTextureType type)
 		{
 			if(cachedTextures.ContainsKey(key))
 			{
 				return cachedTextures[key];
 			}
-			return Texture2D.whiteTexture;
+
+			if(type == DummyTextureType.White)
+			{
+				return Texture2D.whiteTexture;
+			}
+			else
+			{
+				return normalTexture;
+			}
 		}
 
 		internal static UnityRendererModel GetCachedModel(IntPtr key)

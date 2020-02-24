@@ -98,6 +98,7 @@ public:
 
 using Vertex = EffekseerRenderer::SimpleVertex;
 using VertexDistortion = EffekseerRenderer::VertexDistortion;
+using DynamicVertex = EffekseerRenderer::DynamicVertex;
 
 struct ModelParameter
 {

@@ -63,6 +63,7 @@ namespace Effekseer.Editor
 				handle.UpdateHandle(deltaFrames);
 			}
 			EffekseerSystem.Instance.UpdateTime(deltaFrames);
+			EffekseerSystem.Instance.ApplyLightingToNative();
 			emitter.Update();
 		}
 

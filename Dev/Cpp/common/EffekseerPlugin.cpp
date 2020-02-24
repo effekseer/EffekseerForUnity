@@ -36,11 +36,11 @@
 // DirectX
 #ifdef _WIN32
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
-#include <EffekseerRendererDX9/EffekseerRendererDX9.h>
 #include <EffekseerRendererDX11/EffekseerRendererDX11.h>
+#include <EffekseerRendererDX9/EffekseerRendererDX9.h>
 #else
-#include "EffekseerRendererDX9.h"
 #include "EffekseerRendererDX11.h"
+#include "EffekseerRendererDX9.h"
 #endif
 #endif
 
@@ -106,6 +106,9 @@ Graphics* g_graphics = nullptr;
 Effekseer::Manager* g_EffekseerManager = NULL;
 EffekseerRenderer::Renderer* g_EffekseerRenderer = NULL;
 float g_time = 0.0f;
+Effekseer::Vector3D g_lightDirection = Effekseer::Vector3D(1, 1, -1);
+Effekseer::Color g_lightColor = Effekseer::Color(255, 255, 255);
+Effekseer::Color g_lightAmbientColor = Effekseer::Color(40, 40, 40);
 
 bool g_isRunning = false;
 
@@ -678,6 +681,9 @@ extern "C"
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
 		g_EffekseerRenderer->SetTime(g_time);
+		g_EffekseerRenderer->SetLightColor(g_lightColor);
+		g_EffekseerRenderer->SetLightAmbientColor(g_lightAmbientColor);
+		g_EffekseerRenderer->SetLightDirection(g_lightDirection);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();

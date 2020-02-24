@@ -171,6 +171,15 @@ namespace Effekseer
 		public static extern void EffekseerSetTargetLocation(int handle, float x, float y, float z);
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerSetLightDirection(float x, float y, float z);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetLightColor(int r, int g, int b);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetLightAmbientColor(int r, int g, int b);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerSetLayer(int handle, int layer);
 
 		[DllImport(pluginName)]

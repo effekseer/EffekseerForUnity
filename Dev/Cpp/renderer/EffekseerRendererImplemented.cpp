@@ -650,6 +650,44 @@ Exit:;
 	}
 	else if (m_currentShader->GetType() == Effekseer::RendererMaterialType::Lighting)
 	{
+		DynamicVertex* vs = (DynamicVertex*)m_vertexBuffer->GetResource();
+
+		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
+		AlignVertexBuffer(rp.VertexBufferStride);
+		int32_t startOffset = exportedVertexBuffer.size();
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			UnityDynamicVertex unity_v;
+
+			unity_v.Pos = v.Pos;
+			unity_v.UV1[0] = v.UV1[0];
+			unity_v.UV1[1] = v.UV1[1];
+			unity_v.UV2[0] = v.UV2[0];
+			unity_v.UV2[1] = v.UV2[1];
+			unity_v.Col[0] = v.Col.R / 255.0f;
+			unity_v.Col[1] = v.Col.G / 255.0f;
+			unity_v.Col[2] = v.Col.B / 255.0f;
+			unity_v.Col[3] = v.Col.A / 255.0f;
+			unity_v.Tangent = UnpackVector3DF(v.Tangent);
+			unity_v.Normal = UnpackVector3DF(v.Normal);
+
+			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
+		}
+
+		rp.DistortionIntensity = m_distortionIntensity;
+
+		rp.VertexBufferOffset = startOffset;
+		rp.TexturePtrs[0] = m_textures[0];
+		rp.TexturePtrs[1] = m_textures[1];
+		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
+		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
+		rp.TextureFilterTypes[1] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[1];
+		rp.TextureWrapTypes[1] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[1];
+		rp.MaterialPtr = nullptr;
+		rp.ElementCount = spriteCount;
+		renderParameters.push_back(rp);
 	}
 	else
 	{
@@ -738,6 +776,13 @@ void RendererImplemented::DrawModel(void* model,
 		rp.TexturePtrs[0] = m_textures[0];
 		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
 		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
+
+		if (m_currentShader->GetType() == Effekseer::RendererMaterialType::Lighting)
+		{
+			rp.TexturePtrs[1] = m_textures[1];
+			rp.TextureFilterTypes[1] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[1];
+			rp.TextureWrapTypes[1] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[1];
+		}
 
 		if (m_currentShader->GetType() == Effekseer::RendererMaterialType::BackDistortion)
 		{

@@ -18,7 +18,7 @@ namespace EffekseerTool
 {
 	public class Core
 	{
-		public const string Version = "1.50β6";
+		public const string Version = "1.50RC1";
 
 		public const string OptionFilePath = "config.option.xml";
 
@@ -1588,6 +1588,18 @@ namespace EffekseerTool
 						list.Add(Tuple35.Create(name, (object)node.RendererCommonValues.CustomData2.FCurveColor));
 					}
 
+#if __EFFEKSEER_BUILD_VERSION16__
+					if (node.AlphaCrunchValues.Type == Data.AlphaCrunchValues.ParameterType.FCurve)
+					{
+						var name = "AlphaThreshold";
+						if (Language == Language.Japanese)
+						{
+							name = "アルファ閾値";
+						}
+						list.Add(Tuple35.Create(name, (object)node.AlphaCrunchValues.FCurve));
+					}
+#endif
+
 					return list.ToArray();
 				};
 
@@ -1665,8 +1677,13 @@ namespace EffekseerTool
 
 namespace EffekseerTool
 {
-	class Constant
+	public class Constant
 	{
+		/// <summary>
+		///  the maximum number of generation of node
+		/// </summary>
+		public const int NodeLayerLimit = 20;
+
 		/// <summary>
 		///  the maximum number of texture slot which can be specified by an user
 		/// </summary>
@@ -2019,6 +2036,82 @@ namespace EffekseerTool
         public static Tuple35<TV1, TV2> Create<TV1, TV2>(TV1 t1, TV2 t2)
         {
             return new Tuple35<TV1, TV2>(t1, t2);
+        }
+    }
+}
+
+namespace EffekseerTool.Binary
+{
+    class AlphaCrunchValues
+    {
+        public static byte[] GetBytes(Data.AlphaCrunchValues value)
+        {
+            List<byte[]> data = new List<byte[]>();
+            data.Add(value.Type.GetValueAsInt().GetBytes());
+
+            if (value.Type == Data.AlphaCrunchValues.ParameterType.Fixed)
+            {
+                var refBuf = value.Fixed.Threshold.DynamicEquation.Index.GetBytes();
+                var mainBuf = value.Fixed.Threshold.GetBytes();
+                data.Add( (mainBuf.Count() + refBuf.Count()).GetBytes() );
+                data.Add(refBuf);
+                data.Add(mainBuf);
+            }
+            else if (value.Type == Data.AlphaCrunchValues.ParameterType.FourPointInterpolation)
+            {
+                List<byte[]> _data = new List<byte[]>();
+                _data.Add(value.FourPointInterpolation.BeginThreshold.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.BeginThreshold.Min.GetBytes());
+                _data.Add(value.FourPointInterpolation.TransitionFrameNum.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.TransitionFrameNum.Min.GetBytes());
+                _data.Add(value.FourPointInterpolation.No2Threshold.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.No2Threshold.Min.GetBytes());
+                _data.Add(value.FourPointInterpolation.No3Threshold.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.No3Threshold.Min.GetBytes());
+                _data.Add(value.FourPointInterpolation.TransitionFrameNum2.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.TransitionFrameNum2.Min.GetBytes());
+                _data.Add(value.FourPointInterpolation.EndThreshold.Max.GetBytes());
+                _data.Add(value.FourPointInterpolation.EndThreshold.Min.GetBytes());
+
+                var __data = _data.ToArray().ToArray();
+
+                data.Add(__data.Count().GetBytes());
+                data.Add(__data);
+            }
+            else if (value.Type == Data.AlphaCrunchValues.ParameterType.Easing)
+            {
+                var easing = Utl.MathUtl.Easing((float)value.Easing.StartSpeed.Value, (float)value.Easing.EndSpeed.Value);
+
+                var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
+                var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
+                var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
+                var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
+
+                List<byte[]> _data = new List<byte[]>();
+                _data.Add(refBuf1_1);
+                _data.Add(refBuf1_2);
+                _data.Add(refBuf2_1);
+                _data.Add(refBuf2_2);
+                _data.Add(value.Easing.Start.Max.GetBytes());
+                _data.Add(value.Easing.Start.Min.GetBytes());
+                _data.Add(value.Easing.End.Max.GetBytes());
+                _data.Add(value.Easing.End.Min.GetBytes());
+                _data.Add(BitConverter.GetBytes(easing[0]));
+                _data.Add(BitConverter.GetBytes(easing[1]));
+                _data.Add(BitConverter.GetBytes(easing[2]));
+                var __data = _data.ToArray().ToArray();
+
+                data.Add(__data.Count().GetBytes());
+                data.Add(__data);
+            }
+            else if (value.Type == Data.AlphaCrunchValues.ParameterType.FCurve)
+            {
+                var _data = value.FCurve.GetBytes();
+                data.Add(_data.Count().GetBytes());
+                data.Add(_data);
+            }
+
+            return data.ToArray().ToArray();
         }
     }
 }
@@ -2823,6 +2916,13 @@ namespace EffekseerTool.Binary
 					node_data.Add(RendererValues.GetBytes(null, texture_and_index, normalTexture_and_index, model_and_index));
 				}
 
+#if __EFFEKSEER_BUILD_VERSION16__
+				if (Version >= 1600)
+				{
+					node_data.Add(AlphaCrunchValues.GetBytes(n.AlphaCrunchValues));
+				}
+#endif
+
 				data.Add(node_data.ToArray().ToArray());
 
 				data.Add(SoundValues.GetBytes(n.SoundValues, wave_and_index));
@@ -3451,6 +3551,10 @@ namespace EffekseerTool.Binary
 
 				data.Add(value_.StartSheet.Max.GetBytes());
 				data.Add(value_.StartSheet.Min.GetBytes());
+
+#if __EFFEKSEER_BUILD_VERSION16__
+				data.Add(value_.FlipbookInterpolationType);
+#endif
 
 			}
 			else if (value.UV.Value == Data.RendererCommonValues.UVType.Scroll)
@@ -4851,7 +4955,7 @@ namespace EffekseerTool.Command
 		/// ロールバック
 		/// </summary>
 		/// <returns></returns>
-		public static bool Undo()
+		public static bool Undo(bool removeCommand = false)
 		{
 			if (cmd_collections_count > 0)
 			{
@@ -4869,6 +4973,11 @@ namespace EffekseerTool.Command
 					if (Changed != null)
 					{
 						Changed(null, null);
+					}
+
+					if (removeCommand)
+					{
+						cmds.RemoveAt(cmds.Count - 1);
 					}
 
 					return true;
@@ -5066,6 +5175,115 @@ namespace EffekseerTool.Command
 		/// </summary>
 		void Unexecute();
 	}
+}
+
+namespace EffekseerTool.Data
+{
+    public class AlphaCrunchValues
+    {
+        [Selector(ID = 0)]
+        [IO(Export = true)]
+        public Value.Enum<ParameterType> Type { get; private set; }
+
+        [Selected(ID = 0, Value = 0)]
+        [IO(Export = true)]
+        public FixedParameter Fixed { get; private set; }
+
+        [Selected(ID = 0, Value = 1)]
+        [IO(Export = true)]
+        public FourPointInterpolationParameter FourPointInterpolation { get; private set; }
+
+        [Selected(ID = 0, Value = 2)]
+        [IO(Export = true)]
+        public FloatEasingParamater Easing { get; private set; }
+
+        [Selected(ID = 0, Value = 3)]
+        [Name(language = Language.Japanese, value = "Fカーブ")]
+        [IO(Export = true)]
+        public Value.FCurveScalar FCurve { get; private set; }
+
+        public AlphaCrunchValues()
+        {
+            Type = new Value.Enum<ParameterType>(ParameterType.Fixed);
+            Fixed = new FixedParameter();
+            FourPointInterpolation = new FourPointInterpolationParameter();
+            Easing = new FloatEasingParamater(0.0f, 1.0f, 0.0f);
+            FCurve = new Value.FCurveScalar(0.0f, 100.0f);
+
+            Fixed.Threshold.CanSelectDynamicEquation = true;
+            Easing.Start.CanSelectDynamicEquation = true;
+            Easing.End.CanSelectDynamicEquation = true;
+        }
+
+        public class FixedParameter
+        {
+            [Name(language = Language.Japanese, value = "アルファ閾値")]
+            [Name(language = Language.English, value = "Alpha Threshold")]
+            public Value.Float Threshold { get; private set; }
+
+            internal FixedParameter()
+            {
+                Threshold = new Value.Float(0.0f, 1.0f, 0.0f, 0.05f);
+            }
+        }
+
+        public class FourPointInterpolationParameter
+        {
+            [Name(language = Language.Japanese, value = "生成時アルファ閾値")]
+            [Name(language = Language.English, value = "Begin Alpha Threshold")]
+            public Value.FloatWithRandom BeginThreshold { get; private set; }
+
+            [Name(language = Language.Japanese, value = "遷移フレーム(生成時 -> 第2)")]
+            [Name(language = Language.English, value = "Sequence Frame Num")]
+            public Value.IntWithRandom TransitionFrameNum { get; private set; }
+
+            [Name(language = Language.Japanese, value = "第2アルファ閾値")]
+            [Name(language = Language.English, value = "Second Alpha Threshold")]
+            public Value.FloatWithRandom No2Threshold { get; private set; }
+
+            [Name(language = Language.Japanese, value = "第3アルファ閾値")]
+            [Name(language = Language.English, value = "Third Alpha Threshold")]
+            public Value.FloatWithRandom No3Threshold { get; private set; }
+
+            [Name(language = Language.Japanese, value = "遷移フレーム(第3 -> 消滅時)")]
+            [Name(language = Language.English, value = "Sequence Frame Num")]
+            public Value.IntWithRandom TransitionFrameNum2 { get; private set; }
+
+            [Name(language = Language.Japanese, value = "消滅時アルファ閾値")]
+            [Name(language = Language.English, value = "End Alpha Threshold")]
+            public Value.FloatWithRandom EndThreshold { get; private set; }
+
+
+            internal FourPointInterpolationParameter()
+            {
+                BeginThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+                TransitionFrameNum = new Value.IntWithRandom(0, int.MaxValue, 0);
+                No2Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+                No3Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+                TransitionFrameNum2 = new Value.IntWithRandom(0, int.MaxValue, 0);
+                EndThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+            }
+        }
+
+        public enum ParameterType : int
+        {
+            [Name(value = "アルファ閾値", language = Language.Japanese)]
+            [Name(value = "Set Alpha Threshold", language = Language.English)]
+            Fixed = 0,
+
+            [Name(value = "4点補間", language = Language.Japanese)]
+            [Name(value = "Four Point Interpolation", language = Language.English)]
+            FourPointInterpolation = 1,
+
+            [Name(value = "イージング", language = Language.Japanese)]
+            [Name(value = "Easing", language = Language.English)]
+            Easing = 2,
+
+            [Name(value = "アルファ閾値(Fカーブ)", language = Language.Japanese)]
+            [Name(value = "F-Curve", language = Language.English)]
+            FCurve = 3,
+        }
+    }
 }
 
 namespace EffekseerTool.Data
@@ -6148,13 +6366,13 @@ namespace EffekseerTool.Data
 
 			EditableValue vn = new EditableValue();
 			vn.Value = selected.Name;
-			vn.Title = "Name";
+			vn.Title = Resources.GetString("DynamicName");
 			vn.IsUndoEnabled = true;
 			ret.Add(vn);
 
 			EditableValue vx = new EditableValue();
 			vx.Value = selected.Code;
-			vx.Title = "Code";
+			vx.Title = Resources.GetString("DynamicEq");
 			vx.IsUndoEnabled = true;
 			ret.Add(vx);
 
@@ -9247,6 +9465,15 @@ namespace EffekseerTool.Data
             private set;
         }
 
+#if __EFFEKSEER_BUILD_VERSION16__
+		[IO(Export = true)]
+		public AlphaCrunchValues AlphaCrunchValues
+		{
+			get;
+			private set;
+		}
+#endif
+
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
@@ -9264,6 +9491,9 @@ namespace EffekseerTool.Data
 			RendererCommonValues = new Data.RendererCommonValues();
             DrawingValues = new RendererValues();
             SoundValues = new SoundValues();
+#if __EFFEKSEER_BUILD_VERSION16__
+			AlphaCrunchValues = new Data.AlphaCrunchValues();
+#endif
 		}
 	}
 }
@@ -9573,7 +9803,38 @@ namespace EffekseerTool.Data
 		}
 
 		/// <summary>
-		/// 子ノード群
+		/// Get the layer number in the hierarchy
+		/// </summary>
+		/// <returns>the layer number</returns>
+		public int GetLayerNumber()
+		{
+			if (Parent != null)
+			{
+				return 1 + Parent.GetLayerNumber();
+			}
+			else
+			{
+				return 1;
+			}
+		}
+
+		/// <summary>
+		/// Get the number of the deepest layer in chidren 
+		/// </summary>
+		/// <returns></returns>
+		public int GetDeepestLayerNumberInChildren()
+		{
+			int maxGen = 0;
+			foreach (var child in children)
+			{
+				int gen = child.GetDeepestLayerNumberInChildren();
+				if (gen > maxGen) maxGen = gen;
+			}
+			return maxGen + 1;
+		}
+
+		/// <summary>
+		/// Children
 		/// </summary>
 		public class ChildrenCollection
 		{
@@ -11190,6 +11451,11 @@ namespace EffekseerTool.Data
 				UVFCurve = new UVFCurveParamater();
 			}
 		}
+
+		[Name(language = Language.Japanese, value = "アルファクランチ")]
+		[Name(language = Language.English, value = "Alpha Crunch")]
+		[IO(Export = true)]
+		public Value.Enum<AlphaCrunchType> AlphaCrunchTypeValue { get; private set; }
 #endif
 
 		[Name(language = Language.Japanese, value = "カスタムデータ")]
@@ -11244,6 +11510,8 @@ namespace EffekseerTool.Data
 #if __EFFEKSEER_BUILD_VERSION16__
 			EnableAlphaTexture = new Value.Boolean(false);
 			AlphaTextureParam = new AlphaTextureParameter();
+
+			AlphaCrunchTypeValue = new Value.Enum<AlphaCrunchType>(RendererCommonValues.AlphaCrunchType.None);
 #endif
 
 			CustomData1 = new CustomDataParameter(1);
@@ -11378,6 +11646,11 @@ namespace EffekseerTool.Data
 			[Name(value = "Start Sheet", language = Language.English)]
 			public Value.IntWithRandom StartSheet { get; private set; }
 
+#if __EFFEKSEER_BUILD_VERSION16__
+			[Name(value = "アニメーション補間", language = Language.Japanese)]
+			public Value.Enum<FlipbookInterpolationType> FlipbookInterpolationType { get; private set; }
+#endif
+
 			public UVAnimationParamater()
 			{
 				Start = new Value.Vector2D();
@@ -11387,6 +11660,10 @@ namespace EffekseerTool.Data
 				FrameCountY = new Value.Int(1, int.MaxValue, 1);
 				LoopType = new Value.Enum<LoopType>(RendererCommonValues.LoopType.Once);
 				StartSheet = new Value.IntWithRandom(0, int.MaxValue, 0);
+
+#if __EFFEKSEER_BUILD_VERSION16__
+				FlipbookInterpolationType = new Value.Enum<FlipbookInterpolationType>(RendererCommonValues.FlipbookInterpolationType.None);
+#endif
 			}
 		}
 
@@ -11510,6 +11787,43 @@ namespace EffekseerTool.Data
 			[Name(value = "Reverse Loop", language = Language.English)]
 			ReverceLoop = 2,
 		}
+
+#if __EFFEKSEER_BUILD_VERSION16__
+		public enum FlipbookInterpolationType : int
+		{
+			[Name(value = "なし", language = Language.Japanese)]
+			[Name(value = "None", language = Language.English)]
+			None = 0,
+
+			[Name(value = "線形補間", language = Language.Japanese)]
+			[Name(value = "Lerp", language = Language.English)]
+			Lerp = 1,
+		}
+
+		public enum AlphaCrunchType : int
+		{
+			[Name(value = "なし", language = Language.Japanese)]
+			[Name(value = "None", language = Language.English)]
+			None = 0,
+
+			[Name(value = "アルファ閾値", language = Language.Japanese)]
+			[Name(value = "Alpha Threshold", language = Language.English)]
+			AlphaThreashold = 1,
+
+			[Name(value = "4点補間", language = Language.Japanese)]
+			[Name(value = "Four Point Interpolation", language = Language.English)]
+			FourPointInterpolation = 2,
+
+			[Name(value = "イージング", language = Language.Japanese)]
+			[Name(value = "Easing", language = Language.English)]
+			Easing = 3,
+
+			[Name(value = "Fカーブ", language = Language.Japanese)]
+			[Name(value = "F Curve", language = Language.English)]
+			FCurve = 4,
+		}
+#endif
+
 	}
 }
 
@@ -15325,6 +15639,31 @@ namespace EffekseerTool.Data.Value
 
 namespace EffekseerTool.Data.Value
 {
+    public class FCurveScalar
+    {
+        public Value.Enum<FCurveTimelineMode> Timeline = new Enum<FCurveTimelineMode>();
+        public FCurve<float> S { get; private set; }
+
+        public FCurveScalar(float MinValue = float.MinValue, float MaxValue = float.MaxValue)
+        {
+            Timeline = new Enum<FCurveTimelineMode>(FCurveTimelineMode.Percent);
+            S = new FCurve<float>(0);
+            S.DefaultValueRangeMin = MinValue;
+            S.DefaultValueRangeMax = MaxValue;
+        }
+
+        public byte[] GetBytes(float mul = 1.0f)
+        {
+            List<byte[]> data = new List<byte[]>();
+            data.Add(BitConverter.GetBytes((int)Timeline.Value));
+            data.Add(S.GetBytes(mul));
+            return data.SelectMany(_ => _).ToArray();
+        }
+    }
+}
+
+namespace EffekseerTool.Data.Value
+{
 	public class FCurveVector2D
 	{
 		public Value.Enum<FCurveTimelineMode> Timeline = new Enum<FCurveTimelineMode>();
@@ -15932,7 +16271,7 @@ namespace EffekseerTool.Data.Value
 		{
 			get;
 			private set;
-		} = false;
+		}
 
 		public event ChangedValueEventHandler OnChanged;
 
@@ -15951,6 +16290,7 @@ namespace EffekseerTool.Data.Value
 			Step = step;
 
 			DefaultValue = value;
+			IsValueAssigned = false;
 		}
 
 		protected void CallChanged(object value, ChangedValueType type)
@@ -17503,6 +17843,8 @@ namespace EffekseerTool.Utl
 
 		public string Code = string.Empty;
 
+		public int ShadingModel = 0;
+
 		public bool Load(string path)
 		{
 			if (string.IsNullOrEmpty(path))
@@ -17593,8 +17935,7 @@ namespace EffekseerTool.Utl
 
 					var reader = new BinaryReader(temp);
 
-					int shadingModel = 0;
-					reader.Get(ref shadingModel);
+					reader.Get(ref ShadingModel);
 
 					bool hasNormal = false;
 					reader.Get(ref hasNormal);

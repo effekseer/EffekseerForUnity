@@ -12,6 +12,8 @@ EXPORTS
   EffekseerRenderFront
   EffekseerRenderBack
   EffekseerUpdate
+  EffekseerUpdateTime
+  EffekseerResetTime
   EffekseerLoadEffect
   EffekseerLoadEffectOnMemory
   EffekseerReleaseEffect
@@ -67,3 +69,7 @@ EXPORTS
   UpdateNetwork
 
   EffekseerAddRemovingRenderPath
+
+  EffekseerSetLightColor
+  EffekseerSetLightDirection
+  EffekseerSetLightAmbientColor

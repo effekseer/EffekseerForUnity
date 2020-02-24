@@ -73,6 +73,7 @@ namespace Effekseer
 			public bool HasRefraction = false;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
+			public int ShadingModel = 0;
 		}
 
 		[SerializeField]
@@ -306,6 +307,11 @@ namespace Effekseer
 				code = code.Replace("//PRAGMA_REFRACTION_FLAG", "#pragma multi_compile _ _MATERIAL_REFRACTION_");
 			}
 
+			if(importingAsset.ShadingModel == 0)
+			{
+				code = code.Replace("//PRAGMA_LIT_FLAG", "#define _MATERIAL_LIT_ 1");
+			}
+
 			if (importingAsset.CustomData1Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float4> buf_customData1;"));
@@ -368,6 +374,7 @@ Cull[_Cull]
 		#pragma fragment frag
 		#pragma multi_compile _ _MODEL_
 		//PRAGMA_REFRACTION_FLAG
+		//PRAGMA_LIT_FLAG
 
 		#include ""UnityCG.cginc""
 
@@ -442,6 +449,10 @@ Cull[_Cull]
 			//%CUSTOM_VSPS_INOUT1%
 			//%CUSTOM_VSPS_INOUT2%
 		};
+
+		float4 lightDirection;
+		float4 lightColor;
+		float4 lightAmbient;
 
 		float2 GetUV(float2 uv)
 		{
@@ -549,7 +560,7 @@ Cull[_Cull]
 			Output.Position = mul(UNITY_MATRIX_VP, float4(worldPos, 1.0f));
 		
 			Output.WorldP = worldPos;
-			Output.VColor = Input.Color;
+			Output.VColor = vcolor;
 			Output.UV1 = uv1;
 			Output.UV2 = uv2;
 			Output.ScreenUV = Output.Position.xy / Output.Position.w;
@@ -637,20 +648,7 @@ Cull[_Cull]
 		
 			%PSCODE%
 
-			#ifdef _MATERIAL_LIT_
-			float3 viewDir = normalize(cameraPosition.xyz - worldPos);
-			float3 diffuse = calcDirectionalLightDiffuseColor(baseColor, pixelNormalDir, lightDirection.xyz, ambientOcclusion);
-			float3 specular = lightColor.xyz * lightScale * calcLightingGGX(worldNormal, viewDir, lightDirection.xyz, roughness, 0.9);
-		
-			float4 Output =  float4(metallic * specular + (1.0 - metallic) * diffuse, opacity);
-			Output.xyz = Output.xyz + emissive.xyz;
-		
-			if(opacityMask <= 0.0) discard;
-			if(opacity <= 0.0) discard;
-		
-			return Output;
-
-			#elif _MATERIAL_REFRACTION_
+			#if _MATERIAL_REFRACTION_
 			float airRefraction = 1.0;
 			float3 dir = mul((float3x3)cameraMat, pixelNormalDir);
 			dir.y = -dir.y;
@@ -667,6 +665,20 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 
 			return Output;
+
+			#elif defined(_MATERIAL_LIT_)
+			float3 viewDir = normalize(cameraPosition.xyz - worldPos);
+			float3 diffuse = calcDirectionalLightDiffuseColor(baseColor, pixelNormalDir, lightDirection.xyz, ambientOcclusion);
+			float3 specular = lightColor.xyz * lightScale * calcLightingGGX(worldNormal, viewDir, lightDirection.xyz, roughness, 0.9);
+		
+			float4 Output =  float4(metallic * specular + (1.0 - metallic) * diffuse, opacity);
+			Output.xyz = Output.xyz + emissive.xyz;
+		
+			if(opacityMask <= 0.0) discard;
+			if(opacity <= 0.0) discard;
+		
+			return Output;
+
 			#else
 
 			float4 Output = float4(emissive, opacity);
