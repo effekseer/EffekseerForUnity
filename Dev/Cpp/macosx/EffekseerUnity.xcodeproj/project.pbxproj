@@ -39,6 +39,12 @@
 		2E3FAC34239D5001000C336B /* MemoryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC31239D5001000C336B /* MemoryFile.cpp */; };
 		2E3FAC37239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */; };
 		2E3FAC38239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */; };
+		2E4A663E24054676001C5787 /* Effekseer.Mat44f.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663724054676001C5787 /* Effekseer.Mat44f.cpp */; };
+		2E4A663F24054676001C5787 /* Effekseer.Mat44f.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663724054676001C5787 /* Effekseer.Mat44f.cpp */; };
+		2E4A664024054676001C5787 /* Effekseer.SIMDUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663924054676001C5787 /* Effekseer.SIMDUtils.cpp */; };
+		2E4A664124054676001C5787 /* Effekseer.SIMDUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663924054676001C5787 /* Effekseer.SIMDUtils.cpp */; };
+		2E4A664224054676001C5787 /* Effekseer.Mat43f.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663C24054676001C5787 /* Effekseer.Mat43f.cpp */; };
+		2E4A664324054676001C5787 /* Effekseer.Mat43f.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E4A663C24054676001C5787 /* Effekseer.Mat43f.cpp */; };
 		2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2EB27C71222C27A100BF4C0E /* EffekseerRendererIndexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EB27C64222C27A000BF4C0E /* EffekseerRendererIndexBuffer.cpp */; };
@@ -240,6 +246,19 @@
 		2E3FAC32239D5001000C336B /* MemoryFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemoryFile.h; path = ../common/MemoryFile.h; sourceTree = "<group>"; };
 		2E3FAC35239D502B000C336B /* EffekseerPluginMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerPluginMaterial.h; path = ../common/EffekseerPluginMaterial.h; sourceTree = "<group>"; };
 		2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EffekseerPluginMaterial.cpp; path = ../common/EffekseerPluginMaterial.cpp; sourceTree = "<group>"; };
+		2E4A663124054676001C5787 /* Effekseer.Vec4f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Vec4f.h; sourceTree = "<group>"; };
+		2E4A663224054676001C5787 /* Effekseer.SIMD4f_SSE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.SIMD4f_SSE.h; sourceTree = "<group>"; };
+		2E4A663324054676001C5787 /* Effekseer.SIMD4f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.SIMD4f.h; sourceTree = "<group>"; };
+		2E4A663424054676001C5787 /* Effekseer.SIMD4f_NEON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.SIMD4f_NEON.h; sourceTree = "<group>"; };
+		2E4A663524054676001C5787 /* Effekseer.Mat43f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Mat43f.h; sourceTree = "<group>"; };
+		2E4A663624054676001C5787 /* Effekseer.SIMD4f_Gen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.SIMD4f_Gen.h; sourceTree = "<group>"; };
+		2E4A663724054676001C5787 /* Effekseer.Mat44f.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.Mat44f.cpp; sourceTree = "<group>"; };
+		2E4A663824054676001C5787 /* Effekseer.Mat44f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Mat44f.h; sourceTree = "<group>"; };
+		2E4A663924054676001C5787 /* Effekseer.SIMDUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.SIMDUtils.cpp; sourceTree = "<group>"; };
+		2E4A663A24054676001C5787 /* Effekseer.Vec2f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Vec2f.h; sourceTree = "<group>"; };
+		2E4A663B24054676001C5787 /* Effekseer.SIMDUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.SIMDUtils.h; sourceTree = "<group>"; };
+		2E4A663C24054676001C5787 /* Effekseer.Mat43f.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.Mat43f.cpp; sourceTree = "<group>"; };
+		2E4A663D24054676001C5787 /* Effekseer.Vec3f.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.Vec3f.h; sourceTree = "<group>"; };
 		2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InternalScript.h; sourceTree = "<group>"; };
 		2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InternalScript.cpp; sourceTree = "<group>"; };
 		2EB27C63222C27A000BF4C0E /* EffekseerRendererRenderState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerRendererRenderState.h; path = ../renderer/EffekseerRendererRenderState.h; sourceTree = "<group>"; };
@@ -510,6 +529,26 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		2E4A663024054676001C5787 /* SIMD */ = {
+			isa = PBXGroup;
+			children = (
+				2E4A663124054676001C5787 /* Effekseer.Vec4f.h */,
+				2E4A663224054676001C5787 /* Effekseer.SIMD4f_SSE.h */,
+				2E4A663324054676001C5787 /* Effekseer.SIMD4f.h */,
+				2E4A663424054676001C5787 /* Effekseer.SIMD4f_NEON.h */,
+				2E4A663524054676001C5787 /* Effekseer.Mat43f.h */,
+				2E4A663624054676001C5787 /* Effekseer.SIMD4f_Gen.h */,
+				2E4A663724054676001C5787 /* Effekseer.Mat44f.cpp */,
+				2E4A663824054676001C5787 /* Effekseer.Mat44f.h */,
+				2E4A663924054676001C5787 /* Effekseer.SIMDUtils.cpp */,
+				2E4A663A24054676001C5787 /* Effekseer.Vec2f.h */,
+				2E4A663B24054676001C5787 /* Effekseer.SIMDUtils.h */,
+				2E4A663C24054676001C5787 /* Effekseer.Mat43f.cpp */,
+				2E4A663D24054676001C5787 /* Effekseer.Vec3f.h */,
+			);
+			path = SIMD;
+			sourceTree = "<group>";
+		};
 		2EB27C62222C278500BF4C0E /* renderer */ = {
 			isa = PBXGroup;
 			children = (
@@ -579,6 +618,7 @@
 		4861A2CB182F846200A8217D /* Effekseer */ = {
 			isa = PBXGroup;
 			children = (
+				2E4A663024054676001C5787 /* SIMD */,
 				2E3FAC2B239D4F9E000C336B /* Utils */,
 				2E0B9C622352FC9C00C85A3B /* Parameter */,
 				2E0B9C552352FC6500C85A3B /* Material */,
@@ -907,6 +947,7 @@
 				48CF46F31B3EFACB005AD8C4 /* Culling3D.Vector3DF.cpp in Sources */,
 				684C1F7A19F610BE00E32FEC /* EffekseerRendererGL.Renderer.h in Sources */,
 				2E0B9C652352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */,
+				2E4A664224054676001C5787 /* Effekseer.Mat43f.cpp in Sources */,
 				2EB27C82222C27D200BF4C0E /* EffekseerPluginNetwork.cpp in Sources */,
 				2E1962D0237FE9B900A0649E /* EffekseerRendererGL.DeviceObjectCollection.cpp in Sources */,
 				48CF46DF1B3EFA94005AD8C4 /* Effekseer.Setting.cpp in Sources */,
@@ -921,6 +962,7 @@
 				684C1F7F19F610BE00E32FEC /* EffekseerRendererGL.Shader.h in Sources */,
 				684C1F6F19F6106D00E32FEC /* EffekseerRendererGL.VertexBuffer.cpp in Sources */,
 				2EB27C79222C27A100BF4C0E /* EffekseerRendererImplemented.cpp in Sources */,
+				2E4A664024054676001C5787 /* Effekseer.SIMDUtils.cpp in Sources */,
 				684C1F8319F610BE00E32FEC /* EffekseerRendererGL.VertexBuffer.h in Sources */,
 				2EB27C75222C27A100BF4C0E /* EffekseerRendererVertexBuffer.cpp in Sources */,
 				48CF46F01B3EFACB005AD8C4 /* Culling3D.Matrix44.cpp in Sources */,
@@ -964,6 +1006,7 @@
 				4861A332182F846200A8217D /* Effekseer.Vector3D.cpp in Sources */,
 				2EB27C7B222C27A100BF4C0E /* EffekseerRendererRenderState.cpp in Sources */,
 				4861A344182F847100A8217D /* EffekseerRenderer.IndexBufferBase.cpp in Sources */,
+				2E4A663E24054676001C5787 /* Effekseer.Mat44f.cpp in Sources */,
 				2E3FAC37239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */,
 				4861A345182F847100A8217D /* EffekseerRenderer.ModelRendererBase.cpp in Sources */,
 				4861A346182F847100A8217D /* EffekseerRenderer.RenderStateBase.cpp in Sources */,
@@ -994,8 +1037,10 @@
 				2EB27C8F222C2F9000BF4C0E /* EffekseerRenderer.Renderer.cpp in Sources */,
 				48DA217A1C8C5C2C00CAA811 /* EffekseerRendererGL.ModelLoader.cpp in Sources */,
 				48DA21781C8C5C2C00CAA811 /* EffekseerRendererGL.GLExtension.cpp in Sources */,
+				2E4A663F24054676001C5787 /* Effekseer.Mat44f.cpp in Sources */,
 				2EB27C7E222C27A100BF4C0E /* EffekseerRendererShader.cpp in Sources */,
 				48DA21881C8C5C4200CAA811 /* EffekseerRenderer.ModelRendererBase.cpp in Sources */,
+				2E4A664324054676001C5787 /* Effekseer.Mat43f.cpp in Sources */,
 				2E0B9C612352FC6500C85A3B /* Effekseer.CompiledMaterial.cpp in Sources */,
 				4847B9281C8C6A79002723AE /* Culling3D.Layer.cpp in Sources */,
 				2EB27C74222C27A100BF4C0E /* EffekseerRendererModelLoader.cpp in Sources */,
@@ -1033,6 +1078,7 @@
 				48DA218A1C8C5C4200CAA811 /* EffekseerRenderer.RibbonRendererBase.cpp in Sources */,
 				48DA219B1C8C5C6B00CAA811 /* Effekseer.EffectNodeTrack.cpp in Sources */,
 				4847B9261C8C69D7002723AE /* Effekseer.Vector3D.cpp in Sources */,
+				2E4A664124054676001C5787 /* Effekseer.SIMDUtils.cpp in Sources */,
 				48DA218F1C8C5C6B00CAA811 /* Effekseer.Client.cpp in Sources */,
 				48DA217D1C8C5C2C00CAA811 /* EffekseerRendererGL.RenderState.cpp in Sources */,
 				48DA21A41C8C5C6B00CAA811 /* Effekseer.RectF.cpp in Sources */,

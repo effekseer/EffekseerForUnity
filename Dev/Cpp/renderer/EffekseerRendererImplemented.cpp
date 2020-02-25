@@ -375,8 +375,8 @@ void RendererImplemented::SetRestorationOfStatesFlag(bool flag)
 
 bool RendererImplemented::BeginRendering()
 {
-	::Effekseer::Matrix44::Mul(GetCameraProjectionMatrix(), GetCameraMatrix(), GetProjectionMatrix());
-
+    impl->CalculateCameraProjectionMatrix();
+    
 	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
