@@ -17,10 +17,10 @@ MonoBehaviour:
   m_RendererData: {fileID: 11400000, guid: 59ea5819b12dc614a95c7cd81e48efd0, type: 2}
   m_RequireDepthTexture: 0
   m_RequireOpaqueTexture: 0
-  m_OpaqueDownsampling: 1
-  m_SupportsHDR: 0
-  m_MSAA: 1
-  m_RenderScale: 1
+  m_OpaqueDownsampling: 0
+  m_SupportsHDR: 1
+  m_MSAA: 8
+  m_RenderScale: 2
   m_MainLightRenderingMode: 1
   m_MainLightShadowsSupported: 1
   m_MainLightShadowmapResolution: 2048
