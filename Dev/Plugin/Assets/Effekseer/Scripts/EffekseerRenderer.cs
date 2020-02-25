@@ -21,6 +21,8 @@ namespace Effekseer.Internal
 		public bool isColorTargetArray = false;
 		public RenderTexture colorTargetRenderTexture = null;
 
+		public bool isRequiredToCopyBackground = false;
+
 		int blitMaterialOffset = 0;
 		List<Material> blitMaterials = new List<Material>();
 
@@ -43,18 +45,25 @@ namespace Effekseer.Internal
 				cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
 			}
+			else if(isRequiredToCopyBackground)
+			{
+				cb.CopyTexture(colorTargetIdentifier, new RenderTargetIdentifier(backgroundRenderTexture.renderTexture));
+			}
 			else
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 			}
-
-			if (depthTargetIdentifier.HasValue)
+			
+			if(!isRequiredToCopyBackground)
 			{
-				cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
-			}
-			else
-			{
-				cb.SetRenderTarget(colorTargetIdentifier);
+				if (depthTargetIdentifier.HasValue)
+				{
+					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
+				}
+				else
+				{
+					cb.SetRenderTarget(colorTargetIdentifier);
+				}
 			}
 		}
 
@@ -131,8 +140,14 @@ namespace Effekseer.Internal
 
 		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format, RenderTargetProperty renderTargetProperty)
 		{
+			if (renderTargetProperty != null)
+			{
+				width = renderTargetProperty.colorTargetDescriptor.width;
+				height = renderTargetProperty.colorTargetDescriptor.height;
+			}
+
 #if UNITY_STANDALONE_WIN
-			if(renderTargetProperty != null)
+			if (renderTargetProperty != null)
 			{
 				renderTexture = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear);
 			}

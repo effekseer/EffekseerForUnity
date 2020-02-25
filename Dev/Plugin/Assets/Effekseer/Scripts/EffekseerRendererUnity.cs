@@ -612,7 +612,8 @@ namespace Effekseer.Internal
 
 				if(enableDistortion && renderTargetProperty != null && renderTargetProperty.colorTargetDescriptor.msaaSamples > 1)
 				{
-					Debug.LogError("[Effekseer] Effekseer(LWRP) not supported a distortion with MSAA");
+					Debug.LogWarning("Distortion with MSAA is differnt from Editor on [Effekseer] Effekseer(*RP)");
+					Debug.LogWarning("If LWRP or URP, please check Opacue Texture is PipelineAsset");
 				}
 
 				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
