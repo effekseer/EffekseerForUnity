@@ -1,3 +1,4 @@
+rm -rf ../Effekseer
 git clone https://github.com/effekseer/Effekseer.git ../Effekseer
 PWD = `pwd`
 
