@@ -11,10 +11,13 @@ jobs:
       ./ci/build_webgl_plugin.sh
   - script: |
       cd tests
-      ./build_unity.sh
-      dg deploy TestProject/Build/Android.apk
+      ./build_unity_pkg.sh
   - task: PublishBuildArtifacts@1
     inputs:
         PathtoPublish: './Effekseer.unitypackage'
         ArtifactName: 'package'
         publishLocation: 'Container'
+  - script: |
+      cd tests
+      ./build_unity_android.sh
+      dg deploy TestProject/Build/Android.apk

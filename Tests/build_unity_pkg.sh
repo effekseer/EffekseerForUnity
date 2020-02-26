@@ -8,5 +8,4 @@ PROJECT_PATH=`pwd`/TestProject
 git clone https://github.com/effekseer/TestData.git TestProject/Resources/TestData
 python3 test_tools.py
 
-$UNITY_PATH -projectPath $PROJECT_PATH -quit -batchmode -logFile log -importPackage `pwd`/../Effekseer.unitypackage
-$UNITY_PATH -projectPath $PROJECT_PATH -quit -batchmode -logFile log -executeMethod BuildClass.Build
+$UNITY_PATH -projectPath $PROJECT_PATH -quit -batchmode -logFile -importPackage `pwd`/../Effekseer.unitypackage
