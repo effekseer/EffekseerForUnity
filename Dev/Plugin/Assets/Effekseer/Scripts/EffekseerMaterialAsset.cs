@@ -277,6 +277,7 @@ namespace Effekseer
 			var mainPSCode = CreateMainShaderCode(importingAsset, 1);
 
 			var code = shaderTemplate;
+			code = code.Replace("@", "#");
 
 			string codeProperty = string.Empty;
 			string codeVariable = string.Empty;
@@ -369,24 +370,24 @@ Cull[_Cull]
 
 		CGPROGRAM
 
-		#pragma target 5.0
-		#pragma vertex vert
-		#pragma fragment frag
-		#pragma multi_compile _ _MODEL_
+		@pragma target 5.0
+		@pragma vertex vert
+		@pragma fragment frag
+		@pragma multi_compile _ _MODEL_
 		//PRAGMA_REFRACTION_FLAG
 		//PRAGMA_LIT_FLAG
 
-		#include ""UnityCG.cginc""
+		@include ""UnityCG.cginc""
 
-		#if _MATERIAL_REFRACTION_
+		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
-		#endif
+		@endif
 
 		%TEX_VARIABLE%
 
 		%UNIFORMS%
 
-		#if _MODEL_
+		@if _MODEL_
 
 		struct SimpleVertex
 		{
@@ -416,7 +417,7 @@ Cull[_Cull]
 		StructuredBuffer<int> buf_vertex_offsets;
 		StructuredBuffer<int> buf_index_offsets;
 
-		#else
+		@else
 
 		struct Vertex
 		{
@@ -433,7 +434,7 @@ Cull[_Cull]
 		StructuredBuffer<Vertex> buf_vertex;
 		float buf_offset;
 
-		#endif
+		@endif
 
 		struct ps_input
 		{
@@ -471,7 +472,7 @@ Cull[_Cull]
 			// Unity
 			float4 cameraPosition = float4(UNITY_MATRIX_V[3].xyzw);
 
-			#if _MODEL_
+			@if _MODEL_
 
 			uint v_id = id;
 	
@@ -487,7 +488,7 @@ Cull[_Cull]
 			float3 localPos = Input.Pos;
 			
 
-			#else
+			@else
 
 			int qind = (id) / 6;
 			int vind = (id) % 6;
@@ -502,40 +503,40 @@ Cull[_Cull]
 
 			Vertex Input = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
 
-			#endif
+			@endif
 
 			ps_input Output;
 
-			#if _MODEL_
+			@if _MODEL_
 			float3x3 matRotModel = (float3x3)buf_matrix;
 			float3 worldPos = mul(buf_matrix, float4(localPos, 1.0f)).xyz;
 			float3 worldNormal = normalize(mul(matRotModel, Input.Normal));
 			float3 worldTangent = normalize(mul(matRotModel, Input.Tangent));
 			float3 worldBinormal = cross(worldNormal, worldTangent);
-			#else
+			@else
 			float3 worldPos = Input.Pos;
 			float3 worldNormal = Input.Normal;
 			float3 worldTangent = Input.Tangent;
 			float3 worldBinormal = cross(worldNormal, worldTangent);
-			#endif
+			@endif
 		
-			#if _MODEL_
+			@if _MODEL_
 			float3 objectScale = float3(1.0, 1.0, 1.0);
 			objectScale.x = length(mul(matRotModel, float3(1.0, 0.0, 0.0)));
 			objectScale.y = length(mul(matRotModel, float3(0.0, 1.0, 0.0)));
 			objectScale.z = length(mul(matRotModel, float3(0.0, 0.0, 1.0)));
-			#else
+			@else
 			float3 objectScale = float3(1.0, 1.0, 1.0);
-			#endif
+			@endif
 
 			// UV
-			#if _MODEL_
+			@if _MODEL_
 			float2 uv1 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
 			float2 uv2 = Input.UV.xy * buf_uv.zw + buf_uv.xy;
-			#else
+			@else
 			float2 uv1 = Input.UV1;
 			float2 uv2 = Input.UV2;
-			#endif
+			@endif
 
 			// NBT
 			Output.WorldN = worldNormal;
@@ -544,11 +545,11 @@ Cull[_Cull]
 		
 			float3 pixelNormalDir = worldNormal;
 
-			#if _MODEL_
+			@if _MODEL_
 			float4 vcolor = Input.Color * buf_color;
-			#else
+			@else
 			float4 vcolor = Input.Color;
-			#endif
+			@endif
 
 			%VSCODE%
 
@@ -569,9 +570,9 @@ Cull[_Cull]
 			return Output;
 		}
 		
-		#ifdef _MATERIAL_LIT_
+		@ifdef _MATERIAL_LIT_
 		
-		#define lightScale 3.14
+		@define lightScale 3.14
 		
 		float calcD_GGX(float roughness, float dotNH)
 		{
@@ -626,7 +627,7 @@ Cull[_Cull]
 			return color;
 		}
 		
-		#endif
+		@endif
 		
 		float4 frag(ps_input Input) : COLOR
 		{
@@ -648,7 +649,7 @@ Cull[_Cull]
 		
 			%PSCODE%
 
-			#if _MATERIAL_REFRACTION_
+			@if _MATERIAL_REFRACTION_
 			float airRefraction = 1.0;
 			float3 dir = mul((float3x3)cameraMat, pixelNormalDir);
 			dir.y = -dir.y;
@@ -666,7 +667,7 @@ Cull[_Cull]
 
 			return Output;
 
-			#elif defined(_MATERIAL_LIT_)
+			@elif defined(_MATERIAL_LIT_)
 			float3 viewDir = normalize(cameraPosition.xyz - worldPos);
 			float3 diffuse = calcDirectionalLightDiffuseColor(baseColor, pixelNormalDir, lightDirection.xyz, ambientOcclusion);
 			float3 specular = lightColor.xyz * lightScale * calcLightingGGX(worldNormal, viewDir, lightDirection.xyz, roughness, 0.9);
@@ -679,7 +680,7 @@ Cull[_Cull]
 		
 			return Output;
 
-			#else
+			@else
 
 			float4 Output = float4(emissive, opacity);
 		
@@ -687,7 +688,7 @@ Cull[_Cull]
 			if(opacity <= 0.0) discard;
 		
 			return Output;
-			#endif
+			@endif
 		}
 
 		ENDCG
