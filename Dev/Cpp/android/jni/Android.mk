@@ -72,7 +72,10 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Material/Effekseer.Material.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
 	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp \
-	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
+	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat43f.cpp \
+	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat44f.cpp \
+	$(LIB_SRC_PATH)/SIMD/Effekseer.SIMDUtils.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
 LOCAL_SRC_FILES += \
@@ -105,6 +108,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Shader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.TextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexArray.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp
+	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObjectCollection.cpp
 
 include $(BUILD_SHARED_LIBRARY)
