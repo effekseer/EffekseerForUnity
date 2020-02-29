@@ -632,7 +632,7 @@ Cull[_Cull]
 		float4 frag(ps_input Input) : COLOR
 		{
 			// Unity
-			float4 cameraPosition = float4(UNITY_MATRIX_V[3].xyzw);
+			float4 cameraPosition = float4(_WorldSpaceCameraPos, 1.0);
 			float4x4 cameraMat = UNITY_MATRIX_V;
 
 			float2 uv1 = Input.UV1;
