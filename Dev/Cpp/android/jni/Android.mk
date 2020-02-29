@@ -17,6 +17,7 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginCommon.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginNetwork.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginModel.cpp \
+	$(LOCAL_PATH)/../common/EffekseerPluginMaterial.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPluginSound.cpp \
 	$(LOCAL_PATH)/../common/EffekseerPlugin.cpp \
 	$(LOCAL_PATH)/../common/MemoryFile.cpp \
