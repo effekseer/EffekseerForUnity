@@ -5,7 +5,7 @@ mkdir ..\build_x86
 cd /d ..\build_x86
 
 cmake -A Win32 ../
-cmake --build . --config Release
+cmake --build . --config Release -D BUILD_EXAMPLES=OFF
 
 copy Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86\
 
@@ -16,7 +16,7 @@ mkdir ..\build_x64
 cd /d ..\build_x64
 
 cmake -A x64 ../
-cmake --build . --config Release
+cmake --build . --config Release -D BUILD_EXAMPLES=OFF
 
 copy Release\EffekseerUnity.dll ..\..\Plugin\Assets\Effekseer\Plugins\x86_64\
 

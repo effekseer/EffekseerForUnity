@@ -5,6 +5,6 @@ mkdir ..\build
 
 cd /d ..\build
 
-cmake ../
+cmake ../ -D BUILD_EXAMPLES=OFF
 
 pause
