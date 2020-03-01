@@ -11,5 +11,5 @@ git clone --recursive https://github.com/effekseer/Effekseer.git
 /mnt/c/Windows/System32/cmd.exe /c 'C:\workdir\build.bat' | nkf -w
 EOC
 
-scp effekseer@192.168.56.102:/mnt/c/workdir/EffekseerForUnity/Dev/Cpp/windows/Win32/Release/EffekseerUnity.dll `pwd`/Dev/Plugin/Assets/Effekseer/Plugins/x86
-scp effekseer@192.168.56.102:/mnt/c/workdir/EffekseerForUnity/Dev/Cpp/windows/x64/Release/EffekseerUnity.dll `pwd`/Dev//Plugin/Assets/Effekseer/Plugins/x86_64
+scp effekseer@192.168.56.102:/mnt/c/workdir/EffekseerForUnity/Dev/Cpp/build_x86/Release/EffekseerUnity.dll `pwd`/Dev/Plugin/Assets/Effekseer/Plugins/x86
+scp effekseer@192.168.56.102:/mnt/c/workdir/EffekseerForUnity/Dev/Cpp/build_x64/Release/EffekseerUnity.dll `pwd`/Dev//Plugin/Assets/Effekseer/Plugins/x86_64
