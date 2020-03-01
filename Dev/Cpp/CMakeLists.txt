@@ -12,6 +12,7 @@ ExternalProject_Add(
                     -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=${USE_MSVC_RUNTIME_LIBRARY_DLL}
                     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
                     -DBUILD_VIEWER:BOOL=OFF
+                    -DBUILD_EXAMPLES:BOOL=OFF
                     -DBUILD_UNITYPLUGIN:BOOL=ON
     )
     
