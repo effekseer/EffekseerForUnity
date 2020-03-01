@@ -5,6 +5,7 @@ jobs:
 
   steps:
   - script: |
+      ./ci/common.sh
       ./ci/build_android_plugin.sh
       ./ci/build_windows_plugin.sh
       ./ci/build_mac_plugin.sh

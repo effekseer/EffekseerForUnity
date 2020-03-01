@@ -1,10 +1,10 @@
-git clone https://github.com/effekseer/Effekseer.git ../Effekseer
+
 PWD = `pwd`
 
 cd $PWD
 
 cd Dev/Cpp/android
-            
+
 ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
 ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
 
