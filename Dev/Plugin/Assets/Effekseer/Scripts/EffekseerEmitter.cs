@@ -4,6 +4,19 @@ using System.Collections.Generic;
 namespace Effekseer
 {
 	/// <summary xml:lang="en">
+	/// Which scale is A scale of effect based on. 
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// どのスケールをエフェクトのスケールの元にするか
+	/// </summary>
+	public enum EffekseerEmitterScale
+	{
+		Local,
+		Global,
+	}
+
+
+	/// <summary xml:lang="en">
 	/// A emitter of the Effekseer effect
 	/// </summary>
 	/// <summary xml:lang="ja">
@@ -15,13 +28,21 @@ namespace Effekseer
 		float cachedMagnification = 0.0f;
 
 		/// <summary xml:lang="en">
+		/// Which scale is A scale of effect based on. 
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// どのスケールをエフェクトのスケールの元にするか
+		/// </summary>
+		public EffekseerEmitterScale EmitterScale = EffekseerEmitterScale.Local;
+
+		/// <summary xml:lang="en">
 		/// Effect name
 		/// </summary>
 		/// <summary xml:lang="ja">
 		/// エフェクト名
 		/// </summary>
 		//public string effectName;
-		
+
 		/// <summary xml:lang="en">
 		/// Effect name
 		/// </summary>
@@ -399,7 +420,16 @@ namespace Effekseer
 				if (handle.exists) {
 					handle.SetLocation(transform.position);
 					handle.SetRotation(transform.rotation);
-					handle.SetScale(transform.localScale);
+
+					if(EmitterScale == EffekseerEmitterScale.Local)
+					{
+						handle.SetScale(transform.localScale);
+					}
+					else if(EmitterScale == EffekseerEmitterScale.Global)
+					{
+						handle.SetScale(transform.lossyScale);
+					}
+
 					i++;
 				} else if(isLooping && handles.Count == 1)
 				{
