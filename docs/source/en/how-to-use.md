@@ -53,7 +53,7 @@ A controller for preview is shown in Scene View when EffekseerEmitter is specifi
 
 It is suitable for effects that follow the installed effects and characters.
 
-## Play by Script {#direct_playback}
+## Play by Script
 
 ### Introduction
 
@@ -80,7 +80,61 @@ If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
 
-## Universal(Light Weight) Render Pipeline
+## Universal Render Pipeline
+
+Effekseer supports Universal RenderPipeline.
+
+URPs are added differently for each version.
+For older URPs, read the LWRP instructions.
+
+Please remove comment out from *ScriptsExternal/EffekseerURPRenderPassFeature.cs* in the case of LWRP because URP is not contained in Unity with default settings at first.
+
+![](../img/URP/Code.png)
+
+Look at Graphics Settings to see which ScriptableRenderPipelineSettings you are currently using.
+
+If it already exists, select it.
+
+If it does not exist, create it and select it.
+
+![](../img/URP/Create_Pipeline.png)
+
+Select the ForwardRenderer used in the Pipeline.
+
+![](../img/URP/Pipeline.png)
+
+If ForwardRenderer is not used, create it, set it to Pipeline and select it.
+
+![](../img/URP/Create_ForwardRenderer.png)
+
+![](../img/URP/ForwardRenderer.png)
+
+Add *EffekseerRenderPassFeature* to *Render Features* of *ForwardRenderer Asset* selected earlier.
+
+![](../img/URP/RenderPassFeature.png)
+
+## High Definition Render Pipeline
+
+Effekseer supports High Definition Render Pipeline.
+Please remove comment out from *ScriptsExternal/EffekseerRendererHDRP.cs* because URP(LWRP) is not contained in Unity with default settings at first.
+
+![](../img/HDRP/Code.png)
+
+You add *CustomPassVolume* Component to a camera.
+
+![](../img/HDRP/CustomPassVolume.png)
+
+You add  *EffekseerRendererHDRP* to *CustomPasses*.
+
+![](../img/HDRP/CustomPassVolumeSelect.png)
+
+![](../img/HDRP/CustomPassVolumeAdd.png)
+
+You change *Injection Point* into *Before Post Process*.
+
+![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
+
+## Light Weight(Universal) Render Pipeline
 
 Effekseer supports Universal(LightWeight)RenderPipeline.
 Please remove comment out from *ScriptsExternal/EffekseerURPRenderPassFeature.cs* in the case of URP, *ScriptsExternal/EffekseerRendererLWRP.cs* in the case of LWRP because URP(LWRP) is not contained in Unity with default settings at first.
@@ -109,26 +163,6 @@ Add EffekseerRenderer to *Render Features* in created *Forward Render Asset*.
 
 ![](../img/LWRP_RenderFeatures2.png)
 
-## High Definition Render Pipeline
-
-Effekseer supports High Definition Render Pipeline.
-Please remove comment out from *ScriptsExternal/EffekseerRendererHDRP.cs* because URP(LWRP) is not contained in Unity with default settings at first.
-
-![](../img/HDRP/Code.png)
-
-You add *CustomPassVolume* Component to a camera.
-
-![](../img/HDRP/CustomPassVolume.png)
-
-You add  *EffekseerRendererHDRP* to *CustomPasses*.
-
-![](../img/HDRP/CustomPassVolumeSelect.png)
-
-![](../img/HDRP/CustomPassVolumeAdd.png)
-
-You change *Injection Point* into *Before Post Process*.
-
-![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
 
 ## Mobile environment
 

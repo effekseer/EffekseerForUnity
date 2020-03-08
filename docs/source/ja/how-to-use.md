@@ -85,7 +85,61 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。
 
-## Universal (Light Weight) Render Pipeline
+## Universal Render Pipeline
+
+Effekseer は Universal Render Pipeline に対応しています。
+
+URPはバージョンごとに追加方法が異なります。
+古いURPの場合、LWRPの説明を読んでください。
+
+URPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerURPRenderPassFeature.cs* からコメントアウトを外してください。
+
+![](../img/URP/Code.png)
+
+現在使用しているScriptableRenderPipelineSettingsを確認するためにGraphics Settingsを見ます。
+
+既に存在していたらそれを選択します。
+
+存在しない場合、作成して選択します。
+
+![](../img/URP/Create_Pipeline.png)
+
+Pipelineで使用されているForwardRendererを選択します。
+
+![](../img/URP/Pipeline.png)
+
+使用されていない場合、作成してPipelineに設定し、選択します。
+
+![](../img/URP/Create_ForwardRenderer.png)
+
+![](../img/URP/ForwardRenderer.png)
+
+先ほど選択した *ForwardRenderer Asset* の *Render Features* に *EffekseerRenderPassFeature* を追加します。
+
+![](../img/URP/RenderPassFeature.png)
+
+## High Definition Render Pipeline
+
+Effekseer は High Definition Render Pipeline に対応しています。.
+HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerRendererHDRP.cs* からコメントアウトを外してください。
+
+![](../img/HDRP/Code.png)
+
+カメラに *CustomPassVolume* コンポーネントを追加します。
+
+![](../img/HDRP/CustomPassVolume.png)
+
+*CustomPasses* に *EffekseerRendererHDRP* を追加します。
+
+![](../img/HDRP/CustomPassVolumeSelect.png)
+
+![](../img/HDRP/CustomPassVolumeAdd.png)
+
+*Injection Point* を *Before Post Process* に変更します。
+
+![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
+
+## Light Weight(Universal) Render Pipeline
 
 Effekseer は Universal(Light Weight) Render Pipeline に対応しています。.
 URP(LWRP)はUnityでは標準に含まれていないため、URPの場合、*ScriptsExternal/EffekseerURPRenderPassFeature.cs*  LWRPの場合、*ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
@@ -113,27 +167,6 @@ Effekseerのエフェクトを表示するために *Custom Forward Render* を�
 ![](../img/LWRP_RenderFeatures1.png)
 
 ![](../img/LWRP_RenderFeatures2.png)
-
-## High Definition Render Pipeline
-
-Effekseer は High Definition Render Pipeline に対応しています。.
-HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerRendererHDRP.cs* からコメントアウトを外してください。
-
-![](../img/HDRP/Code.png)
-
-カメラに *CustomPassVolume* コンポーネントを追加します。
-
-![](../img/HDRP/CustomPassVolume.png)
-
-*CustomPasses* に *EffekseerRendererHDRP* を追加します。
-
-![](../img/HDRP/CustomPassVolumeSelect.png)
-
-![](../img/HDRP/CustomPassVolumeAdd.png)
-
-*Injection Point* を *Before Post Process* に変更します。
-
-![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
 
 ## モバイル環境
 
