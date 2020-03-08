@@ -11,13 +11,13 @@
 
 ## リソースファイルについて
 
-Unityのプロジェクトにエフェクトプロジェクトファイル(*.efkproj)、出力済エフェクト(*.efk)やテクスチャ、サウンドを配置します。  
-\*.efk,efkprojファイルをインポートすると、.efk,efkprojファイルのほかにEffectAssetが生成されます。 
+Unityのプロジェクトにエフェクトファイル(*.efkproj, *.efk, *.efkefc)やテクスチャ、サウンドを配置します。  
+\*.efk,efkproj,efkefcファイルをインポートすると、.efk,efkproj,efkefcファイルのほかにEffectAssetが生成されます。 
 
 ![](../img/unity_resource.png)
 
-.efk,efkprojファイルは削除しても問題ありません。
-また、現在はカスタムパッケージ作成の時に.efk,efkprojファイルを含めてはいけません。
+.efk,efkproj,efkefcファイルは削除しても問題ありません。
+また、現在はカスタムパッケージ作成の時に.efk,efkproj,efkefcファイルを含めてはいけません。
 
 ### Scale
 

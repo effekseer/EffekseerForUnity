@@ -11,13 +11,13 @@ There is a sample scene using the Effekseer plugin in the following places.
 
 ## About resource files
 
-Place the output effect projcet(*.efkproj), effect (*.efk), texture, sound in Unity project.  
-When importing the *.efk, efkproj file, EffectAsset is generated in addition of *.efk, efkproj file.
+Place the output effect (*.efkproj, *.efk, *efkefc), texture, sound in Unity project.  
+When importing the *.efk, efkproj, *efkefc file, EffectAsset is generated in addition of *.efk, efkproj, *efkefc file.
 
 ![](../img/unity_resource.png)
 
-It is no problem that you remove .efk, efkproj files.
-Please don't include .efk, efkproj in custom packages currently. 
+It is no problem that you remove .efk, efkproj, efkefc files.
+Please don't include .efk, efkproj, efkefc in custom packages currently. 
 
 ### Scale
 
