@@ -159,8 +159,11 @@ namespace Effekseer
 		}
 
 #if UNITY_EDITOR
+#if UNITY_2018_1_OR_NEWER
+#else
 		[MenuItem("Edit/Project Settings/Effekseer")]
-		public static void EditOrCreateAsset()
+#endif 
+	public static void EditOrCreateAsset()
 		{
 			const string assetDir = "Assets/Effekseer";
 			const string materialDir = assetDir + "/Materials";
