@@ -91,6 +91,7 @@ namespace Effekseer.Internal
 		}
 	}
 
+	/*
 	struct UnityRendererMaterialUniformParameter
 	{
 		public string Name;
@@ -102,6 +103,7 @@ namespace Effekseer.Internal
 	{
 		public string Name;
 	}
+	*/
 
 	class UnityRendererMaterial
 	{

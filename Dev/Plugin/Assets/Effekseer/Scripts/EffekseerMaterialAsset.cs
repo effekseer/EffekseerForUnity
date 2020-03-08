@@ -211,7 +211,6 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F4$", "float4");
 			baseCode = baseCode.Replace("$TIME$", "_Time.y");
 			baseCode = baseCode.Replace("$UV$", "uv");
-			baseCode = baseCode.Replace("$MOD", "fmod");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
 
@@ -369,6 +368,10 @@ Cull[_Cull]
 	Pass {
 
 		CGPROGRAM
+
+		@define MOD fmod
+		@define FRAC frac
+		@define LERP lerp
 
 		@pragma target 5.0
 		@pragma vertex vert
