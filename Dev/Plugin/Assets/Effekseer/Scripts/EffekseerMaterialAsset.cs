@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 #endif
 
@@ -51,12 +52,18 @@ namespace Effekseer
 		{
 			[SerializeField]
 			public string Name;
+
+			[SerializeField]
+			public string UniformName;
 		}
 		[System.Serializable]
 		public class UniformProperty
 		{
 			[SerializeField]
 			public string Name;
+
+			[SerializeField]
+			public string UniformName;
 
 			[SerializeField]
 			public int Count;
@@ -294,6 +301,31 @@ namespace Effekseer
 			{
 				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
 			}
+
+			// replace for usability
+			// HACK for efk_xxx_1 and efk_xxx_12
+			{
+				var replacingUniforms = importingAsset.Uniforms.ToArray();
+				var replacingTextures = importingAsset.Textures.ToArray();
+
+				replacingTextures = replacingTextures.OrderByDescending(_ => _.UniformName.Length).ToArray();
+				replacingUniforms = replacingUniforms.OrderByDescending(_ => _.UniformName.Length).ToArray();
+
+				foreach(var kv in replacingTextures)
+				{
+					code = code.Replace(kv.UniformName, kv.Name);
+					mainVSCode = mainVSCode.Replace(kv.UniformName, kv.Name);
+					mainPSCode = mainPSCode.Replace(kv.UniformName, kv.Name);
+				}
+
+				foreach (var kv in replacingUniforms)
+				{
+					code = code.Replace(kv.UniformName, kv.Name);
+					mainVSCode = mainVSCode.Replace(kv.UniformName, kv.Name);
+					mainPSCode = mainPSCode.Replace(kv.UniformName, kv.Name);
+				}
+			}
+
 
 			code = code.Replace("%TEX_PROPERTY%", codeProperty);
 			code = code.Replace("%TEX_VARIABLE%", codeVariable);
