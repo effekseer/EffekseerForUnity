@@ -314,22 +314,42 @@ namespace Effekseer
 			asset.textureResources = new EffekseerTextureResource[resourcePath.TexturePathList.Count];
 			for (int i = 0; i < resourcePath.TexturePathList.Count; i++) {
 				asset.textureResources[i] = EffekseerTextureResource.LoadAsset(assetDir, resourcePath.TexturePathList[i]);
+
+				if (asset.textureResources[i] == null)
+				{
+					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.TexturePathList[i]));
+				}
 			}
 			
 			asset.soundResources = new EffekseerSoundResource[resourcePath.SoundPathList.Count];
 			for (int i = 0; i < resourcePath.SoundPathList.Count; i++) {
 				asset.soundResources[i] = EffekseerSoundResource.LoadAsset(assetDir, resourcePath.SoundPathList[i]);
+
+				if (asset.soundResources[i] == null)
+				{
+					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.SoundPathList[i]));
+				}
 			}
 			
 			asset.modelResources = new EffekseerModelResource[resourcePath.ModelPathList.Count];
 			for (int i = 0; i < resourcePath.ModelPathList.Count; i++) {
 				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, resourcePath.ModelPathList[i]);
+
+				if (asset.modelResources[i] == null)
+				{
+					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.ModelPathList[i]));
+				}
 			}
 
 			asset.materialResources = new EffekseerMaterialResource[resourcePath.MaterialPathList.Count];
 			for (int i = 0; i < resourcePath.MaterialPathList.Count; i++)
 			{
 				asset.materialResources[i] = EffekseerMaterialResource.LoadAsset(assetDir, resourcePath.MaterialPathList[i]);
+
+				if (asset.materialResources[i] == null)
+				{
+					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.MaterialPathList[i]));
+				}
 			}
 
 			asset.Scale = defaultScale;
