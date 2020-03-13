@@ -1,4 +1,9 @@
 ﻿#if UNITY_EDITOR
+#pragma warning disable CS0162
+#pragma warning disable CS0067
+#pragma warning disable CS0649
+#pragma warning disable CS0219
+
 using System;
 using System.Linq;
 using System.Collections;

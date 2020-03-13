@@ -7,11 +7,14 @@ using UnityEditor;
 
 #if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
+#elif UNITY_2018_3_OR_NEWER
+using UnityEngine.Experimental.UIElements;
 #endif
+
 
 namespace Effekseer.Editor
 {
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
 	public class EffekseerSettingProvider : SettingsProvider
 	{
 		public EffekseerSettingProvider(string path, SettingsScope scope)

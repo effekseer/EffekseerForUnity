@@ -315,7 +315,7 @@ namespace Effekseer
 			for (int i = 0; i < resourcePath.TexturePathList.Count; i++) {
 				asset.textureResources[i] = EffekseerTextureResource.LoadAsset(assetDir, resourcePath.TexturePathList[i]);
 
-				if (asset.textureResources[i] == null)
+				if (asset.textureResources[i].texture == null)
 				{
 					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.TexturePathList[i]));
 				}
@@ -325,7 +325,7 @@ namespace Effekseer
 			for (int i = 0; i < resourcePath.SoundPathList.Count; i++) {
 				asset.soundResources[i] = EffekseerSoundResource.LoadAsset(assetDir, resourcePath.SoundPathList[i]);
 
-				if (asset.soundResources[i] == null)
+				if (asset.soundResources[i].clip == null)
 				{
 					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.SoundPathList[i]));
 				}
@@ -335,7 +335,7 @@ namespace Effekseer
 			for (int i = 0; i < resourcePath.ModelPathList.Count; i++) {
 				asset.modelResources[i] = EffekseerModelResource.LoadAsset(assetDir, resourcePath.ModelPathList[i]);
 
-				if (asset.modelResources[i] == null)
+				if (asset.modelResources[i].asset == null)
 				{
 					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.ModelPathList[i]));
 				}
@@ -346,7 +346,7 @@ namespace Effekseer
 			{
 				asset.materialResources[i] = EffekseerMaterialResource.LoadAsset(assetDir, resourcePath.MaterialPathList[i]);
 
-				if (asset.materialResources[i] == null)
+				if (asset.materialResources[i].asset == null)
 				{
 					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.MaterialPathList[i]));
 				}
