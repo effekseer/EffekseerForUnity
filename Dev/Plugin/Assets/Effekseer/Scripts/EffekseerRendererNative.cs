@@ -85,15 +85,14 @@ namespace Effekseer.Internal
 
 				if (enableDistortion)
 				{
-					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
-					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
 
 #if UNITY_IOS || UNITY_ANDROID
 					RenderTextureFormat format = RenderTextureFormat.ARGB32;
 #else
 					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-					this.renderTexture = new BackgroundRenderTexture(width, height, 0, format, renderTargetProperty);
+					this.renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
 
 					// HACK for ZenPhone
 					if (this.renderTexture == null || !this.renderTexture.Create())
@@ -173,7 +172,7 @@ namespace Effekseer.Internal
 				}
 			}
 
-			public bool IsValid()
+			public bool IsValid(RenderTargetProperty renderTargetProperty)
 			{
 				if(isDistortionMakeDisabledForcely)
 				{
@@ -186,11 +185,10 @@ namespace Effekseer.Internal
 
 				if (this.renderTexture != null)
 				{
-					var width = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
-					var height = EffekseerRendererUtils.ScaledClamp(this.camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
 
-					return width == this.renderTexture.width &&
-						height == this.renderTexture.height;
+					return targetSize.x == this.renderTexture.width &&
+						targetSize.y == this.renderTexture.height;
 				}
 				return true;
 			}
@@ -344,7 +342,7 @@ namespace Effekseer.Internal
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
-			if (!path.IsValid())
+			if (!path.IsValid(renderTargetProperty))
 			{
 				path.Dispose();
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;

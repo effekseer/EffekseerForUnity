@@ -138,6 +138,25 @@ namespace Effekseer.Internal
 
 		public IntPtr ptr = IntPtr.Zero;
 
+		public static Vector2Int GetRequiredSize(Camera camera, RenderTargetProperty renderTargetProperty)
+		{
+			if (renderTargetProperty != null)
+			{
+				var width = renderTargetProperty.colorTargetDescriptor.width;
+				var height = renderTargetProperty.colorTargetDescriptor.height;
+				return new Vector2Int(width, height);
+			}
+
+			if(camera != null)
+			{
+				var width = EffekseerRendererUtils.ScaledClamp(camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
+				var height = EffekseerRendererUtils.ScaledClamp(camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
+				return new Vector2Int(width, height);
+			}
+
+			return new Vector2Int();
+		}
+
 		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format, RenderTargetProperty renderTargetProperty)
 		{
 			if (renderTargetProperty != null)
