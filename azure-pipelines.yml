@@ -6,9 +6,16 @@ jobs:
   steps:
   - script: |
       ./ci/build_android_plugin.sh
+
+  - script: |
       ./ci/build_windows_plugin.sh
+
+  - script: |
       ./ci/build_mac_plugin.sh
+
+  - script: |
       ./ci/build_webgl_plugin.sh
+
   - script: |
       cd tests
       ./build_unity_pkg.sh
