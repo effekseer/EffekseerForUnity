@@ -19,4 +19,5 @@ emcmake cmake ..
 make
 mkdir ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
 cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
+cd ..
 
