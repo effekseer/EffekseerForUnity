@@ -1082,7 +1082,7 @@ namespace Effekseer.Internal
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
-				prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
 				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 				{
@@ -1118,7 +1118,7 @@ namespace Effekseer.Internal
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
-				prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
 				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 				var normalTexture = GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.Normal);
@@ -1294,7 +1294,7 @@ namespace Effekseer.Internal
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
 					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 					{
@@ -1351,7 +1351,7 @@ namespace Effekseer.Internal
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
 					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 					var normalTexture = GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.Normal);

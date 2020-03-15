@@ -488,7 +488,7 @@ Cull[_Cull]
 
 		float4 lightDirection;
 		float4 lightColor;
-		float4 lightAmbient;
+		float4 lightAmbientColor;
 
 		float2 GetUV(float2 uv)
 		{
