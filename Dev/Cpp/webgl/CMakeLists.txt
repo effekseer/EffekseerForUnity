@@ -28,6 +28,8 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -Oz" ${CMAKE_CXX_FLAGS})
 
+string(APPEND CMAKE_EXE_LINKER_FLAGS " -s WASM=1")
+
 # include 一覧を指定する
 set(
 	INCLUDE_DIR
@@ -50,6 +52,7 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Parameter/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Material/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Utils/*.cpp
+	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer/SIMD/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon/*.cpp
 	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer/*.cpp
 	${PROJECT_SOURCE_DIR}/../common/*.cpp

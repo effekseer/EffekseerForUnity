@@ -4,7 +4,8 @@ cd ../Dev/Cpp/webgl
 
 mkdir build137
 cd build137
-emsdk activate sdk-1.37.3-64bit
+emsdk install sdk-1.37.40-64bit
+emsdk activate sdk-1.37.40-64bit
 emcmake cmake ..
 make
 mkdir ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
