@@ -18,6 +18,7 @@ class GraphicsDX9 : public Graphics
 {
 private:
 	IDirect3DDevice9* d3d9Device = nullptr;
+	EffekseerRendererDX9::Renderer* renderer_ = nullptr;
 
 public:
 	GraphicsDX9();
@@ -37,6 +38,8 @@ public:
 	Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 
 	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+
+	Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };

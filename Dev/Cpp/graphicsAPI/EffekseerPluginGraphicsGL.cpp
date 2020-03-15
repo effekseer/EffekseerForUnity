@@ -6,6 +6,7 @@
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #else
 #include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
+#include <EffekseerRenderer/EffekseerRendererGL.MaterialLoader.h>
 #endif
 
 namespace EffekseerPlugin
@@ -109,8 +110,9 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 }
 
 GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) 
-	: gfxRenderer(renderer) {
-
+	: gfxRenderer(renderer)
+{
+	deviceObjectCollection_ = new ::EffekseerRendererGL::DeviceObjectCollection();
 }
 
 GraphicsGL::~GraphicsGL() {}
@@ -137,14 +139,17 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 	return true;
 }
 
-void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface) { renderer_ = nullptr; }
+void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface) { 
+	renderer_ = nullptr; 
+	ES_SAFE_RELEASE(deviceObjectCollection_);
+}
 
 EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 #ifdef __ANDROID__
 	squareMaxCount = 600;
 #endif
-	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, openglDeviceType);
+	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, openglDeviceType, deviceObjectCollection_);
 	renderer_ = renderer;
 	return renderer;
 }
@@ -176,11 +181,13 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 
 Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
 {
-	if (renderer_ == nullptr)
-		return nullptr;
-
 	auto loader = new MaterialLoader(load, unload);
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 	auto internalLoader = renderer_->CreateMaterialLoader();
+#else
+	auto internalLoader =
+		new ::EffekseerRendererGL::MaterialLoader(openglDeviceType, nullptr, deviceObjectCollection_, nullptr);
+#endif
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }

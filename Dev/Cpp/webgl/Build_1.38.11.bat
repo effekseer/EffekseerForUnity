@@ -1,6 +1,6 @@
 @echo off
 
-call emsdk activate sdk-1.38.11-64bit
+call emsdk activate sdk-fastcomp-tag-1.38.11-64bit
 
 rem emscripten configuration
 call emcmake cmake -G "MinGW Makefiles"

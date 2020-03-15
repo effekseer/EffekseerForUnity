@@ -59,7 +59,8 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../renderer/*.cpp
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphics.cpp
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
-	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp)
+	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp
+	${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/OpenGL/EffekseerMaterialCompilerGL.cpp)
 
 # 使わないソースファイルを削除
 # INTERNAL_LOADER

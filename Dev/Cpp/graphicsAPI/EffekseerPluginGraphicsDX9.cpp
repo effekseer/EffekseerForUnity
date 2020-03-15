@@ -93,11 +93,15 @@ bool GraphicsDX9::Initialize(IUnityInterfaces* unityInterfaces)
 	return true;
 }
 
-void GraphicsDX9::Shutdown(IUnityInterfaces* unityInterface) { ES_SAFE_RELEASE(d3d9Device); }
+void GraphicsDX9::Shutdown(IUnityInterfaces* unityInterface) { 
+	renderer_ = nullptr;
+	ES_SAFE_RELEASE(d3d9Device);
+}
 
 EffekseerRenderer::Renderer* GraphicsDX9::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 	auto renderer = EffekseerRendererDX9::Renderer::Create(d3d9Device, squareMaxCount);
+	renderer_ = renderer;
 	return renderer;
 }
 
@@ -117,6 +121,17 @@ Effekseer::ModelLoader* GraphicsDX9::Create(ModelLoaderLoad load, ModelLoaderUnl
 {
 	auto loader = new ModelLoader(load, unload);
 	auto internalLoader = EffekseerRendererDX9::CreateModelLoader(d3d9Device, loader->GetFileInterface());
+	loader->SetInternalLoader(internalLoader);
+	return loader;
+}
+
+Effekseer::MaterialLoader* GraphicsDX9::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	if (renderer_ == nullptr)
+		return nullptr;
+
+	auto loader = new MaterialLoader(load, unload);
+	auto internalLoader = renderer_->CreateMaterialLoader();
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
