@@ -8,8 +8,8 @@ jobs:
       ./ci/build_android_plugin.sh
       ./ci/build_windows_plugin.sh
       ./ci/build_mac_plugin.sh
-      ./ci/build_webgl137_plugin.sh
-      ./ci/build_webgl138_plugin.sh
+      sh ./ci/build_webgl137_plugin.sh
+      sh ./ci/build_webgl138_plugin.sh
 
   - script: |
       cd tests
