@@ -12,6 +12,11 @@
 	}
 
 	SubShader{
+	Blend[_BlendSrc][_BlendDst]
+	BlendOp[_BlendOp]
+	ZTest[_ZTest]
+	ZWrite[_ZWrite]
+	Cull[_Cull]
 
 		Pass {
 
@@ -215,7 +220,6 @@
 
 			float4 ret = vcolor * tex2D(_ColorTex, uv1);
 			ret.xyz = ret.xyz * (lightColor.xyz * diffuse + lightAmbientColor.xyz);
-
 			return ret;
 		}
 
