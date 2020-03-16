@@ -130,6 +130,15 @@ namespace Effekseer
 			if(importingAsset.CustomData2Count > 0)
 				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
 
+			// avoid space
+			foreach(var texture in importingAsset.Textures)
+			{
+				if(texture.Name == string.Empty)
+				{
+					texture.Name = texture.UniformName;
+				}
+			}
+
 			string assetPath = Path.ChangeExtension(path, ".asset");
 
 			var asset = AssetDatabase.LoadAssetAtPath<EffekseerMaterialAsset>(assetPath);
