@@ -34,7 +34,7 @@ public:
 class MemoryFile : public Effekseer::FileInterface
 {
 public:
-	std::vector<uint8_t> LoadedBuffer;
+	Effekseer::CustomVector<uint8_t> LoadedBuffer;
 	size_t LoadedSize = 0;
 	explicit MemoryFile(size_t bufferSize);
 	void Resize(size_t bufferSize);

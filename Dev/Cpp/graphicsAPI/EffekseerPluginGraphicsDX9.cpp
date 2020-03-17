@@ -132,7 +132,8 @@ Effekseer::MaterialLoader* GraphicsDX9::Create(MaterialLoaderLoad load, Material
 
 	auto loader = new MaterialLoader(load, unload);
 	auto internalLoader = renderer_->CreateMaterialLoader();
-	loader->SetInternalLoader(internalLoader);
+	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
+	loader->SetInternalLoader(holder);
 	return loader;
 }
 

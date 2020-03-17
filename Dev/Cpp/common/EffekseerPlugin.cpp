@@ -60,6 +60,7 @@
 #include "EffekseerRendererXBoxOneDx12.h"
 #endif
 
+#include "../common/EffekseerPluginMaterial.h"
 #include "../common/EffekseerPluginModel.h"
 #include "../common/EffekseerPluginTexture.h"
 #include "../graphicsAPI/EffekseerPluginGraphics.h"
@@ -372,6 +373,15 @@ extern "C"
 
 		TryToRemoveRenderPathes();
 
+		// call events
+		{
+			auto instance = MaterialEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
+
 		// assign flipped
 		if (g_isTextureFlipped)
 		{
@@ -574,6 +584,15 @@ extern "C"
 		// g_graphics->StartRender(g_EffekseerRenderer);
 
 		TryToRemoveRenderPathes();
+
+		// call events
+		{
+			auto instance = MaterialEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
 
 		// assign flipped
 		if (g_isTextureFlipped)
