@@ -11,20 +11,22 @@ namespace Effekseer.Internal
 		/// <summary>
 		/// Ring buffer (it should be better implement)
 		/// </summary>
-		const int MaterialRingCount = 4;
+		const int MaterialRingCount = 6;
 
 		public int? colorBufferID = null;
 		public RenderTargetIdentifier colorTargetIdentifier;
 		public RenderTargetIdentifier? depthTargetIdentifier;
 		public RenderTextureDescriptor colorTargetDescriptor;
 		public Rect Viewport;
-		public bool isColorTargetArray = false;
+		public bool isRequiredToChangeViewport = false;
 		public RenderTexture colorTargetRenderTexture = null;
 
 		public bool isRequiredToCopyBackground = false;
 
+		int blitArrayMaterialOffset = 0;
 		int blitMaterialOffset = 0;
 		List<Material> blitMaterials = new List<Material>();
+		List<Material> blitArrayMaterials = new List<Material>();
 
 		public RenderTargetProperty()
 		{
@@ -32,18 +34,34 @@ namespace Effekseer.Internal
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
 		{
-			if(isColorTargetArray)
+			if(isRequiredToChangeViewport)
 			{
-				var m = AllocateBlitMaterial();
-				m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
-				m.SetVector("textureArea", new Vector4(
-					Viewport.width / colorTargetRenderTexture.width, 
-					Viewport.height / colorTargetRenderTexture.height,
-					Viewport.x / colorTargetRenderTexture.width, 
-					Viewport.y / colorTargetRenderTexture.height));
-				cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
-				cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
-				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+				if(colorTargetRenderTexture.dimension == TextureDimension.Tex2DArray)
+				{
+					var m = AllocateBlitArrayMaterial();
+					m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
+					m.SetVector("textureArea", new Vector4(
+						Viewport.width / colorTargetRenderTexture.width,
+						Viewport.height / colorTargetRenderTexture.height,
+						Viewport.x / colorTargetRenderTexture.width,
+						Viewport.y / colorTargetRenderTexture.height));
+					cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
+					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
+					cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+				}
+				else
+				{
+					var m = AllocateBlitMaterial();
+					m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
+					m.SetVector("textureArea", new Vector4(
+						Viewport.width / colorTargetRenderTexture.width,
+						Viewport.height / colorTargetRenderTexture.height,
+						Viewport.x / colorTargetRenderTexture.width,
+						Viewport.y / colorTargetRenderTexture.height));
+					cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
+					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
+					cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+				}
 			}
 			else if(isRequiredToCopyBackground)
 			{
@@ -67,13 +85,28 @@ namespace Effekseer.Internal
 			}
 		}
 
-		Material AllocateBlitMaterial()
+		Material AllocateBlitArrayMaterial()
 		{
-			if(blitMaterials.Count == 0)
+			if(blitArrayMaterials.Count == 0)
 			{
 				for(int i = 0; i < MaterialRingCount; i++)
 				{
-					blitMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DArrayBlitMaterial));
+					blitArrayMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DArrayBlitMaterial));
+				}
+			}
+
+			blitArrayMaterialOffset++;
+			blitArrayMaterialOffset %= MaterialRingCount;
+			return blitArrayMaterials[blitArrayMaterialOffset];
+		}
+
+		Material AllocateBlitMaterial()
+		{
+			if (blitMaterials.Count == 0)
+			{
+				for (int i = 0; i < MaterialRingCount; i++)
+				{
+					blitMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DBlitMaterial));
 				}
 			}
 
