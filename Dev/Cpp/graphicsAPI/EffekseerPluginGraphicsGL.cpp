@@ -5,9 +5,11 @@
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #else
-#include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
 #include <EffekseerRenderer/EffekseerRendererGL.MaterialLoader.h>
+#include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
 #endif
+
+#include "../common/EffekseerPluginMaterial.h"
 
 namespace EffekseerPlugin
 {
@@ -36,7 +38,10 @@ public:
 
 bool IsPowerOfTwo(uint32_t x) { return (x & (x - 1)) == 0; }
 
-TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer) : TextureLoader(load, unload), gfxRenderer(renderer) {}
+TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer)
+	: TextureLoader(load, unload), gfxRenderer(renderer)
+{
+}
 
 TextureLoaderGL::~TextureLoaderGL() {}
 
@@ -109,17 +114,18 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 	}
 }
 
-GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) 
-	: gfxRenderer(renderer)
+GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer)
 {
 	deviceObjectCollection_ = new ::EffekseerRendererGL::DeviceObjectCollection();
+
+	MaterialEvent::Initialize();
 }
 
 GraphicsGL::~GraphicsGL() {}
 
 bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 {
-	
+
 	switch (gfxRenderer)
 	{
 	case kUnityGfxRendererOpenGL:
@@ -139,9 +145,12 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 	return true;
 }
 
-void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface) { 
-	renderer_ = nullptr; 
+void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface)
+{
+	renderer_ = nullptr;
 	ES_SAFE_RELEASE(deviceObjectCollection_);
+
+	MaterialEvent::Terminate();
 }
 
 EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
@@ -185,10 +194,10 @@ Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialL
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 	auto internalLoader = renderer_->CreateMaterialLoader();
 #else
-	auto internalLoader =
-		new ::EffekseerRendererGL::MaterialLoader(openglDeviceType, nullptr, deviceObjectCollection_, nullptr);
+	auto internalLoader = new ::EffekseerRendererGL::MaterialLoader(openglDeviceType, nullptr, deviceObjectCollection_, nullptr);
 #endif
-	loader->SetInternalLoader(internalLoader);
+	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
+	loader->SetInternalLoader(holder);
 	return loader;
 }
 
