@@ -18,6 +18,11 @@ jobs:
         PathtoPublish: './Effekseer.unitypackage'
         ArtifactName: 'package'
         publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+    inputs:
+        PathtoPublish: './Dev/Plugin/Assets/'
+        ArtifactName: 'Assets'
+        publishLocation: 'Container'
   - script: |
       cd tests
       ./build_unity_android.sh
