@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## 1.50 (2020/03/18)
+
+- Upgarade to 1.5
+- Support HDRP and URP
+- Fixed some bugs
+
 ## 1.43m (2019/11/20)
 
 - Fixed a bug that could not read image files containing ..
