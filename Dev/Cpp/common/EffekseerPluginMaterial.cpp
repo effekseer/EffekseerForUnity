@@ -21,7 +21,7 @@ public:
 	LazyMaterialData(const std::shared_ptr<MaterialLoaderHolder>& loader,
 					 const Effekseer::CustomVector<uint8_t>& data,
 					 const Effekseer::CustomVector<uint8_t>& compiledData)
-		: internalLoader_(loader), data_(data), compiledData_(compiledData_)
+		: internalLoader_(loader), data_(data), compiledData_(compiledData)
 	{
 	}
 
