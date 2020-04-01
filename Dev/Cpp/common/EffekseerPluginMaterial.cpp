@@ -20,9 +20,20 @@ private:
 public:
 	LazyMaterialData(const std::shared_ptr<MaterialLoaderHolder>& loader,
 					 const Effekseer::CustomVector<uint8_t>& data,
-					 const Effekseer::CustomVector<uint8_t>& compiledData)
-		: internalLoader_(loader), data_(data), compiledData_(compiledData)
+					 int32_t dataSize,
+					 const Effekseer::CustomVector<uint8_t>& compiledData,
+					 int32_t compiledDataSize)
+		: internalLoader_(loader)
 	{
+		if (dataSize > 0)
+		{
+			data_.assign(data.begin(), data.begin() + dataSize);	
+		}
+
+		if (compiledDataSize > 0)
+		{
+			compiledData_.assign(compiledData.begin(), compiledData.begin() + compiledDataSize);
+		}
 	}
 
 	void Load()
@@ -198,7 +209,11 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 
 	if (memoryFileForCache_.LoadedSize > 0 || memoryFile_.LoadedSize > 0)
 	{
-		auto data = new LazyMaterialData(internalLoader_, memoryFile_.LoadedBuffer, memoryFileForCache_.LoadedBuffer);
+		auto data = new LazyMaterialData(internalLoader_,
+										 memoryFile_.LoadedBuffer,
+										 memoryFile_.LoadedSize,
+										 memoryFileForCache_.LoadedBuffer,
+										 memoryFileForCache_.LoadedSize);
 		res.internalData = data;
 
 		auto eventInstance = MaterialEvent::GetInstance();
