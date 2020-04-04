@@ -267,7 +267,7 @@ namespace Effekseer.Internal
 
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
-			
+
 			// don't need to update because doesn't exists and need not to render
 			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
@@ -336,7 +336,7 @@ namespace Effekseer.Internal
 				}
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
-				var stereoRenderingType = (camera.stereoEnabled)? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
+				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty, stereoRenderingType);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
@@ -355,23 +355,25 @@ namespace Effekseer.Internal
 			// effects shown don't exists
 			if ((camera.cullingMask & mask) == 0)
 			{
+				// Because rendering thread is asynchronous
+				SpecifyRenderingMatrix(camera, path);
 				return;
 			}
 
-			if(path.isCommandBufferFromExternal)
+			if (path.isCommandBufferFromExternal)
 			{
 				path.AssignExternalCommandBuffer(targetCommandBuffer, renderTargetProperty);
 			}
 
 			// if LWRP
 			if (renderTargetProperty != null)
-            {
+			{
 				// flip a rendertaget
 				// Direct11 : OK (2019, LWRP 5.13)
 				// Android(OpenGL) : OK (2019, LWRP 5.13)
 				Plugin.EffekseerSetRenderSettings(path.renderId, true);
-                Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
-            }
+				Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
+			}
 			else
 			{
 #if UNITY_SWITCH && !UNITY_EDITOR
@@ -387,11 +389,16 @@ namespace Effekseer.Internal
 				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.ptr);
 			}
 
+			SpecifyRenderingMatrix(camera, path);
+		}
+
+		private static void SpecifyRenderingMatrix(Camera camera, RenderPath path)
+		{
 			// specify matrixes for stereo rendering
 			if (camera.stereoEnabled)
 			{
 				var stereoRenderType = StereoRendererUtil.GetStereoRenderingType();
-				if(stereoRenderType != StereoRendererUtil.StereoRenderingTypes.None)
+				if (stereoRenderType != StereoRendererUtil.StereoRenderingTypes.None)
 				{
 					float[] camCenterMat = Utility.Matrix2Array(camera.worldToCameraMatrix);
 					float[] projMatL = Utility.Matrix2Array(GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), false));
