@@ -16,7 +16,7 @@
 
 		public static StereoRenderingTypes GetStereoRenderingType()
 		{
-#if UNITY_2018_1_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
 			if (!UnityEngine.XR.XRSettings.enabled)
 			{
 				return StereoRenderingTypes.None;
