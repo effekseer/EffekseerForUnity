@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define EFFEKSEER_INTERNAL_DEBUG
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -546,18 +548,117 @@ namespace Effekseer.Internal
 			}
 		}
 
+
+		private class ComputeBufferCollection : IDisposable
+		{
+			/// <summary>
+			/// SimpleSprite * 4 * 8192
+			/// </summary>
+			int VertexMaxSize = 8192 * 4 * 36;
+
+			const int defaultVertexSize = 36;
+
+			Dictionary<int, ComputeBuffer> computeBuffers = new Dictionary<int, ComputeBuffer>();
+			byte[] data = null;
+
+			public ComputeBufferCollection()
+			{
+				data = new byte[VertexMaxSize];
+				Get(defaultVertexSize);
+			}
+
+			public byte[] GetCPUData()
+			{
+				return data;
+			}
+
+			public void CopyCPUToGPU(int vertexSize, int offset, int size)
+			{
+				vertexSize = FilterVertexSize(vertexSize);
+
+				var cb = Get(vertexSize);
+
+				cb.SetData(data, offset, offset, size);
+			}
+
+			public ComputeBuffer Get(int vertexSize)
+			{
+				vertexSize = FilterVertexSize(vertexSize);
+
+				if (!computeBuffers.ContainsKey(vertexSize))
+				{
+					var count = VertexMaxSize / vertexSize;
+					if (count * vertexSize != VertexMaxSize) count++;
+					computeBuffers.Add(vertexSize, new ComputeBuffer(count, vertexSize));
+				}
+
+				return computeBuffers[vertexSize];
+			}
+
+			public DelayEvent[] ReallocateComputeBuffers(int desiredSize)
+			{
+				while(desiredSize > VertexMaxSize)
+				{
+					VertexMaxSize *= 2;
+				}
+
+#if EFFEKSEER_INTERNAL_DEBUG
+				Debug.Log("ComputeBufferCollection : ReallocateComputeBuffers : " + (VertexMaxSize).ToString());
+#endif
+				List<DelayEvent> events = new List<DelayEvent>();
+				foreach (var computeBuffer in computeBuffers)
+				{
+					events.Add(new DelayEventDisposeComputeBuffer(computeBuffer.Value));
+				}
+
+				var newComputeBuffers = new Dictionary<int, ComputeBuffer>();
+
+				foreach(var cb in computeBuffers)
+				{
+					var count = VertexMaxSize / cb.Key;
+					if (count * cb.Key != VertexMaxSize) count++;
+					newComputeBuffers.Add(cb.Key, new ComputeBuffer(count, cb.Key));
+				}
+
+				computeBuffers = newComputeBuffers;
+				data = new byte[VertexMaxSize];
+
+				return events.ToArray();
+			}
+
+			public void Dispose()
+			{
+#if EFFEKSEER_INTERNAL_DEBUG
+				Debug.Log("ComputeBufferCollection : Dispose");
+#endif
+
+				foreach (var computeBuffer in computeBuffers)
+				{
+					computeBuffer.Value.Release();
+				}
+				computeBuffers.Clear();
+			}
+
+			int FilterVertexSize(int size)
+			{
+#if UNITY_PS4
+				return size;
+#else
+				return defaultVertexSize;
+#endif
+			}
+		}
+
 		private class RenderPath : IDisposable
 		{
-			int VertexMaxCount = 8192 * 4 * 2;
 			public Camera camera;
 			public CommandBuffer commandBuffer;
 			public bool isCommandBufferFromExternal = false;
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public BackgroundRenderTexture renderTexture;
-			public ComputeBuffer computeBufferFront;
-			public ComputeBuffer computeBufferBack;
-			public byte[] computeBufferTemp;
+			public ComputeBufferCollection computeBufferFront;
+			public ComputeBufferCollection computeBufferBack;
 			public int LifeTime = 5;
 
 			bool isDistortionEnabled = false;
@@ -629,24 +730,14 @@ namespace Effekseer.Internal
 					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 				}
 
-				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
-				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
-				computeBufferTemp = new byte[VertexMaxCount * VertexSize];
+				computeBufferFront = new ComputeBufferCollection();
+				computeBufferBack = new ComputeBufferCollection();
 			}
 
-			public void ReallocateComputeBuffer()
+			public void ReallocateComputeBuffer(int desiredSize)
 			{
-				VertexMaxCount *= 2;
-
-				var oldBufB = computeBufferBack;
-				var oldBufF = computeBufferFront;
-
-				delayEvents.Add(new DelayEventDisposeComputeBuffer(oldBufB));
-				delayEvents.Add(new DelayEventDisposeComputeBuffer(oldBufF));
-
-				computeBufferFront = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
-				computeBufferBack = new ComputeBuffer(VertexMaxCount, VertexSize, ComputeBufferType.Default);
-				computeBufferTemp = new byte[VertexMaxCount * VertexSize];
+				delayEvents.AddRange(computeBufferFront.ReallocateComputeBuffers(desiredSize));
+				delayEvents.AddRange(computeBufferBack.ReallocateComputeBuffers(desiredSize));
 			}
 
 			public void Dispose()
@@ -949,12 +1040,12 @@ namespace Effekseer.Internal
 			Plugin.EffekseerRenderBack(path.renderId);
 
 			// if memory is lacked, reallocate memory
-			while(Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferTemp.Length)
+			while(Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferBack.GetCPUData().Length)
 			{
-				path.ReallocateComputeBuffer();
+				path.ReallocateComputeBuffer(Plugin.GetUnityRenderVertexBufferCount());
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
 
 			// Distortion
 			if (EffekseerRendererUtils.IsDistortionEnabled && 
@@ -990,12 +1081,12 @@ namespace Effekseer.Internal
 			Plugin.EffekseerRenderFront(path.renderId);
 
 			// if memory is lacked, reallocate memory
-			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferTemp.Length)
+			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferFront.GetCPUData().Length)
 			{
-				path.ReallocateComputeBuffer();
+				path.ReallocateComputeBuffer(Plugin.GetUnityRenderVertexBufferCount());
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferTemp, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
 		}
 
 		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DummyTextureType type)
@@ -1005,7 +1096,7 @@ namespace Effekseer.Internal
 			return EffekseerSystem.GetCachedTexture(key, type);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, byte[] computeBufferTemp, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
@@ -1014,16 +1105,17 @@ namespace Effekseer.Internal
 			{
 				Plugin.UnityRenderParameter parameter = new Plugin.UnityRenderParameter();
 
+#if !UNITY_PS4
 				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
 
 				if(vertexBufferCount > 0)
 				{
 					var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
 
-					System.Runtime.InteropServices.Marshal.Copy(vertexBuffer, computeBufferTemp, 0, vertexBufferCount);
-					computeBuffer.SetData(computeBufferTemp, 0, 0, vertexBufferCount);
+					Marshal.Copy(vertexBuffer, computeBuffer.GetCPUData(), 0, vertexBufferCount);
+					computeBuffer.CopyCPUToGPU(VertexSize, 0, vertexBufferCount);
 				}
-
+#endif
 				var infoBuffer = Plugin.GetUnityRenderInfoBuffer();
 
 				for (int i = 0; i < renderParameterCount; i++)
@@ -1032,7 +1124,7 @@ namespace Effekseer.Internal
 					
 					if(parameter.RenderMode == 1)
 					{
-						RenderModdel(parameter, infoBuffer, commandBuffer, computeBuffer, matPropCol, modelBufferCol, customDataBufferCol, background);
+						RenderModdel(parameter, infoBuffer, commandBuffer, matPropCol, modelBufferCol, customDataBufferCol, background);
 					}
 					else
 					{
@@ -1043,7 +1135,7 @@ namespace Effekseer.Internal
 
 		}
 
-		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background)
+		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background)
 		{
 			var prop = matPropCol.GetNext();
 
@@ -1053,6 +1145,17 @@ namespace Effekseer.Internal
 			key.ZWrite = parameter.ZWrite > 0;
 			key.Cull = (int)UnityEngine.Rendering.CullMode.Off;
 
+#if UNITY_PS4
+			{
+				var vertexBuffer = (byte*)Plugin.GetUnityRenderVertexBuffer();
+				vertexBuffer += parameter.VertexBufferOffset;
+				Marshal.Copy(new IntPtr(vertexBuffer), computeBuffer.GetCPUData(), parameter.VertexBufferOffset, parameter.ElementCount * 4 * parameter.VertexBufferStride);
+			}
+
+			computeBuffer.CopyCPUToGPU(parameter.VertexBufferStride, parameter.VertexBufferOffset, parameter.ElementCount * 4 * parameter.VertexBufferStride);
+#endif
+			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
+			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
 
 			if (parameter.MaterialType == Plugin.RendererMaterialType.File)
 			{
@@ -1076,9 +1179,6 @@ namespace Effekseer.Internal
 				{
 					material = efkMaterial.materials.GetMaterial(ref key);
 				}
-
-				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
-				prop.SetBuffer("buf_vertex", computeBuffer);
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
@@ -1112,9 +1212,6 @@ namespace Effekseer.Internal
 			else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
 			{
 				var material = materialsLighting.GetMaterial(ref key);
-
-				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
-				prop.SetBuffer("buf_vertex", computeBuffer);
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
@@ -1167,8 +1264,6 @@ namespace Effekseer.Internal
 			{
 				var material = materialsDistortion.GetMaterial(ref key);
 
-				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexDistortionSize);
-				prop.SetBuffer("buf_vertex", computeBuffer);
 				prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
 				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
@@ -1202,9 +1297,6 @@ namespace Effekseer.Internal
 			{
 				var material = materials.GetMaterial(ref key);
 
-				prop.SetFloat("buf_offset", parameter.VertexBufferOffset / VertexSize);
-				prop.SetBuffer("buf_vertex", computeBuffer);
-
 				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 				if (parameter.TextureWrapTypes[0] == 0)
 				{
@@ -1230,7 +1322,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBuffer computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
+		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
 		{
 			// Draw model
 			var modelParameters = ((Plugin.UnityRenderModelParameter*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
