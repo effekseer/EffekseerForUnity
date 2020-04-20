@@ -62,7 +62,6 @@ EXPORTS
   GetUnityRenderVertexBuffer
   GetUnityRenderVertexBufferCount
   GetUnityRenderInfoBuffer
-  SetMaterial
 
   StartNetwork
   StopNetwork

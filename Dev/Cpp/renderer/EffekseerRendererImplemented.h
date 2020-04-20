@@ -75,7 +75,6 @@ extern "C"
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderCount();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityVertexBuffer();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityInfoBuffer();
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetMaterial(void* material);
 };
 
 namespace EffekseerRendererUnity
