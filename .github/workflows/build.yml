@@ -81,10 +81,11 @@ jobs:
           emcmake cmake ..
           make
           mkdir ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
+          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
 
       - name: Upload math result for webgl 1.38
         uses: actions/upload-artifact@v1
         with:
           name: webgl1.38
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.4064bit/
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
 
