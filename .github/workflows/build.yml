@@ -60,32 +60,49 @@ jobs:
         with:
           name: x86_64
           path: ./Dev/Plugin/Assets/Effekseer/Plugins/x86_64
-  webgl:
+
+  webgl138:
     name: wrbgl Build with emsdk 1.38
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
 
 
-      - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v2
-        with:
-          version: 1.38.40
-
-
       - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+
+
       - run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
+          ./emsdk activate sdk-fastcomp-tag-1.38.11-64bit
+          source ./emsdk_env.sh
+          cd ..
+
           cd ./Dev/Cpp/webgl
           mkdir build138
           cd build138
           emcmake cmake ..
           make
-          mkdir ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
-          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
+          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
 
-      - name: Upload math result for webgl 1.38
+      - run: |
+          cd emsdk
+          ./emsdk install sdk-fastcomp-1.37.40-64bit
+          ./emsdk activate sdk-fastcomp-1.37.40-64bit
+          source ./emsdk_env.sh
+          cd ..
+
+          cd ./Dev/Cpp/webgl
+          mkdir build137
+          cd build137
+          emcmake cmake ..
+          make
+          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
+
+      - name: Upload math result for webgl
         uses: actions/upload-artifact@v1
         with:
-          name: webgl1.38
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.40-64bit/
+          name: webgl
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins/WebGL
 
