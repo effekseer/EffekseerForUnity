@@ -84,7 +84,6 @@ jobs:
           cd build138
           emcmake cmake ..
           make
-          mkdir ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
 
       - run: |
