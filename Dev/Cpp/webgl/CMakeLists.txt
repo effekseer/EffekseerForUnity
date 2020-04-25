@@ -68,6 +68,7 @@ list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/
 list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.cpp")
 
 # 拡張子を指定する
+set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".bc")
 
 # コンパイル先を追加
