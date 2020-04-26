@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: x86
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/x86_64
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins/x86
       - name: Upload math result for x86_64
         uses: actions/upload-artifact@v1
         with:
