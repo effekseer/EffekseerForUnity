@@ -29,18 +29,20 @@ jobs:
         with:
           name: Android
           path: ./Dev/Plugin/Assets/Effekseer/Plugins/Android
+
   ios:
-    name: iOS Build
+    name: mac iOS Build
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
       - run: cd  ./Dev/Cpp/macosx/ && ./Build.sh
-      - name: Upload math result for ios
+      - name: Upload ios
         uses: actions/upload-artifact@v1
         with:
-          name: iOS
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/iOS
+          name: mac_iOS
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
+
   windows:
     name: windows Build
     runs-on: windows-latest
