@@ -353,7 +353,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 {
 	m_squareMaxCount = squareMaxCount;
 	m_renderState = new RenderState();
-	m_vertexBuffer = new VertexBuffer(sizeof(Vertex) * m_squareMaxCount * 4, true);
+	m_vertexBuffer = new VertexBuffer(EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, true);
 
 	stanShader_ = std::unique_ptr<Shader>(new Shader(Effekseer::RendererMaterialType::Default));
 	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(Effekseer::RendererMaterialType::BackDistortion));
