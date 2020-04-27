@@ -1,5 +1,10 @@
 ﻿# Release notes
 
+## 1.52 (2020/04/26)
+
+- Upgarade to 1.52
+- Fixed a bug that caused crashes rarely (update to main unit)
+
 ## 1.50 (2020/03/18)
 
 - Upgarade to 1.5
