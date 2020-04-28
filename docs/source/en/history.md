@@ -1,5 +1,10 @@
 ﻿# Release notes
 
+## 1.52 (2020/04/28)
+
+- Upgarade to 1.52a
+- Fixed a bug that a behavior of rotated billboard is something wrong when an angle is about 90 degree
+
 ## 1.52 (2020/04/26)
 
 - Upgarade to 1.52
