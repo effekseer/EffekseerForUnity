@@ -28,9 +28,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: Android
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/Android
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
-  ios:
+  mac_ios:
     name: mac iOS Build
     runs-on: macos-latest
     steps:
@@ -52,19 +52,14 @@ jobs:
       - name: Build
         run: cd ./Dev/Cpp/windows && Build.bat
         shell: cmd
-      - name: Upload math result for x86
+      - name: Upload math result
         uses: actions/upload-artifact@v1
         with:
-          name: x86
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/x86
-      - name: Upload math result for x86_64
-        uses: actions/upload-artifact@v1
-        with:
-          name: x86_64
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/x86_64
+          name: Windows
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
-  webgl138:
-    name: wrbgl Build with emsdk 1.38
+  webgl:
+    name: wrbgl Build with emsdk
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -105,6 +100,50 @@ jobs:
       - name: Upload math result for webgl
         uses: actions/upload-artifact@v1
         with:
-          name: webgl
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins/WebGL
+          name: WebGL
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
+  merge:
+    name: merge
+    runs-on: windows-latest
+    needs: [android, mac_ios, windows, webgl]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Android
+        uses: actions/download-artifact@v1
+        with:
+          name: Android
+
+      - name: Download mac_ios
+        uses: actions/download-artifact@v1
+        with:
+          name: mac_iOS
+
+      - name: Download mac_ios
+        uses: actions/download-artifact@v1
+        with:
+          name: Windows
+
+      - name: Download mac_ios
+        uses: actions/download-artifact@v1
+        with:
+          name: WebGL
+
+      - name: Copy
+        run: |
+          move Android\Android\libs\arm64-v8a\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\arm64-v8a\
+          move Android\Android\libs\armeabi-v7a\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\armeabi-v7a\
+          move Android\Android\libs\x86\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\x86\
+          move mac_iOS\iOS\libEffekseerUnity.a Dev\Plugin\Assets\Effekseer\Plugins\iOS\
+          move mac_iOS\EffekseerUnity.bundle\Contents\libEffekseerUnity.a Dev\Plugin\Assets\Effekseer\Plugins\EffekseerUnity.bundle\Contents\
+          move WebGL\WebGL\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\
+          move WebGL\WebGL\1.38.11-64bit\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\1.38.11-64bit\
+          move Windows\x86\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86\
+          move Windows\x86_64\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86_64\
+        shell: cmd
+
+      - name: Upload math result
+        uses: actions/upload-artifact@v1
+        with:
+          name: Assets
+          path: Dev\Plugin\Assets\
