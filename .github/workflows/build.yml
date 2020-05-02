@@ -141,9 +141,10 @@ jobs:
           move Windows\x86\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86\
           move Windows\x86_64\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86_64\
         shell: cmd
-
+      - run: pip install PyYAML
+      - run: python create_unitypackage.py -r -o Effekseer.unitypackage Dev\Plugin\Assets\Effekseer
       - name: Upload math result
         uses: actions/upload-artifact@v1
         with:
-          name: Assets
-          path: Dev\Plugin\Assets\
+          name: Effekseer.unitypackage
+          path: Effekseer.unitypackage
