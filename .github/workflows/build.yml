@@ -32,7 +32,7 @@ jobs:
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macos-latest
+    runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v2
       - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
