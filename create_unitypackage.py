@@ -32,7 +32,7 @@ def filter_tarinfo(tarinfo):
     return tarinfo
 
 def add_file(tar, metapath):
-    filepath = metapath[0:-5]
+    filepath = metapath[0:-5].replace('\\', '/')
     print(filepath)
     with open(metapath, 'r') as f:
         try:
