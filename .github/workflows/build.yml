@@ -175,7 +175,7 @@ jobs:
           path: Dev/Plugin/Assets/Effekseer
       - run: pip install PyYAML
       - run: mkdir dist
-      - run: python3 create_unitypackage.py -r -o dist/Effekseer.unitypackage Dev/Plugin/Assets/Effekseer
+      - run: cd Dev/Plugin && python3 ../../create_unitypackage.py -r -o ../../dist/Effekseer.unitypackage Assets/Effekseer
       - name: Upload math result
         uses: actions/upload-artifact@v1
         with:
