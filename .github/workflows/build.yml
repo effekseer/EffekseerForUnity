@@ -163,7 +163,7 @@ jobs:
           mv Android/Android/libs/armeabi-v7a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
           mv Android/Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
-          mv mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
+          mv mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
           mv WebGL_1-37/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
           mv WebGL_1-38/WebGL/1.38.11-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
