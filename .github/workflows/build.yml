@@ -135,7 +135,8 @@ jobs:
           move Android\Android\libs\armeabi-v7a\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\armeabi-v7a\
           move Android\Android\libs\x86\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\x86\
           move mac_iOS\iOS\libEffekseerUnity.a Dev\Plugin\Assets\Effekseer\Plugins\iOS\
-          move mac_iOS\EffekseerUnity.bundle\Contents\EffekseerUnity Dev\Plugin\Assets\Effekseer\Plugins\EffekseerUnity.bundle\Contents\
+          move mac_iOS\EffekseerUnity.bundle\Contents\MacOS\EffekseerUnity Dev\Plugin\Assets\Effekseer\Plugins\EffekseerUnity.bundle\Contents\MacOS\
+
           move WebGL\WebGL\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\
           move WebGL\WebGL\1.38.11-64bit\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\1.38.11-64bit\
           move Windows\x86\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86\
