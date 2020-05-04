@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+### 1.52b (2020/05/02)
+
+- Fixed a bug where particles are not shown with Line of SpawnMethod
+
 ## 1.52a (2020/04/28)
 
 - Upgarade to 1.52a
