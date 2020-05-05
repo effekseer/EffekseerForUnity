@@ -58,38 +58,63 @@ jobs:
           name: Windows
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
-  webgl:
-    name: wrbgl Build with emsdk
+  webgl_1-38:
+    name: WebGL Build with emsdk 1.38
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-
-
-      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
-
-
-      - run: |
+      - name: Cache emsdk
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: ./emsdk
+          key: ${{ runner.os }}-emsdk-1_38-v1
+      - name: install emsdk 1.38
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
-          ./emsdk activate sdk-fastcomp-tag-1.38.11-64bit
-          source ./emsdk_env.sh
           cd ..
-
+      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: |
+          ./emsdk/emsdk activate sdk-fastcomp-tag-1.38.11-64bit
+          source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
           mkdir build138
           cd build138
           emcmake cmake ..
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
+      - name: Upload math result for webgl
+        uses: actions/upload-artifact@v1
+        with:
+          name: WebGL_1-38
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
+  webgl_1-37:
+    name: WebGL Build with emsdk 1.37
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache emsdk
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: ./emsdk
+          key: ${{ runner.os }}-emsdk-1_37-v1
 
-      - run: |
+
+      - name: install emsdk 1.37
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install sdk-fastcomp-1.37.40-64bit
-          ./emsdk activate sdk-fastcomp-1.37.40-64bit
-          source ./emsdk_env.sh
           cd ..
-
+      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: |
+          ./emsdk/emsdk activate sdk-fastcomp-1.37.40-64bit
+          source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
           mkdir build137
           cd build137
@@ -100,13 +125,13 @@ jobs:
       - name: Upload math result for webgl
         uses: actions/upload-artifact@v1
         with:
-          name: WebGL
+          name: WebGL_1-37
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
   merge:
     name: merge
-    runs-on: windows-latest
-    needs: [android, mac_ios, windows, webgl]
+    runs-on: ubuntu-latest
+    needs: [android, mac_ios, windows, webgl_1-38, webgl_1-37]
     steps:
       - uses: actions/checkout@v2
       - name: Download Android
@@ -124,27 +149,41 @@ jobs:
         with:
           name: Windows
 
-      - name: Download mac_ios
+      - name: Download webgl 1.38
         uses: actions/download-artifact@v1
         with:
-          name: WebGL
-
+          name: WebGL_1-38
+      - name: Download webgl 1.37
+        uses: actions/download-artifact@v1
+        with:
+          name: WebGL_1-37
       - name: Copy
         run: |
-          move Android\Android\libs\arm64-v8a\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\arm64-v8a\
-          move Android\Android\libs\armeabi-v7a\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\armeabi-v7a\
-          move Android\Android\libs\x86\libEffekseerUnity.so Dev\Plugin\Assets\Effekseer\Plugins\Android\libs\x86\
-          move mac_iOS\iOS\libEffekseerUnity.a Dev\Plugin\Assets\Effekseer\Plugins\iOS\
-          move mac_iOS\EffekseerUnity.bundle\Contents\MacOS\EffekseerUnity Dev\Plugin\Assets\Effekseer\Plugins\EffekseerUnity.bundle\Contents\MacOS\
+          mv Android/Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
+          mv Android/Android/libs/armeabi-v7a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
+          mv Android/Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
+          mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
+          rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
+          cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
+          mv WebGL_1-37/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
+          mv WebGL_1-38/WebGL/1.38.11-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
+          mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
+          mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
+      - name: Upload math result
+        uses: actions/upload-artifact@v1
+        with:
+          name: merged
+          path: Dev/Plugin/Assets/Effekseer
+      - run: pip install PyYAML
+      - run: mkdir dist
+      - run: |
+          cd Dev/Plugin
+          python3 ../../create_unitypackage.py -r -o ../../dist/Effekseer.tar.gz Assets/Effekseer
+          mv ../../dist/Effekseer.tar.gz ../../dist/Effekseer.unitypackage
 
-          move WebGL\WebGL\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\
-          move WebGL\WebGL\1.38.11-64bit\libEffekseerUnity.bc Dev\Plugin\Assets\Effekseer\Plugins\WebGL\1.38.11-64bit\
-          move Windows\x86\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86\
-          move Windows\x86_64\EffekseerUnity.dll Dev\Plugin\Assets\Effekseer\Plugins\x86_64\
-        shell: cmd
 
       - name: Upload math result
         uses: actions/upload-artifact@v1
         with:
-          name: Assets
-          path: Dev\Plugin\Assets\
+          name: Effekseer.unitypackage
+          path: dist
