@@ -24,7 +24,7 @@ private:
 	EffekseerRendererGL::Renderer* renderer_ = nullptr;
 
 	EffekseerRendererGL::OpenGLDeviceType openglDeviceType = EffekseerRendererGL::OpenGLDeviceType::OpenGL2;
-	::EffekseerRendererGL::DeviceObjectCollection* deviceObjectCollection_ = nullptr;
+	::EffekseerRenderer::GraphicsDevice* graphicsDevice_ = nullptr;
 
 public:
 	GraphicsGL(UnityGfxRenderer renderer);

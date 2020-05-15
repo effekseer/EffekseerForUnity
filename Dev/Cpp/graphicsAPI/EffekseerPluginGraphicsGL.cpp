@@ -116,8 +116,6 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 
 GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer)
 {
-	deviceObjectCollection_ = new ::EffekseerRendererGL::DeviceObjectCollection();
-
 	MaterialEvent::Initialize();
 }
 
@@ -142,13 +140,15 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 		break;
 	}
 
+	graphicsDevice_ = ::EffekseerRendererGL::CreateDevice(openglDeviceType);
+
 	return true;
 }
 
 void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface)
 {
 	renderer_ = nullptr;
-	ES_SAFE_RELEASE(deviceObjectCollection_);
+	ES_SAFE_RELEASE(graphicsDevice_);
 
 	MaterialEvent::Terminate();
 }
@@ -158,7 +158,7 @@ EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool
 #ifdef __ANDROID__
 	squareMaxCount = 600;
 #endif
-	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, openglDeviceType, deviceObjectCollection_);
+	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, graphicsDevice_);
 	renderer_ = renderer;
 	return renderer;
 }
