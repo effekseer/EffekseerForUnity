@@ -191,11 +191,7 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
 {
 	auto loader = new MaterialLoader(load, unload);
-#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
-	auto internalLoader = renderer_->CreateMaterialLoader();
-#else
-	auto internalLoader = new ::EffekseerRendererGL::MaterialLoader(openglDeviceType, nullptr, deviceObjectCollection_, nullptr);
-#endif
+	auto internalLoader = ::EffekseerRendererGL::CreateMaterialLoader(graphicsDevice_);
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);
 	return loader;
