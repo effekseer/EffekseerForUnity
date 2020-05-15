@@ -63,4 +63,4 @@ effekseerCore.lines = using_lines + ['\n'] + effekseerCore.lines
 effekseerCore.lines = ['#if UNITY_EDITOR\n'] + ['#pragma warning disable CS0162\n'] + ['#pragma warning disable CS0067\n'] + ['#pragma warning disable CS0649\n'] + ['#pragma warning disable CS0219\n'] + \
     effekseerCore.lines + ['#endif\n']
 
-effekseerCore.output('EffekseerTool.cs')
+effekseerCore.output('Dev/Plugin/Assets/Effekseer/Editor/EffekseerTool.cs')

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
           cd Dev/Cpp/android
@@ -35,7 +35,7 @@ jobs:
     runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v2
-      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && ./Build.sh
       - name: Upload ios
         uses: actions/upload-artifact@v1
@@ -48,7 +48,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - run: git clone --recursive --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: scripts/clone_dependencies.bat
       - name: Build
         run: cd ./Dev/Cpp/windows && Build.bat
         shell: cmd
@@ -76,7 +76,7 @@ jobs:
           cd emsdk
           ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
           cd ..
-      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: sh scripts/clone_dependencies.sh
       - run: |
           ./emsdk/emsdk activate sdk-fastcomp-tag-1.38.11-64bit
           source ./emsdk/emsdk_env.sh
@@ -107,7 +107,7 @@ jobs:
       - name: install emsdk 1.37
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
+          sh scripts/clone_dependencies.sh
           cd emsdk
           ./emsdk install sdk-fastcomp-1.37.40-64bit
           cd ..

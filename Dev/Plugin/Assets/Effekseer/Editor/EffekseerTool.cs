@@ -3,7 +3,6 @@
 #pragma warning disable CS0067
 #pragma warning disable CS0649
 #pragma warning disable CS0219
-
 using System;
 using System.Linq;
 using System.Collections;
@@ -21,9 +20,140 @@ using EffekseerTool.Utl;
 
 namespace EffekseerTool
 {
+	public class LanguageTable
+	{
+		static int selectedIndex = 0;
+		static List<string> languages = new List<string> { "en" };
+
+		public static void LoadTable(string path)
+		{
+			var lines = System.IO.File.ReadAllLines(path);
+			languages = lines.ToList();
+		}
+
+		public static void SelectLanguage(int index, bool callEvent = true)
+		{
+			if (selectedIndex == index) return;
+			selectedIndex = index;
+			if (OnLanguageChanged != null && callEvent)
+			{
+				OnLanguageChanged(null, null);
+			}
+		}
+
+		public static void SelectLanguage(string key, bool callEvent = true)
+		{
+			var ind = languages.Select((i, v) => Tuple35.Create(i, v)).FirstOrDefault(_ => _.Item1 == key).Item2;
+			SelectLanguage(ind, callEvent);
+		}
+
+		public static IReadOnlyList<string> Languages { get { return languages; } }
+
+		public static int SelectedIndex { get { return selectedIndex; } }
+
+		public static Action<object, ChangedValueEventArgs> OnLanguageChanged;
+	}
+
+	public class MultiLanguageTextProvider
+	{
+		internal static int UpdateCounter { get; private set; }
+
+		static Dictionary<string, string> texts = new Dictionary<string, string>();
+
+		public static string Language { get; set; } = "en";
+
+		public static string RootDirectory = string.Empty;
+
+		public static void Reset()
+		{
+			texts.Clear();
+			UpdateCounter++;
+		}
+
+		public static void LoadCSV(string path)
+		{
+			LoadCSV(path, "en");
+			if(LanguageTable.Languages.Count > 0)
+			{
+				LoadCSV(path, LanguageTable.Languages[LanguageTable.SelectedIndex]);
+			}
+		}
+
+		internal static void LoadCSV(string path, string language)
+		{
+			using (var streamReader = new System.IO.StreamReader(RootDirectory + "resources/languages/" + language + "/" + path, Encoding.UTF8))
+			{
+				var records = Utils.CsvReaader.Read(streamReader.ReadToEnd());
+
+				foreach(var record in records)
+				{
+					if (record.Count < 2) continue;
+					if (record[0] == string.Empty) continue;
+
+					if (texts.ContainsKey(record[0]))
+					{
+						texts[record[0]] = record[1];
+					}
+					else
+					{
+						texts.Add(record[0], record[1]);
+					}
+				}
+			}
+		}
+
+		public static bool HasKey(string key)
+		{
+			return texts.ContainsKey(key);
+		}
+
+		public static string GetText(string key)
+		{
+			string ret = string.Empty;
+			if(texts.TryGetValue(key, out ret))
+			{
+				return ret;
+			}
+			return key;
+		}
+	}
+
+	public class MultiLanguageString
+	{
+		string cached = null;
+
+		internal int UpdateCounter = 0;
+
+		internal string Key = string.Empty;
+
+		public MultiLanguageString(string key)
+		{
+			Key = key;
+		}
+
+		public string Value
+		{
+			get
+			{
+				if (UpdateCounter != MultiLanguageTextProvider.UpdateCounter || cached == null)
+				{
+					UpdateCounter = MultiLanguageTextProvider.UpdateCounter;
+					cached = MultiLanguageTextProvider.GetText(Key);
+				}
+				return cached;
+			}
+		}
+
+		public override string ToString()
+		{
+			return Value;
+		}
+	}
+
+
 	public class Core
 	{
-		public const string Version = "1.50RC1";
+		public const string Version = "1.52f";
 
 		public const string OptionFilePath = "config.option.xml";
 
@@ -55,6 +185,7 @@ namespace EffekseerTool
 
 		static bool is_loop = false;
 
+		//static Language language;
 		/*
 		public static IViewer Viewer
 		{
@@ -69,10 +200,15 @@ namespace EffekseerTool
 			set;
 		}
 
+		/// <summary>
+		/// For compatibility
+		/// </summary>
 		public static Language Language
 		{
-			get;
-			private set;
+			get {
+				if (LanguageTable.Languages[LanguageTable.SelectedIndex] == "ja") return Language.Japanese;
+				return Language.English;
+			}
 		}
 
 		public static Data.NodeRoot Root
@@ -174,7 +310,8 @@ namespace EffekseerTool
 				}
 			}
 		}
-#if SCRIPT_ENABLED
+
+		/*
         public static Script.ScriptCollection<Script.CommandScript> CommandScripts
 		{
 			get;
@@ -198,7 +335,8 @@ namespace EffekseerTool
 			get;
 			private set;
 		}
-#endif
+		*/
+
 		public static Data.OptionValues Option
 		{
 			get { return option; }
@@ -325,20 +463,20 @@ namespace EffekseerTool
 		{
 			ResourceCache = new Utils.ResourceCache();
 
-#if SCRIPT_ENABLED
+			/*
 			CommandScripts = new Script.ScriptCollection<Script.CommandScript>();
 			SelectedScripts = new Script.ScriptCollection<Script.SelectedScript>();
 			ExportScripts = new Script.ScriptCollection<Script.ExportScript>();
 			ImportScripts = new Script.ScriptCollection<Script.ImportScript>();
-#endif
+			*/
+
             // change a separator
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
-            Language = Language.English;
         }
 
-		public static void Initialize(Language? language = null)
+		public static void Initialize(string language = null)
 		{
 			var entryDirectory = GetEntryDirectory() + "/";
 
@@ -346,20 +484,6 @@ namespace EffekseerTool
 			FullPath = string.Empty;
 
 			option = LoadOption(language);
-
-			// Switch the language according to the loaded settings
-			Language = Option.GuiLanguage;
-
-			// Switch the culture according to the set language
-			switch (Language)
-			{
-				case Language.English:
-					Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-					break;
-				case Language.Japanese:
-					Thread.CurrentThread.CurrentUICulture = new CultureInfo("ja-JP");
-					break;
-			}
 
 			New();
 
@@ -371,13 +495,13 @@ namespace EffekseerTool
 
 		static void InitializeScripts(string entryDirectory)
 		{
-#if SCRIPT_ENABLED
 			// Load scripts
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/import");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/export");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/command");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/selected");
+#if SCRIPT_ENABLED
 
 			Script.Compiler.Initialize();
 
@@ -1187,7 +1311,7 @@ namespace EffekseerTool
 		/// </summary>
 		/// <param name="defaultLanguage"></param>
 		/// <returns></returns>
-		static public Data.OptionValues LoadOption(Language? defaultLanguage)
+		static public Data.OptionValues LoadOption(string defaultLanguage)
 		{
             Data.OptionValues res = new Data.OptionValues();
 			environments = new Data.EnvironmentValues();
@@ -1198,7 +1322,7 @@ namespace EffekseerTool
 			{
 				if (defaultLanguage != null)
 				{
-					res.GuiLanguage.SetValueDirectly((Language)defaultLanguage.Value);
+					LanguageTable.SelectLanguage(defaultLanguage, false);
 				}
 				return res;
 			}
@@ -1774,80 +1898,56 @@ namespace EffekseerTool
     // カルチャーによってローカライズ済の文字列が得られます。
     public static class Resources
     {
-		/* this implementation causes errors in mono
-		[DataContract]
-		class Data
-		{
-			[DataMember]
-			public Dictionary<string, string> kv;
-		}
-		*/
-
-		static ResourceManager resources;
-
 		static Dictionary<string, string> keyToStrings = new Dictionary<string, string>();
 
 		static Resources()
         {
         }
 
-		public static void SetResourceManager(ResourceManager resourceManager)
-		{
-			resources = resourceManager;
-		}
-
-		public static void LoadLanguageFile(string path)
-		{
-			var lines = System.IO.File.ReadAllLines(path);
-
-			foreach(var line in lines)
-			{
-				var strs = line.Split(',');
-				if (strs.Length < 2) continue;
-
-				var key = strs[0];
-				var value = string.Join(",", strs.Skip(1).ToArray());
-				value = value.Replace(@"\n", "\n");
-
-				keyToStrings.Add(key, value);
-			}
-
-			/* this implementation causes errors in mono
-			var bytes = System.IO.File.ReadAllBytes(path);
-		
-			var settings = new DataContractJsonSerializerSettings();
-			settings.UseSimpleDictionaryFormat = true;
-			var serializer = new DataContractJsonSerializer(typeof(Data), settings);
-			using (var ms = new MemoryStream(bytes))
-			{
-				var data = (Data)serializer.ReadObject(ms);
-				foreach (var x in data.kv)
-				{
-					keyToStrings = data.kv;
-				}
-			}
-			*/
-		}
-
 		public static string GetString(string name)
         {
-			if(keyToStrings.ContainsKey(name))
+			if(MultiLanguageTextProvider.HasKey(name))
 			{
-				return keyToStrings[name];
+				return MultiLanguageTextProvider.GetText(name);
 			}
-
-            if (resources == null) return string.Empty;
-			
-            try
-            {
-                var value = resources.GetString(name);
-                if (!String.IsNullOrEmpty(value)) return value; // 発見した場合、文字列を返す
-            }
-            catch {}
             
             return string.Empty;
         }
     }
+
+	/// <summary>
+	/// attribute for parameter's key
+	/// </summary>
+	[AttributeUsage(
+	AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method,
+	AllowMultiple = true,
+	Inherited = false)]
+	public class KeyAttribute : Attribute
+	{
+		static KeyAttribute()
+		{
+		}
+
+		public string key
+		{
+			get;
+			set;
+		}
+
+
+		public static string GetKey(object[] attributes)
+		{
+			if (attributes != null && attributes.Length > 0)
+			{
+				foreach (var attribute in attributes.OfType<KeyAttribute>())
+				{
+					if (!String.IsNullOrEmpty(attribute.key)) return attribute.key;
+				}
+			}
+
+			return null;
+		}
+	}
 
 	/// <summary>
 	/// attribute for parameter's name
@@ -1880,6 +1980,12 @@ namespace EffekseerTool
 			set;
 		}
 
+		public string key
+		{
+			get;
+			set;
+		}
+
 		/// <summary>
 		/// Get name from attributes
 		/// </summary>
@@ -1905,6 +2011,19 @@ namespace EffekseerTool
 
 			return string.Empty;
 		}
+
+		public static string GetKey(object[] attributes)
+		{
+			if (attributes != null && attributes.Length > 0)
+			{
+				foreach (var attribute in attributes.OfType<NameAttribute>())
+				{
+					if (!String.IsNullOrEmpty(attribute.key)) return attribute.key;
+				}
+			}
+
+			return null;
+		}
 	}
 
 	/// <summary>
@@ -1929,6 +2048,11 @@ namespace EffekseerTool
 		}
 
 		public string value
+		{
+			get;
+			set;
+		}
+		public string key
 		{
 			get;
 			set;
@@ -1959,9 +2083,23 @@ namespace EffekseerTool
 
 			return string.Empty;
 		}
+
+		public static string GetKey(object[] attributes)
+		{
+			if (attributes != null && attributes.Length > 0)
+			{
+				foreach (var attribute in attributes.OfType<DescriptionAttribute>())
+				{
+					if (!String.IsNullOrEmpty(attribute.key)) return attribute.key;
+				}
+			}
+
+			return null;
+		}
+
 	}
 
-	
+
 	/// <summary>
 	/// アイコンを設定する属性
 	/// </summary>
@@ -2256,9 +2394,9 @@ namespace EffekseerTool.Binary
 			{
 				Language language = Language.English;
 
-				if(Core.Option != null && Core.Option.GuiLanguage != null)
+				if(Core.Option != null && Core.Option.LanguageSelector != null)
 				{
-					language = Core.Option.GuiLanguage.Value;
+					language = Core.Language;
 				}
 				else
 				{
@@ -2280,23 +2418,20 @@ namespace EffekseerTool.Binary
 
 namespace EffekseerTool.Binary
 {
+	public enum ExporterVersion
+	{
+		Ver1500 = 1500,
+		Ver1600 = 1600,
+
+#if __EFFEKSEER_BUILD_VERSION16__
+		Latest = 1600,
+#else
+		Latest = 1500,
+#endif
+	}
+
 	public class Exporter
 	{
-		/// <summary>
-		/// Binary version
-		/// </summary>
-		/// <remarks>
-		/// Version15
-		/// Material
-		/// Version14
-		/// Support dynamic parameter
-		/// </remarks>
-#if __EFFEKSEER_BUILD_VERSION16__
-		const int Version = 1600;
-#else
-		const int Version = 1500;
-#endif
-
 		public HashSet<string> UsedTextures = new HashSet<string>();
 
 		public HashSet<string> UsedNormalTextures = new HashSet<string>();
@@ -2310,21 +2445,21 @@ namespace EffekseerTool.Binary
 		public HashSet<string> Materials = new HashSet<string>();
 
 		/// <summary>
-		/// エフェクトデータの出力
+		/// Export effect data
 		/// </summary>
 		/// <returns></returns>
-		public byte[] Export(float magnification = 1.0f)
+		public byte[] Export(float magnification = 1.0f, ExporterVersion exporterVersion = ExporterVersion.Latest)
 		{
 			List<byte[]> data = new List<byte[]>();
 
 			// ヘッダ
 			data.Add(Encoding.UTF8.GetBytes("SKFE"));
 
-			// バージョン
-			data.Add(BitConverter.GetBytes(Version));
+			// Version
+			data.Add(BitConverter.GetBytes((int)exporterVersion));
 
 			// reset texture names
-            UsedTextures = new HashSet<string>();
+			UsedTextures = new HashSet<string>();
 
 			UsedNormalTextures = new HashSet<string>();
 
@@ -2892,20 +3027,17 @@ namespace EffekseerTool.Binary
 				node_data.Add(BitConverter.GetBytes(n.DepthValues.IsScaleChangedDependingOnDepthOffset.Value ? 1 : 0));
 				node_data.Add(BitConverter.GetBytes(n.DepthValues.IsDepthOffsetChangedDependingOnParticleScale.Value ? 1 : 0));
 
-				if (Version >= 15)
+				node_data.Add(((float)n.DepthValues.SuppressionOfScalingByDepth.Value).GetBytes());
+
+				if (n.DepthValues.DepthClipping.Infinite)
 				{
-					node_data.Add(((float)n.DepthValues.SuppressionOfScalingByDepth.Value).GetBytes());
-
-					if (n.DepthValues.DepthClipping.Infinite)
-					{
-						node_data.Add((float.MaxValue).GetBytes());
-					}
-					else
-					{
-						node_data.Add(((float)n.DepthValues.DepthClipping.Value.Value).GetBytes());
-					}
+					node_data.Add((float.MaxValue).GetBytes());
 				}
-
+				else
+				{
+					node_data.Add(((float)n.DepthValues.DepthClipping.Value.Value).GetBytes());
+				}
+				
 				node_data.Add(((int)n.DepthValues.ZSort.Value).GetBytes());
 				node_data.Add(n.DepthValues.DrawingPriority.Value.GetBytes());
 				node_data.Add(n.DepthValues.SoftParticle.Value.GetBytes());
@@ -5295,94 +5427,71 @@ namespace EffekseerTool.Data
 {
 	public class CommonValues
 	{
-		[Name(language = Language.Japanese, value = "生成数")]
-		[Description(language = Language.Japanese, value = "インスタンスの生成数")]
-		[Name(language = Language.English, value = "Spawn Count")]
-		[Description(language = Language.English, value = "Number of instances to generate")]
+		[Key(key = "BasicSettings_MaxGeneration")]
+
 		public Value.IntWithInifinite MaxGeneration
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "位置への影響")]
-		[Description(language = Language.Japanese, value = "親ノードからの位置への影響")]
-		[Name(language = Language.English, value = "Inherit Position")]
-		[Description(language = Language.English, value = "When this instance should copy its parent node's position")]
+		[Key(key = "BasicSettings_LocationEffectType")]
 		public Value.Enum<ParentEffectType> LocationEffectType
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "回転への影響")]
-		[Description(language = Language.Japanese, value = "親ノードからの回転への影響")]
-		[Name(language = Language.English, value = "Inherit Rotation")]
-		[Description(language = Language.English, value = "When this instance should copy its parent node's rotation")]
+		[Key(key = "BasicSettings_RotationEffectType")]
 		public Value.Enum<ParentEffectType> RotationEffectType
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "拡大への影響")]
-		[Description(language = Language.Japanese, value = "親ノードからの拡大への影響")]
-		[Name(language = Language.English, value = "Inherit Scale")]
-		[Description(language = Language.English, value = "When this instance should copy its parent node's scale")]
+		[Key(key = "BasicSettings_ScaleEffectType")]
 		public Value.Enum<ParentEffectType> ScaleEffectType
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "寿命により削除")]
-		[Name(language = Language.English, value = "Destroy after time")]
+		[Key(key = "BasicSettings_RemoveWhenLifeIsExtinct")]
 		public Value.Boolean RemoveWhenLifeIsExtinct
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "親削除時削除")]
-		[Name(language = Language.English, value = "Destroy with parent")]
+		[Key(key = "BasicSettings_RemoveWhenParentIsRemoved")]
 		public Value.Boolean RemoveWhenParentIsRemoved
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "子が全て消滅時削除")]
-		[Name(language = Language.English, value = "Destroy when no\nmore children")]
+		[Key(key = "BasicSettings_RemoveWhenAllChildrenAreRemoved")]
 		public Value.Boolean RemoveWhenAllChildrenAreRemoved
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "生存時間")]
-		[Description(language = Language.Japanese, value = "1インスタンスが生存する時間")]
-		[Name(language = Language.English, value = "Time to live")]
-		[Description(language = Language.English, value = "Length of time each instance survives")]
+		[Key(key = "BasicSettings_Life")]
 		public Value.IntWithRandom Life
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "生成時間")]
-		[Description(language = Language.Japanese, value = "1インスタンスを生成するのに必要とする時間")]
-		[Name(language = Language.English, value = "Spawn Rate")]
-		[Description(language = Language.English, value = "Time between each instance generation")]
+		[Key(key = "BasicSettings_GenerationTime")]
 		public Value.FloatWithRandom GenerationTime
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "生成開始時間")]
-		[Description(language = Language.Japanese, value = "このノードのインスタンスが生成されてから生成を開始するまでの時間")]
-		[Name(language = Language.English, value = "Initial Delay")]
-		[Description(language = Language.English, value = "Amount of time that must elapse after instance spawns before it starts generating.")]
+		[Key(key = "BasicSettings_GenerationTimeOffset")]
 		public Value.FloatWithRandom GenerationTimeOffset
 		{
 			get;
@@ -5435,36 +5544,27 @@ namespace EffekseerTool.Data
 	}
     public enum ParentEffectType : int
 	{
-		[Name(value = "なし", language = Language.Japanese)]
-		[Name(value = "Never", language = Language.English)]
+		[Key(key = "BasicSettings_ParentEffectType_NotBind")]
 		NotBind = 0,
-		[Name(value = "なし(Root依存)-非推奨", language = Language.Japanese)]
-		[Name(value = "Root dependent (deprecated)", language = Language.English)]
+		[Key(key = "BasicSettings_ParentEffectType_NotBind_Root")]
 		NotBind_Root = 3,
-		[Name(value = "生成時のみ", language = Language.Japanese)]
-		[Name(value = "Only on create", language = Language.English)]
+		[Key(key = "BasicSettings_ParentEffectType_WhenCreating")]
 		WhenCreating = 1,
-		[Name(value = "常時", language = Language.Japanese)]
-		[Name(value = "Always", language = Language.English)]
+		[Key(key = "BasicSettings_ParentEffectType_Already")]
 		Already = 2,
 	}
 
 	public enum AlphaBlendType : int
 	{
-		[Name(value = "不透明", language = Language.Japanese)]
-		[Name(value = "Opacity", language = Language.English)]
+		[Key(key = "AlphaBlendType_Opacity")]
 		Opacity = 0,
-		[Name(value = "通常", language = Language.Japanese)]
-		[Name(value = "Blend", language = Language.English)]
+		[Key(key = "AlphaBlendType_Blend")]
 		Blend = 1,
-		[Name(value = "加算", language = Language.Japanese)]
-		[Name(value = "Additive", language = Language.English)]
+		[Key(key = "AlphaBlendType_Add")]
 		Add = 2,
-		[Name(value = "減算", language = Language.Japanese)]
-		[Name(value = "Subtract", language = Language.English)]
+		[Key(key = "AlphaBlendType_Sub")]
 		Sub = 3,
-		[Name(value = "乗算", language = Language.Japanese)]
-		[Name(value = "Multiply", language = Language.English)]
+		[Key(key = "AlphaBlendType_Mul")]
 		Mul = 4,
 	}
 
@@ -5493,51 +5593,37 @@ namespace EffekseerTool.Data
 
 	public enum EasingStart : int
 	{
-		[Name(value = "低速3", language = Language.Japanese)]
-		[Name(value = "Slowest", language = Language.English)]
+		[Key(key = "Easing_StartSlowly3")]
 		StartSlowly3 = -30,
-		[Name(value = "低速2", language = Language.Japanese)]
-		[Name(value = "Slower", language = Language.English)]
+		[Key(key = "Easing_StartSlowly2")]
 		StartSlowly2 = -20,
-		[Name(value = "低速1", language = Language.Japanese)]
-		[Name(value = "Slow", language = Language.English)]
+		[Key(key = "Easing_StartSlowly1")]
 		StartSlowly1 = -10,
-		[Name(value = "等速", language = Language.Japanese)]
-		[Name(value = "Normal", language = Language.English)]
+		[Key(key = "Easing_StartNormal")]
 		Start = 0,
-		[Name(value = "高速1", language = Language.Japanese)]
-		[Name(value = "Fast", language = Language.English)]
+		[Key(key = "Easing_StartRapidly1")]
 		StartRapidly1 = 10,
-		[Name(value = "高速2", language = Language.Japanese)]
-		[Name(value = "Faster", language = Language.English)]
+		[Key(key = "Easing_StartRapidly2")]
 		StartRapidly2 = 20,
-		[Name(value = "高速3", language = Language.Japanese)]
-		[Name(value = "Fastest", language = Language.English)]
+		[Key(key = "Easing_StartRapidly3")]
 		StartRapidly3 = 30,
 	}
 
 	public enum EasingEnd : int
 	{
-		[Name(value = "低速3", language = Language.Japanese)]
-		[Name(value = "Slowest", language = Language.English)]
+		[Key(key = "Easing_EndSlowly3")]
 		EndSlowly3 = -30,
-		[Name(value = "低速2", language = Language.Japanese)]
-		[Name(value = "Slower", language = Language.English)]
+		[Key(key = "Easing_EndSlowly2")]
 		EndSlowly2 = -20,
-		[Name(value = "低速1", language = Language.Japanese)]
-		[Name(value = "Slow", language = Language.English)]
+		[Key(key = "Easing_EndSlowly1")]
 		EndSlowly1 = -10,
-		[Name(value = "等速", language = Language.Japanese)]
-		[Name(value = "Normal", language = Language.English)]
+		[Key(key = "Easing_EndNormal")]
 		End = 0,
-		[Name(value = "高速1", language = Language.Japanese)]
-		[Name(value = "Fast", language = Language.English)]
+		[Key(key = "Easing_EndRapidly1")]
 		EndRapidly1 = 10,
-		[Name(value = "高速2", language = Language.Japanese)]
-		[Name(value = "Faster", language = Language.English)]
+		[Key(key = "Easing_EndRapidly2")]
 		EndRapidly2 = 20,
-		[Name(value = "高速3", language = Language.Japanese)]
-		[Name(value = "Fastest", language = Language.English)]
+		[Key(key = "Easing_EndRapidly3")]
 		EndRapidly3 = 30,
 	}
 
@@ -5577,41 +5663,29 @@ namespace EffekseerTool.Data
 	}
 
 	public class ColorEasingParamater
-	{ 
-		[Name(language = Language.Japanese, value = "始点")]
-		[Description(language = Language.Japanese, value = "イージングの始点")]
-		[Name(language = Language.English, value = "Start")]
-		[Description(language = Language.English, value = "Starting point of easing")]
+	{
+		[Key(key = "Easing_Start")]
 		public Value.ColorWithRandom Start
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "終点")]
-		[Description(language = Language.Japanese, value = "イージングの終点")]
-		[Name(language = Language.English, value = "End")]
-		[Description(language = Language.English, value = "Value of easing at end")]
+		[Key(key = "Easing_End")]
 		public Value.ColorWithRandom End
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "始点速度")]
-		[Description(language = Language.Japanese, value = "始点速度")]
-		[Name(language = Language.English, value = "Ease In")]
-		[Description(language = Language.English, value = "Initial rate of easing")]
+		[Key(key = "Easing_StartSpeed")]
 		public Value.Enum<EasingStart> StartSpeed
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "終点速度")]
-		[Description(language = Language.Japanese, value = "終点速度")]
-		[Name(language = Language.English, value = "Ease Out")]
-		[Description(language = Language.English, value = "Rate of easing at end")]
+		[Key(key = "Easing_EndSpeed")]
 		public Value.Enum<EasingEnd> EndSpeed
 		{
 			get;
@@ -5631,10 +5705,7 @@ namespace EffekseerTool.Data
 
 	public class ColorFCurveParameter
 	{
-		[Name(language = Language.Japanese, value = "Fカーブ")]
-		[Description(language = Language.Japanese, value = "Fカーブ")]
-		[Name(language = Language.English, value = "F-Curve")]
-		[Description(language = Language.English, value = "F-Curve")]
+		[Key(key = "FCurve")]
 		[Shown(Shown = true)]
 		public Value.FCurveColorRGBA FCurve
 		{
@@ -5659,41 +5730,29 @@ namespace EffekseerTool.Data
 
     public class FloatEasingParamater
     {
-        [Name(language = Language.Japanese, value = "始点")]
-        [Description(language = Language.Japanese, value = "イージングの始点")]
-		[Name(language = Language.English, value = "Start")]
-		[Description(language = Language.English, value = "Starting point of easing")]
-        public Value.FloatWithRandom Start
+		[Key(key = "Easing_Start")]
+		public Value.FloatWithRandom Start
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "終点")]
-        [Description(language = Language.Japanese, value = "イージングの終点")]
-		[Name(language = Language.English, value = "End")]
-		[Description(language = Language.English, value = "Value of easing at end")]
-        public Value.FloatWithRandom End
+		[Key(key = "Easing_End")]
+		public Value.FloatWithRandom End
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "始点速度")]
-        [Description(language = Language.Japanese, value = "始点速度")]
-		[Name(language = Language.English, value = "Ease In")]
-		[Description(language = Language.English, value = "Initial rate of easing")]
-        public Value.Enum<EasingStart> StartSpeed
+		[Key(key = "Easing_StartSpeed")]
+		public Value.Enum<EasingStart> StartSpeed
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "終点速度")]
-        [Description(language = Language.Japanese, value = "終点速度")]
-		[Name(language = Language.English, value = "Ease Out")]
-		[Description(language = Language.English, value = "Rate of easing at end")]
-        public Value.Enum<EasingEnd> EndSpeed
+		[Key(key = "Easing_EndSpeed")]
+		public Value.Enum<EasingEnd> EndSpeed
         {
             get;
             private set;
@@ -5710,41 +5769,29 @@ namespace EffekseerTool.Data
 
     public class Vector2DEasingParamater
     {
-        [Name(language = Language.Japanese, value = "始点")]
-        [Description(language = Language.Japanese, value = "イージングの始点")]
-		[Name(language = Language.English, value = "Start")]
-		[Description(language = Language.English, value = "Starting point of easing")]
+		[Key(key="Easing_Start")]
         public Value.Vector2DWithRandom Start
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "終点")]
-        [Description(language = Language.Japanese, value = "イージングの終点")]
-		[Name(language = Language.English, value = "End")]
-		[Description(language = Language.English, value = "Value of easing at end")]
-        public Value.Vector2DWithRandom End
+		[Key(key="Easing_End")]
+		public Value.Vector2DWithRandom End
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "始点速度")]
-        [Description(language = Language.Japanese, value = "始点速度")]
-		[Name(language = Language.English, value = "Ease In")]
-		[Description(language = Language.English, value = "Initial rate of easing")]
-        public Value.Enum<EasingStart> StartSpeed
+		[Key(key="Easing_StartSpeed")]
+		public Value.Enum<EasingStart> StartSpeed
         {
             get;
             private set;
         }
 
-        [Name(language = Language.Japanese, value = "終点速度")]
-        [Description(language = Language.Japanese, value = "終点速度")]
-		[Name(language = Language.English, value = "Ease Out")]
-		[Description(language = Language.English, value = "Rate of easing at end")]
-        public Value.Enum<EasingEnd> EndSpeed
+		[Key(key="Easing_EndSpeed")]
+		public Value.Enum<EasingEnd> EndSpeed
         {
             get;
             private set;
@@ -5761,40 +5808,28 @@ namespace EffekseerTool.Data
 
 	public class Vector3DEasingParamater
 	{
-		[Name(language = Language.Japanese, value = "始点")]
-		[Description(language = Language.Japanese, value = "イージングの始点")]
-		[Name(language = Language.English, value = "Start")]
-		[Description(language = Language.English, value = "Starting point of easing")]
+		[Key(key = "Easing_Start")]
 		public Value.Vector3DWithRandom Start
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "終点")]
-		[Description(language = Language.Japanese, value = "イージングの終点")]
-		[Name(language = Language.English, value = "End")]
-		[Description(language = Language.English, value = "Value of easing at end")]
+		[Key(key = "Easing_End")]
 		public Value.Vector3DWithRandom End
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "始点速度")]
-		[Description(language = Language.Japanese, value = "始点速度")]
-		[Name(language = Language.English, value = "Ease In")]
-		[Description(language = Language.English, value = "Initial rate of easing")]
+		[Key(key = "Easing_StartSpeed")]
 		public Value.Enum<EasingStart> StartSpeed
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "終点速度")]
-		[Description(language = Language.Japanese, value = "終点速度")]
-		[Name(language = Language.English, value = "Ease Out")]
-		[Description(language = Language.English, value = "Rate of easing at end")]
+		[Key(key = "Easing_EndSpeed")]
 		public Value.Enum<EasingEnd> EndSpeed
 		{
 			get;
@@ -5812,10 +5847,7 @@ namespace EffekseerTool.Data
 
 	public class Vector3DFCurveParameter
 	{
-		[Name(language = Language.Japanese, value = "Fカーブ")]
-		[Description(language = Language.Japanese, value = "Fカーブ")]
-		[Name(language = Language.English, value = "F-Curve")]
-		[Description(language = Language.English, value = "F-Curve")]
+		[Key(key = "FCurve")]
 		[Shown(Shown = true)]
 		public Value.FCurveVector3D FCurve
 		{
@@ -5961,8 +5993,8 @@ namespace EffekseerTool.Data
 	public class EditableValue
 	{
 		public object Value;
-		public string Title = string.Empty;
-		public string Description = string.Empty;
+		public object Title = new MultiLanguageString(string.Empty);
+		public object Description = new MultiLanguageString(string.Empty);
 		public bool IsUndoEnabled;
 		public bool IsShown = true;
 		public int SelfSelectorID = -1;
@@ -6021,8 +6053,45 @@ namespace EffekseerTool.Data
 				ret.RequiredSelectorValues = selectedAttributes.Select(_ => _.Value).ToArray();
 			}
 
-			ret.Title = NameAttribute.GetName(attributes);
-			ret.Description = DescriptionAttribute.GetDescription(attributes);
+			var key = KeyAttribute.GetKey(attributes);
+			var nameKey = key + "_Name";
+			if(string.IsNullOrEmpty(key))
+			{
+				nameKey = info.ReflectedType.Name + "_" + info.Name + "_Name";
+			}
+
+			if(MultiLanguageTextProvider.HasKey(nameKey))
+			{
+				ret.Title = new MultiLanguageString(nameKey);
+			}
+			else
+			{
+				ret.Title = NameAttribute.GetName(attributes);
+				//if (!string.IsNullOrEmpty(ret.Title.ToString()))
+				//{
+				//	System.IO.File.AppendAllText("kv.csv", nameKey + ","  + "\"" + ret.Title.ToString() + "\"" + "\r\n");
+				//}
+			}
+
+			var descKey = key + "_Desc";
+			if (string.IsNullOrEmpty(key))
+			{
+				descKey = info.ReflectedType.Name + "_" + info.Name + "_Desc";
+			}
+
+			if (MultiLanguageTextProvider.HasKey(descKey))
+			{
+				ret.Description = new MultiLanguageString(descKey);
+			}
+			else
+			{
+				ret.Description = DescriptionAttribute.GetDescription(attributes);
+
+				//if(!string.IsNullOrEmpty(ret.Description.ToString()))
+				//{
+				//	System.IO.File.AppendAllText("kv.csv", descKey + "," + "\"" + ret.Description.ToString() + "\"" + "\r\n");
+				//}
+			}
 
 			return ret;
 		}
@@ -6174,18 +6243,16 @@ namespace EffekseerTool.Data
 
 	public class DynamicEquation
 	{
-		public const string DefaultName = "Eq";
-
 		public Value.String Name { get; private set; }
 
 		public Value.String Code { get; private set; }
 
 		DynamicEquationCollection parent = null;
 
-		public DynamicEquation(string name, DynamicEquationCollection parent)
+		public DynamicEquation(DynamicEquationCollection parent)
 		{
-			Name = new Value.String(name);
-			Code = new Value.String();
+			Name = new Value.String("");
+			Code = new Value.String("");
 			Code.IsMultiLine = true;
 			this.parent = parent;
 		}
@@ -6253,7 +6320,7 @@ namespace EffekseerTool.Data
 				EditableValue v = new EditableValue();
 
 				v.Value = values[i].Input;
-				v.Title = (i + 1).ToString();
+				v.Title = (i).ToString();
 				v.IsUndoEnabled = false;
 				ret.Add(v);
 			}
@@ -6303,15 +6370,20 @@ namespace EffekseerTool.Data
 		{
 			if (values.Count >= 16) return false;
 
+			var old_selected = selected;
 			var old_value = values;
 			var new_value = new List<DynamicEquation>(values);
-			new_value.Add(new DynamicEquation(DynamicEquation.DefaultName, this));
 
+			var value = new DynamicEquation(this);
+			value.Name.SetValue("New Expression");
+			value.Code.SetValue("@O.x = @In0\n@O.y = @In1");
+			new_value.Add(value);
 
 			var cmd = new Command.DelegateCommand(
 				() =>
 				{
 					values = new_value;
+					selected = new_value[new_value.Count - 1];
 					if (OnChanged != null)
 					{
 						OnChanged(this, null);
@@ -6320,6 +6392,7 @@ namespace EffekseerTool.Data
 				() =>
 				{
 					values = old_value;
+					selected = old_selected;
 					if (OnChanged != null)
 					{
 						OnChanged(this, null);
@@ -6336,6 +6409,7 @@ namespace EffekseerTool.Data
 			if (o == null)
 				return false;
 
+			var old_index = values.IndexOf(o);
 			var old_value = values;
 			var new_value = new List<DynamicEquation>(values);
 			new_value.Remove(o);
@@ -6344,6 +6418,11 @@ namespace EffekseerTool.Data
 				() =>
 				{
 					values = new_value;
+					
+					if (old_index < values.Count) selected = new_value[old_index];
+					else if (old_index > 0 && values.Count > 0) selected = new_value[old_index - 1];
+					else selected = null;
+
 					if (OnChanged != null)
 					{
 						OnChanged(this, null);
@@ -6352,6 +6431,7 @@ namespace EffekseerTool.Data
 				() =>
 				{
 					values = old_value;
+					selected = o;
 					if (OnChanged != null)
 					{
 						OnChanged(this, null);
@@ -7373,6 +7453,16 @@ namespace EffekseerTool.Data
 {
 	public class IO
 	{
+		static Dictionary<Type, Func<XmlDocument, string, object, bool, XmlElement>> saveEvents = new Dictionary<Type, Func<XmlDocument, string, object, bool, XmlElement>>();
+
+		static Dictionary<Type, Action<XmlElement, object, bool>> loadEvents = new Dictionary<Type, Action<XmlElement, object, bool>>();
+
+		public static void ExtendSupportedType(Type type, Func<XmlDocument, string, object, bool, XmlElement>  save, Action<XmlElement, object, bool> load)
+		{
+			saveEvents.Add(type, save);
+			loadEvents.Add(type, load);
+		}
+
 		public static XmlElement SaveObjectToElement(XmlDocument doc, string element_name, object o, bool isClip)
 		{
 			XmlElement e_o = doc.CreateElement(element_name);
@@ -7389,6 +7479,16 @@ namespace EffekseerTool.Data
 				{
 					var property_value = property.GetValue(o, null);
 					var element = method.Invoke(null, new object[] { doc, property.Name, property_value, isClip });
+
+					if (element != null)
+					{
+						e_o.AppendChild(element as XmlNode);
+					}
+				}
+				else if(saveEvents.ContainsKey(property.PropertyType))
+				{
+					var property_value = property.GetValue(o, null);
+					var element = saveEvents[property.PropertyType](doc, property.Name, property_value, isClip);
 
 					if (element != null)
 					{
@@ -7665,8 +7765,13 @@ namespace EffekseerTool.Data
 			var e = doc.CreateElement(element_name);
 			for (int i = 0; i < collection.Values.Count; i++)
 			{
-				var e_node = SaveToElement(doc, collection.Values[i].GetType().Name, collection.Values[i], isClip);
-				e.AppendChild(e_node);
+				var name = collection.Values[i].GetType().Name;
+				// a node must be generated
+				var e_node = SaveToElement(doc, name, collection.Values[i], true);
+				if (e_node != null)
+				{
+					e.AppendChild(e_node);
+				}
 			}
 
 			return e;
@@ -8170,6 +8275,11 @@ namespace EffekseerTool.Data
 					var property_value = property.GetValue(o, null);
 					method.Invoke(null, new object[] { ch_node, property_value, isClip });
 				}
+				else if(loadEvents.ContainsKey(property.PropertyType))
+				{
+					var property_value = property.GetValue(o, null);
+					loadEvents[property.PropertyType](ch_node, property_value, isClip);
+				}
 				else
 				{
 					if (io_attribute != null && io_attribute.Import)
@@ -8406,7 +8516,7 @@ namespace EffekseerTool.Data
 			for (var i = 0; i < e.ChildNodes.Count; i++)
 			{
 				var e_child = e.ChildNodes[i] as XmlElement;
-				var element = new DynamicEquation(DynamicEquation.DefaultName, collection);
+				var element = new DynamicEquation(collection);
 				LoadFromElement(e_child, element, isClip);
 				collection.Values.Add(element);
 			}
@@ -9053,6 +9163,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
+		[IO(Export = true)]
 		[Selected(ID = 10, Value = (int)LocalForceFieldType.Turbulence)]
 		public LocalForceFieldTurbulence Turbulence
 		{
@@ -9321,10 +9432,7 @@ namespace EffekseerTool.Data
 
 		public class FixedParamater
 		{
-			[Name(language = Language.Japanese, value = "位置")]
-			[Description(language = Language.Japanese, value = "インスタンスの位置")]
-			[Name(language = Language.English, value = "Location")]
-			[Description(language = Language.English, value = "Position of the instance")]
+			[Key(key = "Position_FixedParamater_Location")]
 			public Value.Vector3D Location
 			{
 				get;
@@ -9339,30 +9447,21 @@ namespace EffekseerTool.Data
 
 		public class PVAParamater
 		{
-			[Name(language = Language.Japanese, value = "位置")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期位置")]
-			[Name(language = Language.English, value = "Pos")]
-			[Description(language = Language.English, value = "Position of the instance")]
+			[Key(key = "Position_PVAParamater_Location")]
 			public Value.Vector3DWithRandom Location
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期速度")]
-			[Name(language = Language.English, value = "Speed")]
-			[Description(language = Language.English, value = "Initial velocity of the instance")]
+			[Key(key = "Position_PVAParamater_Velocity")]
 			public Value.Vector3DWithRandom Velocity
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "加速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期加速度")]
-			[Name(language = Language.English, value = "Accel")]
-			[Description(language = Language.English, value = "Acceleration of the instance")]
+			[Key(key = "Position_PVAParamater_Acceleration")]
 			public Value.Vector3DWithRandom Acceleration
 			{
 				get;
@@ -9379,17 +9478,13 @@ namespace EffekseerTool.Data
 
 		public enum ParamaterType : int
 		{
-			[Name(value = "位置", language = Language.Japanese)]
-			[Name(value = "Set Position", language = Language.English)]
+			[Key(key = "Position_ParamaterType_Fixed")]
 			Fixed = 0,
-			[Name(value = "位置・速度・加速度", language = Language.Japanese)]
-			[Name(value = "PVA", language = Language.English)]
+			[Key(key = "Position_ParamaterType_PVA")]
 			PVA = 1,
-			[Name(value = "イージング", language = Language.Japanese)]
-			[Name(value = "Easing", language = Language.English)]
+			[Key(key = "Position_ParamaterType_Easing")]
 			Easing = 2,
-			[Name(value = "位置(Fカーブ)", language = Language.Japanese)]
-			[Name(value = "F-Curve", language = Language.English)]
+			[Key(key = "Position_ParamaterType_LocationFCurve")]
 			LocationFCurve = 3,
 		}
 	}
@@ -9509,20 +9604,14 @@ namespace EffekseerTool.Data
 	{
 		List<Node> children = new List<Node>();
 
-		[Name(language = Language.Japanese, value = "描画")]
-		[Description(language = Language.Japanese, value = "編集画面にインスタンスを描画するかどうか。\n最終的に出力される結果には関係ない。")]
-		[Name(language = Language.English, value = "Visibility")]
-		[Description(language = Language.English, value = "Whether to draw the instance to the viewport.\nHas nothing to do with the final output.")]
+		[Key(key = "Node_IsRendered")]
 		public Value.Boolean IsRendered
 		{
 			get;
 			private set;
 		}
 
-		[Name(language=Language.Japanese, value="名称")]
-		[Description(language=Language.Japanese, value="ノードの名称。\n描画には関係ない。")]
-		[Name(language = Language.English, value = "Name")]
-		[Description(language = Language.English, value = "The name of the node.")]
+		[Key(key = "Node_Name")]
 		public Value.String Name
 		{
 			get;
@@ -9912,22 +10001,37 @@ namespace EffekseerTool.Data
 
 namespace EffekseerTool.Data
 {
+	public class LanguageSelector
+	{
+		static LanguageSelector()
+		{
+			IO.ExtendSupportedType(typeof(LanguageSelector), SaveToElement, LoadFromElement);
+		}
+
+		public static XmlElement SaveToElement(XmlDocument doc, string element_name, object o, bool isClip)
+		{
+			var text = LanguageTable.Languages[LanguageTable.SelectedIndex];
+			return doc.CreateTextElement(element_name, text);
+		}
+
+		public static void LoadFromElement(XmlElement e, object o, bool isClip)
+		{
+			var text = e.GetText();
+			LanguageTable.SelectLanguage(text);
+		}
+	}
+
 	public enum FontType
 	{
-		[Name(value = "普通", language = Language.Japanese)]
-		[Name(value = "Normal", language = Language.English)]
+		[Key(key ="FontType_Normal")]
 		Normal,
 
-		[Name(value = "太い", language = Language.Japanese)]
-		[Name(value = "Bold", language = Language.English)]
+		[Key(key = "FontType_Bold")]
 		Bold,
 	}
 	public class OptionValues
 	{
-		[Name(language = Language.Japanese, value = "描画モード")]
-		[Description(language = Language.Japanese, value = "エフェクトの通常モードの設定")]
-		[Name(language = Language.English, value = "Render Mode")]
-		[Description(language = Language.English, value = "Set the Render Mode of effects")]
+		[Key(key = "Options_RenderingMode")]
 		[Undo(Undo = false)]
 		public Value.Enum<RenderMode> RenderingMode
 		{
@@ -9935,10 +10039,15 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "グリッド色")]
-		[Description(language = Language.Japanese, value = "グリッド色")]
-		[Name(language = Language.English, value = "Grid Color")]
-		[Description(language = Language.English, value = "Color of the grid")]
+		[Key(key = "Options_ViewerMode")]
+		[Undo(Undo = false)]
+		public Value.Enum<ViewMode> ViewerMode
+		{
+			get;
+			private set;
+		}
+
+		[Key(key = "Options_GridColor")]
 		[Undo(Undo = false)]
 		public Value.Color GridColor
 		{
@@ -9946,10 +10055,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "グリッドの表示")]
-		[Description(language = Language.Japanese, value = "グリッドの表示非表示")]
-		[Name(language = Language.English, value = "Grid Visibility")]
-		[Description(language = Language.English, value = "Toggle the visibility of the grid")]
+		[Key(key = "Options_IsGridShown")]
 		[Undo(Undo = false)]
 		public Value.Boolean IsGridShown
 		{
@@ -9957,10 +10063,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "XYグリッドの表示")]
-		[Description(language = Language.Japanese, value = "XYグリッドの表示非表示")]
-		[Name(language = Language.English, value = "X-Y Grid Visibility")]
-		[Description(language = Language.English, value = "Toggle the visibility of the grid along the X-Y axes")]
+		[Key(key = "Options_IsXYGridShown")]
 		[Undo(Undo = false)]
 		public Value.Boolean IsXYGridShown
 		{
@@ -9968,10 +10071,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "XZグリッドの表示")]
-		[Description(language = Language.Japanese, value = "XZグリッドの表示非表示")]
-		[Name(language = Language.English, value = "X-Z Grid Visibility")]
-		[Description(language = Language.English, value = "Toggle the visibility of the grid along the X-Z axes")]
+		[Key(key = "Options_IsXZGridShown")]
 		[Undo(Undo = false)]
 		public Value.Boolean IsXZGridShown
 		{
@@ -9979,11 +10079,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-
-		[Name(language = Language.Japanese, value = "YZグリッドの表示")]
-		[Description(language = Language.Japanese, value = "YZグリッドの表示非表示")]
-		[Name(language = Language.English, value = "Y-Z Grid Visibility")]
-		[Description(language = Language.English, value = "Toggle the visibility of the grid along the Y-Z axes")]
+		[Key(key = "Options_IsYZGridShown")]
 		[Undo(Undo = false)]
 		public Value.Boolean IsYZGridShown
 		{
@@ -9992,10 +10088,7 @@ namespace EffekseerTool.Data
 		}
 
 
-		[Name(language = Language.Japanese, value = "グリッドサイズ")]
-		[Description(language = Language.Japanese, value = "表示しているグリッドの幅")]
-		[Name(language = Language.English, value = "Grid Size")]
-		[Description(language = Language.English, value = "Dimensions of the displayed grid")]
+		[Key(key = "Options_GridLength")]
 		[Undo(Undo = false)]
 		public Value.Float GridLength
 		{
@@ -10003,10 +10096,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "出力時の拡大率")]
-		[Description(language = Language.Japanese, value = "出力時の拡大率")]
-		[Name(language = Language.English, value = "Output Magnification")]
-		[Description(language = Language.English, value = "Output magnification")]
+		[Key(key = "Options_Magnification")]
 		[Undo(Undo = false)]
 		public Value.Float Magnification
 		{
@@ -10014,10 +10104,6 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "出力時の拡大率")]
-		[Description(language = Language.Japanese, value = "出力時の拡大率")]
-		[Name(language = Language.English, value = "Output Magnification")]
-		[Description(language = Language.English, value = "Output magnification")]
 		[Undo(Undo = false)]
 		[Shown(Shown = false)]
 		public Value.Float ExternalMagnification
@@ -10027,10 +10113,7 @@ namespace EffekseerTool.Data
 		}
 
 
-		[Name(language = Language.Japanese, value = "出力FPS")]
-		[Description(language = Language.Japanese, value = "出力FPS")]
-		[Name(language = Language.English, value = "Output FPS")]
-		[Description(language = Language.English, value = "Output FPS")]
+		[Key(key = "Options_FPS")]
 		[Undo(Undo = false)]
 		public Value.Enum<FPSType> FPS
 		{
@@ -10038,10 +10121,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "座標系")]
-		[Description(language = Language.Japanese, value = "座標系")]
-		[Name(language = Language.English, value = "Coordinate System")]
-		[Description(language = Language.English, value = "Coordinate system to use")]
+		[Key(key = "Options_Coordinate")]
 		[Undo(Undo = false)]
 		public Value.Enum<CoordinateType> Coordinate
 		{
@@ -10049,10 +10129,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "カラースペース")]
-		[Description(language = Language.Japanese, value = "カラースペース(再起動後に有効になります。)")]
-		[Name(language = Language.English, value = "Color Space")]
-		[Description(language = Language.English, value = "Color Space")]
+		[Key(key = "Options_ColorSpace")]
 		[Undo(Undo = false)]
 		public Value.Enum<ColorSpaceType> ColorSpace
 		{
@@ -10060,10 +10137,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "フォント")]
-		[Description(language = Language.Japanese, value = "フォント")]
-		[Name(language = Language.English, value = "Font")]
-		[Description(language = Language.English, value = "Font")]
+		[Key(key = "Options_Font")]
 		[Undo(Undo = false)]
 		public Value.Enum<FontType> Font
 		{
@@ -10071,10 +10145,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "フォントサイズ")]
-		[Description(language = Language.Japanese, value = "フォントサイズ")]
-		[Name(language = Language.English, value = "Font size")]
-		[Description(language = Language.English, value = "Font size")]
+		[Key(key = "Options_FontSize")]
 		[Undo(Undo = false)]
 		public Value.Int FontSize
 		{
@@ -10082,10 +10153,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "マウスの回転方向(X)")]
-		[Description(language = Language.Japanese, value = "マウスの回転方向を逆にする。")]
-		[Name(language = Language.English, value = "Mouse Rotation (X)")]
-		[Description(language = Language.English, value = "Invert the rotation about the X-axis")]
+		[Key(key = "Options_MouseRotInvX")]
 		[Undo(Undo = false)]
 		public Value.Boolean MouseRotInvX
 		{
@@ -10093,10 +10161,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "マウスの回転方向(Y)")]
-		[Description(language = Language.Japanese, value = "マウスの回転方向を逆にする。")]
-		[Name(language = Language.English, value = "Mouse Rotation (Y)")]
-		[Description(language = Language.English, value = "Invert the rotation about the Y-axis")]
+		[Key(key = "Options_MouseRotInvY")]
 		[Undo(Undo = false)]
 		public Value.Boolean MouseRotInvY
 		{
@@ -10104,10 +10169,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "マウスのスライド方向(X)")]
-		[Description(language = Language.Japanese, value = "マウスのスライド方向を逆にする。")]
-		[Name(language = Language.English, value = "Mouse Panning (X)")]
-		[Description(language = Language.English, value = "Invert the pan direction about the X-axis")]
+		[Key(key = "Options_MouseSlideInvX")]
 		[Undo(Undo = false)]
 		public Value.Boolean MouseSlideInvX
 		{
@@ -10115,10 +10177,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "マウスのスライド方向(Y)")]
-		[Description(language = Language.Japanese, value = "マウスのスライド方向を逆にする。")]
-		[Name(language = Language.English, value = "Mouse Panning (Y)")]
-		[Description(language = Language.English, value = "Invert the pan direction about the Y-axis")]
+		[Key(key = "Options_MouseSlideInvY")]
 		[Undo(Undo = false)]
 		public Value.Boolean MouseSlideInvY
 		{
@@ -10126,21 +10185,15 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [Name(language = Language.Japanese, value = "言語設定")]
-        [Description(language = Language.Japanese, value = "言語設定")]
-        [Name(language = Language.English, value = "Language")]
-        [Description(language = Language.English, value = "Langueage")]
-        [Undo(Undo = false)]
-        public Value.Enum<Language> GuiLanguage
-        {
-            get;
-            private set;
-        }
+		[Key(key = "Options_LanguageSelector")]
+		[Undo(Undo = false)]
+		public LanguageSelector LanguageSelector
+		{
+			get;
+			private set;
+		}
 
-		[Name(language = Language.Japanese, value = "歪み方法")]
-		[Description(language = Language.Japanese, value = "歪み方法")]
-		[Name(language = Language.English, value = "Distortion method")]
-		[Description(language = Language.English, value = "Distortion method")]
+		[Key(key = "Options_DistortionType")]
 		[Undo(Undo = false)]
 		public Value.Enum<DistortionMethodType> DistortionType
 		{
@@ -10151,6 +10204,7 @@ namespace EffekseerTool.Data
 		public OptionValues()
 		{
 			RenderingMode = new Value.Enum<RenderMode>(RenderMode.Normal);
+			ViewerMode = new Value.Enum<ViewMode>(ViewMode._3D);
 			GridColor = new Value.Color(255, 255, 255, 255);
 			
 			IsGridShown = new Value.Boolean(true);
@@ -10177,67 +10231,61 @@ namespace EffekseerTool.Data
 			Font = new Value.Enum<FontType>(FontType.Normal);
 			FontSize = new Value.Int(16, 32, 8);
 
-			// Switch the language according to the OS settings
-			GuiLanguage = new Value.Enum<Language>(LanguageGetter.GetLanguage());
+			LanguageSelector = new LanguageSelector();
 		}
 		
 		public enum RenderMode : int
 		{
-			[Name(value = "通常モード", language = Language.Japanese)]
-			[Name(value = "Normal", language = Language.English)]
+			[Key(key = "RenderMode_Normal")]
 			Normal = 0,
-			[Name(value = "ワイヤーフレーム", language = Language.Japanese)]
-			[Name(value = "Wireframe", language = Language.English)]
+			[Key(key = "RenderMode_Wireframe")]
 			Wireframe = 1,
+		}
+
+		public enum ViewMode : int
+		{
+			[Key(key = "ViewMode_3D")]
+			_3D = 0,
+			[Key(key = "ViewMode_2D")]
+			_2D = 1,
 		}
 
 		public enum FPSType : int
 		{
-			[Name(value = "60FPS", language = Language.Japanese)]
-			[Name(value = "60 FPS", language = Language.English)]
+			[Key(key = "FPSType_60FPS")]
 			_60FPS = 1,
-			[Name(value = "30FPS", language = Language.Japanese)]
-			[Name(value = "30 FPS", language = Language.English)]
+			[Key(key = "FPSType_30FPS")]
 			_30FPS = 2,
-			[Name(value = "20FPS", language = Language.Japanese)]
-			[Name(value = "20 FPS", language = Language.English)]
+			[Key(key = "FPSType_20FPS")]
 			_20FPS = 3,
-			[Name(value = "15FPS", language = Language.Japanese)]
-			[Name(value = "15 FPS", language = Language.English)]
+			[Key(key = "FPSType_15FPS")]
 			_15FPS = 4,
 		}
 
 		public enum CoordinateType : int
 		{
-			[Name(value = "右手系", language = Language.Japanese)]
-			[Name(value = "Right-Handed", language = Language.English)]
+			[Key(key = "CoordinateType_Right")]
 			Right = 0,
-			[Name(value = "左手系", language = Language.Japanese)]
-			[Name(value = "Left-Handed", language = Language.English)]
+			[Key(key = "CoordinateType_Left")]
 			Left = 1,
 		}
 
 		public enum DistortionMethodType : int
 		{
-			[Name(value = "現行", language = Language.Japanese)]
-			[Name(value = "Current", language = Language.English)]
+			[Key(key = "DistortionMethodType_Current")]
 			Current = 0,
-			[Name(value = "1.20互換", language = Language.Japanese)]
-			[Name(value = "1.20 Compatible", language = Language.English)]
+			[Key(key = "DistortionMethodType_Effekseer120")]
 			Effekseer120 = 1,
-			[Name(value = "無効", language = Language.Japanese)]
-			[Name(value = "Disabled", language = Language.English)]
+			[Key(key = "DistortionMethodType_Disabled")]
 			Disabled = 2,
 		}
 
 
 		public enum ColorSpaceType : int
 		{
-			[Name(value = "ガンマスペース", language = Language.Japanese)]
-			[Name(value = "GammaSpace", language = Language.English)]
+			[Key(key = "ColorSpaceType_GammaSpace")]
 			GammaSpace = 0,
-			[Name(value = "リニアスペース", language = Language.Japanese)]
-			[Name(value = "LinearSpace", language = Language.English)]
+			[Key(key = "ColorSpaceType_LinearSpace")]
 			LinearSpace = 1,
 		}
 	}
@@ -10477,20 +10525,15 @@ namespace EffekseerTool.Data
 {
 	public enum UVTextureReferenceTargetType
 	{
-		[Name(language = Language.Japanese, value = "なし(128x128)")]
-		[Name(language = Language.English, value = "None(128x128)")]
+		[Key(key= "UVTextureReferenceTargetType_None")]
 		None = 0,
-		[Name(language = Language.Japanese, value = "画像1")]
-		[Name(language = Language.English, value = "Image1")]
+		[Key(key = "UVTextureReferenceTargetType_Texture1")]
 		Texture1 = 1,
-		[Name(language = Language.Japanese, value = "画像2")]
-		[Name(language = Language.English, value = "Image2")]
+		[Key(key = "UVTextureReferenceTargetType_Texture2")]
 		Texture2 = 2,
-		[Name(language = Language.Japanese, value = "画像3")]
-		[Name(language = Language.English, value = "Image3")]
+		[Key(key = "UVTextureReferenceTargetType_Texture3")]
 		Texture3 = 3,
-		[Name(language = Language.Japanese, value = "画像4")]
-		[Name(language = Language.English, value = "Image4")]
+		[Key(key = "UVTextureReferenceTargetType_Texture4")]
 		Texture4 = 4,
 	}
 
@@ -10630,8 +10673,7 @@ namespace EffekseerTool.Data
 		string selfDetail = string.Empty;
 
 		[Shown(Shown = true)]
-		[Name(language = Language.Japanese, value = "パス")]
-		[Name(language = Language.English, value = "Path")]
+		[Key(key = "MaterialFileParameter_Path")]
 		public Value.PathForMaterial Path
 		{
 			get;
@@ -11204,8 +11246,7 @@ namespace EffekseerTool.Data
 	public class RendererCommonValues
 	{
 		[Selector(ID = 3)]
-		[Name(language = Language.Japanese, value = "マテリアル")]
-		[Name(language = Language.English, value = "Material")]
+		[Key(key = "BRS_Material")]
 		public Value.Enum<MaterialType> Material
 		{
 			get;
@@ -11215,11 +11256,7 @@ namespace EffekseerTool.Data
 		[Selected(ID = 3, Value = (int)MaterialType.Default)]
 		[Selected(ID = 3, Value = (int)MaterialType.BackDistortion)]
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "色/歪み画像")]
-		[Description(language = Language.Japanese, value = "色/歪みを表す画像")]
-		[Name(language = Language.English, value = "Texture")]
-		[Description(language = Language.English, value = "Image that represents color/distortion")]
-
+		[Key(key = "BRS_ColorTexture")]
 		public Value.PathForImage ColorTexture
 		{
 			get;
@@ -11229,22 +11266,17 @@ namespace EffekseerTool.Data
 		[Selected(ID = 3, Value = (int)MaterialType.Default)]
 		[Selected(ID = 3, Value = (int)MaterialType.BackDistortion)]
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "フィルタ")]
-		[Name(language = Language.English, value = "Filter")]
+		[Key(key = "BRS_Filter")]
 		public Value.Enum<FilterType> Filter { get; private set; }
 
 		[Selected(ID = 3, Value = (int)MaterialType.Default)]
 		[Selected(ID = 3, Value = (int)MaterialType.BackDistortion)]
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "外側")]
-		[Name(language = Language.English, value = "Wrap")]
+		[Key(key = "BRS_Wrap")]
 		public Value.Enum<WrapType> Wrap { get; private set; }
 
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "法線画像")]
-		[Description(language = Language.Japanese, value = "法線を表す画像")]
-		[Name(language = Language.English, value = "Normal Map")]
-		[Description(language = Language.English, value = "Image representing normal vectors")]
+		[Key(key = "BRS_NormalTexture")]
 		public Value.PathForImage NormalTexture
 		{
 			get;
@@ -11252,18 +11284,15 @@ namespace EffekseerTool.Data
 		}
 
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "フィルタ")]
-		[Name(language = Language.English, value = "Filter")]
+		[Key(key = "BRS_Filter2")]
 		public Value.Enum<FilterType> Filter2 { get; private set; }
 
 		[Selected(ID = 3, Value = (int)MaterialType.Lighting)]
-		[Name(language = Language.Japanese, value = "外側")]
-		[Name(language = Language.English, value = "Wrap")]
+		[Key(key = "BRS_Wrap2")]
 		public Value.Enum<WrapType> Wrap2 { get; private set; }
 
 		[Selected(ID = 3, Value = (int)MaterialType.BackDistortion)]
-		[Name(language = Language.Japanese, value = "歪み強度")]
-		[Name(language = Language.English, value = "Distortion\nIntensity")]
+		[Key(key = "BRS_DistortionIntensity")]
 		public Value.Float DistortionIntensity { get; private set; }
 
 		[Selected(ID = 3, Value = (int)MaterialType.File)]
@@ -11274,21 +11303,17 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "ブレンド")]
-		[Name(language = Language.English, value = "Blend")]
+		[Key(key = "BRS_AlphaBlend")]
 		public Value.Enum<AlphaBlendType> AlphaBlend { get; private set; }
 
-		[Name(language = Language.Japanese, value = "深度書き込み")]
-		[Name(language = Language.English, value = "Depth Set")]
+		[Key(key = "BRS_ZWrite")]
 		public Value.Boolean ZWrite { get; private set; }
 
-		[Name(language = Language.Japanese, value = "深度テスト")]
-		[Name(language = Language.English, value = "Depth Test")]
+		[Key(key = "BRS_ZTest")]
 		public Value.Boolean ZTest { get; private set; }
 
 		[Selector(ID = 0)]
-		[Name(language = Language.Japanese, value = "フェードイン")]
-		[Name(language = Language.English, value = "Fade-In")]
+		[Key(key = "BRS_FadeInType")]
 		public Value.Enum<FadeType> FadeInType
 		{
 			get;
@@ -11312,8 +11337,7 @@ namespace EffekseerTool.Data
 		}
 
 		[Selector(ID = 1)]
-		[Name(language = Language.Japanese, value = "フェードアウト")]
-		[Name(language = Language.English, value = "Fade-Out")]
+		[Key(key = "BRS_FadeOutType")]
 		public Value.Enum<FadeType> FadeOutType
 		{
 			get;
@@ -11337,20 +11361,18 @@ namespace EffekseerTool.Data
 		}
 
 		[Selector(ID = 2)]
-		[Name(language = Language.Japanese, value = "UV")]
-		[Name(language = Language.English, value = "UV")]
+		[Key(key = "BRS_UV")]
 		public Value.Enum<UVType> UV
 		{
 			get;
 			private set;
 		}
 
-		[Name(language = Language.Japanese, value = "参照画像")]
-		[Name(language = Language.English, value = "Referenced")]
 		[Selected(ID = 2, Value = 1)]
 		[Selected(ID = 2, Value = 2)]
 		[Selected(ID = 2, Value = 3)]
 		[IO(Export = true)]
+		[Key(key = "BRS_UVTextureReferenceTarget")]
 		public Value.Enum<UVTextureReferenceTargetType> UVTextureReferenceTarget
 		{
 			get;
@@ -11377,10 +11399,7 @@ namespace EffekseerTool.Data
 		[IO(Export = true)]
 		public UVFCurveParamater UVFCurve { get; private set; }
 
-		[Name(language = Language.Japanese, value = "色への影響")]
-		[Description(language = Language.Japanese, value = "親ノードからの色への影響")]
-		[Name(language = Language.English, value = "Inherit Color")]
-		[Description(language = Language.English, value = "When this instance should copy its parent node's color")]
+		[Key(key = "BRS_ColorInheritType")]
 		public Value.Enum<ParentEffectType> ColorInheritType
 		{
 			get;
@@ -11463,14 +11482,12 @@ namespace EffekseerTool.Data
 		public Value.Enum<AlphaCrunchType> AlphaCrunchTypeValue { get; private set; }
 #endif
 
-		[Name(language = Language.Japanese, value = "カスタムデータ")]
-		[Name(language = Language.English, value = "Custom data")]
 		[IO(Export = true)]
+		[Key(key = "BRS_CustomData1")]
 		public CustomDataParameter CustomData1 { get; private set; }
 
-		[Name(language = Language.Japanese, value = "カスタムデータ")]
-		[Name(language = Language.English, value = "Custom data")]
 		[IO(Export = true)]
+		[Key(key = "BRS_CustomData2")]
 		public CustomDataParameter CustomData2 { get; private set; }
 		internal RendererCommonValues()
 		{
@@ -11532,26 +11549,17 @@ namespace EffekseerTool.Data
 
 		public class FadeInParamater
 		{
-			[Name(value = "フレーム数", language = Language.Japanese)]
-			[Description(language = Language.Japanese, value = "生成からフェードインが終了するまでのフレーム数")]
-			[Name(value = "Frame Count", language = Language.English)]
-			[Description(language = Language.English, value = "Duration in frames of the fade-in transition")]
+			[Key(key = "BRS_FadeIn_Frame")]
 			public Value.Float Frame { get; private set; }
 
-			[Name(language = Language.Japanese, value = "始点速度")]
-			[Description(language = Language.Japanese, value = "始点速度")]
-			[Name(language = Language.English, value = "Ease In")]
-			[Description(language = Language.English, value = "Initial speed (of the tween)")]
+			[Key(key = "BRS_FadeIn_StartSpeed")]
 			public Value.Enum<EasingStart> StartSpeed
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "終点速度")]
-			[Description(language = Language.Japanese, value = "終点速度")]
-			[Name(language = Language.English, value = "Ease Out")]
-			[Description(language = Language.English, value = "Final speed (of the tween)")]
+			[Key(key = "BRS_FadeIn_EndSpeed")]
 			public Value.Enum<EasingEnd> EndSpeed
 			{
 				get;
@@ -11568,26 +11576,17 @@ namespace EffekseerTool.Data
 
 		public class FadeOutParamater
 		{
-			[Name(value = "フレーム数", language = Language.Japanese)]
-			[Description(language = Language.Japanese, value = "フェードアウトが開始してから終了するまでのフレーム数")]
-			[Name(value = "Frame Count", language = Language.English)]
-			[Description(language = Language.English, value = "Duration in frames of the fade-out transition")]
+			[Key(key = "BRS_FadeOut_Frame")]
 			public Value.Float Frame { get; private set; }
 
-			[Name(language = Language.Japanese, value = "始点速度")]
-			[Description(language = Language.Japanese, value = "始点速度")]
-			[Name(language = Language.English, value = "Ease In")]
-			[Description(language = Language.English, value = "Initial speed (of the tween)")]
+			[Key(key = "BRS_FadeOut_StartSpeed")]
 			public Value.Enum<EasingStart> StartSpeed
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "終点速度")]
-			[Description(language = Language.Japanese, value = "終点速度")]
-			[Name(language = Language.English, value = "Ease Out")]
-			[Description(language = Language.English, value = "Final speed (of the tween)")]
+			[Key(key = "BRS_FadeOut_EndSpeed")]
 			public Value.Enum<EasingEnd> EndSpeed
 			{
 				get;
@@ -11715,20 +11714,16 @@ namespace EffekseerTool.Data
 
 		public enum MaterialType : int
 		{
-			[Name(value = "標準", language = Language.Japanese)]
-			[Name(value = "Default", language = Language.English)]
+			[Key(key = "MaterialType_Default")]
 			Default = 0,
 
-			[Name(value = "歪み(背景)", language = Language.Japanese)]
-			[Name(value = "Distortion(Back)", language = Language.English)]
+			[Key(key = "MaterialType_BackDistortion")]
 			BackDistortion = 6,
 
-			[Name(value = "ライティング", language = Language.Japanese)]
-			[Name(value = "Lighting", language = Language.English)]
+			[Key(key = "MaterialType_Lighting")]
 			Lighting = 7,
 
-			[Name(value = "ファイル", language = Language.Japanese)]
-			[Name(value = "File", language = Language.English)]
+			[Key(key = "MaterialType_File")]
 			File = 128,
 		}
 		public enum FadeType : int
@@ -11743,21 +11738,17 @@ namespace EffekseerTool.Data
 
 		public enum FilterType : int
 		{
-			[Name(value = "最近傍", language = Language.Japanese)]
-			[Name(value = "Nearest-Neighbor", language = Language.English)]
+			[Key(key = "FilterType_Nearest")]
 			Nearest = 0,
-			[Name(value = "線形", language = Language.Japanese)]
-			[Name(value = "Linear Interpolation", language = Language.English)]
+			[Key(key = "FilterType_Linear")]
 			Linear = 1,
 		}
 
 		public enum WrapType : int
 		{
-			[Name(value = "繰り返し", language = Language.Japanese)]
-			[Name(value = "Repeat", language = Language.English)]
+			[Key(key = "WrapType_Repeat")]
 			Repeat = 0,
-			[Name(value = "クランプ", language = Language.Japanese)]
-			[Name(value = "Clamp", language = Language.English)]
+			[Key(key = "WrapType_Clamp")]
 			Clamp = 1,
 		}
 
@@ -13045,10 +13036,7 @@ namespace EffekseerTool.Data
 
 		public class FixedParamater
 		{
-			[Name(language = Language.Japanese, value = "角度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの角度")]
-			[Name(language = Language.English, value = "Angle")]
-			[Description(language = Language.English, value = "Rotation of the instance, in degrees")]
+			[Key(key = "Rotation_FixedParamater_Rotation")]
 			public Value.Vector3D Rotation
 			{
 				get;
@@ -13063,30 +13051,21 @@ namespace EffekseerTool.Data
 
 		public class PVAParamater
 		{
-			[Name(language = Language.Japanese, value = "角度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期角度")]
-			[Name(language = Language.English, value = "Angle")]
-			[Description(language = Language.English, value = "Initial rotation of the instance, in degrees")]
+			[Key(key = "Rotation_PVAParamater_Rotation")]
 			public Value.Vector3DWithRandom Rotation
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "角速度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの角速度")]
-			[Name(language = Language.English, value = "Angular\nVelocity")]
-			[Description(language = Language.English, value = "Initial angular velocity of the instance, in degrees")]
+			[Key(key = "Rotation_PVAParamater_Velocity")]
 			public Value.Vector3DWithRandom Velocity
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "角加速度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期角加速度")]
-			[Name(language = Language.English, value = "Angular\nAccel")]
-			[Description(language = Language.English, value = "Acceleration of the instance's angular velocity, in degrees")]
+			[Key(key = "Rotation_PVAParamater_Acceleration")]
 			public Value.Vector3DWithRandom Acceleration
 			{
 				get;
@@ -13103,40 +13082,28 @@ namespace EffekseerTool.Data
 
 		public class AxisPVAParamater
 		{
-			[Name(language = Language.Japanese, value = "回転軸")]
-			[Description(language = Language.Japanese, value = "インスタンスの回転軸")]
-			[Name(language = Language.English, value = "Axis of\nRotation")]
-			[Description(language = Language.English, value = "Axis of rotation of the instance")]
+			[Key(key = "Rotation_AxisPVAParamater_Axis")]
 			public Value.Vector3DWithRandom Axis
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "角度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期角度")]
-			[Name(language = Language.English, value = "Angle")]
-			[Description(language = Language.English, value = "Initial rotation of the instance, in degrees")]
+			[Key(key = "Rotation_AxisPVAParamater_Rotation")]
 			public Value.FloatWithRandom Rotation
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "角速度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの角速度")]
-			[Name(language = Language.English, value = "Angular\nVelocity")]
-			[Description(language = Language.English, value = "Initial angular velocity of the instance, in degrees")]
+			[Key(key = "Rotation_AxisPVAParamater_Velocity")]
 			public Value.FloatWithRandom Velocity
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "角加速度(度)")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期角加速度")]
-			[Name(language = Language.English, value = "Angular\nAccel")]
-			[Description(language = Language.English, value = "Acceleration of the instance's angular velocity, in degrees")]
+			[Key(key = "Rotation_AxisPVAParamater_Acceleration")]
 			public Value.FloatWithRandom Acceleration
 			{
 				get;
@@ -13155,10 +13122,7 @@ namespace EffekseerTool.Data
 
 		public class AxisEasingParamater
 		{
-			[Name(language = Language.Japanese, value = "回転軸")]
-			[Description(language = Language.Japanese, value = "インスタンスの回転軸")]
-			[Name(language = Language.English, value = "Axis of\nRotation")]
-			[Description(language = Language.English, value = "Axis of rotation of the instance")]
+			[Key(key = "Rotation_AxisEasingParamater_Axis")]
 			public Value.Vector3DWithRandom Axis
 			{
 				get;
@@ -13181,10 +13145,7 @@ namespace EffekseerTool.Data
 
 		public class RotationFCurveParamater
 		{
-			[Name(language = Language.Japanese, value = "Fカーブ")]
-			[Description(language = Language.Japanese, value = "Fカーブ")]
-			[Name(language = Language.English, value = "F-Curve")]
-			[Description(language = Language.English, value = "F-Curve")]
+			[Key(key = "FCurve")]
 			[Shown(Shown = true)]
 			public Value.FCurveVector3D FCurve
 			{
@@ -13207,23 +13168,17 @@ namespace EffekseerTool.Data
 
 		public enum ParamaterType : int
 		{
-			[Name(value = "角度", language = Language.Japanese)]
-			[Name(value = "Fixed Angle", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_Fixed")]
 			Fixed = 0,
-			[Name(value = "角度・速度・加速度", language = Language.Japanese)]
-			[Name(value = "PVA", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_PVA")]
 			PVA = 1,
-			[Name(value = "イージング", language = Language.Japanese)]
-			[Name(value = "Easing", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_Easing")]
 			Easing = 2,
-			[Name(value = "任意軸 角度・速度・加速度", language = Language.Japanese)]
-			[Name(value = "PVA (Arbitrary Axis)", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_AxisPVA")]
 			AxisPVA = 3,
-			[Name(value = "任意軸 イージング", language = Language.Japanese)]
-			[Name(value = "Easing (Arbitrary Axis)", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_AxisEasing")]
 			AxisEasing = 4,
-			[Name(value = "角度(Fカーブ)", language = Language.Japanese)]
-			[Name(value = "Rotation (F-Curve)", language = Language.English)]
+			[Key(key = "Rotation_ParamaterType_RotationFCurve")]
 			RotationFCurve = 5,
 		}
 	}
@@ -13338,10 +13293,7 @@ namespace EffekseerTool.Data
 
 		public class FixedParamater
 		{
-			[Name(language = Language.Japanese, value = "拡大率")]
-			[Description(language = Language.Japanese, value = "インスタンスの拡大率")]
-			[Name(language = Language.English, value = "Scaling Factor")]
-			[Description(language = Language.English, value = "Magnification of the instance")]
+			[Key(key = "Scale_FixedParamater_Scale")]
 			public Value.Vector3D Scale
 			{
 				get;
@@ -13356,30 +13308,22 @@ namespace EffekseerTool.Data
 
 		public class PVAParamater
 		{
-			[Name(language = Language.Japanese, value = "拡大率")]
-			[Description(language = Language.Japanese, value = "インスタンスの拡大率")]
-			[Name(language = Language.English, value = "Scaling Factor")]
-			[Description(language = Language.English, value = "Magnification of the instance")]
+			[Key(key = "Scale_PVAParamater_Scale")]
 			public Value.Vector3DWithRandom Scale
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "拡大速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの拡大速度")]
-			[Name(language = Language.English, value = "Expansion\nSpeed")]
-			[Description(language = Language.English, value = "The instance's initial rate of expansion")]
+			[Key(key = "Scale_PVAParamater_Velocity")]
 			public Value.Vector3DWithRandom Velocity
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "拡大加速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期拡大加速度")]
-			[Name(language = Language.English, value = "Expansion\nAccel")]
-			[Description(language = Language.English, value = "Acceleration of the instance's expansion rate")]
+			[Key(key = "Scale_PVAParamater_Acceleration")]
+
 			public Value.Vector3DWithRandom Acceleration
 			{
 				get;
@@ -13396,30 +13340,21 @@ namespace EffekseerTool.Data
 
 		public class SinglePVAParamater
 		{
-			[Name(language = Language.Japanese, value = "拡大率")]
-			[Description(language = Language.Japanese, value = "インスタンスの拡大率")]
-			[Name(language = Language.English, value = "Scaling Factor")]
-			[Description(language = Language.English, value = "Magnification of the instance")]
+			[Key(key = "Scale_SinglePVAParamater_Scale")]
 			public Value.FloatWithRandom Scale
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "拡大速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの拡大速度")]
-			[Name(language = Language.English, value = "Expansion\nSpeed")]
-			[Description(language = Language.English, value = "The instance's initial rate of expansion")]
+			[Key(key = "Scale_SinglePVAParamater_Velocity")]
 			public Value.FloatWithRandom Velocity
 			{
 				get;
 				private set;
 			}
 
-			[Name(language = Language.Japanese, value = "拡大加速度")]
-			[Description(language = Language.Japanese, value = "インスタンスの初期拡大加速度")]
-			[Name(language = Language.English, value = "Expansion\nAccel")]
-			[Description(language = Language.English, value = "Acceleration of the instance's expansion rat")]
+			[Key(key = "Scale_SinglePVAParamater_Acceleration")]
 			public Value.FloatWithRandom Acceleration
 			{
 				get;
@@ -13436,23 +13371,17 @@ namespace EffekseerTool.Data
 
 		public enum ParamaterType : int
 		{
-			[Name(value = "拡大率", language = Language.Japanese)]
-			[Name(value = "Fixed Scale", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_Fixed")]
 			Fixed = 0,
-			[Name(value = "拡大率・速度・加速度", language = Language.Japanese)]
-			[Name(value = "PVA", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_PVA")]
 			PVA = 1,
-			[Name(value = "イージング", language = Language.Japanese)]
-			[Name(value = "Easing", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_Easing")]
 			Easing = 2,
-			[Name(value = "単一 拡大率・速度・加速度", language = Language.Japanese)]
-			[Name(value = "PVA (Single)", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_SinglePVA")]
 			SinglePVA = 3,
-			[Name(value = "単一 イージング", language = Language.Japanese)]
-			[Name(value = "Easing (Single)", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_SingleEasing")]
 			SingleEasing = 4,
-			[Name(value = "拡大率(Fカーブ)", language = Language.Japanese)]
-			[Name(value = "F-Curve", language = Language.English)]
+			[Key(key = "Scale_ParamaterType_FCurve")]
 			FCurve = 5,
 		}
 	}
@@ -16810,6 +16739,9 @@ namespace EffekseerTool.Data.Value
 		{
 			if (abspath == _abspath) return;
 
+			// Replace separators
+			abspath = abspath.Replace('\\', '/');
+
 			var old_value = _abspath;
 			var new_value = abspath;
 
@@ -16845,6 +16777,9 @@ namespace EffekseerTool.Data.Value
 
 		public void SetRelativePath(string relative_path)
 		{
+			// Replace separators
+			relative_path = relative_path.Replace('\\', '/');
+
 			try
 			{
 				if (Core.FullPath == string.Empty)
@@ -18800,6 +18735,110 @@ namespace EffekseerTool.Utils
 
 namespace EffekseerTool.Utils
 {
+	class CsvReaader
+	{
+		public static List<List<string>> Read(string csv)
+		{
+			bool inDQ = false;
+			bool isStarting = true;
+
+			Func<int, bool> isCurrentDQ = (int i) =>
+			{
+				if (i >= csv.Length) return false;
+				return csv[i] == '"';
+			};
+
+			Func<int, bool> isNextDQ = (int i) => 
+			{
+				if (i >= csv.Length - 1) return false;
+				return csv[i + 1] == '"';
+			};
+
+			var sb = new StringBuilder();
+
+			List<List<string>> columns = new List<List<string>>();
+			List<string> rows = new List<string>();
+
+			for (int i = 0; i < csv.Length; i++)
+			{
+				if (isCurrentDQ(i))
+				{
+					if(isStarting)
+					{
+						inDQ = true;
+					}
+					else if (isNextDQ(i))
+					{
+						if (inDQ)
+						{
+							sb.Append("\"");
+						}
+						else
+						{
+							sb.Append("\"\"");
+						}
+						i++;
+					}
+					else
+					{
+						inDQ = !inDQ;
+					}
+					isStarting = false;
+				}
+				else if (csv[i] == ',')
+				{
+					if (inDQ)
+					{
+						sb.Append(csv[i]);
+						isStarting = false;
+					}
+					else
+					{
+						rows.Add(sb.ToString());
+						sb.Clear();
+						isStarting = true;
+					}
+				}
+				else if (csv[i] == '\n')
+				{
+					if (inDQ)
+					{
+						sb.Append(csv[i]);
+						isStarting = false;
+					}
+					else
+					{
+						rows.Add(sb.ToString());
+						sb.Clear();
+						columns.Add(rows);
+						rows = new List<string>();
+						isStarting = true;
+					}
+				}
+				else if (csv[i] == '\r')
+				{
+					// Skip
+				}
+				else
+				{
+					sb.Append(csv[i]);
+					isStarting = false;
+				}
+			}
+
+			if(sb.Length > 0 || rows.Count > 0)
+			{
+				rows.Add(sb.ToString());
+				columns.Add(rows);
+			}
+
+			return columns;
+		}
+	}
+}
+
+namespace EffekseerTool.Utils
+{
 	public class Misc
 	{
 		public static string GetRelativePath(string basePath, string path)
@@ -19269,7 +19308,7 @@ namespace EffekseerTool.IO
 
 			// binary data
 			var binaryExporter = new Binary.Exporter();
-			var binaryData = binaryExporter.Export(1);  // TODO change magnification
+			var binaryDataLatest = binaryExporter.Export(1, Binary.ExporterVersion.Latest);  // TODO change magnification
 
 			// info data
 			byte[] infoData = null;
@@ -19310,7 +19349,15 @@ namespace EffekseerTool.IO
 			var chunk = new Chunk();
 			chunk.AddChunk("INFO", infoData);
 			chunk.AddChunk("EDIT", Compress(editorData));
-			chunk.AddChunk("BIN_", binaryData);
+			chunk.AddChunk("BIN_", binaryDataLatest);
+
+			// fallback
+			if(Binary.ExporterVersion.Latest > Binary.ExporterVersion.Ver1500)
+			{
+				var binaryExporterFallback = new Binary.Exporter();
+				var binaryDataFallback = binaryExporterFallback.Export(1, Binary.ExporterVersion.Ver1500);
+				chunk.AddChunk("BIN_", binaryDataFallback);
+			}
 
 			var chunkData = chunk.Save();
 
@@ -19320,8 +19367,25 @@ namespace EffekseerTool.IO
 			{
 				System.IO.File.WriteAllBytes(path, allData);
 			}
-			catch
+			catch(Exception e)
 			{
+				string messeage = "";
+				if (Core.Language == Language.English)
+				{
+					messeage = "Failed to save a file " + path + "\nThis error is \n";
+				}
+				else	
+				{
+					messeage = "保存に失敗しました。 " + path + "\nエラーは \n";
+				}
+
+				messeage += e.ToString();
+
+				if(Core.OnOutputMessage != null)
+				{
+					Core.OnOutputMessage(messeage);
+				}
+
 				return false;
 			}
 
@@ -19576,6 +19640,11 @@ namespace EffekseerTool.InternalScript
 			valid.Add("@3");
 			valid.Add("@4");
 
+			valid.Add("@In0");
+			valid.Add("@In1");
+			valid.Add("@In2");
+			valid.Add("@In3");
+
 			valid.Add("@GTime");
 
 			valid.Add("@P.x");
@@ -19593,6 +19662,11 @@ namespace EffekseerTool.InternalScript
 			if (label == "@2") return 1 + 0x1000;
 			if (label == "@3") return 2 + 0x1000;
 			if (label == "@4") return 3 + 0x1000;
+
+			if (label == "@In0") return 0 + 0x1000;
+			if (label == "@In1") return 1 + 0x1000;
+			if (label == "@In2") return 2 + 0x1000;
+			if (label == "@In3") return 3 + 0x1000;
 
 			if (label == "@GTime") return 0 + 0x1000 + 0x100;
 
@@ -20901,10 +20975,10 @@ namespace EffekseerTool.InternalScript
 		{
 			RootTable = new SymbolTable();
 
-			Func<string, Value> generatePredefined = (name) =>
+			Func<string, Value> generatePredefined = (source) =>
 			{
 				var v = new Value();
-				var generator = new NodePredefined(name);
+				var generator = new NodePredefined(source);
 				generator.Outputs.Add(v);
 				v.Generator = generator;
 				return v;
@@ -20932,6 +21006,11 @@ namespace EffekseerTool.InternalScript
 			outputParam.Tables.Add("w", new Attribute(generatePredefined("@P.w")));
 
 			RootTable.Tables.Add("@O", new Attribute(outputParam));
+
+			RootTable.Tables.Add("@In0", new Attribute(generatePredefined("@In0")));
+			RootTable.Tables.Add("@In1", new Attribute(generatePredefined("@In1")));
+			RootTable.Tables.Add("@In2", new Attribute(generatePredefined("@In2")));
+			RootTable.Tables.Add("@In3", new Attribute(generatePredefined("@In3")));
 
 			foreach (var expression in expressions)
 			{
