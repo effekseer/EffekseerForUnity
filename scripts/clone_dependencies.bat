@@ -1,1 +1,1 @@
-git clone --recursive --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+git clone -b 15x --recursive --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
