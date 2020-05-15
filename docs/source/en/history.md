@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+### 1.52f (2020/05/15)
+
+- Fixed a bug where it cannot load an efkproj file which is saved with Effekseer 1.51 or later
+
 ### 1.52b (2020/05/02)
 
 - Fixed a bug where particles are not shown with Line of SpawnMethod
