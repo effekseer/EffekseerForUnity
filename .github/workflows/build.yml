@@ -107,11 +107,11 @@ jobs:
       - name: install emsdk 1.37
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          sh scripts/clone_dependencies.sh
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install sdk-fastcomp-1.37.40-64bit
           cd ..
-      - run: git clone --depth 1 https://github.com/effekseer/Effekseer.git ../Effekseer
+      - run: sh scripts/clone_dependencies.sh
       - run: |
           ./emsdk/emsdk activate sdk-fastcomp-1.37.40-64bit
           source ./emsdk/emsdk_env.sh
