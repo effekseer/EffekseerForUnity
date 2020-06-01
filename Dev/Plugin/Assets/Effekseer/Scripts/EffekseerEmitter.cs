@@ -92,8 +92,8 @@ namespace Effekseer
 			// must run after loading
 			cachedMagnification = effectAsset.Magnification;
 
-			h.SetRotation(transform.rotation);
-			h.SetScale(transform.localScale);
+			ApplyRotationAndScale(ref h);
+
 			h.layer = gameObject.layer;
 			if (speed != 1.0f) h.speed = speed;
 			if (paused) h.paused = paused;
@@ -419,16 +419,8 @@ namespace Effekseer
 				var handle = handles[i];
 				if (handle.exists) {
 					handle.SetLocation(transform.position);
-					handle.SetRotation(transform.rotation);
 
-					if(EmitterScale == EffekseerEmitterScale.Local)
-					{
-						handle.SetScale(transform.localScale);
-					}
-					else if(EmitterScale == EffekseerEmitterScale.Global)
-					{
-						handle.SetScale(transform.lossyScale);
-					}
+					ApplyRotationAndScale(ref handle);
 
 					i++;
 				} else if(isLooping && handles.Count == 1)
@@ -447,7 +439,21 @@ namespace Effekseer
 				}
 			}
 		}
-		
+
 		#endregion
+
+		void ApplyRotationAndScale(ref EffekseerHandle handle)
+		{
+			handle.SetRotation(transform.rotation);
+
+			if (EmitterScale == EffekseerEmitterScale.Local)
+			{
+				handle.SetScale(transform.localScale);
+			}
+			else if (EmitterScale == EffekseerEmitterScale.Global)
+			{
+				handle.SetScale(transform.lossyScale);
+			}
+		}
 	}
 }
