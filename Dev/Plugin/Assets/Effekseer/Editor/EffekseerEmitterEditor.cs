@@ -18,11 +18,19 @@ namespace Effekseer.Editor
 		void OnEnable()
 		{
 			emitter = (EffekseerEmitter)target;
+
+#if UNITY_2019_1_OR_NEWER
+			SceneView.duringSceneGui += SceneView_duringSceneGui;
+#endif
 		}
-		
+
 		void OnDisable()
 		{
 			TermSystem();
+
+#if UNITY_2019_1_OR_NEWER
+			SceneView.duringSceneGui -= SceneView_duringSceneGui;
+#endif
 		}
 
 		void InitSystem()
@@ -78,8 +86,20 @@ namespace Effekseer.Editor
 				gameview.Repaint();
 			}
 		}
-		
+
+#if UNITY_2019_1_OR_NEWER
+		private void SceneView_duringSceneGui(SceneView obj)
+		{
+			CallSceneGUI();
+		}
+#else
 		void OnSceneGUI()
+		{
+			CallSceneGUI();
+		}
+#endif
+
+		void CallSceneGUI()
 		{
 			if (emitter == null)
 				return;
