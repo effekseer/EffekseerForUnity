@@ -15,6 +15,18 @@ namespace Effekseer
 		Global,
 	}
 
+	/// <summary xml:lang="en">
+	/// Timing of the update
+	/// </summary>
+	/// <summary xml:lang="ja">
+	/// 更新のタイミング
+	/// </summary>
+	public enum EffekseerEmitterTimingOfUpdate
+	{
+		Update,
+		FixedUpdate,
+	}
+
 
 	/// <summary xml:lang="en">
 	/// A emitter of the Effekseer effect
@@ -26,6 +38,14 @@ namespace Effekseer
 	public class EffekseerEmitter : MonoBehaviour
 	{
 		float cachedMagnification = 0.0f;
+
+		/// <summary xml:lang="en">
+		/// Timing of the update
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 更新のタイミング
+		/// </summary>
+		public EffekseerEmitterTimingOfUpdate TimingOfUpdate = EffekseerEmitterTimingOfUpdate.Update;
 
 		/// <summary xml:lang="en">
 		/// Which scale is A scale of effect based on. 
@@ -413,7 +433,7 @@ namespace Effekseer
 		/// <summary>
 		/// Don't touch it!!
 		/// </summary>
-		public void Update()
+		public void UpdateSelf()
 		{
 			for (int i = 0; i < handles.Count; ) {
 				var handle = handles[i];
@@ -437,6 +457,22 @@ namespace Effekseer
 				else {
 					handles.RemoveAt(i);
 				}
+			}
+		}
+
+		public void Update()
+		{
+			if(TimingOfUpdate == EffekseerEmitterTimingOfUpdate.Update)
+			{
+				UpdateSelf();
+			}
+		}
+
+		public void FixedUpdate()
+		{
+			if (TimingOfUpdate == EffekseerEmitterTimingOfUpdate.FixedUpdate)
+			{
+				UpdateSelf();
 			}
 		}
 
