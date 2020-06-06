@@ -120,7 +120,8 @@ namespace Effekseer.Editor
 			float screenHeight = sceneView.camera.pixelHeight;
 			
 			float width = 160;
-			float height = 80;
+			float height = 120;
+
 			var boxRect  = new Rect(screenWidth - width - 30, screenHeight - height - 45, width + 20, height + 40);
 			var areaRect = new Rect(screenWidth - width - 20, screenHeight - height - 20, width, height);
 
@@ -163,7 +164,17 @@ namespace Effekseer.Editor
 			GUILayout.Label("Speed", GUILayout.Width(50));
 			emitter.speed = GUILayout.HorizontalSlider(emitter.speed, 0.0f, 2.0f);
 			GUILayout.EndHorizontal();
-			
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Instance", GUILayout.Width(80));
+			GUILayout.Label(emitter.instanceCount.ToString());
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("RestInstance", GUILayout.Width(80));
+			GUILayout.Label(EffekseerSystem.restInstanceCount.ToString());
+			GUILayout.EndHorizontal();
+
 			GUILayout.EndArea();
 
 			Handles.EndGUI();

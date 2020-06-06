@@ -46,6 +46,8 @@ EXPORTS
   EffekseerSetAllColor
   EffekseerSetTargetLocation
   EffekseerSetLayer
+  EffekseerGetInstanceCount
+  EffekseerGetRestInstancesCount
   EffekseerGetDynamicInput
   EffekseerSetDynamicInput
   EffekseerSetTextureLoaderEvent
