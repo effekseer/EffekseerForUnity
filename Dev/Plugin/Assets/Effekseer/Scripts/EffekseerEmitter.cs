@@ -390,6 +390,25 @@ namespace Effekseer
 			}
 		}
 
+		/// <summary xml:lang="en">
+		/// Get the number of instance which is used in this effect including root
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// Rootを含んだエフェクトに使用されているインスタンス数を取得する。
+		/// </summary>
+		public int instanceCount
+		{
+			get
+			{
+				int res = 0;
+				foreach (var handle in handles)
+				{
+					res += handle.instanceCount;
+				}
+				return res;
+			}
+		}
+
 		#region Internal Implimentation
 
 		void OnEnable()

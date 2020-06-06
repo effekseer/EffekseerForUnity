@@ -75,6 +75,17 @@ namespace Effekseer
 			Plugin.EffekseerSetPausedToAllEffects(paused);
 		}
 
+		/// <summary xml:lang="en">
+		/// Gets the number of remaining allocated instances.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 残りの確保したインスタンス数を取得する。
+		/// </summary>
+		public static int restInstanceCount
+		{
+			get { return Plugin.EffekseerGetRestInstancesCount(); }
+		}
+
 		#region Network
 		/// <summary xml:lang="en">
 		/// start a server to edit effects from remote
@@ -176,6 +187,7 @@ namespace Effekseer
 				lightAmbientColor = value;
 			}
 		}
+
 		private void ReloadEffects()
 		{
 			foreach (var weakEffectAsset in EffekseerEffectAsset.enabledAssets)

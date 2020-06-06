@@ -385,6 +385,26 @@ extern "C"
 		g_EffekseerManager->SetLayer(handle, layer);
 	}
 
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetInstanceCount(int handle)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return 0;
+		}
+
+		return g_EffekseerManager->GetInstanceCount(handle);
+	}
+
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetRestInstancesCount()
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return 0;
+		}
+
+		return g_EffekseerManager->GetRestInstancesCount();
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightDirection(float x, float y, float z)
 	{
 		g_lightDirection.X = x;
