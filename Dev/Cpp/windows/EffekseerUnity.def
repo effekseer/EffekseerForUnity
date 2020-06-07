@@ -46,6 +46,8 @@ EXPORTS
   EffekseerSetAllColor
   EffekseerSetTargetLocation
   EffekseerSetLayer
+  EffekseerSetGroupMask
+  EffekseerSetTimeScaleByGroup
   EffekseerGetInstanceCount
   EffekseerGetRestInstancesCount
   EffekseerGetDynamicInput

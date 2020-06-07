@@ -2,6 +2,12 @@
 
 namespace Effekseer
 {
+	public enum EffekseerTimeScale
+	{
+		Scale,
+		Unscale,
+	}
+
 	/// <summary xml:lang="ja">
 	/// A instance handle of played effect
 	/// </summary>
@@ -12,10 +18,14 @@ namespace Effekseer
 	{
 		internal int m_handle;
 
+		EffekseerTimeScale timeScale;
+
 		public EffekseerHandle(int handle = -1)
 		{
 			m_handle = handle;
 			layer_ = 0;
+			timeScale = EffekseerTimeScale.Scale;
+			ApplyTimeScale();
 		}
 
 		/// <summary>
@@ -23,6 +33,9 @@ namespace Effekseer
 		/// </summary>
 		public void UpdateHandle(float deltaFrame)
 		{
+			Plugin.EffekseerSetTimeScaleByGroup(1, 1);
+			Plugin.EffekseerSetTimeScaleByGroup(2, 1);
+
 			Plugin.EffekseerUpdateHandle(m_handle, deltaFrame);
 		}
 		
@@ -263,6 +276,35 @@ namespace Effekseer
 			get
 			{
 				return Plugin.EffekseerGetInstanceCount(m_handle);
+			}
+		}
+
+		public EffekseerTimeScale TimeScale
+		{
+			get
+			{
+				return timeScale;
+			}
+			set
+			{
+				if (timeScale == value)
+					return;
+
+				timeScale = value;
+
+				ApplyTimeScale();
+			}
+		}
+
+		void ApplyTimeScale()
+		{
+			if(timeScale == EffekseerTimeScale.Scale)
+			{
+				Plugin.EffekseerSetGroupMask(m_handle, 1);
+			}
+			else if (timeScale == EffekseerTimeScale.Unscale)
+			{
+				Plugin.EffekseerSetGroupMask(m_handle, 2);
 			}
 		}
 	}

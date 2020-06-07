@@ -56,6 +56,14 @@ namespace Effekseer
 		public EffekseerEmitterScale EmitterScale = EffekseerEmitterScale.Local;
 
 		/// <summary xml:lang="en">
+		/// TimeScale where the effect is played
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトが再生されるタイムスケール
+		/// </summary>
+		public EffekseerTimeScale TimeScale = EffekseerTimeScale.Scale;
+
+		/// <summary xml:lang="en">
 		/// Effect name
 		/// </summary>
 		/// <summary xml:lang="ja">
@@ -509,6 +517,8 @@ namespace Effekseer
 			{
 				handle.SetScale(transform.lossyScale);
 			}
+
+			handle.TimeScale = TimeScale;
 		}
 	}
 }

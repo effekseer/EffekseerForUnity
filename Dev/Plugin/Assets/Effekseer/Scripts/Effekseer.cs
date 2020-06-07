@@ -183,6 +183,12 @@ namespace Effekseer
 		public static extern void EffekseerSetLayer(int handle, int layer);
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerSetGroupMask(int handle, Int64 groupMask);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetTimeScaleByGroup(Int64 groupMask, float timeScale);
+
+		[DllImport(pluginName)]
 		public static extern int EffekseerGetInstanceCount(int handle);
 
 		[DllImport(pluginName)]

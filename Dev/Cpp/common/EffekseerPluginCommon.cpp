@@ -76,7 +76,11 @@ extern "C"
 			return;
 		}
 		
-		g_EffekseerManager->Update(deltaFrame);
+		Effekseer::Manager::UpdateParameter param;
+		param.DeltaFrame = deltaFrame;
+		param.UpdateInterval = 1;
+
+		g_EffekseerManager->Update(param);
 		
 	}
 	
@@ -383,6 +387,26 @@ extern "C"
 		}
 
 		g_EffekseerManager->SetLayer(handle, layer);
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetGroupMask(int handle, int64_t groupMask)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetGroupMask(handle, groupMask);
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetTimeScaleByGroup(int64_t groupMask, float timeScale)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetTimeScaleByGroup(groupMask, timeScale);
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetInstanceCount(int handle)

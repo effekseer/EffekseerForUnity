@@ -494,13 +494,19 @@ namespace Effekseer
 
 		float restFrames = 0;
 
-		internal void Update(float deltaTime) {
+		internal void Update(float deltaTime, float unsacaledDeltaTime) {
 			float deltaFrames = Utility.TimeToFrames(deltaTime);
+			float unsacaledDeltaFrames = Utility.TimeToFrames(unsacaledDeltaTime);
+
+			Plugin.EffekseerSetTimeScaleByGroup(1, deltaFrames);
+			Plugin.EffekseerSetTimeScaleByGroup(2, unsacaledDeltaFrames);
+			Plugin.EffekseerUpdate(1);
+
 			restFrames += deltaFrames;
 			int updateCount = Mathf.RoundToInt(restFrames);
 			for (int i = 0; i < updateCount; i++) {
 				Plugin.EffekseerUpdateTime(1);
-				Plugin.EffekseerUpdate(1);
+				//Plugin.EffekseerUpdate(1);
 			}
 			restFrames -= updateCount;
 

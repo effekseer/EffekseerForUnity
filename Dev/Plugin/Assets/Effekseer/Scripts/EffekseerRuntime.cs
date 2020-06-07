@@ -66,7 +66,7 @@ namespace Effekseer
 
 			Plugin.UpdateNetwork();
 
-			system.Update(Time.deltaTime);
+			system.Update(Time.deltaTime, Time.unscaledDeltaTime);
 		}
 	}
 }
