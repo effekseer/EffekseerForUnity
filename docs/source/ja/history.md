@@ -1,5 +1,13 @@
 ﻿# 更新履歴
 
+### 1.52g (2020/06/09)
+
+- Effekseer1.52gへのアップグレード
+- EmitterComponentに更新タイミングの設定を追加
+- EmitterComponentの設定にインスタンス数の表示を追加
+- EmitterComponentのScaleの設定が適用されないことがある不具合の修正
+- EmitterComponentの設定がシーンビューに表示されない不具合を修正(2019.3以降)
+
 ### 1.52f (2020/05/15)
 
 - 1,51以降のEffekseerで保存されたefkprojファイルを読み込めない不具合を修正

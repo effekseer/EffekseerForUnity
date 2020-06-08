@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+### 1.52g (2020/06/09)
+
+- Upgrade to Effekseer 1.52g
+- Added the setting of update timing to EmitterComponent.
+- Added the display of the number of instances to EmitterComponent.
+- Fixed a bug where the Scale setting of EmitterComponent may not be applied
+- Fixed a bug where EmitterComponent settings were not displayed in the scene view ( After 2019.3)
+
 ### 1.52f (2020/05/15)
 
 - Fixed a bug where it cannot load an efkproj file which is saved with Effekseer 1.51 or later
