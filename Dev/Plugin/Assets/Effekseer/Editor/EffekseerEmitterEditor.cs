@@ -116,8 +116,8 @@ namespace Effekseer.Editor
 
 			Handles.BeginGUI();
 
-			float screenWidth  = sceneView.camera.pixelWidth;
-			float screenHeight = sceneView.camera.pixelHeight;
+			float screenWidth  = sceneView.position.size.x;
+			float screenHeight = sceneView.position.size.y;
 			
 			float width = 160;
 			float height = 120;
