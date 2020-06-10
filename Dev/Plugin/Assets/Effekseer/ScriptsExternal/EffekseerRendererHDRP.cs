@@ -30,7 +30,10 @@ namespace Effekseer
 			prop.colorTargetIdentifier = new RenderTargetIdentifier(colorBuffer);
 			prop.depthTargetIdentifier = new RenderTargetIdentifier(depthBuffer);
 			prop.colorTargetRenderTexture = (UnityEngine.RenderTexture)colorBuffer;
-			prop.Viewport = hdCamera.finalViewport;
+
+			// TODO : It needs to support VR and override
+			prop.Viewport = hdCamera.camera.pixelRect;
+
 			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(hdCamera.actualWidth, hdCamera.actualHeight, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
