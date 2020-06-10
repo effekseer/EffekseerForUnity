@@ -7,6 +7,7 @@
 - Added the display of the number of instances to EmitterComponent.
 - Fixed a bug where the Scale setting of EmitterComponent may not be applied
 - Fixed a bug where EmitterComponent settings were not displayed in the scene view ( After 2019.3)
+- Support HDRP 7.4.1
 
 ### 1.52f (2020/05/15)
 
