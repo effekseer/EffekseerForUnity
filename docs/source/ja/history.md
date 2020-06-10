@@ -7,6 +7,7 @@
 - EmitterComponentの設定にインスタンス数の表示を追加
 - EmitterComponentのScaleの設定が適用されないことがある不具合の修正
 - EmitterComponentの設定がシーンビューに表示されない不具合を修正(2019.3以降)
+- HDRP 7.4.1のサポート
 
 ### 1.52f (2020/05/15)
 
