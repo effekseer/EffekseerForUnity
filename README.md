@@ -10,6 +10,8 @@ Effekseerで作成したエフェクトをUnityで表示することができま
 
 - [Effekseer main repository](https://github.com/effekseer/Effekseer)
 
+- [EffekseerForUnity(1.5x)](https://github.com/effekseer/EffekseerForUnity/tree/15x)
+
 - [EffekseerForUnity(Legacy)](https://github.com/effekseer/EffekseerForUnity/tree/legacy)
 
 ## Help
@@ -35,7 +37,7 @@ You need to build native binaries.
 
 #### Windows
 
-Visual Studio 2015 or later is required.
+Visual Studio 2017 or later is required.
 
 Execute ``` Dev/Cpp/windows/Build.bat ```
 
@@ -51,7 +53,7 @@ Execute ``` Dev/Cpp/android/Build.bat ```
 
 #### WebGL
 
-emscripten, MinGW and Visual Studio 2015 or late are required.
+emscripten, MinGW and Visual Studio 2017 or late are required.
 
 Execute ``` Dev/Cpp/webgl/Build.bat ```
 
@@ -59,7 +61,7 @@ Execute ``` Dev/Cpp/webgl/Build.bat ```
 
 #### Windows
 
-Uses Visual Studio 2015 or later, to open and build the following solution file.
+Uses Visual Studio 2017 or later, to open and build the following solution file.
 
 - Dev/Cpp/windows/EffekseerUnity.sln
 

@@ -78,7 +78,7 @@ extern "C"
 		
 		Effekseer::Manager::UpdateParameter param;
 		param.DeltaFrame = deltaFrame;
-		param.UpdateInterval = 1;
+		param.UpdateInterval = 1.0f;
 
 		g_EffekseerManager->Update(param);
 		
