@@ -5,7 +5,7 @@ LOCAL_PATH := $(call my-dir)
 LOCAL_ARM_MODE  := arm
 LOCAL_PATH      := $(NDK_PROJECT_PATH)
 LOCAL_MODULE    := libEffekseerUnity
-LOCAL_CFLAGS    := -O2 -D__EFFEKSEER_RENDERER_GLES2__
+LOCAL_CFLAGS    := -O2 -D__EFFEKSEER_RENDERER_GLES2__ -D__EFFEKSEER_RENDERER_INTERNAL_LOADER__
 LOCAL_LDLIBS    := -landroid -lEGL -lGLESv2
 
 LOCAL_C_INCLUDES += \
@@ -63,6 +63,8 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Socket.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
+	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
+	$(LIB_SRC_PATH)/Effekseer.Random.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Grid.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Layer.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Matrix44.cpp \
@@ -96,7 +98,9 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
