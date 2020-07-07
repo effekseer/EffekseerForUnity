@@ -87,7 +87,14 @@ SubShader{
 
 	float4 frag(ps_input i) : COLOR
 	{
-		return tex2D(_ColorTex, i.uv) * i.color;
+		float4 color = tex2D(_ColorTex, i.uv) * i.color;
+
+		if (color.w <= 0.0f)
+		{
+			discard;
+		}
+
+		return color;
 	}
 
 	ENDCG

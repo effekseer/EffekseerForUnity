@@ -116,6 +116,11 @@
 
 			color.xyz = tex2D(_BackTex, uv).xyz;
 
+			if (color.w <= 0.0f)
+			{
+				discard;
+			}
+
 			return color;
 		}
 
