@@ -27,9 +27,9 @@ namespace Effekseer.Internal
 		public int GetKey()
 		{
 			return (int)Blend +
-				(ZTest ? 1 : 0) << 4 +
-				(ZWrite ? 1 : 0) << 5 +
-				Cull << 6;
+				((ZTest ? 1 : 0) << 4) +
+				((ZWrite ? 1 : 0) << 5) +
+				(Cull << 6);
 		}
 	}
 	class MaterialCollection
