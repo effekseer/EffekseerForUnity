@@ -47,7 +47,7 @@ namespace EffekseerTool
 			SelectLanguage(ind, callEvent);
 		}
 
-		public static IReadOnlyList<string> Languages { get { return languages; } }
+		public static List<string> Languages { get { return languages; } }
 
 		public static int SelectedIndex { get { return selectedIndex; } }
 
@@ -60,9 +60,14 @@ namespace EffekseerTool
 
 		static Dictionary<string, string> texts = new Dictionary<string, string>();
 
-		public static string Language { get; set; } = "en";
+		public static string Language { get; set; }
 
 		public static string RootDirectory = string.Empty;
+
+		static MultiLanguageTextProvider()
+		{
+			Language = "en";
+		}
 
 		public static void Reset()
 		{
@@ -153,7 +158,7 @@ namespace EffekseerTool
 
 	public class Core
 	{
-		public const string Version = "1.52f";
+		public const string Version = "1.52h";
 
 		public const string OptionFilePath = "config.option.xml";
 
@@ -310,9 +315,8 @@ namespace EffekseerTool
 				}
 			}
 		}
-
-		/*
-        public static Script.ScriptCollection<Script.CommandScript> CommandScripts
+#if SCRIPT_ENABLED
+		public static Script.ScriptCollection<Script.CommandScript> CommandScripts
 		{
 			get;
 			private set;
@@ -335,8 +339,7 @@ namespace EffekseerTool
 			get;
 			private set;
 		}
-		*/
-
+#endif
 		public static Data.OptionValues Option
 		{
 			get { return option; }
@@ -462,16 +465,14 @@ namespace EffekseerTool
 		static Core()
 		{
 			ResourceCache = new Utils.ResourceCache();
-
-			/*
+#if SCRIPT_ENABLED
 			CommandScripts = new Script.ScriptCollection<Script.CommandScript>();
 			SelectedScripts = new Script.ScriptCollection<Script.SelectedScript>();
 			ExportScripts = new Script.ScriptCollection<Script.ExportScript>();
 			ImportScripts = new Script.ScriptCollection<Script.ImportScript>();
-			*/
-
-            // change a separator
-            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+#endif
+			// change a separator
+			System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
         }
@@ -496,12 +497,12 @@ namespace EffekseerTool
 		static void InitializeScripts(string entryDirectory)
 		{
 			// Load scripts
+#if SCRIPT_ENABLED
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/import");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/export");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/command");
 			System.IO.Directory.CreateDirectory(entryDirectory + "scripts/selected");
-#if SCRIPT_ENABLED
 
 			Script.Compiler.Initialize();
 
@@ -2478,10 +2479,7 @@ namespace EffekseerTool.Binary
 					{
 						var _node = node as Data.Node;
 
-						if (!_node.IsRendered)
-						{
-						}
-						else
+						if(IsRenderedNode(_node))
 						{
 							if(_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.Default)
 							{
@@ -2638,20 +2636,23 @@ namespace EffekseerTool.Binary
                 {
                     var _node = node as Data.Node;
 
-                    if (_node.SoundValues.Type.GetValue() == Data.SoundValues.ParamaterType.None)
-                    {
-                    }
-                    else if (_node.SoundValues.Type.GetValue() == Data.SoundValues.ParamaterType.Use)
-                    {
-                        var relative_path = _node.SoundValues.Sound.Wave.RelativePath;
-                        if (relative_path != string.Empty)
-                        {
-                            if (!Sounds.Contains(relative_path))
-                            {
-                                Sounds.Add(relative_path);
-                            }
-                        }
-                    }
+					if (IsRenderedNode(_node))
+					{
+						if (_node.SoundValues.Type.GetValue() == Data.SoundValues.ParamaterType.None)
+						{
+						}
+						else if (_node.SoundValues.Type.GetValue() == Data.SoundValues.ParamaterType.Use)
+						{
+							var relative_path = _node.SoundValues.Sound.Wave.RelativePath;
+							if (relative_path != string.Empty)
+							{
+								if (!Sounds.Contains(relative_path))
+								{
+									Sounds.Add(relative_path);
+								}
+							}
+						}
+					}
                 }
 
                 for (int i = 0; i < node.Children.Count; i++)
@@ -2679,7 +2680,7 @@ namespace EffekseerTool.Binary
 				{
 					var _node = node as Data.Node;
 
-					if (_node.IsRendered && _node.DrawingValues.Type.Value == Data.RendererValues.ParamaterType.Model)
+					if (IsRenderedNode(_node) && _node.DrawingValues.Type.Value == Data.RendererValues.ParamaterType.Model)
 					{
 						var relative_path = _node.DrawingValues.Model.Model.RelativePath;
 
@@ -2756,7 +2757,7 @@ namespace EffekseerTool.Binary
 				{
 					var _node = node as Data.Node;
 
-					if (_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File)
+					if (IsRenderedNode(_node) && _node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File)
 					{
 						var relative_path = _node.RendererCommonValues.MaterialFile.Path.RelativePath;
 						if (relative_path != string.Empty)
@@ -2799,9 +2800,11 @@ namespace EffekseerTool.Binary
 					nodes.Add(_node);
 				}
 
-				for (int i = 0; i < node.Children.Count; i++)
+				var children = node.Children.Internal.Where(_ =>IsRenderedNodeGroup(_)).ToList();
+
+				for (int i = 0; i < children.Count; i++)
 				{
-					get_nodes(node.Children[i]);
+					get_nodes(children[i]);
 				}
 			};
 
@@ -2933,10 +2936,13 @@ namespace EffekseerTool.Binary
 			outout_rootnode = (n) =>
 				{
 					data.Add(((int)NodeType.Root).GetBytes());
-					data.Add(n.Children.Count.GetBytes());
-					for (int i = 0; i < n.Children.Count; i++)
+
+					var children = n.Children.Internal.Where(_ => IsRenderedNodeGroup(_)).ToList();
+
+					data.Add(children.Count.GetBytes());
+					for (int i = 0; i < children.Count; i++)
 					{
-						outout_node(n.Children[i]);
+						outout_node(children[i]);
 					}
 				};
 
@@ -3064,16 +3070,37 @@ namespace EffekseerTool.Binary
 
 				data.Add(SoundValues.GetBytes(n.SoundValues, wave_and_index));
 
-				data.Add(n.Children.Count.GetBytes());
-				for (int i = 0; i < n.Children.Count; i++)
+				var children = n.Children.Internal.Where(_ => IsRenderedNodeGroup(_)).ToList();
+
+				data.Add(children.Count.GetBytes());
+				for (int i = 0; i < children.Count; i++)
 				{
-					outout_node(n.Children[i]);
+					outout_node(children[i]);
 				}
 			};
 
 			outout_rootnode(Core.Root);
 
 			return data.ToArray().ToArray();
+		}
+
+		bool IsRenderedNode(Data.Node node)
+		{
+			return node.IsRendered.Value && node.DrawingValues.Type.Value != Data.RendererValues.ParamaterType.None;
+		}
+
+		bool IsRenderedNodeGroup(Data.Node node)
+		{
+			if (IsRenderedNode(node))
+				return true;
+
+			foreach(var n in node.Children.Internal)
+			{
+				if (IsRenderedNodeGroup(n))
+					return true;
+			}
+
+			return false;
 		}
 	}
 }
@@ -11180,10 +11207,13 @@ namespace EffekseerTool.Data
 
 				if(version > 0)
 				{
+					// TODO : rename to unity flag
+#if SCRIPT_ENABLED
 					var labels = key.Split(' ');
 					status.Name = System.Net.WebUtility.UrlDecode(labels[0]);
 					status.UniformName = System.Net.WebUtility.UrlDecode(labels[1]);
 					status.Footer = labels[2];
+#endif
 					return status;
 				}
 				else
@@ -11236,7 +11266,12 @@ namespace EffekseerTool.Data
 
 			public override string ToString()
 			{
+				// TODO : rename to unity flag
+#if SCRIPT_ENABLED
 				return System.Net.WebUtility.UrlEncode(Name) + " " + System.Net.WebUtility.UrlEncode(UniformName) + " " + Footer;
+#else
+				return string.Empty;
+#endif
 			}
 		}
 
@@ -18795,7 +18830,11 @@ namespace EffekseerTool.Utils
 					else
 					{
 						rows.Add(sb.ToString());
+#if SCRIPT_ENABLED
 						sb.Clear();
+#else
+						sb = new StringBuilder();
+#endif
 						isStarting = true;
 					}
 				}
@@ -18809,7 +18848,11 @@ namespace EffekseerTool.Utils
 					else
 					{
 						rows.Add(sb.ToString());
+#if SCRIPT_ENABLED
 						sb.Clear();
+#else
+						sb = new StringBuilder();
+#endif
 						columns.Add(rows);
 						rows = new List<string>();
 						isStarting = true;
@@ -18833,6 +18876,34 @@ namespace EffekseerTool.Utils
 			}
 
 			return columns;
+		}
+	}
+}
+
+namespace EffekseerTool.Utils
+{
+	public static class Logger
+	{
+		public static string LogPath;
+
+		static object lockObject = new object();
+
+		public static void Write(string log)
+		{
+			try
+			{
+				if (!string.IsNullOrEmpty(log))
+				{
+					lock (lockObject)
+					{
+						System.IO.File.AppendAllText(LogPath, log + "\n");
+					}
+				}
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e.ToString());
+			}
 		}
 	}
 }
@@ -18931,6 +19002,8 @@ namespace EffekseerTool.Utils
 	{
 		public static unsafe byte[] Compress(byte[] buffer)
 		{
+			// TODO : rename to unity flag
+#if SCRIPT_ENABLED
 			using (var compressStream = new System.IO.MemoryStream())
 			using (var compressor = new System.IO.Compression.DeflateStream(compressStream, System.IO.Compression.CompressionLevel.Optimal))
 			{
@@ -18951,10 +19024,15 @@ namespace EffekseerTool.Utils
 
 				return dst.SelectMany(_ => _).ToArray();
 			}
+#else
+			return null;
+#endif
 		}
 
 		public static byte[] Decompress(byte[] buffer)
 		{
+			// TODO : rename to unity flag
+#if SCRIPT_ENABLED
 			var decompressBuffer = new List<byte>();
 			using (var decompressStream = new System.IO.MemoryStream(buffer.Skip(2).Take(buffer.Length - 4).ToArray()))
 			using (var decompressor = new System.IO.Compression.DeflateStream(decompressStream, System.IO.Compression.CompressionMode.Decompress))
@@ -18969,6 +19047,9 @@ namespace EffekseerTool.Utils
 			}
 
 			return decompressBuffer.ToArray();
+#else
+			return null;
+#endif
 		}
 
 		static unsafe UInt32 CalcAdler32(byte* data, UInt32 len)
@@ -19303,6 +19384,8 @@ namespace EffekseerTool.IO
 
 		public bool Save(string path)
 		{
+			Utils.Logger.Write(string.Format("Save : Start : {0}", path));
+
 			// editor data
 			var editorData = Core.SaveAsXmlDocument(path);
 
@@ -19386,8 +19469,12 @@ namespace EffekseerTool.IO
 					Core.OnOutputMessage(messeage);
 				}
 
+				Utils.Logger.Write(string.Format("Save : Failed : {0}", e.ToString()));
+
 				return false;
 			}
+
+			Utils.Logger.Write(string.Format("Save : End"));
 
 			return true;
 		}

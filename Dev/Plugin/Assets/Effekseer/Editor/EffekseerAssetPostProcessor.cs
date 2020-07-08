@@ -103,14 +103,7 @@ namespace Effekseer.Editor
 
 					EffekseerMaterialAsset.CreateAsset(assetPath, importingAsset);
 				}
-				if (Path.GetExtension(assetPath) == ".efkproj")
-				{
-					EffekseerTool.Core.LoadFrom(assetPath);
-					var exporter = new EffekseerTool.Binary.Exporter();
-					var data = exporter.Export(1);
-					EffekseerEffectAsset.CreateAsset(assetPath, data);
-				}
-				if (Path.GetExtension(assetPath) == ".efkefc")
+				if (Path.GetExtension(assetPath) == ".efkproj" || Path.GetExtension(assetPath) == ".efkefc")
 				{
 					var fullpath = System.IO.Path.GetFullPath(assetPath);
 					if (!System.IO.File.Exists(fullpath)) return;
@@ -123,23 +116,33 @@ namespace Effekseer.Editor
 						allData[2] != 'K' ||
 						allData[3] != 'E')
 					{
-						return;
+						// Before 1.5
+						if (EffekseerTool.Core.LoadFrom(assetPath))
+						{
+							var exporter = new EffekseerTool.Binary.Exporter();
+							var data = exporter.Export(1);
+							EffekseerEffectAsset.CreateAsset(assetPath, data);
+						}
 					}
-
-					var version = System.BitConverter.ToInt32(allData, 4);
-
-					var chunkData = allData.Skip(8).ToArray();
-
-					var chunk = new EffekseerTool.IO.Chunk();
-					chunk.Load(chunkData);
-
-					var binBlock = chunk.Blocks.FirstOrDefault(_ => _.Chunk == "BIN_");
-					if (binBlock == null)
+					else
 					{
-						return;
+						// After 1.5
+						var version = System.BitConverter.ToInt32(allData, 4);
+
+						var chunkData = allData.Skip(8).ToArray();
+
+						var chunk = new EffekseerTool.IO.Chunk();
+						chunk.Load(chunkData);
+
+						var binBlock = chunk.Blocks.FirstOrDefault(_ => _.Chunk == "BIN_");
+						if (binBlock == null)
+						{
+							return;
+						}
+
+						EffekseerEffectAsset.CreateAsset(assetPath, binBlock.Buffer);
 					}
 
-					EffekseerEffectAsset.CreateAsset(assetPath, binBlock.Buffer);
 				}
 			}
 		}
