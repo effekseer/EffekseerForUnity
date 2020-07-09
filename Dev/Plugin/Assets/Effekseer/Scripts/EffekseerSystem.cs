@@ -298,8 +298,13 @@ namespace Effekseer
 
 				if (SystemInfo.supportsComputeShaders)
 				{
+					int maxComputeBufferInputsVertex = 0;
+#if UNITY_2019_3_OR_NEWER
+					maxComputeBufferInputsVertex = SystemInfo.maxComputeBufferInputsVertex;
+#endif
+
 					if ((SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
-						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3) && !SystemInfo.supportsGeometryShaders
+						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3) && maxComputeBufferInputsVertex == 0
 
 					)
 					{
