@@ -298,16 +298,9 @@ namespace Effekseer
 
 				if (SystemInfo.supportsComputeShaders)
 				{
-					if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
-						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3
-#if !(UNITY_WEBGL)
-#if UNITY_2017_4_OR_NEWER
-						&& !PlayerSettings.openGLRequireES31 && !PlayerSettings.openGLRequireES31AEP
-#endif
-#if UNITY_2019_2_OR_NEWER
-						&& !PlayerSettings.openGLRequireES32
-#endif
-#endif
+					if ((SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
+						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3) && !SystemInfo.supportsGeometryShaders
+
 					)
 					{
 						Debug.LogWarning("[Effekseer] Graphics API \"" + SystemInfo.graphicsDeviceType + "\" has many limitations with ComputeShader. Renderer is changed into Native.");
