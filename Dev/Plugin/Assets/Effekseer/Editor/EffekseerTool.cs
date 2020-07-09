@@ -3086,7 +3086,9 @@ namespace EffekseerTool.Binary
 
 		bool IsRenderedNode(Data.Node node)
 		{
-			return node.IsRendered.Value && node.DrawingValues.Type.Value != Data.RendererValues.ParamaterType.None;
+			var rendered = node.IsRendered.Value && node.DrawingValues.Type.Value != Data.RendererValues.ParamaterType.None;
+			var hasSound = node.SoundValues.Type.GetValue() == Data.SoundValues.ParamaterType.Use;
+			return rendered || hasSound;
 		}
 
 		bool IsRenderedNodeGroup(Data.Node node)
@@ -18830,6 +18832,7 @@ namespace EffekseerTool.Utils
 					else
 					{
 						rows.Add(sb.ToString());
+						// TODO : rename to unity flag
 #if SCRIPT_ENABLED
 						sb.Clear();
 #else
@@ -18848,6 +18851,7 @@ namespace EffekseerTool.Utils
 					else
 					{
 						rows.Add(sb.ToString());
+						// TODO : rename to unity flag
 #if SCRIPT_ENABLED
 						sb.Clear();
 #else
