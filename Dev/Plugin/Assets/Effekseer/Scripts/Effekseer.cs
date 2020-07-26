@@ -120,6 +120,9 @@ namespace Effekseer
 		public static extern void EffekseerUpdateHandle(int handle, float deltaDrame);
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerUpdateHandleToMoveToFrame(int handle, float frame);
+
+		[DllImport(pluginName)]
 		public static extern void EffekseerStopEffect(int handle);
 
 		[DllImport(pluginName)]

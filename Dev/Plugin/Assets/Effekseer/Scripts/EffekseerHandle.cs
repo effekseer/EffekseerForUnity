@@ -29,7 +29,7 @@ namespace Effekseer
 		}
 
 		/// <summary>
-		/// Don't touch it!!
+		/// Update a single effect (almost for Editor)
 		/// </summary>
 		public void UpdateHandle(float deltaFrame)
 		{
@@ -37,6 +37,15 @@ namespace Effekseer
 			Plugin.EffekseerSetTimeScaleByGroup(2, 1);
 
 			Plugin.EffekseerUpdateHandle(m_handle, deltaFrame);
+		}
+
+		/// <summary>
+		/// Update to move the specified frame (almost for Editor)
+		/// </summary>
+		/// <param name="frame"></param>
+		public void UpdateHandleToMoveToFrame(float frame)
+		{
+			Plugin.EffekseerUpdateHandleToMoveToFrame(m_handle, frame);
 		}
 		
 		/// <summary xml:lang="en">

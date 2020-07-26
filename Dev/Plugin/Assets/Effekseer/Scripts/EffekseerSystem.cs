@@ -37,7 +37,18 @@ namespace Effekseer
 		public static EffekseerHandle PlayEffect(EffekseerEffectAsset effectAsset, Vector3 location)
 		{
 			if (Instance == null) {
+#if UNITY_EDITOR
+				if(Application.isPlaying)
+				{
+					Debug.LogError("[Effekseer] System is not initialized.");
+				}
+				else
+				{
+					Debug.LogError("[Effekseer] System is not initialized. Please call EffekseerEditor.instance.InitSystem");
+				}
+#else
 				Debug.LogError("[Effekseer] System is not initialized.");
+#endif
 				return new EffekseerHandle(-1);
 			}
 			if (effectAsset == null) {
@@ -86,7 +97,7 @@ namespace Effekseer
 			get { return Plugin.EffekseerGetRestInstancesCount(); }
 		}
 
-		#region Network
+#region Network
 		/// <summary xml:lang="en">
 		/// start a server to edit effects from remote
 		/// </summary>
@@ -108,9 +119,9 @@ namespace Effekseer
 		{
 			Plugin.StopNetwork();
 		}
-		#endregion
+#endregion
 
-		#region Internal Implimentation
+#region Internal Implimentation
 
 
 		// Singleton instance

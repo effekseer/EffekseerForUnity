@@ -194,6 +194,18 @@ extern "C"
 		g_EffekseerManager->EndUpdate();
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateHandleToMoveToFrame(int handle, float frame)
+	{
+		if (g_EffekseerManager == NULL)
+		{
+			return;
+		}
+
+		g_EffekseerManager->BeginUpdate();
+		g_EffekseerManager->UpdateHandleToMoveToFrame(handle, frame);
+		g_EffekseerManager->EndUpdate();
+	}
+
 	// エフェクト停止
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerStopEffect(int handle)
 	{

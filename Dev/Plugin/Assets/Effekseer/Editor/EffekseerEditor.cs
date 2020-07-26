@@ -28,6 +28,9 @@ namespace Effekseer.Editor
 			inEditor = !Application.isPlaying;
 		}
 
+		/// <summary>
+		/// Initialize Effekseer on Editor
+		/// </summary>
 		public void InitSystem()
 		{
 			if (!inEditor) {
@@ -42,6 +45,9 @@ namespace Effekseer.Editor
 			}
 		}
 
+		/// <summary>
+		/// Terminate Effekseer on Editor
+		/// </summary>
 		public void TermSystem()
 		{
 			if (!inEditor) {
