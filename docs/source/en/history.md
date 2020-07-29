@@ -1,5 +1,9 @@
 ﻿# Release notes
 
+### 1.52i (2020/07/30)
+
+- Upgrade to Effekseer 1.52i
+
 ### 1.52h (2020/07/09)
 
 - Upgrade to Effekseer 1.52h
