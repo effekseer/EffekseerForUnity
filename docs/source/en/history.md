@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+### 1.52i (2020/07/30)
+
+- Upgrade to Effekseer 1.52i
+
+### 1.52h (2020/07/09)
+
+- Upgrade to Effekseer 1.52h
+- Fixed a bug that Opacity Shader is not drawn correctly
+- Unity shader is disabled in OpenGL with some devices
+- Removed Zlib
+
 ### 1.52g (2020/06/09)
 
 - Upgrade to Effekseer 1.52g
