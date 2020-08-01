@@ -23,6 +23,7 @@ namespace Effekseer
 
 		public override void Create()
 		{
+			Debug.LogWarning("Plese use URP, LWRP for Effekseer is deprecated. If you use it, please check Opaque Texture");
 		}
 
 		public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -41,7 +42,6 @@ namespace Effekseer
 
 		public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
 		{
-			Debug.LogWarning("Plese use URP, LWRP for Effekseer is deprecated.");
 			this.cameraColorTarget = cameraColorTarget;
 			this.cameraDepthTarget = cameraDepthTarget;
 			this.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
