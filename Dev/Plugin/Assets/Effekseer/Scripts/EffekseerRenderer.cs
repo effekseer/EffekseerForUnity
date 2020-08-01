@@ -65,7 +65,17 @@ namespace Effekseer.Internal
 			}
 			else if(isRequiredToCopyBackground)
 			{
-				cb.CopyTexture(colorTargetIdentifier, new RenderTargetIdentifier(backgroundRenderTexture.renderTexture));
+				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+
+				if (depthTargetIdentifier.HasValue)
+				{
+					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
+				}
+				else
+				{
+					cb.SetRenderTarget(colorTargetIdentifier);
+				}
+				//cb.CopyTexture(colorTargetIdentifier, new RenderTargetIdentifier(backgroundRenderTexture.renderTexture));
 			}
 			else
 			{
@@ -201,6 +211,7 @@ namespace Effekseer.Internal
 			if (renderTargetProperty != null)
 			{
 				renderTexture = new RenderTexture(renderTargetProperty.colorTargetDescriptor);
+				renderTexture.antiAliasing = 1;
 			}
 			else
 			{
