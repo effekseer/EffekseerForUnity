@@ -198,18 +198,15 @@ namespace Effekseer.Internal
 				height = renderTargetProperty.colorTargetDescriptor.height;
 			}
 
-#if UNITY_STANDALONE_WIN
 			if (renderTargetProperty != null)
 			{
-				renderTexture = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear);
+				renderTexture = new RenderTexture(renderTargetProperty.colorTargetDescriptor);
 			}
 			else
 			{
 				renderTexture = new RenderTexture(width, height, 0, format);
 			}
-#else
-			renderTexture = new RenderTexture(width, height, 0, format);
-#endif
+
 			if(renderTexture != null)
 			{
 				renderTexture.name = "EffekseerBackground";
@@ -218,7 +215,7 @@ namespace Effekseer.Internal
 
 		public bool Create()
 		{
-			// HACK for ZenPhone (cannot understand)
+			// HACK for ZenPhone
 			if (this.renderTexture == null || !this.renderTexture.Create())
 			{
 				this.renderTexture = null;

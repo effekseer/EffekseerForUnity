@@ -41,6 +41,7 @@ namespace Effekseer
 
 		public EffekseerRenderPassLWRP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
 		{
+			Debug.LogWarning("Plese use URP, LWRP for Effekseer is deprecated.");
 			this.cameraColorTarget = cameraColorTarget;
 			this.cameraDepthTarget = cameraDepthTarget;
 			this.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
