@@ -221,7 +221,7 @@
 			float4 ret = vcolor * tex2D(_ColorTex, uv1);
 			ret.xyz = ret.xyz * (lightColor.xyz * diffuse + lightAmbientColor.xyz);
 
-			if (ret.w <= 0.0f)
+			if (ret.w <= 0.0f || ret.w > 1.01f)
 			{
 				discard;
 			}
