@@ -128,7 +128,7 @@ Properties{
 
 			color.xyz = tex2D(_BackTex, uv).xyz;
 
-			if (color.w <= 0.0f || color.w > 1.01f)
+			if (color.w <= 0.0f)
 			{
 				discard;
 			}

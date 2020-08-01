@@ -89,7 +89,7 @@ SubShader{
 	{
 		float4 color = tex2D(_ColorTex, i.uv) * i.color;
 
-		if (color.w <= 0.0f || color.w > 1.01f)
+		if (color.w <= 0.0f)
 		{
 			discard;
 		}
