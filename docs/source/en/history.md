@@ -3,7 +3,14 @@
 ### 1.52j (2020/08/02)
 
 - Upgrade to Effekseer 1.52j
+
+Fixed a bug that caused crashes on x86.
+
 - Improved behavior of URP and HDRP
+
+Fixed a bug that caused URP to continuously display errors.
+
+Distortion behavior is fixed.
 
 ### 1.52i (2020/07/30)
 
