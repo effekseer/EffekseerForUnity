@@ -1,5 +1,10 @@
 ﻿# Release notes
 
+### 1.52j (2020/08/02)
+
+- Upgrade to Effekseer 1.52j
+- Improved behavior of URP and HDRP
+
 ### 1.52i (2020/07/30)
 
 - Upgrade to Effekseer 1.52i
