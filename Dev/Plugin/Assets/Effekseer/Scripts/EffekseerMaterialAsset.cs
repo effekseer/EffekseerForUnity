@@ -109,6 +109,16 @@ namespace Effekseer
 
 #if UNITY_EDITOR
 		/// <summary>
+		/// To avoid reserved name
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		static string EscapePropertyName(string name)
+		{
+			return "_" + name + "_Tex";
+		}
+
+		/// <summary>
 		/// to avoid unity bug
 		/// </summary>
 		/// <param name="path"></param>
@@ -130,13 +140,16 @@ namespace Effekseer
 			if(importingAsset.CustomData2Count > 0)
 				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
 
-			// avoid space
+			// modifiy importing asset to avoid invalid name
 			foreach(var texture in importingAsset.Textures)
 			{
 				if(texture.Name == string.Empty)
 				{
 					texture.Name = texture.UniformName;
 				}
+
+				// Escape
+				texture.Name = EscapePropertyName(texture.Name);
 			}
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
@@ -366,6 +379,9 @@ namespace Effekseer
 				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
 				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
 			}
+
+			// change return codes
+			code = code.Replace("\r\n", "\n");
 
 			AssetDatabase.StartAssetEditing();
 
