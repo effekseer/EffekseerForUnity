@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <Effekseer.h>
+#include <mutex>
 #include "EffekseerPluginCommon.h"
 
 namespace EffekseerPlugin
@@ -41,10 +42,11 @@ namespace EffekseerPlugin
 		};
 
 		struct ModelResource {
+			std::mutex mtx;
 			int referenceCount = 1;
-			void* internalData;
+			void* internalData = nullptr;
 		};
-		std::map<std::u16string, ModelResource> resources;
+		std::map<std::u16string, std::shared_ptr<ModelResource>> resources;
 		MemoryFile memoryFile;
 		std::unique_ptr<Effekseer::ModelLoader> internalLoader;
 

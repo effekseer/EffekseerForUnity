@@ -17,7 +17,79 @@
 
 #include "../opengl/EffekseerPluginLoaderGL.h"
 
+#include "LasyModelDX11.h"
+
 using namespace Effekseer;
+
+namespace EffekseerPlugin
+{
+
+	class LasyModelLoaderDX11
+		: public ::Effekseer::ModelLoader
+	{
+	private:
+		ID3D11Device* device;
+		::Effekseer::FileInterface* m_fileInterface;
+		::Effekseer::DefaultFileInterface m_defaultFileInterface;
+
+	public:
+		LasyModelLoaderDX11(ID3D11Device* device, ::Effekseer::FileInterface* fileInterface);
+		virtual ~LasyModelLoaderDX11();
+
+	public:
+		void* Load(const EFK_CHAR* path);
+
+		void Unload(void* data);
+	};
+
+	LasyModelLoaderDX11::LasyModelLoaderDX11(ID3D11Device* device, ::Effekseer::FileInterface* fileInterface)
+		: device(device)
+		, m_fileInterface(fileInterface)
+	{
+		ES_SAFE_ADDREF(device);
+
+		if (m_fileInterface == NULL)
+		{
+			m_fileInterface = &m_defaultFileInterface;
+		}
+	}
+
+	LasyModelLoaderDX11::~LasyModelLoaderDX11()
+	{
+		ES_SAFE_RELEASE(device);
+	}
+
+	void* LasyModelLoaderDX11::Load(const EFK_CHAR* path)
+	{
+		std::auto_ptr<::Effekseer::FileReader>
+			reader(m_fileInterface->OpenRead(path));
+		if (reader.get() == NULL) return false;
+
+		if (reader.get() != NULL)
+		{
+			size_t size_model = reader->GetLength();
+			uint8_t* data_model = new uint8_t[size_model];
+			reader->Read(data_model, size_model);
+
+			LasyModelDX11* model = new LasyModelDX11(device, data_model, size_model);
+
+			delete[] data_model;
+
+			return (void*)model;
+		}
+
+		return NULL;
+	}
+
+	void LasyModelLoaderDX11::Unload(void* data)
+	{
+		if (data != NULL)
+		{
+			LasyModelDX11* model = (LasyModelDX11*)data;
+			delete model;
+		}
+	}
+}
 
 namespace EffekseerPlugin
 {
@@ -136,7 +208,12 @@ namespace EffekseerPlugin
 		ModelLoaderUnload unload)
 	{
 		auto loader = new ModelLoader( load, unload );
-		auto internalLoader = g_EffekseerRenderer->CreateModelLoader( loader->GetFileInterface() );
+
+		// Windows‚È‚ç•K‚¸DX11‚Æ‚·‚é (DX12‚Í–¢‘Î‰ž‚Ì‚½‚ß)
+		auto r = (EffekseerRendererDX11::Renderer*)(g_EffekseerRenderer);
+		auto internalLoader = new LasyModelLoaderDX11( r->GetDevice(), loader->GetFileInterface());
+
+		//auto internalLoader = g_EffekseerRenderer->CreateModelLoader( loader->GetFileInterface() );
 		loader->SetInternalLoader( internalLoader );
 		return loader;
 	}

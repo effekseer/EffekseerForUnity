@@ -1,6 +1,11 @@
 #include <algorithm>
 #include "EffekseerPluginModel.h"
 
+#ifdef _WIN32
+#include "../windows/RenderThreadEventQueue.h"
+#include "../windows/LasyModelDX11.h"
+#endif
+
 namespace EffekseerPlugin
 {
 	ModelLoader::MemoryFileReader::MemoryFileReader(uint8_t* data, size_t length)
@@ -58,12 +63,12 @@ namespace EffekseerPlugin
 		// リソーステーブルを検索して存在したらそれを使う
 		auto it = resources.find((const char16_t*)path);
 		if (it != resources.end()) {
-			it->second.referenceCount++;
-			return it->second.internalData;
+			it->second->referenceCount++;
+			return it->second->internalData;
 		}
 
 		// Load with unity
-		ModelResource res;
+		auto res = std::make_shared< ModelResource>();
 		int size = load( (const char16_t*)path, &memoryFile.loadbuffer[0], (int)memoryFile.loadbuffer.size() );
 
 		if (size == 0)
@@ -89,11 +94,27 @@ namespace EffekseerPlugin
 
 		// 内部ローダに渡してロード処理する
 		memoryFile.loadsize = (size_t)size;
-		res.internalData = internalLoader->Load( path );
-			
-		resources.insert( std::make_pair(
-			(const char16_t*)path, res ) );
-		return res.internalData;
+		res->internalData = internalLoader->Load( path );
+
+		// DX11前提
+#ifdef _WIN32
+
+		RenderThreadEventQueue::GetInstance()->AddEvent([res]()-> void {
+			std::lock_guard<std::mutex> lock(res->mtx);
+
+			if (res->referenceCount > 0)
+			{
+				auto lasyModel = (LasyModelDX11*)res->internalData;
+				lasyModel->LoadActually();
+			}
+		});
+
+#endif
+
+		auto key = std::u16string((const char16_t*)path);
+		resources.insert(std::make_pair(
+			key, res));
+		return res->internalData;
 	}
 	void ModelLoader::Unload( void* source ){
 		if (source == nullptr) {
@@ -102,15 +123,19 @@ namespace EffekseerPlugin
 
 		// アンロードするモデルを検索
 		auto it = std::find_if(resources.begin(), resources.end(), 
-			[source](const std::pair<std::u16string, ModelResource>& pair){
-				return pair.second.internalData == source;
+			[source](const std::pair<std::u16string, std::shared_ptr<ModelResource>>& pair){
+				return pair.second->internalData == source;
 			});
 
 		// 参照カウンタが0になったら実際にアンロード
-		it->second.referenceCount--;
-		if (it->second.referenceCount <= 0)
+		auto res = it->second;
+
+		std::lock_guard<std::mutex> lock(res->mtx);
+
+		res->referenceCount--;
+		if (res->referenceCount <= 0)
 		{
-			internalLoader->Unload(it->second.internalData);
+			internalLoader->Unload(res->internalData);
 			unload(it->first.c_str());
 			resources.erase(it);
 		}

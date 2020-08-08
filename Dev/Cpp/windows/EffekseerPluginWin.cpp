@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <shlwapi.h>
+#include <functional>
 
 #include "Effekseer.h"
 
@@ -19,6 +20,8 @@
 
 #include "../Device/EffekseerPluginDX9.h"
 #include "../Device/EffekseerPluginDX11.h"
+
+#include "../windows/RenderThreadEventQueue.h"
 
 #pragma comment(lib, "shlwapi.lib")
 
@@ -125,6 +128,8 @@ namespace EffekseerPlugin
 		g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
 		g_EffekseerManager->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
 		g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+
+		RenderThreadEventQueue::Initialize();
 	}
 
 	void TermRenderer()
@@ -140,6 +145,9 @@ namespace EffekseerPlugin
 			}
 			renderSettings[i].backgroundTexture = nullptr;
 		}
+
+		RenderThreadEventQueue::GetInstance()->Execute();
+		RenderThreadEventQueue::Terminate();
 
 		if (g_EffekseerRenderer != NULL)
 		{
@@ -288,6 +296,7 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// •`‰æŽÀs(‘S‘Ì)
+		RenderThreadEventQueue::GetInstance()->Execute();
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw();
 		g_EffekseerRenderer->EndRendering();
@@ -303,6 +312,7 @@ extern "C"
 
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 
+		RenderThreadEventQueue::GetInstance()->Execute();
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront();
 		g_EffekseerRenderer->EndRendering();
@@ -379,6 +389,7 @@ extern "C"
 		SetBackGroundTexture(settings.backgroundTexture);
 
 		// •`‰æŽÀs(‘S‘Ì)
+		RenderThreadEventQueue::GetInstance()->Execute();
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawBack();
 		g_EffekseerRenderer->EndRendering();
