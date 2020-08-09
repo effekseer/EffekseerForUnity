@@ -146,8 +146,11 @@ namespace EffekseerPlugin
 			renderSettings[i].backgroundTexture = nullptr;
 		}
 
-		RenderThreadEventQueue::GetInstance()->Execute();
-		RenderThreadEventQueue::Terminate();
+		if (!RenderThreadEventQueue::IsTerminated())
+		{
+			RenderThreadEventQueue::GetInstance()->Execute();
+			RenderThreadEventQueue::Terminate();
+		}
 
 		if (g_EffekseerRenderer != NULL)
 		{
