@@ -137,6 +137,10 @@ namespace Effekseer.Editor
 				// avoid a bug playing effect sometimes causes craches after window size is changed.
 				// Unity, Effekseer, or driver bug
 				Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
+
+				// Load an effect actually
+				EffekseerSystem.Instance.LoadEffect(emitter.effectAsset);
+
 				emitter.Play();
 			}
 			if (GUILayout.Button("Stop")) {
