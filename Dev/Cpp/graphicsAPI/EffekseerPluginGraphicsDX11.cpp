@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <assert.h>
 
+#include "../common/EffekseerPluginMaterial.h"
+
 // TODO is default OK?
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -135,6 +137,7 @@ bool GraphicsDX11::Initialize(IUnityInterfaces* unityInterface)
 	d3d11Device = unityInterface->Get<IUnityGraphicsD3D11>()->GetDevice();
 	d3d11Device->GetImmediateContext(&d3d11Context);
 	ES_SAFE_ADDREF(d3d11Device);
+	MaterialEvent::Initialize();
 	return true;
 }
 
@@ -146,6 +149,7 @@ void GraphicsDX11::AfterReset(IUnityInterfaces* unityInterface)
 
 void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface)
 {
+	MaterialEvent::Terminate();
 	renderer_ = nullptr;
 	ES_SAFE_RELEASE(d3d11Context);
 	ES_SAFE_RELEASE(d3d11Device);
