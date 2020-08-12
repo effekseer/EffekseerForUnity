@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <assert.h>
 
+#include "../common/EffekseerPluginMaterial.h"
+
 namespace EffekseerPlugin
 {
 
@@ -90,10 +92,12 @@ bool GraphicsDX9::Initialize(IUnityInterfaces* unityInterfaces)
 {
 	d3d9Device = unityInterfaces->Get<IUnityGraphicsD3D9>()->GetDevice();
 	ES_SAFE_ADDREF(d3d9Device);
+	MaterialEvent::Initialize();
 	return true;
 }
 
 void GraphicsDX9::Shutdown(IUnityInterfaces* unityInterface) { 
+	MaterialEvent::Terminate();
 	renderer_ = nullptr;
 	ES_SAFE_RELEASE(d3d9Device);
 }
