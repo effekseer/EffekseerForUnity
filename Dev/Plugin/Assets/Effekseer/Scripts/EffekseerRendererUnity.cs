@@ -1185,8 +1185,24 @@ namespace Effekseer.Internal
 					if (texture != null)
 					{
 						prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
-						texture.wrapMode = TextureWrapMode.Repeat;
-						texture.filterMode = FilterMode.Bilinear;
+
+						if (parameter.TextureWrapTypes[ti] == 0)
+						{
+							texture.wrapMode = TextureWrapMode.Repeat;
+						}
+						else
+						{
+							texture.wrapMode = TextureWrapMode.Clamp;
+						}
+
+						if (parameter.TextureFilterTypes[ti] == 0)
+						{
+							texture.filterMode = FilterMode.Point;
+						}
+						else
+						{
+							texture.filterMode = FilterMode.Bilinear;
+						}
 					}
 				}
 
@@ -1389,8 +1405,24 @@ namespace Effekseer.Internal
 						if (texture != null)
 						{
 							prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
-							texture.wrapMode = TextureWrapMode.Repeat;
-							texture.filterMode = FilterMode.Bilinear;
+
+							if (parameter.TextureWrapTypes[ti] == 0)
+							{
+								texture.wrapMode = TextureWrapMode.Repeat;
+							}
+							else
+							{
+								texture.wrapMode = TextureWrapMode.Clamp;
+							}
+
+							if (parameter.TextureFilterTypes[ti] == 0)
+							{
+								texture.filterMode = FilterMode.Point;
+							}
+							else
+							{
+								texture.filterMode = FilterMode.Bilinear;
+							}
 						}
 					}
 
