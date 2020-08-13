@@ -1,7 +1,7 @@
 import shutil
 import os
 
-version = '152j2'
+version = '152k'
 
 package_name = 'EffekseerForUnity{}/'.format(version)
 if os.path.exists(package_name):
