@@ -166,6 +166,23 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	if (model == nullptr)
 		return;
 
+	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
+	{
+		if (parameter.BasicParameterPtr->MaterialParameterPtr == nullptr ||
+			parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex < 0)
+		{
+			return;
+		}
+
+		Effekseer::MaterialData* material =
+			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex);
+
+		if (material == nullptr)
+		{
+			return;
+		}
+	}
+
 	SortTemporaryValues(m_renderer, parameter);
 
 	bool fileRefraction = false;
@@ -375,8 +392,8 @@ void RendererImplemented::SetRestorationOfStatesFlag(bool flag)
 
 bool RendererImplemented::BeginRendering()
 {
-    impl->CalculateCameraProjectionMatrix();
-    
+	impl->CalculateCameraProjectionMatrix();
+
 	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
@@ -479,6 +496,16 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
 	{
+		if (m_currentShader == nullptr)
+		{
+			return;
+		}
+
+		if (m_currentShader->GetMaterial() == nullptr)
+		{
+			return;
+		}
+
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
 
