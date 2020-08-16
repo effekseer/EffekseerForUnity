@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+### 1.52k (2020/08/16)
+
+- Upgrade to Effekseer 1.52k
+- Fixed a bug where effects would not play when switching emitters after playing an emitter in the Scene window.
+- Fixed a bug that prevented material compilation if the material contains a reserved word
+- Supports material wrapping and repeats
+
 ### 1.52j (2020/08/02)
 
 - Upgrade to Effekseer 1.52j
