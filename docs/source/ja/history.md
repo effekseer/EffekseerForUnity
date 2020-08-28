@@ -1,6 +1,6 @@
 ﻿# 更新履歴
 
-### 1.52l (2020/08/18)
+### 1.52l 以降
 
 - ツールの [リリースノート](https://effekseer.github.io/Help_Tool/ja/releasenotes.html) を読んでください。
 

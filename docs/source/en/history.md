@@ -1,6 +1,6 @@
 ﻿# Release notes
 
-### 1.52l (2020/08/18)
+### 1.52l or later
 
 - Please read Tool [release notes](https://effekseer.github.io/Help_Tool/en/releasenotes.html)
 
