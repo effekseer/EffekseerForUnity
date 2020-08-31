@@ -127,6 +127,13 @@ namespace Effekseer
 		[SerializeField]
 		public Shader texture2DBlitMaterial = null;
 
+		/// <summary>
+		/// A shader to avoid a unity bug
+		/// </summary>
+		[SerializeField]
+		public Shader fakeMaterial = null;
+
+
 		#region Network
 		/// <summary xml:lang="en">
 		/// A network port to edit effects from remote
@@ -166,19 +173,28 @@ namespace Effekseer
 #else
 		[MenuItem("Edit/Project Settings/Effekseer")]
 #endif 
-	public static void EditOrCreateAsset()
+		public static void EditOrCreateAsset()
+		{
+			var asset = AssignAssets();
+			EditorGUIUtility.PingObject(asset);
+			Selection.activeObject = asset;
+		}
+
+		public static EffekseerSettings AssignAssets()
 		{
 			const string assetDir = "Assets/Effekseer";
 			const string materialDir = assetDir + "/Materials";
 			const string resourcesDir = assetDir + "/Resources";
 			const string assetPath = resourcesDir + "/EffekseerSettings.asset";
 
-			if (!AssetDatabase.IsValidFolder(resourcesDir)) {
+			if (!AssetDatabase.IsValidFolder(resourcesDir))
+			{
 				AssetDatabase.CreateFolder(assetDir, "Resources");
 			}
 			var asset = AssetDatabase.LoadAssetAtPath<EffekseerSettings>(assetPath);
 
-			if (asset == null) {
+			if (asset == null)
+			{
 				asset = CreateInstance<EffekseerSettings>();
 				asset.standardShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardShader.shader");
 				asset.standardDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardDistortionShader.shader");
@@ -187,13 +203,31 @@ namespace Effekseer
 				asset.standardLightingShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardLightingShader.shader");
 				asset.texture2DArrayBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DArrayBlitShader.shader");
 				asset.texture2DBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DBlitShader.shader");
-
+				asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
 				AssetDatabase.CreateAsset(asset, assetPath);
 				AssetDatabase.Refresh();
 			}
+			else
+			{
+				bool dirtied = false;
+				if (asset.fakeMaterial == null)
+				{
+					asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
 
-			EditorGUIUtility.PingObject(asset);
-			Selection.activeObject = asset;
+					if(asset.fakeMaterial != null)
+					{
+						dirtied = true;
+					}
+				}
+
+				if (dirtied)
+				{
+					EditorUtility.SetDirty(asset);
+					AssetDatabase.Refresh();
+				}
+			}
+
+			return asset;
 		}
 #endif
 	}

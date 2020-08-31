@@ -27,12 +27,30 @@ namespace Effekseer.Internal
 			/// </summary>
 			bool isDistortionMakeDisabledForcely = false;
 
+			Material fakeMaterial = null;
+
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
 				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
+
+				var fakeShader = EffekseerSettings.Instance.fakeMaterial;
+#if UNITY_EDITOR
+				if (fakeShader == null)
+				{
+					EffekseerSettings.AssignAssets();
+				}
+				fakeShader = EffekseerSettings.Instance.fakeMaterial;
+#endif
+
+#if UNITY_EDITOR || UNITY_PS4
+				if (fakeShader != null)
+				{
+					fakeMaterial = new Material(EffekseerSettings.Instance.fakeMaterial);
+				}
+#endif
 			}
 
 			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty
@@ -141,6 +159,12 @@ namespace Effekseer.Internal
 					{
 						cmbBuf.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
 						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+
+						// to reset shader settings. SetRenderTarget is not applied until drawing
+						if(fakeMaterial != null)
+						{
+							cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
+						}
 					}
 				}
 
