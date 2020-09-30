@@ -63,15 +63,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Cache emsdk
-        id: cache
-        uses: actions/cache@v1
-        with:
-          path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_38-v1
-      - name: install emsdk 1.38
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
+      - run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
