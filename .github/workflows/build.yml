@@ -68,7 +68,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_38-v1
+          key: ${{ runner.os }}-emsdk-1_38-v1-2
       - name: install emsdk 1.38
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
