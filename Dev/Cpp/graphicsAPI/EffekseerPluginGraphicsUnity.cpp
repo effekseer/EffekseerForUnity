@@ -20,7 +20,7 @@ void GraphicsUnity::AfterReset(IUnityInterfaces* unityInterface) {}
 
 void GraphicsUnity::Shutdown(IUnityInterfaces* unityInterface) {}
 
-EffekseerRenderer::Renderer* GraphicsUnity::CreateRenderer(int squareMaxCount, bool reversedDepth)
+Effekseer::RefPtr<EffekseerRenderer::Renderer> GraphicsUnity::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 	auto renderer = EffekseerRendererUnity::RendererImplemented::Create();
 	if (renderer->Initialize(squareMaxCount))
@@ -29,7 +29,6 @@ EffekseerRenderer::Renderer* GraphicsUnity::CreateRenderer(int squareMaxCount, b
 	}
 	else
 	{
-		ES_SAFE_RELEASE(renderer);
 		return nullptr;
 	}
 }
@@ -41,19 +40,19 @@ void GraphicsUnity::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* 
 
 void GraphicsUnity::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
 
-Effekseer::TextureLoader* GraphicsUnity::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsUnity::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return new EffekseerRendererUnity::TextureLoader(load, unload);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::TextureLoader>(load, unload);
 }
 
-Effekseer::ModelLoader* GraphicsUnity::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsUnity::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
-	return new EffekseerRendererUnity::ModelLoader(load, unload);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ModelLoader>(load, unload);
 }
 
-Effekseer::MaterialLoader* GraphicsUnity::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsUnity::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
 {
-	return new EffekseerRendererUnity::MaterialLoader(load, unload);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::MaterialLoader>(load, unload);
 }
 
 void GraphicsUnity::ShiftViewportForStereoSinglePass(bool isShift) 

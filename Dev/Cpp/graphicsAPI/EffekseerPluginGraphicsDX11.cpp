@@ -155,7 +155,7 @@ void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface)
 	ES_SAFE_RELEASE(d3d11Device);
 }
 
-EffekseerRenderer::Renderer* GraphicsDX11::CreateRenderer(int squareMaxCount, bool reversedDepth)
+EffekseerRenderer::RendererRef GraphicsDX11::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 	const D3D11_COMPARISON_FUNC depthFunc = (reversedDepth) ? D3D11_COMPARISON_GREATER_EQUAL : D3D11_COMPARISON_LESS_EQUAL;
 	auto renderer = EffekseerRendererDX11::Renderer::Create(d3d11Device, d3d11Context, squareMaxCount, depthFunc);
@@ -221,25 +221,28 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 	}
 }
 
-Effekseer::TextureLoader* GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return new TextureLoaderDX11(load, unload, d3d11Device);
+	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, d3d11Device);
 }
 
-Effekseer::ModelLoader* GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
-{
-	auto loader = new ModelLoader(load, unload);
-	auto internalLoader = EffekseerRendererDX11::CreateModelLoader(d3d11Device, loader->GetFileInterface());
-	loader->SetInternalLoader(internalLoader);
-	return loader;
-}
-
-Effekseer::MaterialLoader* GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = new MaterialLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
+	auto internalLoader = EffekseerRendererDX11::CreateModelLoader(renderer_->GetGraphicsDevice(), loader->GetFileInterface());
+	loader->SetInternalLoader(internalLoader);
+	return loader;
+}
+
+Effekseer::MaterialLoaderRef GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	if (renderer_ == nullptr)
+		return nullptr;
+
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
 	auto internalLoader = renderer_->CreateMaterialLoader();
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

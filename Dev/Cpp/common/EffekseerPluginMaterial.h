@@ -76,12 +76,12 @@ public:
 class MaterialLoaderHolder
 {
 private:
-	std::unique_ptr<Effekseer::MaterialLoader> internalLoader_;
+	Effekseer::MaterialLoaderRef internalLoader_;
 
 public:
-	MaterialLoaderHolder(Effekseer::MaterialLoader* loader) { internalLoader_.reset(loader); }
+	MaterialLoaderHolder(Effekseer::MaterialLoaderRef loader) { internalLoader_ = loader; }
 
-	Effekseer::MaterialLoader* Get() const { return internalLoader_.get(); }
+	Effekseer::MaterialLoaderRef Get() const { return internalLoader_; }
 };
 
 class MaterialLoader : public Effekseer::MaterialLoader

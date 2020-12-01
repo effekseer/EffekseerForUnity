@@ -47,20 +47,20 @@ namespace EffekseerPlugin
 		}
 	}
 	
-	SoundLoader* SoundLoader::Create(
+	Effekseer::SoundLoaderRef SoundLoader::Create(
 		SoundLoaderLoad load,
 		SoundLoaderUnload unload)
 	{
-		return new SoundLoader(load, unload);
+		return Effekseer::MakeRefPtr<SoundLoader>(load, unload);
 	}
 
-	SoundPlayer* SoundPlayer::Create(
+	Effekseer::SoundPlayerRef SoundPlayer::Create(
 		SoundPlayerPlay play,
 		SoundPlayerStopTag stopTag,
 		SoundPlayerPauseTag pauseTag,
 		SoundPlayerCheckPlayingTag checkPlayingTag,
 		SoundPlayerStopAll stopAll)
 	{
-		return new SoundPlayer(play, stopTag, pauseTag, checkPlayingTag, stopAll);
+		return Effekseer::MakeRefPtr<SoundPlayer>(play, stopTag, pauseTag, checkPlayingTag, stopAll);
 	}
 }

@@ -6,7 +6,7 @@
 
 namespace EffekseerPlugin
 {
-extern EffekseerRenderer::Renderer* g_EffekseerRenderer;
+extern EffekseerRenderer::RendererRef g_EffekseerRenderer;
 }
 
 extern "C"
@@ -15,7 +15,7 @@ extern "C"
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
 			return;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
 		*dst = renderer->GetRenderParameters()[index];
 	}
 
@@ -23,15 +23,15 @@ extern "C"
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
 			return 0;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
-		return renderer->GetRenderParameters().size();
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
+		return static_cast<int32_t>(renderer->GetRenderParameters().size());
 	}
 
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderVertexBuffer()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
 			return nullptr;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
 		return renderer->GetRenderVertexBuffer().data();
 	}
 
@@ -39,15 +39,15 @@ extern "C"
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
 			return 0;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
-		return renderer->GetRenderVertexBuffer().size();
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
+		return static_cast<int32_t>(renderer->GetRenderVertexBuffer().size());
 	}
 
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderInfoBuffer()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
 			return nullptr;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
 		return renderer->GetRenderInfoBuffer().data();
 	}
 }
@@ -103,7 +103,7 @@ void ExtractTextures(const Effekseer::Effect* effect,
 
 		if (materialParam->MaterialTextures.size() > 0)
 		{
-			textureCount = Effekseer::Min(materialParam->MaterialTextures.size(), ::Effekseer::UserTextureSlotMax);
+			textureCount = Effekseer::Min(static_cast<int32_t>(materialParam->MaterialTextures.size()), ::Effekseer::UserTextureSlotMax);
 
 			for (size_t i = 0; i < textureCount; i++)
 			{
@@ -138,11 +138,11 @@ ModelRenderer::ModelRenderer(RendererImplemented* renderer) : m_renderer(rendere
 
 ModelRenderer::~ModelRenderer() {}
 
-ModelRenderer* ModelRenderer::Create(RendererImplemented* renderer)
+::Effekseer::ModelRendererRef ModelRenderer::Create(RendererImplemented* renderer)
 {
 	assert(renderer != NULL);
 
-	return new ModelRenderer(renderer);
+	return Effekseer::MakeRefPtr<ModelRenderer>(renderer);
 }
 
 void ModelRenderer::BeginRendering(const efkModelNodeParam& parameter, int32_t count, void* userData)
@@ -229,7 +229,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		}
 		else
 		{
-			shader = m_renderer->GetShader(true, parameter.BasicParameterPtr->MaterialType);
+			shader = m_renderer->GetShader(collector_.ShaderType);
 		}
 
 		::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
@@ -324,7 +324,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
 {
-	auto ret = exportedVertexBuffer.size();
+	auto ret = static_cast<int32_t>(exportedVertexBuffer.size());
 
 	exportedVertexBuffer.resize(exportedVertexBuffer.size() + size);
 	memcpy(exportedVertexBuffer.data() + ret, data, size);
@@ -334,7 +334,7 @@ int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
 
-	auto ret = exportedInfoBuffer.size();
+	auto ret = static_cast<int32_t>(exportedInfoBuffer.size());
 
 	exportedInfoBuffer.resize(exportedInfoBuffer.size() + size);
 	memcpy(exportedInfoBuffer.data() + ret, data, size);
@@ -343,10 +343,10 @@ int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 
 void RendererImplemented::AlignVertexBuffer(int32_t alignment)
 {
-	exportedVertexBuffer.resize(GetAlignedOffset(exportedVertexBuffer.size(), alignment));
+	exportedVertexBuffer.resize(GetAlignedOffset(static_cast<int32_t>(exportedVertexBuffer.size()), alignment));
 }
 
-RendererImplemented* RendererImplemented::Create() { return new RendererImplemented(); }
+Effekseer::RefPtr<RendererImplemented> RendererImplemented::Create() { return Effekseer::MakeRefPtr<RendererImplemented>(); }
 
 RendererImplemented::RendererImplemented()
 {
@@ -372,22 +372,18 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	m_renderState = new RenderState();
 	m_vertexBuffer = new VertexBuffer(EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, true);
 
-	stanShader_ = std::unique_ptr<Shader>(new Shader(Effekseer::RendererMaterialType::Default));
-	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(Effekseer::RendererMaterialType::BackDistortion));
-	lightingShader_ = std::unique_ptr<Shader>(new Shader(Effekseer::RendererMaterialType::Lighting));
+	unlitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Unlit));
+	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::BackDistortion));
+	litShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Lit));
 
-	m_standardRenderer =
-		new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>(this, nullptr, nullptr);
+	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 
 	exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
 	return true;
 }
 
-void RendererImplemented::Destroy() { Release(); }
-
 void RendererImplemented::SetRestorationOfStatesFlag(bool flag)
 {
-	// TODO
 }
 
 bool RendererImplemented::BeginRendering()
@@ -396,8 +392,6 @@ bool RendererImplemented::BeginRendering()
 
 	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
-
-	// GLCheckError();
 
 	exportedVertexBuffer.resize(0);
 	exportedInfoBuffer.resize(0);
@@ -408,8 +402,6 @@ bool RendererImplemented::BeginRendering()
 
 bool RendererImplemented::EndRendering()
 {
-	//		GLCheckError();
-
 	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
@@ -421,31 +413,33 @@ bool RendererImplemented::EndRendering()
 
 int32_t RendererImplemented::GetSquareMaxCount() const { return m_squareMaxCount; }
 
-::Effekseer::SpriteRenderer* RendererImplemented::CreateSpriteRenderer()
+::Effekseer::SpriteRendererRef RendererImplemented::CreateSpriteRenderer()
 {
-	return new ::EffekseerRenderer::SpriteRendererBase<RendererImplemented, Vertex, VertexDistortion>(this);
+	return Effekseer::MakeRefPtr<::EffekseerRenderer::SpriteRendererBase<RendererImplemented, false>>(this);
 }
 
-::Effekseer::RibbonRenderer* RendererImplemented::CreateRibbonRenderer()
+::Effekseer::RibbonRendererRef RendererImplemented::CreateRibbonRenderer()
 {
-	return new ::EffekseerRenderer::RibbonRendererBase<RendererImplemented, Vertex, VertexDistortion>(this);
+	return Effekseer::MakeRefPtr <::EffekseerRenderer::RibbonRendererBase<RendererImplemented, false>>(this);
 }
 
-::Effekseer::RingRenderer* RendererImplemented::CreateRingRenderer()
+::Effekseer::RingRendererRef RendererImplemented::CreateRingRenderer()
 {
-	return new ::EffekseerRenderer::RingRendererBase<RendererImplemented, Vertex, VertexDistortion>(this);
+	auto ret = Effekseer::MakeRefPtr <::EffekseerRenderer::RingRendererBase<RendererImplemented, false>>(this);
+	ret->SetFasterSngleRingModeEnabled(false);
+	return ret;
 }
 
-::Effekseer::ModelRenderer* RendererImplemented::CreateModelRenderer() { return ModelRenderer::Create(this); }
+::Effekseer::ModelRendererRef RendererImplemented::CreateModelRenderer() { return ModelRenderer::Create(this); }
 
-::Effekseer::TrackRenderer* RendererImplemented::CreateTrackRenderer()
+::Effekseer::TrackRendererRef RendererImplemented::CreateTrackRenderer()
 {
-	return new ::EffekseerRenderer::TrackRendererBase<RendererImplemented, Vertex, VertexDistortion>(this);
+	return Effekseer::MakeRefPtr<::EffekseerRenderer::TrackRendererBase<RendererImplemented, false>>(this);
 }
 
-::Effekseer::TextureLoader* RendererImplemented::CreateTextureLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
+::Effekseer::TextureLoaderRef RendererImplemented::CreateTextureLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
 
-::Effekseer::ModelLoader* RendererImplemented::CreateModelLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
+::Effekseer::ModelLoaderRef RendererImplemented::CreateModelLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
 
 void RendererImplemented::ResetRenderState() {}
 
@@ -461,7 +455,7 @@ VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }
 
 IndexBuffer* RendererImplemented::GetIndexBuffer() { return nullptr; }
 
-EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* RendererImplemented::GetStandardRenderer()
+EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer()
 {
 	return m_standardRenderer;
 }
@@ -477,10 +471,21 @@ void RendererImplemented::SetLayout(Shader* shader) {}
 inline Effekseer::Vector3D UnpackVector3DF(const Effekseer::Color& v)
 {
 	Effekseer::Vector3D ret;
-	ret.X = (v.R / 255.0 * 2.0f - 1.0f);
-	ret.Y = (v.G / 255.0 * 2.0f - 1.0f);
-	ret.Z = (v.B / 255.0 * 2.0f - 1.0f);
+	ret.X = (v.R / 255.0f * 2.0f - 1.0f);
+	ret.Y = (v.G / 255.0f * 2.0f - 1.0f);
+	ret.Z = (v.B / 255.0f * 2.0f - 1.0f);
 	return ret;
+}
+
+template<typename T, typename U>
+void CopyBuffer(const T& dstUnityVertex, const U& srcVertex) {
+	dstUnityVertex.Pos = srcVertex.Pos;
+	dstUnityVertex.UV[0] = srcVertex.UV[0];
+	dstUnityVertex.UV[1] = srcVertex.UV[1];
+	dstUnityVertex.Col[0] = srcVertex.Col.R / 255.0f;
+	dstUnityVertex.Col[1] = srcVertex.Col.G / 255.0f;
+	dstUnityVertex.Col[2] = srcVertex.Col.B / 255.0f;
+	dstUnityVertex.Col[3] = srcVertex.Col.A / 255.0f;
 }
 
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
@@ -494,7 +499,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	rp.RenderMode = 0;
 	rp.ModelPtr = nullptr;
 
-	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
+	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
 		if (m_currentShader == nullptr)
 		{
@@ -587,37 +592,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		renderParameters.push_back(rp);
 		return;
 	}
-
-	// is single ring?
-	Effekseer::Matrix44 stanMat;
-
-	stanMat = ((Effekseer::Matrix44*)m_currentShader->GetVertexConstantBuffer())[0];
-
-	auto cameraMat = GetCameraMatrix();
-	Effekseer::Matrix44 ringMat;
-
-	bool isSingleRing = false;
-
-	for (int32_t r = 0; r < 4; r++)
-	{
-		for (int32_t c = 0; c < 4; c++)
-		{
-			if (stanMat.Values[r][c] != cameraMat.Values[r][c])
-			{
-				isSingleRing = true;
-				goto Exit;
-			}
-		}
-	}
-Exit:;
-
-	if (isSingleRing)
-	{
-		Effekseer::Matrix44 inv;
-		Effekseer::Matrix44::Mul(ringMat, stanMat, Effekseer::Matrix44::Inverse(inv, cameraMat));
-	}
-
-	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::BackDistortion)
+	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 	{
 		if (m_textures[1] == nullptr)
 		{
@@ -631,22 +606,12 @@ Exit:;
 
 		rp.VertexBufferStride = sizeof(UnityDistortionVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = exportedVertexBuffer.size();
+		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
 			auto& v = vs[vi];
 			UnityDistortionVertex unity_v;
-
-			if (isSingleRing)
-			{
-				Effekseer::Matrix44 trans;
-				trans.Translation(v.Pos.X, v.Pos.Y, v.Pos.Z);
-				Effekseer::Matrix44::Mul(trans, trans, ringMat);
-				v.Pos.X = trans.Values[3][0];
-				v.Pos.Y = trans.Values[3][1];
-				v.Pos.Z = trans.Values[3][2];
-			}
 
 			Effekseer::Vector3D normal;
 			Effekseer::Vector3D::Cross(normal, v.Binormal, v.Tangent);
@@ -654,10 +619,10 @@ Exit:;
 			unity_v.Pos = v.Pos;
 			unity_v.UV[0] = v.UV[0];
 			unity_v.UV[1] = v.UV[1];
-			unity_v.Col[0] = v.Col[0] / 255.0f;
-			unity_v.Col[1] = v.Col[1] / 255.0f;
-			unity_v.Col[2] = v.Col[2] / 255.0f;
-			unity_v.Col[3] = v.Col[3] / 255.0f;
+			unity_v.Col[0] = v.Col.R / 255.0f;
+			unity_v.Col[1] = v.Col.G / 255.0f;
+			unity_v.Col[2] = v.Col.B / 255.0f;
+			unity_v.Col[3] = v.Col.A / 255.0f;
 			unity_v.Tangent = v.Tangent;
 			unity_v.Binormal = v.Binormal;
 
@@ -675,13 +640,13 @@ Exit:;
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
 	}
-	else if (m_currentShader->GetType() == Effekseer::RendererMaterialType::Lighting)
+	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 	{
 		DynamicVertex* vs = (DynamicVertex*)m_vertexBuffer->GetResource();
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = exportedVertexBuffer.size();
+		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
@@ -722,30 +687,20 @@ Exit:;
 
 		rp.VertexBufferStride = sizeof(UnityVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = exportedVertexBuffer.size();
+		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
 			auto& v = vs[vi];
 			UnityVertex unity_v;
 
-			if (isSingleRing)
-			{
-				Effekseer::Matrix44 trans;
-				trans.Translation(v.Pos.X, v.Pos.Y, v.Pos.Z);
-				Effekseer::Matrix44::Mul(trans, trans, ringMat);
-				v.Pos.X = trans.Values[3][0];
-				v.Pos.Y = trans.Values[3][1];
-				v.Pos.Z = trans.Values[3][2];
-			}
-
 			unity_v.Pos = v.Pos;
 			unity_v.UV[0] = v.UV[0];
 			unity_v.UV[1] = v.UV[1];
-			unity_v.Col[0] = v.Col[0] / 255.0f;
-			unity_v.Col[1] = v.Col[1] / 255.0f;
-			unity_v.Col[2] = v.Col[2] / 255.0f;
-			unity_v.Col[3] = v.Col[3] / 255.0f;
+			unity_v.Col[0] = v.Col.R / 255.0f;
+			unity_v.Col[1] = v.Col.G / 255.0f;
+			unity_v.Col[2] = v.Col.B / 255.0f;
+			unity_v.Col[3] = v.Col.A / 255.0f;
 
 			AddVertexBuffer(&unity_v, sizeof(UnityVertex));
 		}
@@ -786,7 +741,7 @@ void RendererImplemented::DrawModel(void* model,
 	if (model == nullptr)
 		return;
 
-	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
+	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
@@ -804,14 +759,14 @@ void RendererImplemented::DrawModel(void* model,
 		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
 		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 
-		if (m_currentShader->GetType() == Effekseer::RendererMaterialType::Lighting)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 		{
 			rp.TexturePtrs[1] = m_textures[1];
 			rp.TextureFilterTypes[1] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[1];
 			rp.TextureWrapTypes[1] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[1];
 		}
 
-		if (m_currentShader->GetType() == Effekseer::RendererMaterialType::BackDistortion)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
 			rp.TexturePtrs[1] = m_textures[1];
 
@@ -820,8 +775,8 @@ void RendererImplemented::DrawModel(void* model,
 		}
 	}
 
-	rp.ElementCount = matrixes.size();
-	rp.VertexBufferOffset = exportedInfoBuffer.size();
+	rp.ElementCount = static_cast<int32_t>(matrixes.size());
+	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
 	rp.CustomData1BufferOffset = 0;
 	rp.CustomData2BufferOffset = 0;
 
@@ -845,7 +800,7 @@ void RendererImplemented::DrawModel(void* model,
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter));
 	}
 
-	if (m_currentShader->GetType() == Effekseer::RendererMaterialType::File)
+	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
 		const auto& nativeMaterial = m_currentShader->GetMaterial();
 		assert(!nativeMaterial->GetIsSimpleVertex());
@@ -857,35 +812,35 @@ void RendererImplemented::DrawModel(void* model,
 
 		if (nativeMaterial->GetCustomData1Count() > 0)
 		{
-			rp.CustomData1BufferOffset = AddInfoBuffer(customData1.data(), sizeof(std::array<float, 4>) * customData1.size());
+			rp.CustomData1BufferOffset = AddInfoBuffer(customData1.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData1.size()));
 		}
 
 		if (nativeMaterial->GetCustomData2Count() > 0)
 		{
-			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(), sizeof(std::array<float, 4>) * customData2.size());
+			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData2.size()));
 		}
 	}
 
 	renderParameters.push_back(rp);
 }
 
-Shader* RendererImplemented::GetShader(bool useTexture, ::Effekseer::RendererMaterialType materialType) const
+Shader* RendererImplemented::GetShader(::EffekseerRenderer::RendererShaderType materialType) const
 {
-	if (materialType == ::Effekseer::RendererMaterialType::BackDistortion)
+	if (materialType == ::EffekseerRenderer::RendererShaderType::BackDistortion)
 	{
 		return backDistortedShader_.get();
 	}
-	else if (materialType == ::Effekseer::RendererMaterialType::Lighting)
+	else if (materialType == ::EffekseerRenderer::RendererShaderType::Lit)
 	{
-		return lightingShader_.get();
+		return litShader_.get();
 	}
-	else if (materialType == ::Effekseer::RendererMaterialType::Default)
+	else if (materialType == ::EffekseerRenderer::RendererShaderType::Unlit)
 	{
-		return stanShader_.get();
+		return unlitShader_.get();
 	}
 
 	// retuan as a default shader
-	return stanShader_.get();
+	return unlitShader_.get();
 }
 
 void RendererImplemented::BeginShader(Shader* shader) { m_currentShader = shader; }

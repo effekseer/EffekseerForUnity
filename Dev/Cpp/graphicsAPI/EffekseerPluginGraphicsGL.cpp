@@ -140,25 +140,24 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 		break;
 	}
 
-	graphicsDevice_ = ::EffekseerRendererGL::CreateDevice(openglDeviceType);
+	graphicsDevice_ = ::EffekseerRendererGL::CreateGraphicsDevice(openglDeviceType);
 
 	return true;
 }
 
 void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface)
 {
-	renderer_ = nullptr;
-	ES_SAFE_RELEASE(graphicsDevice_);
-
+	renderer_.Reset();
+	graphicsDevice_.Reset();
 	MaterialEvent::Terminate();
 }
 
-EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
+EffekseerRenderer::RendererRef GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 #ifdef __ANDROID__
 	squareMaxCount = 600;
 #endif
-	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, graphicsDevice_);
+	auto renderer = EffekseerRendererGL::Renderer::Create(graphicsDevice_, squareMaxCount);
 	renderer_ = renderer;
 	return renderer;
 }
@@ -170,14 +169,14 @@ void GraphicsGL::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* ren
 
 void GraphicsGL::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
 
-Effekseer::TextureLoader* GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return new TextureLoaderGL(load, unload, gfxRenderer);
+	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, gfxRenderer);
 }
 
-Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
-	auto loader = new ModelLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
@@ -188,9 +187,9 @@ Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnlo
 	return loader;
 }
 
-Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
 {
-	auto loader = new MaterialLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
 	auto internalLoader = ::EffekseerRendererGL::CreateMaterialLoader(graphicsDevice_);
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

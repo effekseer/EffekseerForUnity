@@ -34,7 +34,7 @@ namespace EffekseerPlugin
 		std::map<std::u16string, SoundResource> resources;
 
 	public:
-		static SoundLoader* Create(
+		static Effekseer::SoundLoaderRef Create(
 			SoundLoaderLoad load,
 			SoundLoaderUnload unload);
 		SoundLoader(
@@ -63,7 +63,7 @@ namespace EffekseerPlugin
 		SoundPlayerStopAll stopAll;
 	
 	public:
-		static SoundPlayer* Create(
+		static Effekseer::SoundPlayerRef Create(
 			SoundPlayerPlay play,
 			SoundPlayerStopTag stopTag,
 			SoundPlayerPauseTag pauseTag,

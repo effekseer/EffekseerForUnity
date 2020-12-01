@@ -30,9 +30,9 @@ protected:
 	std::map<void*, void*> textureData2NativePtr;
 
 public:
-	static TextureLoader* Create(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload);
+	static Effekseer::RefPtr<Effekseer::TextureLoader> Create(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload);
 	TextureLoader(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload) : load(load), unload(unload) {}
-	virtual ~TextureLoader() {}
+	~TextureLoader() override = default;
 	Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
 	void Unload(Effekseer::TextureData* source) override;
 };

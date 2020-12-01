@@ -4,7 +4,6 @@
 
 #ifdef _WIN32
 #include "EffekseerPluginGraphicsDX11.h"
-#include "EffekseerPluginGraphicsDX9.h"
 #endif
 
 #ifdef _PS4
@@ -61,11 +60,6 @@ Graphics* Graphics::Create(UnityGfxRenderer renderer, bool isUnityRenderer, bool
 #endif
 
 #ifdef _WIN32
-	if (renderer == UnityGfxRenderer::kUnityGfxRendererD3D9)
-	{
-		return new GraphicsDX9();
-	}
-
 	if (renderer == UnityGfxRenderer::kUnityGfxRendererD3D11)
 	{
 		return new GraphicsDX11();

@@ -10,10 +10,12 @@ ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin:
 	internalBuffer.resize(1024 * 1024);
 }
 
-void* ModelLoader::Load(const EFK_CHAR* path)
+Effekseer::Model* ModelLoader::Load(const EFK_CHAR* path)
 {
+	const auto key = std::u16string(path);
+
 	// find it from resource table and if it exists, it is reused.
-	auto it = resources.find((const char16_t*)path);
+	auto it = resources.find(key);
 	if (it != resources.end())
 	{
 		it->second.referenceCount++;
@@ -25,7 +27,7 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 	int requiredDataSize = 0;
 	void* modelPtr = nullptr;
 
-	modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
+	modelPtr = load(path, internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()), requiredDataSize);
 
 	if (requiredDataSize == 0)
 	{
@@ -38,7 +40,7 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 		// reallocate a buffer
 		internalBuffer.resize(requiredDataSize);
 
-		modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
+		modelPtr = load(path, internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()), requiredDataSize);
 
 		if (modelPtr == nullptr)
 		{
@@ -48,15 +50,15 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 
 	internalBuffer.resize(requiredDataSize);
 
-	auto model = new Model(internalBuffer.data(), internalBuffer.size());
+	auto model = new Model(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
 	model->InternalPtr = modelPtr;
 	res.internalData = model;
 
-	resources.insert(std::make_pair((const char16_t*)path, res));
+	resources.emplace(key, res);
 	return res.internalData;
 }
 
-void ModelLoader::Unload(void* source)
+void ModelLoader::Unload(Effekseer::Model* source)
 {
 	if (source == nullptr)
 	{

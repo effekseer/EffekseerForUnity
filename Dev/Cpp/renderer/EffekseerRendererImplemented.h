@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <Effekseer.Internal.h>
+#include <Effekseer.h>
 #include <EffekseerRenderer.ModelRendererBase.h>
 #include <EffekseerRenderer.RenderStateBase.h>
 #include <EffekseerRenderer.Renderer.h>
@@ -22,7 +22,7 @@ extern "C"
 		//! 0 - procedual, 1 - model
 		int RenderMode = 0;
 
-		Effekseer::RendererMaterialType MaterialType = Effekseer::RendererMaterialType::Default;
+		EffekseerRenderer::RendererShaderType MaterialType = EffekseerRenderer::RendererShaderType::Unlit;
 
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
@@ -115,12 +115,13 @@ class ModelRenderer : public ::EffekseerRenderer::ModelRendererBase
 {
 private:
 	RendererImplemented* m_renderer;
+	
+public:
 	ModelRenderer(RendererImplemented* renderer);
 
-public:
 	virtual ~ModelRenderer();
 
-	static ModelRenderer* Create(RendererImplemented* renderer);
+	static ::Effekseer::ModelRendererRef Create(RendererImplemented* renderer);
 
 public:
 	void BeginRendering(const efkModelNodeParam& parameter, int32_t count, void* userData) override;
@@ -133,13 +134,13 @@ public:
 class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effekseer::ReferenceObject
 {
 protected:
-	int32_t m_squareMaxCount;
+	int32_t m_squareMaxCount = 0;
 
 	VertexBuffer* m_vertexBuffer = nullptr;
 
-	std::unique_ptr<Shader> stanShader_;
+	std::unique_ptr<Shader> unlitShader_;
 	std::unique_ptr<Shader> backDistortedShader_;
-	std::unique_ptr<Shader> lightingShader_;
+	std::unique_ptr<Shader> litShader_;
 
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;
@@ -158,7 +159,7 @@ protected:
 
 	Effekseer::TextureData backgroundData;
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* m_standardRenderer = nullptr;
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
 
 	int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
@@ -166,7 +167,7 @@ protected:
 
 
 public:
-	static RendererImplemented* Create();
+	static Effekseer::RefPtr<RendererImplemented> Create();
 
 	RendererImplemented();
 	virtual ~RendererImplemented();
@@ -178,11 +179,6 @@ public:
 	@brief	初期化
 	*/
 	bool Initialize(int32_t squareMaxCount);
-
-	/**
-	@brief	このインスタンスを破棄する。
-	*/
-	void Destroy() override;
 
 	/**
 	@brief	ステートを復帰するかどうかのフラグを設定する。
@@ -207,39 +203,39 @@ public:
 	/**
 	@brief	スプライトレンダラーを生成する。
 	*/
-	::Effekseer::SpriteRenderer* CreateSpriteRenderer() override;
+	::Effekseer::SpriteRendererRef CreateSpriteRenderer() override;
 
 	/**
 	@brief	リボンレンダラーを生成する。
 	*/
-	::Effekseer::RibbonRenderer* CreateRibbonRenderer() override;
+	::Effekseer::RibbonRendererRef CreateRibbonRenderer() override;
 
 	/**
 	@brief	リングレンダラーを生成する。
 	*/
-	::Effekseer::RingRenderer* CreateRingRenderer() override;
+	::Effekseer::RingRendererRef CreateRingRenderer() override;
 
 	/**
 	@brief	モデルレンダラーを生成する。
 	*/
-	::Effekseer::ModelRenderer* CreateModelRenderer() override;
+	::Effekseer::ModelRendererRef CreateModelRenderer() override;
 
 	/**
 	@brief	軌跡レンダラーを生成する。
 	*/
-	::Effekseer::TrackRenderer* CreateTrackRenderer() override;
+	::Effekseer::TrackRendererRef CreateTrackRenderer() override;
 
 	/**
 	@brief	標準のテクスチャ読込クラスを生成する。
 	*/
-	::Effekseer::TextureLoader* CreateTextureLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
 	/**
 	@brief	標準のモデル読込クラスを生成する。
 	*/
-	::Effekseer::ModelLoader* CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
-	::Effekseer::MaterialLoader* CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
+	::Effekseer::MaterialLoaderRef CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
 
 	/**
 	@brief	レンダーステートを強制的にリセットする。
@@ -264,7 +260,7 @@ public:
 
 	IndexBuffer* GetIndexBuffer();
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* GetStandardRenderer();
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* GetStandardRenderer();
 
 	::EffekseerRenderer::RenderStateBase* GetRenderState();
 
@@ -282,7 +278,7 @@ public:
 				   std::vector<std::array<float, 4>>& customData1,
 				   std::vector<std::array<float, 4>>& customData2);
 
-	Shader* GetShader(bool useTexture, ::Effekseer::RendererMaterialType type) const;
+	Shader* GetShader(::EffekseerRenderer::RendererShaderType materialType) const;
 
 	void BeginShader(Shader* shader);
 	void EndShader(Shader* shader);

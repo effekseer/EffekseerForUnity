@@ -252,10 +252,13 @@ namespace Effekseer
 
 		public enum RendererMaterialType : int
 		{
-			Default = 0,
-			BackDistortion = 6,
-			Lighting = 7,
-			File = 128,
+			Unlit,
+			Lit,
+			BackDistortion,
+			AdvancedUnlit,
+			AdvancedLit,
+			AdvancedBackDistortion,
+			Material,
 		}
 
 		[StructLayout(LayoutKind.Sequential)]

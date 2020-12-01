@@ -11,7 +11,9 @@ namespace EffekseerPlugin
 		, memoryFile( 1 * 1024 * 1024 )
 	{
 	}
-	void* ModelLoader::Load( const EFK_CHAR* path ){
+
+	Effekseer::Model* ModelLoader::Load(const EFK_CHAR* path)
+	{
 		// リソーステーブルを検索して存在したらそれを使う
 		auto it = resources.find((const char16_t*)path);
 		if (it != resources.end()) {

@@ -50,17 +50,17 @@ public:
 
 	virtual void Shutdown(IUnityInterfaces* unityInterface) = 0;
 
-	virtual EffekseerRenderer::Renderer* CreateRenderer(int squareMaxCount, bool reversedDepth) = 0;
+	virtual Effekseer::RefPtr<EffekseerRenderer::Renderer> CreateRenderer(int squareMaxCount, bool reversedDepth) = 0;
 
 	virtual void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) = 0;
 
 	virtual void EffekseerSetBackGroundTexture(int renderId, void* texture) = 0;
 
-	virtual Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
+	virtual Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
 
-	virtual Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
+	virtual Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
 
-	virtual Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
+	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
 
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 

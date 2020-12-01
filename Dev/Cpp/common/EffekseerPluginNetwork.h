@@ -33,9 +33,9 @@ namespace EffekseerPlugin
 
 		void Update();
 
-		void Register(const char16_t* key, Effekseer::Effect* effect);
+		void Register(const char16_t* key, Effekseer::EffectRef effect);
 
-		void Unregister(Effekseer::Effect* effect);
+		void Unregister(Effekseer::EffectRef effect);
 
 		bool IsRunning() const;
 

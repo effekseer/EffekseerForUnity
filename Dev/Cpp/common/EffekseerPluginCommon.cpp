@@ -11,7 +11,7 @@ using namespace EffekseerPlugin;
 namespace EffekseerPlugin
 {
 
-extern Effekseer::Manager* g_EffekseerManager;
+extern Effekseer::ManagerRef g_EffekseerManager;
 extern Graphics* g_graphics;
 extern float g_time;
 extern Effekseer::Vector3D g_lightDirection;
@@ -84,7 +84,7 @@ extern "C"
 		
 	}
 	
-	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffect(const EFK_CHAR* path, float magnification)
+	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API EffekseerLoadEffect(const char16_t* path, float magnification)
 	{
 		if (g_EffekseerManager == NULL) {
 			return NULL;
@@ -99,11 +99,11 @@ extern "C"
 		}
 #endif
 
-		return effect;
+		return effect.Pin();
 	}
 	
 	// エフェクトのロード（メモリ指定）
-	UNITY_INTERFACE_EXPORT Effect* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data,
+	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data,
 																				   int32_t size,
 																				   const EFK_CHAR* path,
 																				   float magnification)
@@ -126,21 +126,23 @@ extern "C"
 #endif
 		}
 		
-		return effect;
+		return effect.Pin();
 	}
 	
 	// エフェクトのアンロード
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReleaseEffect(Effect* effect)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReleaseEffect(void* effect)
 	{
+		auto pinned = Effekseer::EffectRef::FromPinned(effect);
+
 		if (effect != NULL) {
 #ifndef _SWITCH
 			if (Network::GetInstance()->IsRunning())
 			{
-				Network::GetInstance()->Unregister(effect);
+				Network::GetInstance()->Unregister(pinned);
 			}
 #endif
 
-			effect->Release();
+			Effekseer::EffectRef::Unpin(effect);
 		}
 	}
 
@@ -172,12 +174,14 @@ extern "C"
 	// エフェクト再生
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerPlayEffect(Effect* effect, float x, float y, float z)
 	{
+		auto pinned = Effekseer::EffectRef::FromPinned(effect);
+
 		if (g_EffekseerManager == NULL) {
 			return -1;
 		}
 
 		if (effect != NULL) {
-			return g_EffekseerManager->Play(effect, x, y, z);
+			return g_EffekseerManager->Play(pinned, x, y, z);
 		}
 		return -1;
 	}
