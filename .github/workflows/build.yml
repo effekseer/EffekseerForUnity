@@ -60,7 +60,7 @@ jobs:
 
   webgl_1-38:
     name: WebGL Build with emsdk 1.38
-    runs-on: macos-latest
+    runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v2
 
@@ -87,7 +87,7 @@ jobs:
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
   webgl_1-37:
     name: WebGL Build with emsdk 1.37
-    runs-on: macos-latest
+    runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v2
       - name: Cache emsdk
