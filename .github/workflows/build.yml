@@ -32,7 +32,7 @@ jobs:
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macOS-10.14
+    runs-on: macOS-10.15
     steps:
       - uses: actions/checkout@v2
       - run: sh scripts/clone_dependencies.sh
@@ -60,7 +60,7 @@ jobs:
 
   webgl_1-38:
     name: WebGL Build with emsdk 1.38
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Cache emsdk
@@ -69,6 +69,13 @@ jobs:
         with:
           path: ./emsdk
           key: ${{ runner.os }}-emsdk-1_38-v1
+      - name: Cache emsdk
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: ./emsdk
+          key: ${{ runner.os }}-emsdk-1_38-v1
+
       - name: install emsdk 1.38
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -76,6 +83,7 @@ jobs:
           cd emsdk
           ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
           cd ..
+
       - run: sh scripts/clone_dependencies.sh
       - run: |
           ./emsdk/emsdk activate sdk-fastcomp-tag-1.38.11-64bit
@@ -93,7 +101,7 @@ jobs:
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
   webgl_1-37:
     name: WebGL Build with emsdk 1.37
-    runs-on: macos-latest
+    runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v2
       - name: Cache emsdk
