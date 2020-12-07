@@ -32,7 +32,7 @@ jobs:
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macOS-10.14
+    runs-on: macOS-10.15
     steps:
       - uses: actions/checkout@v2
       - run: sh scripts/clone_dependencies.sh
@@ -60,7 +60,7 @@ jobs:
 
   webgl_1-38:
     name: WebGL Build with emsdk 1.38
-    runs-on: macOS-10.14
+    runs-on: macOS-10.15
     steps:
       - uses: actions/checkout@v2
 
