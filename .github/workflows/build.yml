@@ -60,7 +60,7 @@ jobs:
 
   webgl_1-38:
     name: WebGL Build with emsdk 1.38
-    runs-on: macOS-10.15
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
