@@ -25,6 +25,15 @@ namespace Effekseer
 		[SerializeField]
 		public bool drawInSceneView = true;
 
+		/// <summary xml:lang="en">
+		/// Whether effects are rendered as a post processing in PostProcessingStack
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// ポストプロセッシングスタックのポストプロセスとしてエフェクトを描画するかどうか?
+		/// </summary>
+		[SerializeField]
+		public bool renderAsPostProcessingStack = false;
+
 		/// <summary>
 		/// 
 		/// </summary>

@@ -892,7 +892,10 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			Render(camera, null, null);
+			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
+			{
+				Render(camera, null, null);
+			}
 		}
 
 		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer)
