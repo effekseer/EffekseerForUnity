@@ -6,7 +6,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 [Serializable]
 [PostProcess(typeof(PostProcessingStackEffekseerRendererBeforeStack), PostProcessEvent.BeforeStack, "Effekseer/RenderingBeforeStack")]
-public sealed class PostProcessStackEffekseerBeforeStackSettings : PostProcessEffectSettings
+public sealed class PostProcessingStackEffekseerBeforeStackSettings : PostProcessEffectSettings
 {
 }
 

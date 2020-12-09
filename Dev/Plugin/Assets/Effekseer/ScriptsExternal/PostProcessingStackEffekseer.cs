@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
-class PostProcessingStackEffekseerRendererBeforeStack : PostProcessingStackEffekseerRenderer<PostProcessStackEffekseerBeforeStackSettings>
+class PostProcessingStackEffekseerRendererBeforeStack : PostProcessingStackEffekseerRenderer<PostProcessingStackEffekseerBeforeStackSettings>
 {
 }
 class PostProcessingStackEffekseerRendererAfterStack : PostProcessingStackEffekseerRenderer<PostProcessingStackEffekseerAfterStackSettings>
@@ -14,6 +14,7 @@ class PostProcessingStackEffekseerRendererAfterStack : PostProcessingStackEffeks
 class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> where T : PostProcessEffectSettings
 {
 	Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
+	Material grabDepthMat = null;
 
 	public override void Init()
 	{
@@ -25,6 +26,8 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 		base.Release();
 	}
 
+	int propertyId = Shader.PropertyToID("_PostProcessingStackEffekseerRendererDepth");
+
 	public override DepthTextureMode GetCameraFlags()
 	{
 		return DepthTextureMode.Depth;
@@ -32,7 +35,12 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 
 	public override void Render(PostProcessRenderContext context)
 	{
-		if (Effekseer.EffekseerSystem.Instance == null)
+		if(grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
+		{
+			grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
+		}
+
+		if (Effekseer.EffekseerSystem.Instance == null || grabDepthMat == null)
 		{
 			context.command.Blit(context.source, context.destination);
 			return;
@@ -40,10 +48,18 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 
 		context.command.Blit(context.source, context.destination);
 
-		prop.colorTargetDescriptor = new RenderTextureDescriptor(context.width, context.height, context.sourceFormat, 0, 1);
+		var depthDescriptor = new RenderTextureDescriptor(context.width, context.height, RenderTextureFormat.Depth);
+		var depthIdentifer = new UnityEngine.Rendering.RenderTargetIdentifier(propertyId);
+		context.command.GetTemporaryRT(propertyId, depthDescriptor);
+
+		context.command.Blit(context.source, depthIdentifer, grabDepthMat);
+
+		prop.colorTargetDescriptor = new RenderTextureDescriptor(context.width, context.height, context.sourceFormat);
 		prop.colorTargetIdentifier = context.destination;
-		prop.depthTargetIdentifier = UnityEngine.Rendering.BuiltinRenderTextureType.Depth;
+		prop.depthTargetIdentifier = depthIdentifer;
 		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, prop, context.command);
+
+		context.command.ReleaseTemporaryRT(propertyId);
 	}
 }
 
