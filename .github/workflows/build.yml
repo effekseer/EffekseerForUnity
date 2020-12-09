@@ -63,12 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Cache emsdk
-        id: cache
-        uses: actions/cache@v1
-        with:
-          path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_38-v1
+
       - name: Cache emsdk
         id: cache
         uses: actions/cache@v1
