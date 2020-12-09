@@ -120,7 +120,7 @@ Pipelineで使用されているForwardRendererを選択します。
 
 ## High Definition Render Pipeline
 
-Effekseer は High Definition Render Pipeline に対応しています。.
+Effekseer は High Definition Render Pipeline に対応しています。
 HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerRendererHDRP.cs* からコメントアウトを外してください。
 
 ![](../img/HDRP/Code.png)
@@ -138,6 +138,31 @@ HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/Effeks
 *Injection Point* を *Before Post Process* に変更します。
 
 ![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
+
+## PostProcessingStack (1.53以降)
+
+EffekseerはPostProcessingStackのポストプロセスとしても描画できます。
+
+PostProcessingをインストールし、Post-Process VolumeとPost-Process Layerを設定します。
+
+![](../img/PostProcessingStack/pps_install.png)
+
+EffekseerSettingsから、RenderAsPostProcessingStackをOnにします。
+
+![](../img/PostProcessingStack/pps_settings.png)
+
+Post-Process Volumeにeffectを追加します。BeforeStackとAfterStackがありますが、基本的にBeforeStackを選択します。
+詳細は、PostProcessingStackのヘルプを読んでください。
+
+![](../img/PostProcessingStack/pps_ppv.png)
+
+エフェクトを有効にします。
+
+![](../img/PostProcessingStack/pps_make_enable.png)
+
+ポストプロセスとして描画されるため、CustomEffectSortingから描画順序を変更することができます。
+
+![](../img/PostProcessingStack/pps_sorting.png)
 
 ## Light Weight(Universal) Render Pipeline
 

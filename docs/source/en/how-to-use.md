@@ -134,6 +134,31 @@ You change *Injection Point* into *Before Post Process*.
 
 ![](../img/HDRP/CustomPassVolumeInjectionPoint.png)
 
+## PostProcessingStack (1.53 or later)
+
+Effekseer can be drawn as a PostProcessingStack post-process.
+
+Install PostProcessing and set the Post-Process Volume and Post-Process Layer.
+
+![](../img/PostProcessingStack/pps_install.png)
+
+From EffekseerSettings, turn RenderAsPostProcessingStack On.
+
+![](../img/PostProcessingStack/pps_settings.png)
+
+Add the effect to the Post-Processing Volume. BeforeStack and AfterStack exists, basically choose BeforeStack.
+For more information, read the PostProcessingStack help.
+
+![](../img/PostProcessingStack/pps_ppv.png)
+
+Enable the effect.
+
+![](../img/PostProcessingStack/pps_make_enable.png)
+
+You can change the drawing order from CustomEffectSorting because effects are drawn as a post-process.
+
+![](../img/PostProcessingStack/pps_sorting.png)
+
 ## Light Weight(Universal) Render Pipeline
 
 Effekseer supports Universal(LightWeight)RenderPipeline.
