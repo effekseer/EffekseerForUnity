@@ -35,6 +35,14 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 
 	public override void Render(PostProcessRenderContext context)
 	{
+
+#if UNITY_EDITOR
+		if (grabDepthMat == null)
+		{
+			Effekseer.EffekseerSettings.AssignAssets();
+		}
+#endif
+
 		if(grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
 		{
 			grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
