@@ -180,7 +180,13 @@ namespace Effekseer
 				asset.CustomData1Count = importingAsset.CustomData1Count;
 				asset.CustomData2Count = importingAsset.CustomData2Count;
 				asset.HasRefraction = importingAsset.HasRefraction;
-				asset.shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
+				var shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
+
+				// sometimes return null
+				if(shader != null)
+				{
+					asset.shader = shader;
+				}
 			}
 
 			if(isNewAsset)
