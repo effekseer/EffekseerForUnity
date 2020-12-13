@@ -56,7 +56,7 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 
 		context.command.Blit(context.source, context.destination);
 
-		var depthDescriptor = new RenderTextureDescriptor(context.width, context.height, RenderTextureFormat.Depth);
+		var depthDescriptor = new RenderTextureDescriptor(context.width, context.height, RenderTextureFormat.Depth, 16);
 		var depthIdentifer = new UnityEngine.Rendering.RenderTargetIdentifier(propertyId);
 		context.command.GetTemporaryRT(propertyId, depthDescriptor);
 
@@ -65,6 +65,9 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 		prop.colorTargetDescriptor = new RenderTextureDescriptor(context.width, context.height, context.sourceFormat);
 		prop.colorTargetIdentifier = context.destination;
 		prop.depthTargetIdentifier = depthIdentifer;
+
+		context.command.SetRenderTarget(context.destination, depthIdentifer);
+
 		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, prop, context.command);
 
 		context.command.ReleaseTemporaryRT(propertyId);
