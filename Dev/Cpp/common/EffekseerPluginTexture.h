@@ -31,9 +31,7 @@ namespace EffekseerPlugin
 			TextureLoaderLoad load,
 			TextureLoaderUnload unload) 
 			: load(load), unload(unload) {}
-		virtual ~TextureLoader() = default;
-		virtual Effekseer::TextureData* Load( const EFK_CHAR* path, Effekseer::TextureType textureType ) = 0;
-		virtual void Unload( Effekseer::TextureData* source ) = 0;
+		virtual ~TextureLoader() override = default;
 	};
 };
 

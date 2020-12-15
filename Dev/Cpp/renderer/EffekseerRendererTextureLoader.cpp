@@ -3,7 +3,7 @@
 
 namespace EffekseerRendererUnity
 {
-Effekseer::TextureData* TextureLoader::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+Effekseer::TextureRef TextureLoader::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
 	// find it from resource table and if it exists, it is reused.
 	auto it = resources.find((const char16_t*)path);
@@ -34,7 +34,7 @@ Effekseer::TextureData* TextureLoader::Load(const EFK_CHAR* path, Effekseer::Tex
 	return res.textureDataPtr;
 }
 
-void TextureLoader::Unload(Effekseer::TextureData* source)
+void TextureLoader::Unload(Effekseer::TextureRef source)
 {
 	if (source == nullptr)
 	{

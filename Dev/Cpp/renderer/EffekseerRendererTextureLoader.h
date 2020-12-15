@@ -24,7 +24,7 @@ protected:
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
+		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 	std::map<std::u16string, TextureResource> resources;
 	std::map<void*, void*> textureData2NativePtr;
@@ -33,7 +33,7 @@ public:
 	static Effekseer::RefPtr<Effekseer::TextureLoader> Create(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload);
 	TextureLoader(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload) : load(load), unload(unload) {}
 	~TextureLoader() override = default;
-	Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
-	void Unload(Effekseer::TextureData* source) override;
+	Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
+	void Unload(Effekseer::TextureRef source) override;
 };
 }; // namespace EffekseerRendererUnity

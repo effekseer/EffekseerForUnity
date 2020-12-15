@@ -19,11 +19,11 @@ class TextureLoaderGL : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
+		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 
 	std::map<std::u16string, TextureResource> resources;
-	std::map<void*, void*> textureData2NativePtr;
+	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 	UnityGfxRenderer gfxRenderer;
 
 public:
@@ -31,9 +31,9 @@ public:
 
 	virtual ~TextureLoaderGL();
 
-	virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
+	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
 
-	virtual void Unload(Effekseer::TextureData* source);
+	virtual void Unload(Effekseer::TextureRef source);
 };
 
 bool IsPowerOfTwo(uint32_t x) { return (x & (x - 1)) == 0; }
@@ -45,7 +45,7 @@ TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unl
 
 TextureLoaderGL::~TextureLoaderGL() {}
 
-Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
 	// リソーステーブルを検索して存在したらそれを使う
 	auto it = resources.find((const char16_t*)path);
@@ -65,12 +65,7 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 	// リソーステーブルに追加
 	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 	TextureResource& res = added.first->second;
-	res.textureDataPtr = new Effekseer::TextureData();
-	res.textureDataPtr->Width = width;
-	res.textureDataPtr->Height = height;
-	res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
-	res.textureDataPtr->UserID = textureID;
 #if !defined(_WIN32)
 	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(res.textureDataPtr->Width) && IsPowerOfTwo(res.textureDataPtr->Height)))
 	{
@@ -83,10 +78,14 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 
 	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
 
+	// TODO
+	assert(0);
+	res.textureDataPtr = nullptr;
+
 	return res.textureDataPtr;
 }
 
-void TextureLoaderGL::Unload(Effekseer::TextureData* source)
+void TextureLoaderGL::Unload(Effekseer::TextureRef source)
 {
 	if (source == nullptr)
 	{
@@ -95,7 +94,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 
 	// アンロードするテクスチャを検索
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return pair.second.textureDataPtr->UserID == source->UserID;
+		return pair.second.textureDataPtr == source;
 	});
 	if (it == resources.end())
 	{
@@ -109,7 +108,6 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 		// Unity側でアンロード
 		unload(it->first.c_str(), textureData2NativePtr[source]);
 		textureData2NativePtr.erase(source);
-		ES_SAFE_DELETE(it->second.textureDataPtr);
 		resources.erase(it);
 	}
 }

@@ -19,24 +19,23 @@ class TextureLoaderDX11 : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
+		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 
 	std::map<std::u16string, TextureResource> resources;
-	std::map<void*, void*> textureData2NativePtr;
+	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
-	ID3D11Device* d3d11Device = nullptr;
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 
 public:
-	TextureLoaderDX11(TextureLoaderLoad load, TextureLoaderUnload unload, ID3D11Device* device)
-		: TextureLoader(load, unload), d3d11Device(device)
+	TextureLoaderDX11(TextureLoaderLoad load, TextureLoaderUnload unload, Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
+		: TextureLoader(load, unload), graphicsDevice_(graphicsDevice)
 	{
-		ES_SAFE_ADDREF(device);
 	}
 
-	virtual ~TextureLoaderDX11() { ES_SAFE_RELEASE(d3d11Device); }
+	virtual ~TextureLoaderDX11() override = default;
 
-	virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
 		// リソーステーブルを検索して存在したらそれを使う
 		auto it = resources.find((const char16_t*)path);
@@ -57,10 +56,6 @@ public:
 		// リソーステーブルに追加
 		auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 		TextureResource& res = added.first->second;
-		res.textureDataPtr = new Effekseer::TextureData();
-		res.textureDataPtr->Width = width;
-		res.textureDataPtr->Height = height;
-		res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
 		// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
 		// ID3D11ShaderResourceViewを作成する
@@ -85,12 +80,15 @@ public:
 
 		res.textureDataPtr->UserPtr = srv;
 
+		res.textureDataPtr = nullptr; // TODO : must implement it
+		assert(0);
+
 		textureData2NativePtr[res.textureDataPtr] = texturePtr;
 
 		return res.textureDataPtr;
 	}
 
-	virtual void Unload(Effekseer::TextureData* source)
+	virtual void Unload(Effekseer::TextureRef source)
 	{
 		if (source == nullptr)
 		{
@@ -99,7 +97,7 @@ public:
 
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.textureDataPtr->UserPtr == source->UserPtr;
+			return pair.second.textureDataPtr == source;
 		});
 		if (it == resources.end())
 		{
@@ -118,7 +116,6 @@ public:
 			// Unload from unity
 			unload(it->first.c_str(), textureData2NativePtr[source]);
 			textureData2NativePtr.erase(source);
-			ES_SAFE_DELETE(it->second.textureDataPtr);
 			resources.erase(it);
 		}
 	}
@@ -138,6 +135,7 @@ bool GraphicsDX11::Initialize(IUnityInterfaces* unityInterface)
 	d3d11Device->GetImmediateContext(&d3d11Context);
 	ES_SAFE_ADDREF(d3d11Device);
 	MaterialEvent::Initialize();
+	graphicsDevice_ = EffekseerRendererDX11::CreateGraphicsDevice(d3d11Device, d3d11Context);
 	return true;
 }
 
@@ -150,6 +148,7 @@ void GraphicsDX11::AfterReset(IUnityInterfaces* unityInterface)
 void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface)
 {
 	MaterialEvent::Terminate();
+	graphicsDevice_.Reset();
 	renderer_ = nullptr;
 	ES_SAFE_RELEASE(d3d11Context);
 	ES_SAFE_RELEASE(d3d11Device);
@@ -223,7 +222,7 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 
 Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, d3d11Device);
+	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, graphicsDevice_);
 }
 
 Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)

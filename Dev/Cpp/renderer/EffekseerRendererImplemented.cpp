@@ -61,15 +61,6 @@ struct UnityVertex
 	float Col[4];
 };
 
-struct UnityDistortionVertex
-{
-	::Effekseer::Vector3D Pos;
-	float UV[2];
-	float Col[4];
-	::Effekseer::Vector3D Tangent;
-	::Effekseer::Vector3D Binormal;
-};
-
 struct UnityDynamicVertex
 {
 	::Effekseer::Vector3D Pos;
@@ -92,7 +83,7 @@ static int GetAlignedOffset(int offset, int size) { return ((offset + (size - 1)
 
 void ExtractTextures(const Effekseer::Effect* effect,
 					 const Effekseer::NodeRendererBasicParameter* param,
-					 std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax>& textures,
+					 std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax>& textures,
 					 int32_t& textureCount)
 {
 	if (param->MaterialType == Effekseer::RendererMaterialType::File)
@@ -241,7 +232,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		m_renderer->BeginShader(shader);
 
 		int32_t textureCount = 0;
-		std::array<Effekseer::TextureData*, ::Effekseer::TextureSlotMax> textures;
+		std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax> textures;
 		textures.fill(nullptr);
 
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
@@ -352,10 +343,6 @@ RendererImplemented::RendererImplemented()
 {
 	m_textures.fill(nullptr);
 
-	backgroundData.Width = 0;
-	backgroundData.Height = 0;
-	backgroundData.TextureFormat = Effekseer::TextureFormatType::ABGR8;
-	backgroundData.UserID = 0;
 	backgroundData.UserPtr = nullptr;
 }
 
@@ -446,8 +433,6 @@ void RendererImplemented::ResetRenderState() {}
 ::EffekseerRenderer::DistortingCallback* RendererImplemented::GetDistortingCallback() { return nullptr; }
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
-
-Effekseer::TextureData* RendererImplemented::GetBackground() { return (Effekseer::TextureData*)(&backgroundData); }
 
 void RendererImplemented::SetBackground(void* image) { backgroundData.UserPtr = image; }
 
@@ -604,29 +589,28 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
-		rp.VertexBufferStride = sizeof(UnityDistortionVertex);
+		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
 			auto& v = vs[vi];
-			UnityDistortionVertex unity_v;
-
-			Effekseer::Vector3D normal;
-			Effekseer::Vector3D::Cross(normal, v.Binormal, v.Tangent);
+			UnityDynamicVertex unity_v;
 
 			unity_v.Pos = v.Pos;
-			unity_v.UV[0] = v.UV[0];
-			unity_v.UV[1] = v.UV[1];
+			unity_v.UV1[0] = v.UV1[0];
+			unity_v.UV1[1] = v.UV1[1];
+			unity_v.UV2[0] = v.UV2[0];
+			unity_v.UV2[1] = v.UV2[1];
 			unity_v.Col[0] = v.Col.R / 255.0f;
 			unity_v.Col[1] = v.Col.G / 255.0f;
 			unity_v.Col[2] = v.Col.B / 255.0f;
 			unity_v.Col[3] = v.Col.A / 255.0f;
-			unity_v.Tangent = v.Tangent;
-			unity_v.Binormal = v.Binormal;
+			unity_v.Tangent = UnpackVector3DF(v.Tangent);
+			unity_v.Normal = UnpackVector3DF(v.Normal);
 
-			AddVertexBuffer(&unity_v, sizeof(UnityDistortionVertex));
+			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
 		}
 
 		rp.DistortionIntensity = m_distortionIntensity;
@@ -861,7 +845,7 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 	memcpy(p, data, size);
 }
 
-void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count)
+void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count)
 {
 	textureCount_ = count;
 	if (count > 0)

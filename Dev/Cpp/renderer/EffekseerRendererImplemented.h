@@ -96,7 +96,7 @@ public:
 };
 
 using Vertex = EffekseerRenderer::SimpleVertex;
-using VertexDistortion = EffekseerRenderer::VertexDistortion;
+using VertexDistortion = EffekseerRenderer::LightingVertex;
 using DynamicVertex = EffekseerRenderer::DynamicVertex;
 
 struct ModelParameter
@@ -157,7 +157,7 @@ protected:
 	std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
 
-	Effekseer::TextureData backgroundData;
+	Effekseer::TextureRef backgroundData;
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
 
@@ -252,8 +252,6 @@ public:
 	*/
 	void SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) override;
 
-	Effekseer::TextureData* GetBackground();
-
 	void SetBackground(void* image);
 
 	VertexBuffer* GetVertexBuffer();
@@ -287,7 +285,7 @@ public:
 
 	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
-	void SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count);
+	void SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count);
 	void SetDistortionIntensity(float value) { m_distortionIntensity = value; }
 
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
