@@ -55,6 +55,7 @@ extern "C"
 
 namespace EffekseerRendererUnity
 {
+
 struct UnityVertex
 {
 	::Effekseer::Vector3D Pos;
@@ -70,6 +71,17 @@ struct UnityDynamicVertex
 	::Effekseer::Vector3D Tangent;
 	float UV1[2];
 	float UV2[2];
+};
+
+struct UnityAdvancedVertex
+{
+	float AlphaUV[2];
+	float UVDistortionUV[2];
+	float BlendUV[2];
+	float BlendAlphaUV[2];
+	float BlendUVDistortionUV[2];
+	float FlipbookIndexAndNextRate;
+	float AlphaThreshold;
 };
 
 struct UnityModelParameter
@@ -306,6 +318,21 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		m_renderer->GetRenderState()->Update(false);
 		m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
 
+
+		/*
+				m_matrixes.push_back(ToStruct(mat44));
+		m_uv.push_back(instanceParameter.UV);
+		m_alphaUV.push_back(instanceParameter.AlphaUV);
+		m_uvDistortionUV.push_back(instanceParameter.UVDistortionUV);
+		m_blendUV.push_back(instanceParameter.BlendUV);
+		m_blendAlphaUV.push_back(instanceParameter.BlendAlphaUV);
+		m_blendUVDistortionUV.push_back(instanceParameter.BlendUVDistortionUV);
+		m_flipbookIndexAndNextRate.push_back(instanceParameter.FlipbookIndexAndNextRate);
+		m_alphaThreshold.push_back(instanceParameter.AlphaThreshold);
+		m_viewOffsetDistance.push_back(instanceParameter.ViewOffsetDistance);
+		m_colors.push_back(instanceParameter.AllColor);
+		m_times.push_back(instanceParameter.Time);
+		*/
 		m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times, customData1_, customData2_);
 
 		m_renderer->EndShader(shader);
@@ -580,7 +607,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			return;
 		}
 
-		auto intensity = ((float*)m_currentShader->GetPixelConstantBuffer())[0];
+		auto intensity = ((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
 		SetDistortionIntensity(intensity);
 
 		VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
@@ -750,7 +777,7 @@ void RendererImplemented::DrawModel(void* model,
 		{
 			rp.TexturePtrs[1] = m_textures[1];
 
-			auto intensity = ((float*)m_currentShader->GetPixelConstantBuffer())[0];
+			auto intensity = ((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
 			SetDistortionIntensity(intensity);
 		}
 	}

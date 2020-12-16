@@ -1,4 +1,6 @@
 #include "EffekseerRendererShader.h"
+#include "EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h"
+#include "EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h"
 
 namespace EffekseerRendererUnity
 {
@@ -17,11 +19,14 @@ Shader::Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> materia
 Shader::Shader(EffekseerRenderer::RendererShaderType shaderType)
 	: parameterGenerator_(::Effekseer::Material(), false, 0, 1), shaderType_(shaderType)
 {
-	// TODO
-	assert(0);
+	auto vertexConstantBufferSize = sizeof(EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>);
+	vertexConstantBufferSize = std::max(vertexConstantBufferSize, sizeof(EffekseerRenderer::ModelRendererVertexConstantBuffer<1>));
+	vertexConstantBufferSize = std::max(vertexConstantBufferSize, sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
 
-	vertexConstantBuffer.resize(sizeof(::Effekseer::Matrix44) * 4);
-	pixelConstantBuffer.resize(sizeof(float) * 16);
+	vertexConstantBuffer.resize(vertexConstantBufferSize);
+
+	pixelConstantBuffer.resize(
+		std::max(sizeof(EffekseerRenderer::PixelConstantBuffer), sizeof(EffekseerRenderer::PixelConstantBufferDistortion)));
 }
 
 Shader::~Shader() {}
