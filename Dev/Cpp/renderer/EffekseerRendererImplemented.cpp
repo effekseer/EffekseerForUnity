@@ -722,7 +722,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	}
 }
 
-void RendererImplemented::DrawModel(void* model,
+void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 									std::vector<Effekseer::Matrix44>& matrixes,
 									std::vector<Effekseer::RectF>& uvs,
 									std::vector<Effekseer::Color>& colors,
@@ -734,7 +734,7 @@ void RendererImplemented::DrawModel(void* model,
 	rp.RenderMode = 1;
 	rp.MaterialType = m_currentShader->GetType();
 
-	auto model_ = (Model*)model;
+	auto model_ = (Model*)model.Get();
 
 	if (model != nullptr)
 	{

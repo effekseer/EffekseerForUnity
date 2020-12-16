@@ -25,7 +25,7 @@ class ModelLoader : public Effekseer::ModelLoader
 	struct ModelResource
 	{
 		int referenceCount = 1;
-		Effekseer::Model* internalData;
+		Effekseer::ModelRef internalData;
 	};
 	std::map<std::u16string, ModelResource> resources;
 	std::vector<uint8_t> internalBuffer;
@@ -34,8 +34,8 @@ public:
 	ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin::ModelLoaderUnload unload);
 
 	virtual ~ModelLoader() = default;
-	virtual Effekseer::Model* Load(const EFK_CHAR* path);
-	virtual void Unload(Effekseer::Model* source);
+	virtual Effekseer::ModelRef Load(const EFK_CHAR* path);
+	virtual void Unload(Effekseer::ModelRef source);
 };
 
 } // namespace EffekseerRendererUnity

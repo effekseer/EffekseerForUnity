@@ -28,7 +28,7 @@ namespace EffekseerPlugin
 		
 		struct ModelResource {
 			int referenceCount = 1;
-			Effekseer::Model* internalData;
+			Effekseer::ModelRef internalData;
 		};
 		std::map<std::u16string, ModelResource> resources;
 		MemoryFile memoryFile;
@@ -45,8 +45,8 @@ namespace EffekseerPlugin
 			ModelLoaderUnload unload );
 		
 		virtual ~ModelLoader() = default;
-		virtual Effekseer::Model* Load(const char16_t* path);
-		virtual void Unload( void* source );
+		virtual Effekseer::ModelRef Load(const char16_t* path) override;
+		virtual void Unload(Effekseer::ModelRef source) override;
 
 		Effekseer::FileInterface* GetFileInterface() {
 			return &memoryFile;

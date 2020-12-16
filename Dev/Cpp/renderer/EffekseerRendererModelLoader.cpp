@@ -10,7 +10,7 @@ ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin:
 	internalBuffer.resize(1024 * 1024);
 }
 
-Effekseer::Model* ModelLoader::Load(const EFK_CHAR* path)
+Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 {
 	const auto key = std::u16string(path);
 
@@ -50,7 +50,7 @@ Effekseer::Model* ModelLoader::Load(const EFK_CHAR* path)
 
 	internalBuffer.resize(requiredDataSize);
 
-	auto model = new Model(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
+	auto model = Effekseer::MakeRefPtr<Model>(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
 	model->InternalPtr = modelPtr;
 	res.internalData = model;
 
@@ -58,7 +58,7 @@ Effekseer::Model* ModelLoader::Load(const EFK_CHAR* path)
 	return res.internalData;
 }
 
-void ModelLoader::Unload(Effekseer::Model* source)
+void ModelLoader::Unload(Effekseer::ModelRef source)
 {
 	if (source == nullptr)
 	{
@@ -78,7 +78,7 @@ void ModelLoader::Unload(Effekseer::Model* source)
 	it->second.referenceCount--;
 	if (it->second.referenceCount <= 0)
 	{
-		auto model = (Model*)it->second.internalData;
+		auto model = it->second.internalData.DownCast<Model>().Get();
 		unload(it->first.c_str(), model->InternalPtr);
 		ES_SAFE_DELETE(model);
 		it->second.internalData = nullptr;

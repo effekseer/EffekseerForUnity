@@ -268,7 +268,7 @@ public:
 	void SetLayout(Shader* shader);
 	void DrawSprites(int32_t spriteCount, int32_t vertexOffset);
 
-	void DrawModel(void* model,
+	void DrawModel(Effekseer::ModelRef model,
 				   std::vector<Effekseer::Matrix44>& matrixes,
 				   std::vector<Effekseer::RectF>& uvs,
 				   std::vector<Effekseer::Color>& colors,
