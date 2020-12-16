@@ -23,11 +23,7 @@ Effekseer::TextureRef TextureLoader::Load(const EFK_CHAR* path, Effekseer::Textu
 
 	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 	TextureResource& res = added.first->second;
-	res.textureDataPtr = new Effekseer::TextureData();
-	res.textureDataPtr->Width = width;
-	res.textureDataPtr->Height = height;
-	res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
-	res.textureDataPtr->UserPtr = texturePtr;
+	res.textureDataPtr = Effekseer::MakeRefPtr<Texture>(texturePtr);
 
 	textureData2NativePtr[res.textureDataPtr] = texturePtr;
 
@@ -43,7 +39,7 @@ void TextureLoader::Unload(Effekseer::TextureRef source)
 
 	// find a texture
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return pair.second.textureDataPtr->UserPtr == source->UserPtr;
+		return pair.second.textureDataPtr == source;
 	});
 	if (it == resources.end())
 	{
@@ -57,7 +53,6 @@ void TextureLoader::Unload(Effekseer::TextureRef source)
 		// Unload from unity
 		unload(it->first.c_str(), textureData2NativePtr[source]);
 		textureData2NativePtr.erase(source);
-		ES_SAFE_DELETE(it->second.textureDataPtr);
 		resources.erase(it);
 	}
 }

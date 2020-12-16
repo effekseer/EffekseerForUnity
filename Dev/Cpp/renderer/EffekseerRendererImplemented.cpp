@@ -2,6 +2,7 @@
 #include "EffekseerRendererIndexBuffer.h"
 #include "EffekseerRendererRenderState.h"
 #include "EffekseerRendererShader.h"
+#include "EffekseerRendererTextureLoader.h"
 #include "EffekseerRendererVertexBuffer.h"
 
 namespace EffekseerPlugin
@@ -343,7 +344,7 @@ RendererImplemented::RendererImplemented()
 {
 	m_textures.fill(nullptr);
 
-	backgroundData.UserPtr = nullptr;
+	backgroundData = Effekseer::MakeRefPtr<Texture>(nullptr);
 }
 
 RendererImplemented::~RendererImplemented()
@@ -369,9 +370,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	return true;
 }
 
-void RendererImplemented::SetRestorationOfStatesFlag(bool flag)
-{
-}
+void RendererImplemented::SetRestorationOfStatesFlag(bool flag) {}
 
 bool RendererImplemented::BeginRendering()
 {
@@ -407,12 +406,12 @@ int32_t RendererImplemented::GetSquareMaxCount() const { return m_squareMaxCount
 
 ::Effekseer::RibbonRendererRef RendererImplemented::CreateRibbonRenderer()
 {
-	return Effekseer::MakeRefPtr <::EffekseerRenderer::RibbonRendererBase<RendererImplemented, false>>(this);
+	return Effekseer::MakeRefPtr<::EffekseerRenderer::RibbonRendererBase<RendererImplemented, false>>(this);
 }
 
 ::Effekseer::RingRendererRef RendererImplemented::CreateRingRenderer()
 {
-	auto ret = Effekseer::MakeRefPtr <::EffekseerRenderer::RingRendererBase<RendererImplemented, false>>(this);
+	auto ret = Effekseer::MakeRefPtr<::EffekseerRenderer::RingRendererBase<RendererImplemented, false>>(this);
 	ret->SetFasterSngleRingModeEnabled(false);
 	return ret;
 }
@@ -434,16 +433,13 @@ void RendererImplemented::ResetRenderState() {}
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
 
-void RendererImplemented::SetBackground(void* image) { backgroundData.UserPtr = image; }
+void RendererImplemented::SetBackground(void* image) { backgroundData.DownCast<Texture>()->UserData = image; }
 
 VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }
 
 IndexBuffer* RendererImplemented::GetIndexBuffer() { return nullptr; }
 
-EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer()
-{
-	return m_standardRenderer;
-}
+EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer() { return m_standardRenderer; }
 
 ::EffekseerRenderer::RenderStateBase* RendererImplemented::GetRenderState() { return m_renderState; }
 
@@ -462,8 +458,8 @@ inline Effekseer::Vector3D UnpackVector3DF(const Effekseer::Color& v)
 	return ret;
 }
 
-template<typename T, typename U>
-void CopyBuffer(const T& dstUnityVertex, const U& srcVertex) {
+template <typename T, typename U> void CopyBuffer(const T& dstUnityVertex, const U& srcVertex)
+{
 	dstUnityVertex.Pos = srcVertex.Pos;
 	dstUnityVertex.UV[0] = srcVertex.UV[0];
 	dstUnityVertex.UV[1] = srcVertex.UV[1];
@@ -796,12 +792,14 @@ void RendererImplemented::DrawModel(void* model,
 
 		if (nativeMaterial->GetCustomData1Count() > 0)
 		{
-			rp.CustomData1BufferOffset = AddInfoBuffer(customData1.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData1.size()));
+			rp.CustomData1BufferOffset =
+				AddInfoBuffer(customData1.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData1.size()));
 		}
 
 		if (nativeMaterial->GetCustomData2Count() > 0)
 		{
-			rp.CustomData2BufferOffset = AddInfoBuffer(customData2.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData2.size()));
+			rp.CustomData2BufferOffset =
+				AddInfoBuffer(customData2.data(), static_cast<int32_t>(sizeof(std::array<float, 4>) * customData2.size()));
 		}
 	}
 
@@ -854,7 +852,7 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureRef* tex
 		{
 			if (textures[i] != nullptr)
 			{
-				m_textures[i] = textures[i]->UserPtr;
+				m_textures[i] = textures[i].DownCast<Texture>()->UserData;
 			}
 			else
 			{

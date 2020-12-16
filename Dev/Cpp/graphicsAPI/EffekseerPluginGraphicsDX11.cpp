@@ -25,11 +25,15 @@ class TextureLoaderDX11 : public TextureLoader
 	std::map<std::u16string, TextureResource> resources;
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
+	ID3D11Device* d3d11Device_ = nullptr;
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 
 public:
-	TextureLoaderDX11(TextureLoaderLoad load, TextureLoaderUnload unload, Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
-		: TextureLoader(load, unload), graphicsDevice_(graphicsDevice)
+	TextureLoaderDX11(TextureLoaderLoad load,
+					  TextureLoaderUnload unload,
+					  ID3D11Device* d3d11Device,
+					  Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
+		: TextureLoader(load, unload), d3d11Device_(d3d11Device), graphicsDevice_(graphicsDevice)
 	{
 	}
 
@@ -72,18 +76,16 @@ public:
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		desc.Texture2D.MostDetailedMip = 0;
 		desc.Texture2D.MipLevels = texDesc.MipLevels;
-		hr = d3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
+		hr = d3d11Device_->CreateShaderResourceView(textureDX11, &desc, &srv);
 		if (FAILED(hr))
 		{
 			return nullptr;
 		}
 
-		res.textureDataPtr->UserPtr = srv;
-
-		res.textureDataPtr = nullptr; // TODO : must implement it
-		assert(0);
-
+		res.textureDataPtr = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
 		textureData2NativePtr[res.textureDataPtr] = texturePtr;
+
+		ES_SAFE_RELEASE(srv);
 
 		return res.textureDataPtr;
 	}
@@ -108,11 +110,6 @@ public:
 		it->second.referenceCount--;
 		if (it->second.referenceCount <= 0)
 		{
-
-			// 作成したID3D11ShaderResourceViewを解放する
-			ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)source->UserPtr;
-			srv->Release();
-
 			// Unload from unity
 			unload(it->first.c_str(), textureData2NativePtr[source]);
 			textureData2NativePtr.erase(source);
@@ -222,7 +219,7 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 
 Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, graphicsDevice_);
+	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, d3d11Device, graphicsDevice_);
 }
 
 Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)

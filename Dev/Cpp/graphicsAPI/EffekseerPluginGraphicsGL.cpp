@@ -22,12 +22,16 @@ class TextureLoaderGL : public TextureLoader
 		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 	std::map<std::u16string, TextureResource> resources;
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 	UnityGfxRenderer gfxRenderer;
 
 public:
-	TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer);
+	TextureLoaderGL(TextureLoaderLoad load,
+					TextureLoaderUnload unload,
+					Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
+					UnityGfxRenderer renderer);
 
 	virtual ~TextureLoaderGL();
 
@@ -38,8 +42,11 @@ public:
 
 bool IsPowerOfTwo(uint32_t x) { return (x & (x - 1)) == 0; }
 
-TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer)
-	: TextureLoader(load, unload), gfxRenderer(renderer)
+TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load,
+								 TextureLoaderUnload unload,
+								 Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
+								 UnityGfxRenderer renderer)
+	: TextureLoader(load, unload), graphicsDevice_(graphicsDevice), gfxRenderer(renderer)
 {
 }
 
@@ -78,9 +85,7 @@ Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::Tex
 
 	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
 
-	// TODO
-	assert(0);
-	res.textureDataPtr = nullptr;
+	res.textureDataPtr = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
 
 	return res.textureDataPtr;
 }
@@ -112,10 +117,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureRef source)
 	}
 }
 
-GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer)
-{
-	MaterialEvent::Initialize();
-}
+GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer) { MaterialEvent::Initialize(); }
 
 GraphicsGL::~GraphicsGL() {}
 
@@ -169,7 +171,7 @@ void GraphicsGL::EffekseerSetBackGroundTexture(int renderId, void* texture) { re
 
 Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, gfxRenderer);
+	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, graphicsDevice_, gfxRenderer);
 }
 
 Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
