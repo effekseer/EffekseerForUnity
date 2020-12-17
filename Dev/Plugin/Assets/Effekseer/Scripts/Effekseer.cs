@@ -272,6 +272,8 @@ namespace Effekseer
 			//! VertexBuffer 
 			public int VertexBufferOffset;
 
+			public int AdvancedDataOffset;
+
 			//! VertexBuffer 
 			public int VertexBufferStride;
 

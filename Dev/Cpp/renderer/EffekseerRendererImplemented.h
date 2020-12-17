@@ -27,6 +27,8 @@ extern "C"
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
 
+		int AdvancedBufferOffset = 0;
+
 		//! Stride for material
 		int VertexBufferStride = 0;
 
@@ -115,7 +117,7 @@ class ModelRenderer : public ::EffekseerRenderer::ModelRendererBase
 {
 private:
 	RendererImplemented* m_renderer;
-	
+
 public:
 	ModelRenderer(RendererImplemented* renderer);
 
@@ -129,6 +131,34 @@ public:
 	void Rendering(const efkModelNodeParam& parameter, const efkModelInstanceParam& instanceParameter, void* userData) override;
 
 	void EndRendering(const efkModelNodeParam& parameter, void* userData) override;
+};
+
+struct UnityVertex
+{
+	::Effekseer::Vector3D Pos;
+	float UV[2];
+	float Col[4];
+};
+
+struct UnityDynamicVertex
+{
+	::Effekseer::Vector3D Pos;
+	float Col[4];
+	::Effekseer::Vector3D Normal;
+	::Effekseer::Vector3D Tangent;
+	float UV1[2];
+	float UV2[2];
+};
+
+struct AdvancedVertexParameter
+{
+	float AlphaUV[2];
+	float UVDistortionUV[2];
+	float BlendUV[2];
+	float BlendAlphaUV[2];
+	float BlendUVDistortionUV[2];
+	float FlipbookIndexAndNextRate;
+	float AlphaThreshold;
 };
 
 class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effekseer::ReferenceObject
@@ -163,8 +193,53 @@ protected:
 
 	int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
+
 	void AlignVertexBuffer(int32_t alignment);
 
+	template <typename T> void AddVertexBufferAsVertex(const T& v)
+	{
+		UnityVertex dst;
+		dst.Pos = v.Pos;
+		dst.UV[0] = v.UV1[0];
+		dst.UV[1] = v.UV1[1];
+		dst.Col[0] = v.Col.R / 255.0f;
+		dst.Col[1] = v.Col.G / 255.0f;
+		dst.Col[2] = v.Col.B / 255.0f;
+		dst.Col[3] = v.Col.A / 255.0f;
+		AddVertexBuffer(&dst, sizeof(UnityVertex));
+	}
+
+	template <typename T> void AddVertexBufferAsDynamicVertex(const T& v)
+	{
+		UnityDynamicVertex dst;
+		dst.Pos = v.Pos;
+		dst.UV1[0] = v.UV1[0];
+		dst.UV1[1] = v.UV1[1];
+		dst.UV2[0] = v.UV2[0];
+		dst.UV2[1] = v.UV2[1];
+		dst.Col[0] = v.Col.R / 255.0f;
+		dst.Col[1] = v.Col.G / 255.0f;
+		dst.Col[2] = v.Col.B / 255.0f;
+		dst.Col[3] = v.Col.A / 255.0f;
+		dst.Tangent = UnpackVector3DF(v.Tangent);
+		dst.Normal = UnpackVector3DF(v.Normal);
+		AddVertexBuffer(&dst, sizeof(UnityDynamicVertex));
+	}
+
+	template <typename T> void AddVertexBufferAsAdvancedData(const T& v)
+	{
+		AdvancedVertexParameter dst;
+
+		dst.AlphaUV = EffekseerRenderer::GetVertexAlphaUV(v);
+		dst.UVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.BlendUV = EffekseerRenderer::GetVertexBlendUV(v);
+		dst.BlendAlphaUV = EffekseerRenderer::GetVertexBlendAlphaUV(v);
+		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.FlipbookIndexAndNextRate = EffekseerRenderer::GetVertexFlipbookIndexAndNextRate(v);
+		dst.AlphaThreshold = EffekseerRenderer::GetVertexAlphaThreshold(v);
+
+		AddVertexBuffer(&dst, sizeof(AdvancedVertexParameter));
+	}
 
 public:
 	static Effekseer::RefPtr<RendererImplemented> Create();

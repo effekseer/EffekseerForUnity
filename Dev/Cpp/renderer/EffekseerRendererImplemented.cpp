@@ -56,34 +56,6 @@ extern "C"
 namespace EffekseerRendererUnity
 {
 
-struct UnityVertex
-{
-	::Effekseer::Vector3D Pos;
-	float UV[2];
-	float Col[4];
-};
-
-struct UnityDynamicVertex
-{
-	::Effekseer::Vector3D Pos;
-	float Col[4];
-	::Effekseer::Vector3D Normal;
-	::Effekseer::Vector3D Tangent;
-	float UV1[2];
-	float UV2[2];
-};
-
-struct UnityAdvancedVertex
-{
-	float AlphaUV[2];
-	float UVDistortionUV[2];
-	float BlendUV[2];
-	float BlendAlphaUV[2];
-	float BlendUVDistortionUV[2];
-	float FlipbookIndexAndNextRate;
-	float AlphaThreshold;
-};
-
 struct UnityModelParameter
 {
 	Effekseer::Matrix44 Matrix;
@@ -318,7 +290,6 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		m_renderer->GetRenderState()->Update(false);
 		m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
 
-
 		/*
 				m_matrixes.push_back(ToStruct(mat44));
 		m_uv.push_back(instanceParameter.UV);
@@ -352,7 +323,6 @@ int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
 
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
-
 	auto ret = static_cast<int32_t>(exportedInfoBuffer.size());
 
 	exportedInfoBuffer.resize(exportedInfoBuffer.size() + size);
@@ -600,40 +570,47 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		renderParameters.push_back(rp);
 		return;
 	}
-	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
+	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
+			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
 	{
 		if (m_textures[1] == nullptr)
 		{
 			return;
 		}
 
-		auto intensity = ((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
+		auto intensity =
+			((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
 		SetDistortionIntensity(intensity);
-
-		VertexDistortion* vs = (VertexDistortion*)m_vertexBuffer->GetResource();
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
-		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
-			auto& v = vs[vi];
-			UnityDynamicVertex unity_v;
+			auto vs = (DynamicVertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsDynamicVertex(v);
+			}
+		}
+		else
+		{
+			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsDynamicVertex(v);
+			}
 
-			unity_v.Pos = v.Pos;
-			unity_v.UV1[0] = v.UV1[0];
-			unity_v.UV1[1] = v.UV1[1];
-			unity_v.UV2[0] = v.UV2[0];
-			unity_v.UV2[1] = v.UV2[1];
-			unity_v.Col[0] = v.Col.R / 255.0f;
-			unity_v.Col[1] = v.Col.G / 255.0f;
-			unity_v.Col[2] = v.Col.B / 255.0f;
-			unity_v.Col[3] = v.Col.A / 255.0f;
-			unity_v.Tangent = UnpackVector3DF(v.Tangent);
-			unity_v.Normal = UnpackVector3DF(v.Normal);
-
-			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
+			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsAdvancedData(v);
+			}
 		}
 
 		rp.DistortionIntensity = m_distortionIntensity;
@@ -647,32 +624,38 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
 	}
-	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
+	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
+			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 	{
-		DynamicVertex* vs = (DynamicVertex*)m_vertexBuffer->GetResource();
-
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
-		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 		{
-			auto& v = vs[vi];
-			UnityDynamicVertex unity_v;
+			auto vs = (DynamicVertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsDynamicVertex(v);
+			}
+		}
+		else
+		{
+			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsDynamicVertex(v);
+			}
 
-			unity_v.Pos = v.Pos;
-			unity_v.UV1[0] = v.UV1[0];
-			unity_v.UV1[1] = v.UV1[1];
-			unity_v.UV2[0] = v.UV2[0];
-			unity_v.UV2[1] = v.UV2[1];
-			unity_v.Col[0] = v.Col.R / 255.0f;
-			unity_v.Col[1] = v.Col.G / 255.0f;
-			unity_v.Col[2] = v.Col.B / 255.0f;
-			unity_v.Col[3] = v.Col.A / 255.0f;
-			unity_v.Tangent = UnpackVector3DF(v.Tangent);
-			unity_v.Normal = UnpackVector3DF(v.Normal);
-
-			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
+			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsAdvancedData(v);
+			}
 		}
 
 		rp.DistortionIntensity = m_distortionIntensity;
@@ -688,28 +671,38 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
 	}
-	else
+	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
+			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
 	{
-		Vertex* vs = (Vertex*)m_vertexBuffer->GetResource();
-
 		rp.VertexBufferStride = sizeof(UnityVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
-		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
 		{
-			auto& v = vs[vi];
-			UnityVertex unity_v;
+			auto vs = (Vertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsVertex(v);
+			}
+		}
+		else
+		{
+			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsVertex(v);
+			}
 
-			unity_v.Pos = v.Pos;
-			unity_v.UV[0] = v.UV[0];
-			unity_v.UV[1] = v.UV[1];
-			unity_v.Col[0] = v.Col.R / 255.0f;
-			unity_v.Col[1] = v.Col.G / 255.0f;
-			unity_v.Col[2] = v.Col.B / 255.0f;
-			unity_v.Col[3] = v.Col.A / 255.0f;
-
-			AddVertexBuffer(&unity_v, sizeof(UnityVertex));
+			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+			{
+				auto& v = vs[vi];
+				AddVertexBufferAsAdvancedData(v);
+			}
 		}
 
 		rp.VertexBufferOffset = startOffset;
@@ -777,7 +770,8 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		{
 			rp.TexturePtrs[1] = m_textures[1];
 
-			auto intensity = ((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
+			auto intensity =
+				((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
 			SetDistortionIntensity(intensity);
 		}
 	}
