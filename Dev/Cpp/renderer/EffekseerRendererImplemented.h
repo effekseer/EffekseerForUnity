@@ -199,8 +199,7 @@ protected:
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;
 
-	int32_t textureCount_ = 0;
-	std::array<void*, Effekseer::TextureSlotMax> m_textures;
+	std::vector<void*> textures_;
 
 	std::vector<UnityRenderParameter> renderParameters;
 

@@ -228,19 +228,13 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 		int32_t textureCount = collector_.TextureCount;
 		std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
-		
+
 		for (int32_t i = 0; i < textureCount; i++)
 		{
-			state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
-			state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
-			state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
-			state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
-			// TODO refacto
-			assert(0);
+			state.TextureFilterTypes[i] = parameter.BasicParameterPtr->TextureFilters[i];
+			state.TextureWrapTypes[i] = parameter.BasicParameterPtr->TextureWraps[i];
 		}
-			
 
-		
 		if (textureCount > 0)
 		{
 			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
@@ -306,12 +300,7 @@ void RendererImplemented::AlignVertexBuffer(int32_t alignment)
 
 Effekseer::RefPtr<RendererImplemented> RendererImplemented::Create() { return Effekseer::MakeRefPtr<RendererImplemented>(); }
 
-RendererImplemented::RendererImplemented()
-{
-	m_textures.fill(nullptr);
-
-	backgroundData = Effekseer::MakeRefPtr<Texture>(nullptr);
-}
+RendererImplemented::RendererImplemented() { backgroundData = Effekseer::MakeRefPtr<Texture>(nullptr); }
 
 RendererImplemented::~RendererImplemented()
 {
@@ -445,6 +434,13 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	rp.RenderMode = 0;
 	rp.ModelPtr = nullptr;
 
+	for (size_t i = 0; i < textures_.size(); i++)
+	{
+		rp.TexturePtrs[i] = textures_[i];
+		rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
+		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
+	}
+
 	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
 		if (m_currentShader == nullptr)
@@ -527,13 +523,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		rp.VertexBufferOffset = startOffset;
 
-		for (int32_t i = 0; i < textureCount_; i++)
-		{
-			rp.TexturePtrs[i] = m_textures[i];
-			rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
-			rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
-		}
-
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
 		return;
@@ -541,7 +530,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
 			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
 	{
-		if (m_textures[1] == nullptr)
+		if (textures_[1] == nullptr)
 		{
 			return;
 		}
@@ -581,10 +570,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 
 		rp.VertexBufferOffset = startOffset;
-		rp.TexturePtrs[0] = m_textures[0];
-		rp.TexturePtrs[1] = m_textures[1];
-		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
-		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 		rp.MaterialPtr = nullptr;
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
@@ -624,12 +609,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 
 		rp.VertexBufferOffset = startOffset;
-		rp.TexturePtrs[0] = m_textures[0];
-		rp.TexturePtrs[1] = m_textures[1];
-		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
-		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
-		rp.TextureFilterTypes[1] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[1];
-		rp.TextureWrapTypes[1] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[1];
 		rp.MaterialPtr = nullptr;
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
@@ -686,9 +665,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
 
 		rp.VertexBufferOffset = startOffset;
-		rp.TexturePtrs[0] = m_textures[0];
-		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
-		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
 		rp.MaterialPtr = nullptr;
 		rp.ElementCount = spriteCount;
 		renderParameters.push_back(rp);
@@ -728,35 +704,26 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	if (model == nullptr)
 		return;
 
+	for (size_t i = 0; i < textures_.size(); i++)
+	{
+		rp.TexturePtrs[i] = textures_[i];
+		rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
+		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
+	}
+
 	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
 		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
 		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
-
-		for (int32_t i = 0; i < textureCount_; i++)
-		{
-			rp.TexturePtrs[i] = m_textures[i];
-			rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
-			rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
-		}
 	}
 	else
 	{
-		rp.TexturePtrs[0] = m_textures[0];
-		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
-		rp.TextureWrapTypes[0] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[0];
-
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 		{
-			rp.TexturePtrs[1] = m_textures[1];
-			rp.TextureFilterTypes[1] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[1];
-			rp.TextureWrapTypes[1] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[1];
 		}
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
-			rp.TexturePtrs[1] = m_textures[1];
-
 			rp.DistortionIntensity =
 				((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
 		}
@@ -858,24 +825,20 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count)
 {
-	textureCount_ = count;
+	textures_.resize(count);
 	if (count > 0)
 	{
 		for (int i = 0; i < count; i++)
 		{
 			if (textures[i] != nullptr)
 			{
-				m_textures[i] = textures[i].DownCast<Texture>()->UserData;
+				textures_[i] = textures[i].DownCast<Texture>()->UserData;
 			}
 			else
 			{
-				m_textures[i] = nullptr;
+				textures_[i] = nullptr;
 			}
 		}
-	}
-	else
-	{
-		m_textures.fill(nullptr);
 	}
 }
 
