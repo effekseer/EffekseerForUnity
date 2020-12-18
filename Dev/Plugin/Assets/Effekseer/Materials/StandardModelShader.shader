@@ -43,8 +43,16 @@ SubShader{
 	struct ModelParameter
 	{
 		float4x4 Mat;
+		float4 VColor;
 		float4 UV;
-		float4 Color;
+		float4 AlphaUV;
+		float4 DistortionUV;
+		float4 BlendUV;
+		float4 BlendAlphaUV;
+		float4 BlendDistortionUV;
+		float FlipbookIndexAndNextRate;
+		float AlphaThreshold;
+		float ViewOffsetDistance;
 		int Time;
 	};
 

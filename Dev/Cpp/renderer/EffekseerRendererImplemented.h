@@ -17,6 +17,29 @@
 
 extern "C"
 {
+	struct FlipbookParameters
+	{
+		int32_t Enable = 0;
+		int32_t LoopType = 0;
+		int32_t DivideX = 1;
+		int32_t DivideY = 1;
+	};
+
+	struct EdgeParameters
+	{
+		std::array<float, 4> Color;
+		float Threshold = 0;
+		float ColorScaling = 1;
+	};
+
+	struct FalloffParameter
+	{
+		int32_t ColorBlendType = 0;
+		std::array<float, 4> BeginColor;
+		std::array<float, 4> EndColor;
+		float Pow = 1.0f;
+	};
+
 	struct UnityRenderParameter
 	{
 		//! 0 - procedual, 1 - model
@@ -42,7 +65,16 @@ extern "C"
 		int UniformBufferOffset = 0;
 
 		//! Element count (Triangle) or instance
-		int32_t ElementCount;
+		int32_t ElementCount = 0;
+
+		FlipbookParameters FlipbookParams;
+		float UVDistortionIntensity = 1.0f;
+		int32_t TextureBlendType = -1;
+		float BlendUVDistortionIntensity = 1.0f;
+		int EnableFalloff = 0;
+		FalloffParameter FalloffParam;
+		float EmissiveScaling = 1;
+		EdgeParameters EdgeParams;
 
 		int ZTest = 0;
 
@@ -101,14 +133,6 @@ using Vertex = EffekseerRenderer::SimpleVertex;
 using VertexDistortion = EffekseerRenderer::LightingVertex;
 using DynamicVertex = EffekseerRenderer::DynamicVertex;
 
-struct ModelParameter
-{
-	Effekseer::Matrix44 Matrix;
-	Effekseer::Color VertexColors;
-	Effekseer::RectF UV;
-	int32_t Time;
-};
-
 typedef ::Effekseer::ModelRenderer::NodeParameter efkModelNodeParam;
 typedef ::Effekseer::ModelRenderer::InstanceParameter efkModelInstanceParam;
 typedef ::Effekseer::Vector3D efkVector3D;
@@ -152,11 +176,11 @@ struct UnityDynamicVertex
 
 struct AdvancedVertexParameter
 {
-	float AlphaUV[2];
-	float UVDistortionUV[2];
-	float BlendUV[2];
-	float BlendAlphaUV[2];
-	float BlendUVDistortionUV[2];
+	std::array<float, 2> AlphaUV;
+	std::array<float, 2> UVDistortionUV;
+	std::array<float, 2> BlendUV;
+	std::array<float, 2> BlendAlphaUV;
+	std::array<float, 2> BlendUVDistortionUV;
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 };
@@ -179,11 +203,9 @@ protected:
 	std::array<void*, Effekseer::TextureSlotMax> m_textures;
 
 	std::vector<UnityRenderParameter> renderParameters;
-	std::vector<ModelParameter> modelParameters;
 
 	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
-	float m_distortionIntensity = 0.0f;
-
+	
 	std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
 
@@ -200,8 +222,8 @@ protected:
 	{
 		UnityVertex dst;
 		dst.Pos = v.Pos;
-		dst.UV[0] = v.UV1[0];
-		dst.UV[1] = v.UV1[1];
+		dst.UV[0] = v.UV[0];
+		dst.UV[1] = v.UV[1];
 		dst.Col[0] = v.Col.R / 255.0f;
 		dst.Col[1] = v.Col.G / 255.0f;
 		dst.Col[2] = v.Col.B / 255.0f;
@@ -346,7 +368,14 @@ public:
 	void DrawModel(Effekseer::ModelRef model,
 				   std::vector<Effekseer::Matrix44>& matrixes,
 				   std::vector<Effekseer::RectF>& uvs,
-				   std::vector<Effekseer::Color>& colors,
+				   std::vector<Effekseer::RectF>& alphaUVs,
+				   std::vector<Effekseer::RectF>& uvDistortionUVs,
+				   std::vector<Effekseer::RectF>& blendUVs,
+				   std::vector<Effekseer::RectF>& blendAlphaUVs,
+				   std::vector<Effekseer::RectF>& blendUVDistortionUVs,
+				   std::vector<float>& flipbookIndexAndNextRates,
+				   std::vector<float>& alphaThresholds,
+				   std::vector<Effekseer::Color>& colors, 
 				   std::vector<int32_t>& times,
 				   std::vector<std::array<float, 4>>& customData1,
 				   std::vector<std::array<float, 4>>& customData2);
@@ -361,8 +390,7 @@ public:
 	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
 	void SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count);
-	void SetDistortionIntensity(float value) { m_distortionIntensity = value; }
-
+	
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
 	std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
 	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer; }

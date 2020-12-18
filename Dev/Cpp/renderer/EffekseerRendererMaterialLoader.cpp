@@ -13,7 +13,7 @@ MaterialLoader::MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, Effekse
 
 MaterialLoader::~MaterialLoader() {}
 
-Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
+Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
 	auto it = resources.find((const char16_t*)path);
 	if (it != resources.end())
@@ -61,10 +61,10 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 	{
 		memoryFile_.LoadedSize = static_cast<size_t>(requiredDataSize);
 
-		std::shared_ptr<Effekseer::Material> material = std::make_shared<Effekseer::Material>();
+		std::shared_ptr<Effekseer::MaterialFile> material = std::make_shared<Effekseer::MaterialFile>();
 		material->Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), static_cast<int32_t>(memoryFile_.LoadedBuffer.size()));
 
-		res.internalData = new ::Effekseer::MaterialData();
+		res.internalData =  Effekseer::MakeRefPtr<::Effekseer::Material>();
 
 		auto materialData = res.internalData;
 
@@ -96,7 +96,7 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 
 	return nullptr;
 }
-void MaterialLoader::Unload(Effekseer::MaterialData* data)
+void MaterialLoader::Unload(Effekseer::MaterialRef data)
 {
 	if (data == nullptr)
 	{
@@ -129,8 +129,7 @@ void MaterialLoader::Unload(Effekseer::MaterialData* data)
 		ES_SAFE_DELETE(sm);
 		ES_SAFE_DELETE(srs);
 		ES_SAFE_DELETE(srm);
-		ES_SAFE_DELETE(it->second.internalData);
-
+		
 		unload_(it->first.c_str(), ptr);
 		resources.erase(it);
 	}

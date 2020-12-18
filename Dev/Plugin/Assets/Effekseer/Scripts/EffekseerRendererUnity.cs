@@ -1154,7 +1154,7 @@ namespace Effekseer.Internal
 			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
 
-			if (parameter.MaterialType == Plugin.RendererMaterialType.File)
+			if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 			{
 				var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
 				if (efkMaterial == null)
@@ -1222,7 +1222,7 @@ namespace Effekseer.Internal
 
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
-			else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
+			else if (parameter.MaterialType == Plugin.RendererMaterialType.Lit)
 			{
 				var material = materialsLighting.GetMaterial(ref key);
 
@@ -1371,7 +1371,7 @@ namespace Effekseer.Internal
 				ComputeBuffer computeBuf = null;
 				var allocated = modelBufferCol.Allocate(modelParameters, offset, count, ref computeBuf);
 
-				if (parameter.MaterialType == Plugin.RendererMaterialType.File)
+				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
 					var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
 					if (efkMaterial == null)
@@ -1460,7 +1460,7 @@ namespace Effekseer.Internal
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
-				else if (parameter.MaterialType == Plugin.RendererMaterialType.Lighting)
+				else if (parameter.MaterialType == Plugin.RendererMaterialType.Lit)
 				{
 					var material = materialsModelLighting.GetMaterial(ref key);
 

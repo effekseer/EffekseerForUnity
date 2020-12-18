@@ -8,10 +8,10 @@ namespace EffekseerPlugin
 /**
 @brief	load a material with delay
 */
-class LazyMaterialData : public Effekseer::MaterialData
+class LazyMaterialData : public Effekseer::Material
 {
 private:
-	Effekseer::MaterialData* internalData_ = nullptr;
+	Effekseer::MaterialRef internalData_ = nullptr;
 
 	Effekseer::CustomVector<uint8_t> data_;
 	Effekseer::CustomVector<uint8_t> compiledData_;
@@ -27,7 +27,7 @@ public:
 	{
 		if (dataSize > 0)
 		{
-			data_.assign(data.begin(), data.begin() + dataSize);	
+			data_.assign(data.begin(), data.begin() + dataSize);
 		}
 
 		if (compiledDataSize > 0)
@@ -96,7 +96,7 @@ void MaterialEvent::Terminate()
 
 std::shared_ptr<MaterialEvent> MaterialEvent::GetInstance() { return instance_; }
 
-void MaterialEvent::Load(LazyMaterialData* data)
+void MaterialEvent::Load(Effekseer::RefPtr<LazyMaterialData> data)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 
@@ -106,7 +106,7 @@ void MaterialEvent::Load(LazyMaterialData* data)
 	commands_.emplace_back(c);
 }
 
-void MaterialEvent::UnloadAndDelete(LazyMaterialData* data)
+void MaterialEvent::UnloadAndDelete(Effekseer::RefPtr<LazyMaterialData> data)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 
@@ -129,7 +129,6 @@ void MaterialEvent::Execute()
 		else if (c.type == CommandType::UnloadAndDelete)
 		{
 			c.data->Unload();
-			ES_SAFE_DELETE(c.data);
 		}
 		else
 		{
@@ -145,7 +144,7 @@ MaterialLoader::MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unl
 {
 }
 
-Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
+Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
 	auto it = resources.find((const char16_t*)path);
 	if (it != resources.end())
@@ -209,11 +208,11 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 
 	if (memoryFileForCache_.LoadedSize > 0 || memoryFile_.LoadedSize > 0)
 	{
-		auto data = new LazyMaterialData(internalLoader_,
-										 memoryFile_.LoadedBuffer,
-										 memoryFile_.LoadedSize,
-										 memoryFileForCache_.LoadedBuffer,
-										 memoryFileForCache_.LoadedSize);
+		auto data = Effekseer::MakeRefPtr<LazyMaterialData>(internalLoader_,
+															memoryFile_.LoadedBuffer,
+															memoryFile_.LoadedSize,
+															memoryFileForCache_.LoadedBuffer,
+															memoryFileForCache_.LoadedSize);
 		res.internalData = data;
 
 		auto eventInstance = MaterialEvent::GetInstance();
@@ -233,7 +232,7 @@ Effekseer::MaterialData* MaterialLoader::Load(const EFK_CHAR* path)
 
 	return nullptr;
 }
-void MaterialLoader::Unload(Effekseer::MaterialData* data)
+void MaterialLoader::Unload(Effekseer::MaterialRef data)
 {
 	if (data == nullptr)
 	{
@@ -260,7 +259,6 @@ void MaterialLoader::Unload(Effekseer::MaterialData* data)
 		else
 		{
 			it->second.internalData->Unload();
-			ES_SAFE_DELETE(it->second.internalData);
 		}
 
 		unload_(it->first.c_str(), nullptr);

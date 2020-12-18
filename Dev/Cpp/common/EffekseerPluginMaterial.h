@@ -47,7 +47,7 @@ private:
 	struct Command
 	{
 		CommandType type = CommandType::Load;
-		LazyMaterialData* data = nullptr;
+		Effekseer::RefPtr<LazyMaterialData> data = nullptr;
 	};
 
 	std::mutex mtx_;
@@ -56,16 +56,15 @@ private:
 	static std::shared_ptr<MaterialEvent> instance_;
 
 public:
-
 	static void Initialize();
 
 	static void Terminate();
 
 	static std::shared_ptr<MaterialEvent> GetInstance();
 
-	void Load(LazyMaterialData* data);
+	void Load(Effekseer::RefPtr<LazyMaterialData> data);
 
-	void UnloadAndDelete(LazyMaterialData* data);
+	void UnloadAndDelete(Effekseer::RefPtr<LazyMaterialData> data);
 
 	void Execute();
 };
@@ -92,7 +91,7 @@ class MaterialLoader : public Effekseer::MaterialLoader
 	struct MaterialResource
 	{
 		int referenceCount = 1;
-		LazyMaterialData* internalData;
+		Effekseer::RefPtr<LazyMaterialData> internalData;
 	};
 	std::map<std::u16string, MaterialResource> resources;
 	MemoryFile memoryFile_;
@@ -103,8 +102,8 @@ public:
 	MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unload);
 
 	virtual ~MaterialLoader() = default;
-	Effekseer::MaterialData* Load(const EFK_CHAR* path) override;
-	void Unload(Effekseer::MaterialData* data) override;
+	Effekseer::MaterialRef Load(const EFK_CHAR* path) override;
+	void Unload(Effekseer::MaterialRef data) override;
 	void SetInternalLoader(const std::shared_ptr<MaterialLoaderHolder>& loader) { internalLoader_ = loader; }
 };
 

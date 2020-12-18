@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Effekseer/Material/Effekseer.Material.h>
 #include <EffekseerRenderer.CommonUtils.h>
 #include <EffekseerRenderer.ShaderBase.h>
 #include <vector>
@@ -12,7 +11,7 @@ class Shader final
 {
 private:
 	EffekseerRenderer::MaterialShaderParameterGenerator parameterGenerator_;
-	std::shared_ptr<Effekseer::Material> material_;
+	std::shared_ptr<Effekseer::MaterialFile> material_;
 	void* unityMaterial_ = nullptr;
 	EffekseerRenderer::RendererShaderType shaderType_{};
 	std::vector<uint8_t> vertexConstantBuffer;
@@ -23,7 +22,7 @@ public:
 	/**
 		@brief	Constructor for material
 	*/
-	Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> material, bool isModel, bool isRefraction);
+	Shader(void* unityMaterial, std::shared_ptr<Effekseer::MaterialFile> material, bool isModel, bool isRefraction);
 
 	Shader(EffekseerRenderer::RendererShaderType shaderType);
 
@@ -43,7 +42,7 @@ public:
 
 	void* GetUnityMaterial() const;
 
-	const std::shared_ptr<Effekseer::Material>& GetMaterial() { return material_; }
+	const std::shared_ptr<Effekseer::MaterialFile>& GetMaterial() { return material_; }
 
 	const EffekseerRenderer::MaterialShaderParameterGenerator* GetParameterGenerator() const { return &parameterGenerator_; }
 

@@ -262,6 +262,32 @@ namespace Effekseer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
+		public unsafe struct FlipbookParameters
+		{
+			public int Enable;
+			public int LoopType;
+			public int DivideX;
+			public int DivideY;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public unsafe struct EdgeParameters
+		{
+			public Vector4 Color;
+			public float Threshold;
+			public float ColorScaling;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public unsafe struct FalloffParameter
+		{
+			public int ColorBlendType;
+			public Vector4 BeginColor;
+			public Vector4 EndColor;
+			public float Pow;
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
 		public unsafe struct UnityRenderParameter
 		{
 			//! 0 - procedual, 1 - model
@@ -287,6 +313,15 @@ namespace Effekseer
 
 			//! Element count (Triangle) or instance
 			public int ElementCount;
+
+			FlipbookParameters FlipbookParams;
+			float UVDistortionIntensity;
+			int TextureBlendType;
+			float BlendUVDistortionIntensity;
+			int EnableFalloff;
+			FalloffParameter FalloffParam;
+			float EmissiveScaling;
+			EdgeParameters EdgeParams;
 
 			public int ZTest;
 
@@ -341,8 +376,16 @@ namespace Effekseer
 		public struct UnityRenderModelParameter
 		{
 			public Matrix4x4 Matrix;
-			public Vector4 UV;
 			public Color VColor;
+			public Vector4 UV;
+			public Vector4 AlphaUV;
+			public Vector4 DistortionUV;
+			public Vector4 BlendUV;
+			public Vector4 BlendAlphaUV;
+			public Vector4 BlendDistortionUV;
+			public float FlipbookIndexAndNextRate;
+			public float AlphaThreshold;
+			public float ViewOffsetDistance;
 			public int Time;
 		};
 

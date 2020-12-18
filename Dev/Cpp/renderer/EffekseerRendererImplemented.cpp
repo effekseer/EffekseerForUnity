@@ -59,8 +59,17 @@ namespace EffekseerRendererUnity
 struct UnityModelParameter
 {
 	Effekseer::Matrix44 Matrix;
-	Effekseer::RectF UV;
 	float VColor[4];
+	Effekseer::RectF UV;
+	Effekseer::RectF AlphaUV;
+	Effekseer::RectF DistortionUV;
+	Effekseer::RectF BlendUV;
+	Effekseer::RectF BlendAlphaUV;
+	Effekseer::RectF BlendDistortionUV;
+	float FlipbookIndexAndNextRate;
+	float AlphaThreshold;
+	float ViewOffsetDistance;
+
 	int32_t Time;
 };
 
@@ -73,7 +82,7 @@ void ExtractTextures(const Effekseer::Effect* effect,
 {
 	if (param->MaterialType == Effekseer::RendererMaterialType::File)
 	{
-		auto materialParam = param->MaterialParameterPtr;
+		auto materialParam = param->MaterialRenderDataPtr;
 
 		textureCount = 0;
 
@@ -144,14 +153,13 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 	{
-		if (parameter.BasicParameterPtr->MaterialParameterPtr == nullptr ||
-			parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex < 0)
+		if (parameter.BasicParameterPtr->MaterialRenderDataPtr == nullptr ||
+			parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex < 0)
 		{
 			return;
 		}
 
-		Effekseer::MaterialData* material =
-			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex);
+		auto material = parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex);
 
 		if (material == nullptr)
 		{
@@ -163,12 +171,12 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	bool fileRefraction = false;
 
-	if (parameter.BasicParameterPtr->MaterialParameterPtr != nullptr &&
-		parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex >= 0 &&
-		parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex) != nullptr)
+	if (parameter.BasicParameterPtr->MaterialRenderDataPtr != nullptr &&
+		parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex >= 0 &&
+		parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex) != nullptr)
 	{
 		fileRefraction =
-			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)->IsRefractionRequired;
+			parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex)->IsRefractionRequired;
 	}
 
 	int stageCount = 1;
@@ -183,19 +191,21 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		Shader* shader = nullptr;
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 		{
-			if (parameter.BasicParameterPtr->MaterialParameterPtr != nullptr &&
-				parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex >= 0 &&
-				parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex) != nullptr)
+			if (parameter.BasicParameterPtr->MaterialRenderDataPtr != nullptr &&
+				parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex >= 0 &&
+				parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex) != nullptr)
 			{
 				if (fileRefraction && stageInd == 0)
 				{
-					shader = (Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
-								 ->RefractionModelUserPtr;
+					shader =
+						(Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex)
+							->RefractionModelUserPtr;
 				}
 				else
 				{
-					shader = (Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
-								 ->ModelUserPtr;
+					shader =
+						(Shader*)parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex)
+							->ModelUserPtr;
 				}
 			}
 			else
@@ -216,59 +226,21 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 		m_renderer->BeginShader(shader);
 
-		int32_t textureCount = 0;
-		std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax> textures;
-		textures.fill(nullptr);
-
-		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
+		int32_t textureCount = collector_.TextureCount;
+		std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
+		
+		for (int32_t i = 0; i < textureCount; i++)
 		{
-			ExtractTextures(parameter.EffectPointer, parameter.BasicParameterPtr, textures, textureCount);
-
-			for (int i = 0; i < textureCount; i++)
-			{
-				state.TextureFilterTypes[i] = Effekseer::TextureFilterType::Linear;
-				state.TextureWrapTypes[i] =
-					parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex)
-						->TextureWrapTypes[i];
-			}
-		}
-		else if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::BackDistortion)
-		{
-			if (parameter.BasicParameterPtr->Texture1Index >= 0)
-			{
-				textures[0] = parameter.EffectPointer->GetDistortionImage(parameter.BasicParameterPtr->Texture1Index);
-			}
-			else
-			{
-				textures[0] = nullptr;
-			}
-
 			state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
 			state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
 			state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
 			state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
-
-			textureCount = 1;
+			// TODO refacto
+			assert(0);
 		}
-		else
-		{
-			if (parameter.BasicParameterPtr->Texture1Index >= 0)
-			{
-				textures[0] = parameter.EffectPointer->GetColorImage(parameter.BasicParameterPtr->Texture1Index);
-			}
-			else
-			{
-				textures[0] = nullptr;
-			}
+			
 
-			state.TextureFilterTypes[0] = parameter.BasicParameterPtr->TextureFilter1;
-			state.TextureWrapTypes[0] = parameter.BasicParameterPtr->TextureWrap1;
-			state.TextureFilterTypes[1] = parameter.BasicParameterPtr->TextureFilter2;
-			state.TextureWrapTypes[1] = parameter.BasicParameterPtr->TextureWrap2;
-
-			textureCount = 1;
-		}
-
+		
 		if (textureCount > 0)
 		{
 			m_renderer->SetTextures(nullptr, textures.data(), textureCount);
@@ -279,32 +251,29 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			float* cutomData1Ptr = nullptr;
 			float* cutomData2Ptr = nullptr;
 
-			Effekseer::MaterialParameter* materialParam = parameter.BasicParameterPtr->MaterialParameterPtr;
-			Effekseer::MaterialData* material =
-				parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialParameterPtr->MaterialIndex);
+			auto materialParam = parameter.BasicParameterPtr->MaterialRenderDataPtr;
+			auto material = parameter.EffectPointer->GetMaterial(parameter.BasicParameterPtr->MaterialRenderDataPtr->MaterialIndex);
 
 			StoreFileUniform<RendererImplemented, Shader, 1>(
 				m_renderer, shader, material, materialParam, parameter, stageInd, cutomData1Ptr, cutomData2Ptr);
 		}
 
 		m_renderer->GetRenderState()->Update(false);
-		m_renderer->SetDistortionIntensity(parameter.BasicParameterPtr->DistortionIntensity);
 
-		/*
-				m_matrixes.push_back(ToStruct(mat44));
-		m_uv.push_back(instanceParameter.UV);
-		m_alphaUV.push_back(instanceParameter.AlphaUV);
-		m_uvDistortionUV.push_back(instanceParameter.UVDistortionUV);
-		m_blendUV.push_back(instanceParameter.BlendUV);
-		m_blendAlphaUV.push_back(instanceParameter.BlendAlphaUV);
-		m_blendUVDistortionUV.push_back(instanceParameter.BlendUVDistortionUV);
-		m_flipbookIndexAndNextRate.push_back(instanceParameter.FlipbookIndexAndNextRate);
-		m_alphaThreshold.push_back(instanceParameter.AlphaThreshold);
-		m_viewOffsetDistance.push_back(instanceParameter.ViewOffsetDistance);
-		m_colors.push_back(instanceParameter.AllColor);
-		m_times.push_back(instanceParameter.Time);
-		*/
-		m_renderer->DrawModel(model, m_matrixes, m_uv, m_colors, m_times, customData1_, customData2_);
+		m_renderer->DrawModel(model,
+							  m_matrixes,
+							  m_uv,
+							  m_alphaUV,
+							  m_uvDistortionUV,
+							  m_blendUV,
+							  m_blendAlphaUV,
+							  m_blendUVDistortionUV,
+							  m_flipbookIndexAndNextRate,
+							  m_alphaThreshold,
+							  m_colors,
+							  m_times,
+							  customData1_,
+							  customData2_);
 
 		m_renderer->EndShader(shader);
 
@@ -379,7 +348,6 @@ bool RendererImplemented::BeginRendering()
 	exportedVertexBuffer.resize(0);
 	exportedInfoBuffer.resize(0);
 	renderParameters.resize(0);
-	modelParameters.resize(0);
 	return true;
 }
 
@@ -578,9 +546,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			return;
 		}
 
-		auto intensity =
+		rp.DistortionIntensity =
 			((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
-		SetDistortionIntensity(intensity);
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
@@ -612,8 +579,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				AddVertexBufferAsAdvancedData(v);
 			}
 		}
-
-		rp.DistortionIntensity = m_distortionIntensity;
 
 		rp.VertexBufferOffset = startOffset;
 		rp.TexturePtrs[0] = m_textures[0];
@@ -657,8 +622,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				AddVertexBufferAsAdvancedData(v);
 			}
 		}
-
-		rp.DistortionIntensity = m_distortionIntensity;
 
 		rp.VertexBufferOffset = startOffset;
 		rp.TexturePtrs[0] = m_textures[0];
@@ -705,6 +668,23 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			}
 		}
 
+		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+
+		rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
+		rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
+		rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
+		rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
+		rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
+		rp.EnableFalloff = constantBuffer->FalloffParam.Enable;
+		rp.FalloffParam.BeginColor = constantBuffer->FalloffParam.BeginColor;
+		rp.FalloffParam.EndColor = constantBuffer->FalloffParam.EndColor;
+		rp.FalloffParam.ColorBlendType = constantBuffer->FalloffParam.ColorBlendType;
+		rp.FalloffParam.Pow = constantBuffer->FalloffParam.Pow;
+		rp.EmissiveScaling = constantBuffer->EmmisiveParam.EmissiveScaling;
+		rp.EdgeParams.Threshold = constantBuffer->EdgeParam.Threshold;
+		rp.EdgeParams.ColorScaling = constantBuffer->EdgeParam.ColorScaling;
+		rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
+
 		rp.VertexBufferOffset = startOffset;
 		rp.TexturePtrs[0] = m_textures[0];
 		rp.TextureFilterTypes[0] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[0];
@@ -718,6 +698,13 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 									std::vector<Effekseer::Matrix44>& matrixes,
 									std::vector<Effekseer::RectF>& uvs,
+									std::vector<Effekseer::RectF>& alphaUVs,
+									std::vector<Effekseer::RectF>& uvDistortionUVs,
+									std::vector<Effekseer::RectF>& blendUVs,
+									std::vector<Effekseer::RectF>& blendAlphaUVs,
+									std::vector<Effekseer::RectF>& blendUVDistortionUVs,
+									std::vector<float>& flipbookIndexAndNextRates,
+									std::vector<float>& alphaThresholds,
 									std::vector<Effekseer::Color>& colors,
 									std::vector<int32_t>& times,
 									std::vector<std::array<float, 4>>& customData1,
@@ -770,9 +757,8 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		{
 			rp.TexturePtrs[1] = m_textures[1];
 
-			auto intensity =
+			rp.DistortionIntensity =
 				((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
-			SetDistortionIntensity(intensity);
 		}
 	}
 
@@ -785,13 +771,19 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
 	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
-	rp.DistortionIntensity = m_distortionIntensity;
 
 	for (int i = 0; i < matrixes.size(); i++)
 	{
 		UnityModelParameter modelParameter;
 		modelParameter.Matrix = matrixes[i];
 		modelParameter.UV = uvs[i];
+		modelParameter.AlphaUV = alphaUVs[i];
+		modelParameter.DistortionUV = uvDistortionUVs[i];
+		modelParameter.BlendUV = blendUVs[i];
+		modelParameter.BlendAlphaUV = blendAlphaUVs[i];
+		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
+		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
+		modelParameter.AlphaThreshold = alphaThresholds[i];
 		modelParameter.VColor[0] = colors[i].R / 255.0f;
 		modelParameter.VColor[1] = colors[i].G / 255.0f;
 		modelParameter.VColor[2] = colors[i].B / 255.0f;
