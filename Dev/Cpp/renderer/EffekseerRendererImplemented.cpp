@@ -423,6 +423,33 @@ template <typename T, typename U> void CopyBuffer(const T& dstUnityVertex, const
 	dstUnityVertex.Col[3] = srcVertex.Col.A / 255.0f;
 }
 
+void StorePixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::PixelConstantBuffer* constantBuffer)
+{
+	rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
+	rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
+	rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
+	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
+	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
+	rp.EnableFalloff = constantBuffer->FalloffParam.Enable;
+	rp.FalloffParam.BeginColor = constantBuffer->FalloffParam.BeginColor;
+	rp.FalloffParam.EndColor = constantBuffer->FalloffParam.EndColor;
+	rp.FalloffParam.ColorBlendType = constantBuffer->FalloffParam.ColorBlendType;
+	rp.FalloffParam.Pow = constantBuffer->FalloffParam.Pow;
+	rp.EmissiveScaling = constantBuffer->EmmisiveParam.EmissiveScaling;
+	rp.EdgeParams.Threshold = constantBuffer->EdgeParam.Threshold;
+	rp.EdgeParams.ColorScaling = constantBuffer->EdgeParam.ColorScaling;
+	rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
+}
+
+void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::PixelConstantBufferDistortion* constantBuffer)
+{
+	rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
+	rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
+	rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
+	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
+	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
+}
+
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
 	UnityRenderParameter rp;
@@ -535,9 +562,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			return;
 		}
 
-		rp.DistortionIntensity =
-			((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
-
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
 		AlignVertexBuffer(rp.VertexBufferStride);
 		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
@@ -568,6 +592,11 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				AddVertexBufferAsAdvancedData(v);
 			}
 		}
+
+		auto constantBuffer = (EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer();
+		rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
+
+		StoreDistortionPixelConstantBuffer(rp, constantBuffer);
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -607,6 +636,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				AddVertexBufferAsAdvancedData(v);
 			}
 		}
+
+		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+		StorePixelConstantBuffer(rp, constantBuffer);
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -648,21 +680,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 
 		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
-
-		rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
-		rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
-		rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
-		rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
-		rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
-		rp.EnableFalloff = constantBuffer->FalloffParam.Enable;
-		rp.FalloffParam.BeginColor = constantBuffer->FalloffParam.BeginColor;
-		rp.FalloffParam.EndColor = constantBuffer->FalloffParam.EndColor;
-		rp.FalloffParam.ColorBlendType = constantBuffer->FalloffParam.ColorBlendType;
-		rp.FalloffParam.Pow = constantBuffer->FalloffParam.Pow;
-		rp.EmissiveScaling = constantBuffer->EmmisiveParam.EmissiveScaling;
-		rp.EdgeParams.Threshold = constantBuffer->EdgeParam.Threshold;
-		rp.EdgeParams.ColorScaling = constantBuffer->EdgeParam.ColorScaling;
-		rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
+		StorePixelConstantBuffer(rp, constantBuffer);
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -718,14 +736,24 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	}
 	else
 	{
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
+		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
+			m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 		{
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+			StorePixelConstantBuffer(rp, constantBuffer);
 		}
-
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
+		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
+				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
 		{
-			rp.DistortionIntensity =
-				((EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer())->DistortionIntencity[0];
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBufferDistortion*>(m_currentShader->GetPixelConstantBuffer());
+
+			rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
+		}
+		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
+				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+		{
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+			StorePixelConstantBuffer(rp, constantBuffer);
 		}
 	}
 
