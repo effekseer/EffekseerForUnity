@@ -208,7 +208,7 @@ protected:
 	std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
 
-	Effekseer::TextureRef backgroundData;
+	Effekseer::TextureRef backgroundData_;
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
 
@@ -388,7 +388,7 @@ public:
 
 	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
-	void SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count);
+	void SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count);
 	
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
 	std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }

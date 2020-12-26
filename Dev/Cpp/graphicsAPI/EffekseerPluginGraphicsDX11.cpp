@@ -82,7 +82,10 @@ public:
 			return nullptr;
 		}
 
-		res.textureDataPtr = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
+		auto backend = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
+		res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+		res.textureDataPtr->SetBackend(backend);
+
 		textureData2NativePtr[res.textureDataPtr] = texturePtr;
 
 		ES_SAFE_RELEASE(srv);

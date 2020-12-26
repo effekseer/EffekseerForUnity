@@ -227,7 +227,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		m_renderer->BeginShader(shader);
 
 		int32_t textureCount = collector_.TextureCount;
-		std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
+		std::array<Effekseer::Backend::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
 
 		for (int32_t i = 0; i < textureCount; i++)
 		{
@@ -300,7 +300,11 @@ void RendererImplemented::AlignVertexBuffer(int32_t alignment)
 
 Effekseer::RefPtr<RendererImplemented> RendererImplemented::Create() { return Effekseer::MakeRefPtr<RendererImplemented>(); }
 
-RendererImplemented::RendererImplemented() { backgroundData = Effekseer::MakeRefPtr<Texture>(nullptr); }
+RendererImplemented::RendererImplemented() { 
+	backgroundData_ = Effekseer::MakeRefPtr<Effekseer::Texture>();
+	auto backend = Effekseer::MakeRefPtr<Texture>(nullptr);
+	backgroundData_->SetBackend(backend);
+}
 
 RendererImplemented::~RendererImplemented()
 {
@@ -387,7 +391,11 @@ void RendererImplemented::ResetRenderState() {}
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
 
-void RendererImplemented::SetBackground(void* image) { backgroundData.DownCast<Texture>()->UserData = image; }
+void RendererImplemented::SetBackground(void* image)
+{
+	auto backend = backgroundData_->GetBackend();
+	backend.DownCast<Texture>()->UserData = image;
+}
 
 VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }
 
@@ -851,7 +859,7 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 	memcpy(p, data, size);
 }
 
-void RendererImplemented::SetTextures(Shader* shader, Effekseer::TextureRef* textures, int32_t count)
+void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count)
 {
 	textures_.resize(count);
 	if (count > 0)

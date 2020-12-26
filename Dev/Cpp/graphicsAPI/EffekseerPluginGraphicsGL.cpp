@@ -85,7 +85,9 @@ Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::Tex
 
 	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
 
-	res.textureDataPtr = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
+	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
+	res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+	res.textureDataPtr->SetBackend(backend);
 
 	return res.textureDataPtr;
 }

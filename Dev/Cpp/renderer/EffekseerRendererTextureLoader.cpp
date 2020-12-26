@@ -23,7 +23,9 @@ Effekseer::TextureRef TextureLoader::Load(const EFK_CHAR* path, Effekseer::Textu
 
 	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 	TextureResource& res = added.first->second;
-	res.textureDataPtr = Effekseer::MakeRefPtr<Texture>(texturePtr);
+	auto background = Effekseer::MakeRefPtr<Texture>(texturePtr);
+	res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+	res.textureDataPtr->SetBackend(background);
 
 	textureData2NativePtr[res.textureDataPtr] = texturePtr;
 

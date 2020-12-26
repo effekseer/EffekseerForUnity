@@ -809,18 +809,23 @@ extern "C"
 		g_removingRenderPathes.push_back(renderID);
 		g_removingRenderPathMutex.unlock();
 	}
-
-	Effekseer::RefPtr<Effekseer::TextureLoader> TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
-	{
-		if (g_graphics != nullptr)
-			return g_graphics->Create(load, unload);
-		return nullptr;
-	}
-
-	Effekseer::RefPtr<Effekseer::ModelLoader> ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
-	{
-		if (g_graphics != nullptr)
-			return g_graphics->Create(load, unload);
-		return nullptr;
-	}
 }
+
+namespace EffekseerPlugin
+{
+
+Effekseer::RefPtr<Effekseer::TextureLoader> TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+{
+	if (g_graphics != nullptr)
+		return g_graphics->Create(load, unload);
+	return {};
+}
+
+Effekseer::RefPtr<Effekseer::ModelLoader> ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+{
+	if (g_graphics != nullptr)
+		return g_graphics->Create(load, unload);
+	return {};
+}
+
+} // namespace EffekseerPlugin
