@@ -406,6 +406,7 @@ void RendererImplemented::SetBackground(void* image)
 {
 	auto backend = backgroundData_->GetBackend();
 	backend.DownCast<Texture>()->UserData = image;
+	EffekseerRenderer::Renderer::SetBackground(backend);
 }
 
 VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }

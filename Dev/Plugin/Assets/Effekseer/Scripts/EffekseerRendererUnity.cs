@@ -1414,6 +1414,10 @@ namespace Effekseer.Internal
 
 				prop.SetBuffer("buf_model_parameter1", computeBuf1);
 				prop.SetBuffer("buf_model_parameter2", computeBuf2);
+				prop.SetBuffer("buf_vertex", model.VertexBuffer);
+				prop.SetBuffer("buf_index", model.IndexBuffer);
+				prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
+				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
@@ -1434,11 +1438,6 @@ namespace Effekseer.Internal
 					{
 						material = efkMaterial.materialsModel.GetMaterial(ref key);
 					}
-
-					prop.SetBuffer("buf_vertex", model.VertexBuffer);
-					prop.SetBuffer("buf_index", model.IndexBuffer);
-					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
-					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
@@ -1507,11 +1506,6 @@ namespace Effekseer.Internal
 				{
 					var material = materialsModelLighting.GetMaterial(ref key);
 
-					prop.SetBuffer("buf_vertex", model.VertexBuffer);
-					prop.SetBuffer("buf_index", model.IndexBuffer);
-					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
-					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
 					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
@@ -1563,11 +1557,6 @@ namespace Effekseer.Internal
 				{
 					var material = materialsModelDistortion.GetMaterial(ref key);
 
-					prop.SetBuffer("buf_vertex", model.VertexBuffer);
-					prop.SetBuffer("buf_index", model.IndexBuffer);
-					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
-					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-
 					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 					if (parameter.TextureWrapTypes[0] == 0)
 					{
@@ -1601,11 +1590,6 @@ namespace Effekseer.Internal
 				else
 				{
 					var material = materialsModel.GetMaterial(ref key);
-
-					prop.SetBuffer("buf_vertex", model.VertexBuffer);
-					prop.SetBuffer("buf_index", model.IndexBuffer);
-					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
-					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
 					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 					if (parameter.TextureWrapTypes[0] == 0)
