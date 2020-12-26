@@ -42,7 +42,7 @@
 		StructuredBuffer<ModelVertex> buf_vertex;
 		StructuredBuffer<int> buf_index;
 
-		StructuredBuffer<ModelParameter1> buf_model_parameter1;
+		StructuredBuffer<ModelParameter1> buf_model_parameter;
 		StructuredBuffer<ModelParameter2> buf_model_parameter2;
 		StructuredBuffer<int> buf_vertex_offsets;
 		StructuredBuffer<int> buf_index_offsets;
@@ -92,11 +92,11 @@
 
 			uint v_id = id;
 
-			float4x4 buf_matrix = buf_model_parameter1[inst].Mat;
-			float4 buf_uv = buf_model_parameter1[inst].UV;
-			float4 buf_color = buf_model_parameter1[inst].VColor;
-			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter2[inst].Time];
-			float buf_index_offset = buf_index_offsets[buf_model_parameter2[inst].Time];
+			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
+			float4 buf_uv = buf_model_parameter[inst].UV;
+			float4 buf_color = buf_model_parameter[inst].VColor;
+			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
+			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
 
 			SpriteLitDistMatVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 

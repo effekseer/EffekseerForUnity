@@ -65,6 +65,7 @@ struct UnityModelParameter1
 	Effekseer::Matrix44 Matrix;
 	float VColor[4];
 	Effekseer::RectF UV;
+	int32_t Time;
 };
 
 /**
@@ -81,7 +82,6 @@ struct UnityModelParameter2
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 	float ViewOffsetDistance;
-	int32_t Time;
 };
 
 static int GetAlignedOffset(int offset, int size) { return ((offset + (size - 1)) / size) * size; }
@@ -798,6 +798,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.VColor[1] = colors[i].G / 255.0f;
 		modelParameter.VColor[2] = colors[i].B / 255.0f;
 		modelParameter.VColor[3] = colors[i].A / 255.0f;
+		modelParameter.Time = times[i] % model_->GetFrameCount();
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter1));
 	}
 
@@ -813,7 +814,6 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
 		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
 		modelParameter.AlphaThreshold = alphaThresholds[i];
-		modelParameter.Time = times[i] % model_->GetFrameCount();
 
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
 	}

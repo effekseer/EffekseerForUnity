@@ -31,6 +31,7 @@ struct ModelParameter1
 	float4x4 Mat;
 	float4 VColor;
 	float4 UV;
+	int Time;
 };
 
 struct ModelParameter2
@@ -43,7 +44,6 @@ struct ModelParameter2
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 	float ViewOffsetDistance;
-	int Time;
 };
 
 

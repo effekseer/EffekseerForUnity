@@ -314,14 +314,14 @@ namespace Effekseer
 			//! Element count (Triangle) or instance
 			public int ElementCount;
 
-			FlipbookParameters FlipbookParams;
-			float UVDistortionIntensity;
-			int TextureBlendType;
-			float BlendUVDistortionIntensity;
-			int EnableFalloff;
-			FalloffParameter FalloffParam;
-			float EmissiveScaling;
-			EdgeParameters EdgeParams;
+			public FlipbookParameters FlipbookParams;
+			public float UVDistortionIntensity;
+			public int TextureBlendType;
+			public float BlendUVDistortionIntensity;
+			public int EnableFalloff;
+			public FalloffParameter FalloffParam;
+			public float EmissiveScaling;
+			public EdgeParameters EdgeParams;
 
 			public int ZTest;
 

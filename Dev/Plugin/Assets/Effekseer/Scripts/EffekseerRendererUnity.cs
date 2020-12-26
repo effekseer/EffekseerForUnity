@@ -1412,12 +1412,37 @@ namespace Effekseer.Internal
 
 				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, count, ref computeBuf1, ref computeBuf2);
 
-				prop.SetBuffer("buf_model_parameter1", computeBuf1);
-				prop.SetBuffer("buf_model_parameter2", computeBuf2);
+				var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
+					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
+					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit;
+
+				prop.SetBuffer("buf_model_parameter", computeBuf1);
+
+				if(isAdvanced)
+				{
+					prop.SetBuffer("buf_model_parameter2", computeBuf2);
+				}
+
 				prop.SetBuffer("buf_vertex", model.VertexBuffer);
 				prop.SetBuffer("buf_index", model.IndexBuffer);
 				prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
+
+				if (isAdvanced)
+				{
+					prop.SetVector("fFlipbookParameter", 
+						new Vector4((float)parameter.FlipbookParams.Enable, (float)parameter.FlipbookParams.LoopType, (float)parameter.FlipbookParams.DivideX, (float)parameter.FlipbookParams.DivideY));
+
+					// TODO : Check UV inversed
+					prop.SetVector("fUVDistortionParameter", new Vector4(parameter.DistortionIntensity, parameter.UVDistortionIntensity, 1.0f, 0.0f));
+					prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));
+					/*
+	FalloffParameter fFalloffParam;
+	float4 fEmissiveScaling; // x:emissiveScaling
+	float4 fEdgeColor;
+	float4 fEdgeParameter; // x:threshold, y:colorScaling
+					 */
+				}
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
