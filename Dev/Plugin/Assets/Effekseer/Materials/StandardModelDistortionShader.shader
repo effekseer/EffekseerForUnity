@@ -27,40 +27,18 @@ Properties{
 		#pragma fragment frag
 
 		#include "UnityCG.cginc"
+		#include "EffekseerShaderCommon.cginc"
 
 		sampler2D _ColorTex;
 		sampler2D _BackTex;
 
-		struct SimpleVertex
-		{
-			float3 Position;
-			float3 Normal;
-			float3 Binormal;
-			float3 Tangent;
-			float2 UV;
-			float4 Color;
-		};
 
-		struct ModelParameter
-		{
-			float4x4 Mat;
-			float4 VColor;
-			float4 UV;
-			float4 AlphaUV;
-			float4 DistortionUV;
-			float4 BlendUV;
-			float4 BlendAlphaUV;
-			float4 BlendDistortionUV;
-			float FlipbookIndexAndNextRate;
-			float AlphaThreshold;
-			float ViewOffsetDistance;
-			int Time;
-		};
-
-		StructuredBuffer<SimpleVertex> buf_vertex;
+		StructuredBuffer<ModelVertex> buf_vertex;
 		StructuredBuffer<int> buf_index;
 
-		StructuredBuffer<ModelParameter> buf_model_parameter;
+		StructuredBuffer<ModelParameter1> buf_model_parameter1;
+		StructuredBuffer<ModelParameter2> buf_model_parameter2;
+
 		StructuredBuffer<int> buf_vertex_offsets;
 		StructuredBuffer<int> buf_index_offsets;
 
@@ -81,13 +59,13 @@ Properties{
 			ps_input o;
 			uint v_id = id;
 
-			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
-			float4 buf_uv = buf_model_parameter[inst].UV;
-			float4 buf_color = buf_model_parameter[inst].Color;
-			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
-			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
+			float4x4 buf_matrix = buf_model_parameter1[inst].Mat;
+			float4 buf_uv = buf_model_parameter1[inst].UV;
+			float4 buf_color = buf_model_parameter1[inst].VColor;
+			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter2[inst].Time];
+			float buf_index_offset = buf_index_offsets[buf_model_parameter2[inst].Time];
 
-			SimpleVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+			ModelVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
 			float3 localPos = v.Position;
 			float4 vPos = mul(buf_matrix, float4(localPos, 1.0f));

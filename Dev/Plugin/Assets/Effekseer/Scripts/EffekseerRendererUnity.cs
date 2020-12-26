@@ -467,16 +467,49 @@ namespace Effekseer.Internal
 		{
 			const int elementCount = 40;
 
-			List<ComputeBuffer> computeBuffers = new List<ComputeBuffer>();
-			List<Plugin.UnityRenderModelParameter[]> cpuBuffers = new List<Plugin.UnityRenderModelParameter[]>();
+			class Block
+			{
+				public ComputeBuffer gpuBuf1;
+				public Plugin.UnityRenderModelParameter1[] cpuBuf1;
+				public ComputeBuffer gpuBuf2;
+				public Plugin.UnityRenderModelParameter2[] cpuBuf2;
+
+				public unsafe void Init()
+				{
+					gpuBuf1 = new ComputeBuffer(elementCount, sizeof(Plugin.UnityRenderModelParameter1));
+					cpuBuf1 =new Plugin.UnityRenderModelParameter1[elementCount];
+
+					gpuBuf2 = new ComputeBuffer(elementCount, sizeof(Plugin.UnityRenderModelParameter2));
+					cpuBuf2 = new Plugin.UnityRenderModelParameter2[elementCount];
+				}
+
+				public void Dispose()
+				{
+					if(gpuBuf1 != null)
+					{
+						gpuBuf1.Release();
+						gpuBuf1 = null;
+					}
+
+					if (gpuBuf2 != null)
+					{
+						gpuBuf2.Release();
+						gpuBuf2 = null;
+					}
+				}
+			}
+
+			List<Block> blocks = new List<Block>();
+
 			int bufferOffset = 0;
 
-			public ModelBufferCollection()
+			public unsafe ModelBufferCollection()
 			{
 				for (int i = 0; i < 10; i++)
 				{
-					computeBuffers.Add(new ComputeBuffer(elementCount, sizeof(int) * 25));
-					cpuBuffers.Add(new Plugin.UnityRenderModelParameter[elementCount]);
+					var block = new Block();
+					block.Init();
+					blocks.Add(block);
 				}
 			}
 
@@ -485,16 +518,16 @@ namespace Effekseer.Internal
 				bufferOffset = 0;
 			}
 
-			public unsafe int Allocate(Plugin.UnityRenderModelParameter* param, int offset, int count, ref ComputeBuffer computeBuffer)
+			public unsafe int Allocate(Plugin.UnityRenderModelParameter1* param1, Plugin.UnityRenderModelParameter2* param2, int offset, int count, ref ComputeBuffer computeBuffer1, ref ComputeBuffer computeBuffer2)
 			{
-				if (bufferOffset >= computeBuffers.Count)
+				if (bufferOffset >= blocks.Count)
 				{
-					computeBuffers.Add(new ComputeBuffer(elementCount, sizeof(int) * 25));
-					cpuBuffers.Add(new Plugin.UnityRenderModelParameter[elementCount]);
+					var newBlock = new Block();
+					newBlock.Init();
+					blocks.Add(newBlock);
 				}
 
-				computeBuffer = computeBuffers[bufferOffset];
-				var cpuBuffer = cpuBuffers[bufferOffset];
+				var block = blocks[bufferOffset];
 				bufferOffset++;
 
 				if (count >= elementCount)
@@ -504,22 +537,26 @@ namespace Effekseer.Internal
 
 				for (int i = 0; i < count; i++)
 				{
-					cpuBuffer[i] = param[offset + i];
+					block.cpuBuf1[i] = param1[offset + i];
+					block.cpuBuf2[i] = param2[offset + i];
 				}
 
-				computeBuffer.SetData(cpuBuffer, 0, 0, count);
+				block.gpuBuf1.SetData(block.cpuBuf1, 0, 0, count);
+				block.gpuBuf2.SetData(block.cpuBuf2, 0, 0, count);
+
+				computeBuffer1 = block.gpuBuf1;
+				computeBuffer2 = block.gpuBuf2;
 
 				return count;
 			}
 
 			public void Release()
 			{
-				for (int i = 0; i < computeBuffers.Count; i++)
+				for (int i = 0; i < blocks.Count; i++)
 				{
-					computeBuffers[i].Release();
+					blocks[i].Dispose();
 				}
-				computeBuffers.Clear();
-				cpuBuffers.Clear();
+				blocks.Clear();
 			}
 		}
 
@@ -1335,10 +1372,12 @@ namespace Effekseer.Internal
 			}
 		}
 
-		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
+		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
 		{
 			// Draw model
-			var modelParameters = ((Plugin.UnityRenderModelParameter*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
+			var modelParameters1 = ((Plugin.UnityRenderModelParameter1*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
+			var modelParameters2 = ((Plugin.UnityRenderModelParameter2*)(((byte*)infoBuffer.ToPointer()) + parameter.AdvancedDataOffset));
+
 
 			MaterialKey key = new MaterialKey();
 			key.Blend = (AlphaBlendType)parameter.Blend;
@@ -1368,8 +1407,13 @@ namespace Effekseer.Internal
 			while (count > 0)
 			{
 				var prop = matPropCol.GetNext();
-				ComputeBuffer computeBuf = null;
-				var allocated = modelBufferCol.Allocate(modelParameters, offset, count, ref computeBuf);
+				ComputeBuffer computeBuf1 = null;
+				ComputeBuffer computeBuf2 = null;
+
+				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, count, ref computeBuf1, ref computeBuf2);
+
+				prop.SetBuffer("buf_model_parameter1", computeBuf1);
+				prop.SetBuffer("buf_model_parameter2", computeBuf2);
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
@@ -1395,7 +1439,6 @@ namespace Effekseer.Internal
 					prop.SetBuffer("buf_index", model.IndexBuffer);
 					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-					prop.SetBuffer("buf_model_parameter", computeBuf);
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
@@ -1468,7 +1511,6 @@ namespace Effekseer.Internal
 					prop.SetBuffer("buf_index", model.IndexBuffer);
 					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-					prop.SetBuffer("buf_model_parameter", computeBuf);
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
@@ -1525,7 +1567,6 @@ namespace Effekseer.Internal
 					prop.SetBuffer("buf_index", model.IndexBuffer);
 					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-					prop.SetBuffer("buf_model_parameter", computeBuf);
 
 					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 					if (parameter.TextureWrapTypes[0] == 0)
@@ -1565,7 +1606,6 @@ namespace Effekseer.Internal
 					prop.SetBuffer("buf_index", model.IndexBuffer);
 					prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 					prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
-					prop.SetBuffer("buf_model_parameter", computeBuf);
 
 					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
 					if (parameter.TextureWrapTypes[0] == 0)

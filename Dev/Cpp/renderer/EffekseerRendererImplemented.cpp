@@ -56,11 +56,23 @@ extern "C"
 namespace EffekseerRendererUnity
 {
 
-struct UnityModelParameter
+/**
+	@note
+	The size must be lower than 100byte
+*/
+struct UnityModelParameter1
 {
 	Effekseer::Matrix44 Matrix;
 	float VColor[4];
 	Effekseer::RectF UV;
+};
+
+/**
+	@note
+	The size must be lower than 100byte
+*/
+struct UnityModelParameter2
+{
 	Effekseer::RectF AlphaUV;
 	Effekseer::RectF DistortionUV;
 	Effekseer::RectF BlendUV;
@@ -69,7 +81,6 @@ struct UnityModelParameter
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 	float ViewOffsetDistance;
-
 	int32_t Time;
 };
 
@@ -766,7 +777,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	}
 
 	rp.ElementCount = static_cast<int32_t>(matrixes.size());
-	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
+	
 	rp.CustomData1BufferOffset = 0;
 	rp.CustomData2BufferOffset = 0;
 
@@ -775,11 +786,25 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
 	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
 
+	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
+
 	for (int i = 0; i < matrixes.size(); i++)
 	{
-		UnityModelParameter modelParameter;
+		UnityModelParameter1 modelParameter;
 		modelParameter.Matrix = matrixes[i];
 		modelParameter.UV = uvs[i];
+		modelParameter.VColor[0] = colors[i].R / 255.0f;
+		modelParameter.VColor[1] = colors[i].G / 255.0f;
+		modelParameter.VColor[2] = colors[i].B / 255.0f;
+		modelParameter.VColor[3] = colors[i].A / 255.0f;
+		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter1));
+	}
+
+	rp.AdvancedBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
+
+	for (int i = 0; i < matrixes.size(); i++)
+	{
+		UnityModelParameter2 modelParameter;
 		modelParameter.AlphaUV = alphaUVs[i];
 		modelParameter.DistortionUV = uvDistortionUVs[i];
 		modelParameter.BlendUV = blendUVs[i];
@@ -787,13 +812,9 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
 		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
 		modelParameter.AlphaThreshold = alphaThresholds[i];
-		modelParameter.VColor[0] = colors[i].R / 255.0f;
-		modelParameter.VColor[1] = colors[i].G / 255.0f;
-		modelParameter.VColor[2] = colors[i].B / 255.0f;
-		modelParameter.VColor[3] = colors[i].A / 255.0f;
 		modelParameter.Time = times[i] % model_->GetFrameCount();
 
-		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter));
+		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
 	}
 
 	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)

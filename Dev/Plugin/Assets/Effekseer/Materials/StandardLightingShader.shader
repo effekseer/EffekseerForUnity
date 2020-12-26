@@ -32,58 +32,24 @@
 		#pragma multi_compile _ _MODEL_
 
 		#include "UnityCG.cginc"
+		#include "EffekseerShaderCommon.cginc"
 
 		sampler2D _ColorTex;
 		sampler2D _NormalTex;
 
 		#if _MODEL_
 
-		struct SimpleVertex
-		{
-			float3 Pos;
-			float3 Normal;
-			float3 Binormal;
-			float3 Tangent;
-			float2 UV;
-			float4 Color;
-		};
-
-		struct ModelParameter
-		{
-			float4x4 Mat;
-			float4 VColor;
-			float4 UV;
-			float4 AlphaUV;
-			float4 DistortionUV;
-			float4 BlendUV;
-			float4 BlendAlphaUV;
-			float4 BlendDistortionUV;
-			float FlipbookIndexAndNextRate;
-			float AlphaThreshold;
-			float ViewOffsetDistance;
-			int Time;
-		};
-
-		StructuredBuffer<SimpleVertex> buf_vertex;
+		StructuredBuffer<ModelVertex> buf_vertex;
 		StructuredBuffer<int> buf_index;
 
-		StructuredBuffer<ModelParameter> buf_model_parameter;
+		StructuredBuffer<ModelParameter1> buf_model_parameter1;
+		StructuredBuffer<ModelParameter2> buf_model_parameter2;
 		StructuredBuffer<int> buf_vertex_offsets;
 		StructuredBuffer<int> buf_index_offsets;
 
 		#else
 
-		struct Vertex
-		{
-			float3 Pos;
-			float4 Color;
-			float3 Normal;
-			float3 Tangent;
-			float2 UV1;
-			float2 UV2;
-		};
-
-		StructuredBuffer<Vertex> buf_vertex;
+		StructuredBuffer<SpriteLitDistMatVertex> buf_vertex;
 		float buf_offset;
 
 		#endif
@@ -126,13 +92,13 @@
 
 			uint v_id = id;
 
-			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
-			float4 buf_uv = buf_model_parameter[inst].UV;
-			float4 buf_color = buf_model_parameter[inst].Color;
-			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
-			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
+			float4x4 buf_matrix = buf_model_parameter1[inst].Mat;
+			float4 buf_uv = buf_model_parameter1[inst].UV;
+			float4 buf_color = buf_model_parameter1[inst].VColor;
+			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter2[inst].Time];
+			float buf_index_offset = buf_index_offsets[buf_model_parameter2[inst].Time];
 
-			SimpleVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+			SpriteLitDistMatVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
 
 			float3 localPos = Input.Pos;
@@ -151,7 +117,7 @@
 			v_offset[4] = 2;
 			v_offset[5] = 3;
 
-			Vertex Input = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
+			SpriteLitDistMatVertex Input = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
 
 			#endif
 

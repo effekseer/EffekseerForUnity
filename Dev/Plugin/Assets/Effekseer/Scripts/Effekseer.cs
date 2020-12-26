@@ -372,12 +372,23 @@ namespace Effekseer
 			public IntPtr ModelPtr;
 		};
 
+		/// <summary>
+		/// Separated buffer (Stride must be lower than 100byte)
+		/// </summary>
 		[StructLayout(LayoutKind.Sequential)]
-		public struct UnityRenderModelParameter
+		public struct UnityRenderModelParameter1
 		{
 			public Matrix4x4 Matrix;
 			public Color VColor;
 			public Vector4 UV;
+		};
+
+		/// <summary>
+		/// Separated buffer (Stride must be lower than 100byte)
+		/// </summary>
+		[StructLayout(LayoutKind.Sequential)]
+		public struct UnityRenderModelParameter2
+		{
 			public Vector4 AlphaUV;
 			public Vector4 DistortionUV;
 			public Vector4 BlendUV;
