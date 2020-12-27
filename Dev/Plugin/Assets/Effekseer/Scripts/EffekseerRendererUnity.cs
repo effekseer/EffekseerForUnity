@@ -82,7 +82,7 @@ namespace Effekseer.Internal
 			material.SetFloat("_ZWrite", key.ZWrite ? 1.0f : 0.0f);
 			material.SetFloat("_Cull", key.Cull);
 
-			foreach(var keyword in Keywords)
+			foreach (var keyword in Keywords)
 			{
 				material.EnableKeyword(keyword);
 			}
@@ -122,7 +122,7 @@ namespace Effekseer.Internal
 			materialsModel.Shader = asset.shader;
 			materialsModel.Keywords = new string[] { "_MODEL_" };
 
-			if(asset.HasRefraction)
+			if (asset.HasRefraction)
 			{
 				materialsRefraction = new MaterialCollection();
 				materialsModelRefraction = new MaterialCollection();
@@ -158,7 +158,7 @@ namespace Effekseer.Internal
 			version = BitConverter.ToInt32(buffer, offset);
 			offset += sizeof(int);
 
-			if(version < 1)
+			if (version < 1)
 			{
 				sizeEffekseerVertex -= 4;
 			}
@@ -224,7 +224,7 @@ namespace Effekseer.Internal
 				int vertexCount = BitConverter.ToInt32(buffer, offset);
 				offset += sizeof(int);
 
-				if(version < 1)
+				if (version < 1)
 				{
 					fixed (byte* vs_ = &buffer[offset])
 					{
@@ -291,7 +291,7 @@ namespace Effekseer.Internal
 
 				}
 
-				
+
 			}
 
 			VertexBuffer.SetData(vertex, 0, 0, vertex.Count);
@@ -477,7 +477,7 @@ namespace Effekseer.Internal
 				public unsafe void Init()
 				{
 					gpuBuf1 = new ComputeBuffer(elementCount, sizeof(Plugin.UnityRenderModelParameter1));
-					cpuBuf1 =new Plugin.UnityRenderModelParameter1[elementCount];
+					cpuBuf1 = new Plugin.UnityRenderModelParameter1[elementCount];
 
 					gpuBuf2 = new ComputeBuffer(elementCount, sizeof(Plugin.UnityRenderModelParameter2));
 					cpuBuf2 = new Plugin.UnityRenderModelParameter2[elementCount];
@@ -485,7 +485,7 @@ namespace Effekseer.Internal
 
 				public void Dispose()
 				{
-					if(gpuBuf1 != null)
+					if (gpuBuf1 != null)
 					{
 						gpuBuf1.Release();
 						gpuBuf1 = null;
@@ -577,7 +577,7 @@ namespace Effekseer.Internal
 
 			public override void Call()
 			{
-				if(cb != null)
+				if (cb != null)
 				{
 					cb.Dispose();
 					cb = null;
@@ -634,7 +634,7 @@ namespace Effekseer.Internal
 
 			public DelayEvent[] ReallocateComputeBuffers(int desiredSize)
 			{
-				while(desiredSize > VertexMaxSize)
+				while (desiredSize > VertexMaxSize)
 				{
 					VertexMaxSize *= 2;
 				}
@@ -650,7 +650,7 @@ namespace Effekseer.Internal
 
 				var newComputeBuffers = new Dictionary<int, ComputeBuffer>();
 
-				foreach(var cb in computeBuffers)
+				foreach (var cb in computeBuffers)
 				{
 					var count = VertexMaxSize / cb.Key;
 					if (count * cb.Key != VertexMaxSize) count++;
@@ -705,7 +705,7 @@ namespace Effekseer.Internal
 			public CustomDataBufferCollection customDataBuffers = null;
 
 			List<DelayEvent> delayEvents = null;
-			
+
 			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
 			{
 				this.camera = camera;
@@ -752,7 +752,7 @@ namespace Effekseer.Internal
 				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
 
 				// Create a command buffer that is effekseer renderer
-				if(!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal)
 				{
 					this.commandBuffer = new CommandBuffer();
 					this.commandBuffer.name = "Effekseer Rendering";
@@ -834,10 +834,10 @@ namespace Effekseer.Internal
 
 			public void Update()
 			{
-				foreach(var e in delayEvents)
+				foreach (var e in delayEvents)
 				{
 					e.RestTime--;
-					if(e.RestTime <= 0)
+					if (e.RestTime <= 0)
 					{
 						e.Call();
 					}
@@ -848,7 +848,7 @@ namespace Effekseer.Internal
 
 			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer)
 			{
-				if(!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal)
 				{
 					Debug.LogError("External command buffer is assigned even if isCommandBufferFromExternal is true.");
 				}
@@ -858,7 +858,7 @@ namespace Effekseer.Internal
 
 			public void ResetBuffers()
 			{
-				if(!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal)
 				{
 					commandBuffer.Clear();
 				}
@@ -955,7 +955,7 @@ namespace Effekseer.Internal
 			// don't need to update because doesn't exists and need not to render
 			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
 			{
-				if(renderPaths.ContainsKey(camera))
+				if (renderPaths.ContainsKey(camera))
 				{
 					renderPaths[camera].ResetBuffers();
 				}
@@ -1046,7 +1046,7 @@ namespace Effekseer.Internal
 				return;
 			}
 
-			if(path.isCommandBufferFromExternal)
+			if (path.isCommandBufferFromExternal)
 			{
 				path.AssignExternalCommandBuffer(targetCommandBuffer);
 			}
@@ -1074,7 +1074,7 @@ namespace Effekseer.Internal
 			Plugin.EffekseerRenderBack(path.renderId);
 
 			// if memory is lacked, reallocate memory
-			while(Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferBack.GetCPUData().Length)
+			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferBack.GetCPUData().Length)
 			{
 				path.ReallocateComputeBuffer(Plugin.GetUnityRenderVertexBufferCount());
 			}
@@ -1082,11 +1082,11 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
 
 			// Distortion
-			if (EffekseerRendererUtils.IsDistortionEnabled && 
+			if (EffekseerRendererUtils.IsDistortionEnabled &&
 				(path.renderTexture != null || renderTargetProperty != null))
 			{
 				// Add a blit command that copy to the distortion texture
-				if(renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
+				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
 					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
@@ -1096,8 +1096,8 @@ namespace Effekseer.Internal
 						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
 					}
 				}
-                else if (renderTargetProperty != null)
-                {
+				else if (renderTargetProperty != null)
+				{
 					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
 
 					if (renderTargetProperty.Viewport.width > 0)
@@ -1142,7 +1142,7 @@ namespace Effekseer.Internal
 #if !UNITY_PS4
 				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
 
-				if(vertexBufferCount > 0)
+				if (vertexBufferCount > 0)
 				{
 					var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
 
@@ -1155,8 +1155,8 @@ namespace Effekseer.Internal
 				for (int i = 0; i < renderParameterCount; i++)
 				{
 					Plugin.GetUnityRenderParameter(ref parameter, i);
-					
-					if(parameter.RenderMode == 1)
+
+					if (parameter.RenderMode == 1)
 					{
 						RenderModdel(parameter, infoBuffer, commandBuffer, matPropCol, modelBufferCol, customDataBufferCol, background);
 					}
@@ -1191,6 +1191,18 @@ namespace Effekseer.Internal
 			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
 
+
+			var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
+				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
+				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit;
+
+			if (isAdvanced)
+			{
+				ApplyAdvancedParameter(parameter, prop);
+			}
+
+			ApplyTextures(parameter, prop, background);
+
 			if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 			{
 				var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
@@ -1200,9 +1212,9 @@ namespace Effekseer.Internal
 				}
 				Material material = null;
 
-				if(parameter.IsRefraction > 0)
+				if (parameter.IsRefraction > 0)
 				{
-					if(efkMaterial.materialsRefraction == null)
+					if (efkMaterial.materialsRefraction == null)
 					{
 						return;
 					}
@@ -1220,29 +1232,10 @@ namespace Effekseer.Internal
 
 				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 				{
-					var ptr = parameter.GetTexturePtr(ti);
-					var texture = GetCachedTexture(ptr, background, DummyTextureType.White);
+					var texture = GetAndApplyParameterToTexture(parameter, ti, background, DummyTextureType.White);
 					if (texture != null)
 					{
 						prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
-
-						if (parameter.TextureWrapTypes[ti] == 0)
-						{
-							texture.wrapMode = TextureWrapMode.Repeat;
-						}
-						else
-						{
-							texture.wrapMode = TextureWrapMode.Clamp;
-						}
-
-						if (parameter.TextureFilterTypes[ti] == 0)
-						{
-							texture.filterMode = FilterMode.Point;
-						}
-						else
-						{
-							texture.filterMode = FilterMode.Bilinear;
-						}
 					}
 				}
 
@@ -1267,47 +1260,6 @@ namespace Effekseer.Internal
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
 				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
-				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-				var normalTexture = GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.Normal);
-				if (parameter.TextureWrapTypes[0] == 0)
-				{
-					colorTexture.wrapMode = TextureWrapMode.Repeat;
-				}
-				else
-				{
-					colorTexture.wrapMode = TextureWrapMode.Clamp;
-				}
-
-				if (parameter.TextureFilterTypes[0] == 0)
-				{
-					colorTexture.filterMode = FilterMode.Point;
-				}
-				else
-				{
-					colorTexture.filterMode = FilterMode.Bilinear;
-				}
-
-				if (parameter.TextureWrapTypes[1] == 0)
-				{
-					normalTexture.wrapMode = TextureWrapMode.Repeat;
-				}
-				else
-				{
-					normalTexture.wrapMode = TextureWrapMode.Clamp;
-				}
-
-				if (parameter.TextureFilterTypes[1] == 0)
-				{
-					normalTexture.filterMode = FilterMode.Point;
-				}
-				else
-				{
-					normalTexture.filterMode = FilterMode.Bilinear;
-				}
-				
-				prop.SetTexture("_ColorTex", colorTexture);
-				prop.SetTexture("_NormalTex", normalTexture);
-
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
 			else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
@@ -1316,58 +1268,14 @@ namespace Effekseer.Internal
 
 				prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
-				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-				if (parameter.TextureWrapTypes[0] == 0)
-				{
-					colorTexture.wrapMode = TextureWrapMode.Repeat;
-				}
-				else
-				{
-					colorTexture.wrapMode = TextureWrapMode.Clamp;
-				}
-
-				if (parameter.TextureFilterTypes[0] == 0)
-				{
-					colorTexture.filterMode = FilterMode.Point;
-				}
-				else
-				{
-					colorTexture.filterMode = FilterMode.Bilinear;
-				}
-
-				prop.SetTexture("_ColorTex", colorTexture);
-
 				if (background != null)
 				{
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 			}
 			else
 			{
 				var material = materials.GetMaterial(ref key);
-
-				var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-				if (parameter.TextureWrapTypes[0] == 0)
-				{
-					colorTexture.wrapMode = TextureWrapMode.Repeat;
-				}
-				else
-				{
-					colorTexture.wrapMode = TextureWrapMode.Clamp;
-				}
-
-				if (parameter.TextureFilterTypes[0] == 0)
-				{
-					colorTexture.filterMode = FilterMode.Point;
-				}
-				else
-				{
-					colorTexture.filterMode = FilterMode.Bilinear;
-				}
-
-				prop.SetTexture("_ColorTex", colorTexture);
-
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
 		}
@@ -1416,9 +1324,14 @@ namespace Effekseer.Internal
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit;
 
+				if (isAdvanced)
+				{
+					ApplyAdvancedParameter(parameter, prop);
+				}
+
 				prop.SetBuffer("buf_model_parameter", computeBuf1);
 
-				if(isAdvanced)
+				if (isAdvanced)
 				{
 					prop.SetBuffer("buf_model_parameter2", computeBuf2);
 				}
@@ -1428,21 +1341,7 @@ namespace Effekseer.Internal
 				prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
-				if (isAdvanced)
-				{
-					prop.SetVector("fFlipbookParameter", 
-						new Vector4((float)parameter.FlipbookParams.Enable, (float)parameter.FlipbookParams.LoopType, (float)parameter.FlipbookParams.DivideX, (float)parameter.FlipbookParams.DivideY));
-
-					// TODO : Check UV inversed
-					prop.SetVector("fUVDistortionParameter", new Vector4(parameter.DistortionIntensity, parameter.UVDistortionIntensity, 1.0f, 0.0f));
-					prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));
-					/*
-	FalloffParameter fFalloffParam;
-	float4 fEmissiveScaling; // x:emissiveScaling
-	float4 fEdgeColor;
-	float4 fEdgeParameter; // x:threshold, y:colorScaling
-					 */
-				}
+				ApplyTextures(parameter, prop, background);
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
@@ -1470,29 +1369,10 @@ namespace Effekseer.Internal
 
 					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 					{
-						var ptr = parameter.GetTexturePtr(ti);
-						var texture = GetCachedTexture(ptr, background, DummyTextureType.White);
+						var texture = GetAndApplyParameterToTexture(parameter, ti, background, DummyTextureType.White);
 						if (texture != null)
 						{
 							prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
-
-							if (parameter.TextureWrapTypes[ti] == 0)
-							{
-								texture.wrapMode = TextureWrapMode.Repeat;
-							}
-							else
-							{
-								texture.wrapMode = TextureWrapMode.Clamp;
-							}
-
-							if (parameter.TextureFilterTypes[ti] == 0)
-							{
-								texture.filterMode = FilterMode.Point;
-							}
-							else
-							{
-								texture.filterMode = FilterMode.Bilinear;
-							}
 						}
 					}
 
@@ -1504,7 +1384,7 @@ namespace Effekseer.Internal
 					}
 
 					// CustomData
-					if(efkMaterial.asset.CustomData1Count > 0)
+					if (efkMaterial.asset.CustomData1Count > 0)
 					{
 						ComputeBuffer cb = null;
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, count, ref cb);
@@ -1534,115 +1414,128 @@ namespace Effekseer.Internal
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
 					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-
-					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-					var normalTexture = GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.Normal);
-					if (parameter.TextureWrapTypes[0] == 0)
-					{
-						colorTexture.wrapMode = TextureWrapMode.Repeat;
-					}
-					else
-					{
-						colorTexture.wrapMode = TextureWrapMode.Clamp;
-					}
-
-					if (parameter.TextureFilterTypes[0] == 0)
-					{
-						colorTexture.filterMode = FilterMode.Point;
-					}
-					else
-					{
-						colorTexture.filterMode = FilterMode.Bilinear;
-					}
-
-					if (parameter.TextureWrapTypes[1] == 0)
-					{
-						normalTexture.wrapMode = TextureWrapMode.Repeat;
-					}
-					else
-					{
-						normalTexture.wrapMode = TextureWrapMode.Clamp;
-					}
-
-					if (parameter.TextureFilterTypes[1] == 0)
-					{
-						normalTexture.filterMode = FilterMode.Point;
-					}
-					else
-					{
-						normalTexture.filterMode = FilterMode.Bilinear;
-					}
-
-					prop.SetTexture("_ColorTex", colorTexture);
-					prop.SetTexture("_NormalTex", normalTexture);
-
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
 				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
 				{
 					var material = materialsModelDistortion.GetMaterial(ref key);
 
-					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-					if (parameter.TextureWrapTypes[0] == 0)
-					{
-						colorTexture.wrapMode = TextureWrapMode.Repeat;
-					}
-					else
-					{
-						colorTexture.wrapMode = TextureWrapMode.Clamp;
-					}
-
-					if (parameter.TextureFilterTypes[0] == 0)
-					{
-						colorTexture.filterMode = FilterMode.Point;
-					}
-					else
-					{
-						colorTexture.filterMode = FilterMode.Bilinear;
-					}
-
-					prop.SetTexture("_ColorTex", colorTexture);
+					prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
 					if (background != null)
 					{
-						prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
-						//Temp
-						//prop.SetTexture("_BackTex", background);
-
 						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 				}
 				else
 				{
 					var material = materialsModel.GetMaterial(ref key);
-
-					var colorTexture = GetCachedTexture(parameter.TexturePtrs0, background, DummyTextureType.White);
-					if (parameter.TextureWrapTypes[0] == 0)
-					{
-						colorTexture.wrapMode = TextureWrapMode.Repeat;
-					}
-					else
-					{
-						colorTexture.wrapMode = TextureWrapMode.Clamp;
-					}
-
-					if (parameter.TextureFilterTypes[0] == 0)
-					{
-						colorTexture.filterMode = FilterMode.Point;
-					}
-					else
-					{
-						colorTexture.filterMode = FilterMode.Bilinear;
-					}
-
-					prop.SetTexture("_ColorTex", colorTexture);
-
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
 
 				offset += allocated;
 				count -= allocated;
 			}
+		}
+
+		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DummyTextureType dummyTextureType)
+		{
+			var texture = GetCachedTexture(parameter.GetTexturePtr(index), background, dummyTextureType);
+			if(texture == null)
+			{
+				return null;
+			}
+
+			if (parameter.TextureWrapTypes[index] == 0)
+			{
+				texture.wrapMode = TextureWrapMode.Repeat;
+			}
+			else
+			{
+				texture.wrapMode = TextureWrapMode.Clamp;
+			}
+
+			if (parameter.TextureFilterTypes[index] == 0)
+			{
+				texture.filterMode = FilterMode.Point;
+			}
+			else
+			{
+				texture.filterMode = FilterMode.Bilinear;
+			}
+
+			return texture;
+		}
+
+		unsafe void ApplyTextures(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop, BackgroundRenderTexture background)
+		{
+			int textureOffset = 0;
+
+			{
+				var colorTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				prop.SetTexture("_ColorTex", colorTexture);
+				textureOffset += 1;
+			}
+
+			if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
+				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
+			{
+				if (background != null)
+				{
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
+				}
+				textureOffset += 1;
+			}
+
+			if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
+				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
+			{
+				var normalTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				prop.SetTexture("_NormalTex", normalTexture);
+				textureOffset += 1;
+			}
+
+			if(parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
+			{
+				var alphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				prop.SetTexture("_alphaTex", alphaTex);
+				textureOffset += 1;
+
+				var uvDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				prop.SetTexture("_uvDistortionTex", uvDistortionTex);
+				textureOffset += 1;
+
+				var blendTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				prop.SetTexture("_blendTex", blendTex);
+				textureOffset += 1;
+
+				var blendAlphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				prop.SetTexture("_blendAlphaTex", blendAlphaTex);
+				textureOffset += 1;
+
+				var blendUVDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				prop.SetTexture("_blendUVDistortionTex", blendUVDistortionTex);
+				textureOffset += 1;
+			}
+		}
+
+		void ApplyAdvancedParameter(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop)
+		{
+			prop.SetVector("fFlipbookParameter", new Vector4(
+				parameter.FlipbookParams.Enable,
+				parameter.FlipbookParams.LoopType,
+				parameter.FlipbookParams.DivideX,
+				parameter.FlipbookParams.DivideY));
+
+			// TODO : Check UV inversed
+			prop.SetVector("fUVDistortionParameter", new Vector4(parameter.DistortionIntensity, parameter.UVDistortionIntensity, 1.0f, 0.0f));
+			prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));
+			prop.SetVector("fFalloffParameter", new Vector4(parameter.EnableFalloff, parameter.FalloffParam.ColorBlendType, parameter.FalloffParam.Pow, 0.0f));
+			prop.SetVector("fFalloffBeginColor", parameter.FalloffParam.BeginColor);
+			prop.SetVector("fFalloffEndColor", parameter.FalloffParam.EndColor);
+			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
+			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
+			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
 		}
 
 		public void OnPostRender(Camera camera)
