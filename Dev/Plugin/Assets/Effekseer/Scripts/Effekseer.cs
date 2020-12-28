@@ -250,6 +250,14 @@ namespace Effekseer
 
 		#region UnityRenderer
 
+		[StructLayout(LayoutKind.Sequential)]
+		public unsafe struct StrideBufferParameter
+		{
+			public int Stride;
+			public int Size;
+			public IntPtr Ptr;
+		}
+
 		public enum RendererMaterialType : int
 		{
 			Unlit,
@@ -407,13 +415,13 @@ namespace Effekseer
 		public static extern int GetUnityRenderParameterCount();
 
 		[DllImport(pluginName)]
-		public static extern IntPtr GetUnityRenderVertexBuffer();
-
-		[DllImport(pluginName)]
-		public static extern int GetUnityRenderVertexBufferCount();
-
-		[DllImport(pluginName)]
 		public static extern IntPtr GetUnityRenderInfoBuffer();
+
+		[DllImport(pluginName)]
+		public static extern int GetUnityStrideBufferCount();
+
+		[DllImport(pluginName)]
+		public static extern StrideBufferParameter GetUnityStrideBufferParameter(int index);
 
 		#endregion
 

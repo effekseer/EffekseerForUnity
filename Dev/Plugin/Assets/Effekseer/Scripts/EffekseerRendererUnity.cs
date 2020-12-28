@@ -366,9 +366,6 @@ namespace Effekseer.Internal
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
-		const int VertexSize = 36;
-		const int VertexDistortionSize = 36 + 4 * 6;
-		const int VertexDynamicSize = 4 * 17;
 
 		class MaterialPropCollection
 		{
@@ -593,7 +590,7 @@ namespace Effekseer.Internal
 			/// </summary>
 			int VertexMaxSize = 8192 * 4 * 36;
 
-			const int defaultVertexSize = 36;
+			const int defaultStride = 36;
 
 			Dictionary<int, ComputeBuffer> computeBuffers = new Dictionary<int, ComputeBuffer>();
 			byte[] data = null;
@@ -601,7 +598,7 @@ namespace Effekseer.Internal
 			public ComputeBufferCollection()
 			{
 				data = new byte[VertexMaxSize];
-				Get(defaultVertexSize);
+				Get(defaultStride);
 			}
 
 			public byte[] GetCPUData()
@@ -609,27 +606,22 @@ namespace Effekseer.Internal
 				return data;
 			}
 
-			public void CopyCPUToGPU(int vertexSize, int offset, int size)
+			public void CopyCPUToGPU(int stride, int offset, int size)
 			{
-				vertexSize = FilterVertexSize(vertexSize);
-
-				var cb = Get(vertexSize);
-
+				var cb = Get(stride);
 				cb.SetData(data, offset, offset, size);
 			}
 
-			public ComputeBuffer Get(int vertexSize)
+			public ComputeBuffer Get(int stride)
 			{
-				vertexSize = FilterVertexSize(vertexSize);
-
-				if (!computeBuffers.ContainsKey(vertexSize))
+				if (!computeBuffers.ContainsKey(stride))
 				{
-					var count = VertexMaxSize / vertexSize;
-					if (count * vertexSize != VertexMaxSize) count++;
-					computeBuffers.Add(vertexSize, new ComputeBuffer(count, vertexSize));
+					var count = VertexMaxSize / stride;
+					if (count * stride != VertexMaxSize) count++;
+					computeBuffers.Add(stride, new ComputeBuffer(count, stride));
 				}
 
-				return computeBuffers[vertexSize];
+				return computeBuffers[stride];
 			}
 
 			public DelayEvent[] ReallocateComputeBuffers(int desiredSize)
@@ -674,15 +666,6 @@ namespace Effekseer.Internal
 					computeBuffer.Value.Release();
 				}
 				computeBuffers.Clear();
-			}
-
-			int FilterVertexSize(int size)
-			{
-#if UNITY_PS4
-				return size;
-#else
-				return defaultVertexSize;
-#endif
 			}
 		}
 
@@ -869,23 +852,39 @@ namespace Effekseer.Internal
 			}
 		};
 
-		MaterialCollection materials = new MaterialCollection();
-		MaterialCollection materialsDistortion = new MaterialCollection();
-		MaterialCollection materialsLighting = new MaterialCollection();
-		MaterialCollection materialsModel = new MaterialCollection();
-		MaterialCollection materialsModelDistortion = new MaterialCollection();
-		MaterialCollection materialsModelLighting = new MaterialCollection();
 		int nextRenderID = 0;
+
+		Dictionary<int, MaterialCollection> materialCollections = new Dictionary<int, MaterialCollection>();
+
+		MaterialCollection GetMaterialCollection(Plugin.RendererMaterialType type, bool isModel)
+		{
+			if (type == Plugin.RendererMaterialType.Material)
+				return null;
+
+			var key = ((int)type) * 2 + (isModel ? 1 : 0);
+
+			materialCollections.TryGetValue(key, out var value);
+
+			if(value != null)
+			{
+				return value;
+			}
+
+			value = new MaterialCollection();
+			materialCollections.Add(key, value);
+			return value;
+		}
 
 		public EffekseerRendererUnity()
 		{
-			materials.Shader = EffekseerSettings.Instance.standardShader;
-			materialsDistortion.Shader = EffekseerSettings.Instance.standardDistortionShader;
-			materialsLighting.Shader = EffekseerSettings.Instance.standardLightingShader;
-			materialsModel.Shader = EffekseerSettings.Instance.standardModelShader;
-			materialsModelDistortion.Shader = EffekseerSettings.Instance.standardModelDistortionShader;
-			materialsModelLighting.Shader = EffekseerSettings.Instance.standardLightingShader;
-			materialsModelLighting.Keywords = new string[] { "_MODEL_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, false).Shader = EffekseerSettings.Instance.standardShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, false).Shader = EffekseerSettings.Instance.standardDistortionShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerSettings.Instance.standardLightingShader;
+
+			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, true).Shader = EffekseerSettings.Instance.standardModelShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Shader = EffekseerSettings.Instance.standardModelDistortionShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerSettings.Instance.standardLightingShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_" };
 		}
 
 		// RenderPath per Camera
@@ -1074,9 +1073,17 @@ namespace Effekseer.Internal
 			Plugin.EffekseerRenderBack(path.renderId);
 
 			// if memory is lacked, reallocate memory
-			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferBack.GetCPUData().Length)
+			int maxmumSize = 0;
+
+			for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
 			{
-				path.ReallocateComputeBuffer(Plugin.GetUnityRenderVertexBufferCount());
+				var buf = Plugin.GetUnityStrideBufferParameter(i);
+				maxmumSize = Math.Max(maxmumSize, buf.Size);
+			}
+
+			while (Plugin.GetUnityRenderParameterCount() > 0 && maxmumSize > path.computeBufferBack.GetCPUData().Length)
+			{
+				path.ReallocateComputeBuffer(maxmumSize);
 			}
 
 			RenderInternal(path.commandBuffer, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
@@ -1114,10 +1121,18 @@ namespace Effekseer.Internal
 
 			Plugin.EffekseerRenderFront(path.renderId);
 
-			// if memory is lacked, reallocate memory
-			while (Plugin.GetUnityRenderParameterCount() > 0 && Plugin.GetUnityRenderVertexBufferCount() > path.computeBufferFront.GetCPUData().Length)
+			maxmumSize = 0;
+
+			for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
 			{
-				path.ReallocateComputeBuffer(Plugin.GetUnityRenderVertexBufferCount());
+				var buf = Plugin.GetUnityStrideBufferParameter(i);
+				maxmumSize = Math.Max(maxmumSize, buf.Size);
+			}
+
+			// if memory is lacked, reallocate memory
+			while (Plugin.GetUnityRenderParameterCount() > 0 && maxmumSize > path.computeBufferFront.GetCPUData().Length)
+			{
+				path.ReallocateComputeBuffer(maxmumSize);
 			}
 
 			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
@@ -1137,19 +1152,16 @@ namespace Effekseer.Internal
 
 			if (renderParameterCount > 0)
 			{
+				for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
+				{
+					var buf = Plugin.GetUnityStrideBufferParameter(i);
+
+					Marshal.Copy(buf.Ptr, computeBuffer.GetCPUData(), 0,buf.Size);
+					computeBuffer.CopyCPUToGPU(buf.Stride, 0, buf.Size);
+				}
+
 				Plugin.UnityRenderParameter parameter = new Plugin.UnityRenderParameter();
 
-#if !UNITY_PS4
-				var vertexBufferCount = Plugin.GetUnityRenderVertexBufferCount();
-
-				if (vertexBufferCount > 0)
-				{
-					var vertexBuffer = Plugin.GetUnityRenderVertexBuffer();
-
-					Marshal.Copy(vertexBuffer, computeBuffer.GetCPUData(), 0, vertexBufferCount);
-					computeBuffer.CopyCPUToGPU(VertexSize, 0, vertexBufferCount);
-				}
-#endif
 				var infoBuffer = Plugin.GetUnityRenderInfoBuffer();
 
 				for (int i = 0; i < renderParameterCount; i++)
@@ -1252,32 +1264,34 @@ namespace Effekseer.Internal
 
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
-			else if (parameter.MaterialType == Plugin.RendererMaterialType.Lit)
+			else
 			{
-				var material = materialsLighting.GetMaterial(ref key);
+				var material = GetMaterialCollection(parameter.MaterialType, false).GetMaterial(ref key);
+				if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
+						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
+				{
+					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
+					prop.SetColor("lightColor", EffekseerSystem.LightColor);
+					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 
-				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
-				prop.SetColor("lightColor", EffekseerSystem.LightColor);
-				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+				}
+				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
+					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
+				{
+					prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
-				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
-			}
-			else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
-			{
-				var material = materialsDistortion.GetMaterial(ref key);
-
-				prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
-
-				if (background != null)
+					if (background != null)
+					{
+						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					}
+				}
+				else
 				{
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 			}
-			else
-			{
-				var material = materials.GetMaterial(ref key);
-				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
-			}
+			
 		}
 
 		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
@@ -1407,31 +1421,34 @@ namespace Effekseer.Internal
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
-				else if (parameter.MaterialType == Plugin.RendererMaterialType.Lit)
+				else
 				{
-					var material = materialsModelLighting.GetMaterial(ref key);
+					var material = GetMaterialCollection(parameter.MaterialType, true).GetMaterial(ref key);
+					if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
+						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
+					{
+						prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
+						prop.SetColor("lightColor", EffekseerSystem.LightColor);
+						prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+					}
+					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
+						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
+					{
+						prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
 
-					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
-					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
-				}
-				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion)
-				{
-					var material = materialsModelDistortion.GetMaterial(ref key);
-
-					prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
-
-					if (background != null)
+						if (background != null)
+						{
+							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						}
+					}
+					else
 					{
 						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 				}
-				else
-				{
-					var material = materialsModel.GetMaterial(ref key);
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
-				}
+
+
 
 				offset += allocated;
 				count -= allocated;

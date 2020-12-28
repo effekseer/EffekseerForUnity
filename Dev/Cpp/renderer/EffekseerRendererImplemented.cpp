@@ -28,6 +28,7 @@ extern "C"
 		return static_cast<int32_t>(renderer->GetRenderParameters().size());
 	}
 
+	/*
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderVertexBuffer()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
@@ -43,6 +44,7 @@ extern "C"
 		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
 		return static_cast<int32_t>(renderer->GetRenderVertexBuffer().size());
 	}
+	*/
 
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderInfoBuffer()
 	{
@@ -50,6 +52,22 @@ extern "C"
 			return nullptr;
 		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
 		return renderer->GetRenderInfoBuffer().data();
+	}
+
+	UNITY_INTERFACE_EXPORT int32_t UNITY_INTERFACE_API GetUnityStrideBufferCount()
+	{
+		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
+			return 0;
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
+		return renderer->GetStrideBufferCount();
+	}
+
+	UNITY_INTERFACE_EXPORT StrideBufferParameter UNITY_INTERFACE_API GetUnityStrideBufferParameter(int32_t index)
+	{
+		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
+			return StrideBufferParameter{};
+		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
+		return renderer->GetStrideBufferParameter(index);
 	}
 }
 
@@ -286,6 +304,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	}
 }
 
+/*
 int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
 {
 	auto ret = static_cast<int32_t>(exportedVertexBuffer.size());
@@ -294,6 +313,7 @@ int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
 	memcpy(exportedVertexBuffer.data() + ret, data, size);
 	return ret;
 }
+*/
 
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
@@ -304,14 +324,17 @@ int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 	return ret;
 }
 
+/*
 void RendererImplemented::AlignVertexBuffer(int32_t alignment)
 {
 	exportedVertexBuffer.resize(GetAlignedOffset(static_cast<int32_t>(exportedVertexBuffer.size()), alignment));
 }
+*/
 
 Effekseer::RefPtr<RendererImplemented> RendererImplemented::Create() { return Effekseer::MakeRefPtr<RendererImplemented>(); }
 
-RendererImplemented::RendererImplemented() { 
+RendererImplemented::RendererImplemented()
+{
 	backgroundData_ = Effekseer::MakeRefPtr<Effekseer::Texture>();
 	auto backend = Effekseer::MakeRefPtr<Texture>(nullptr);
 	backgroundData_->SetBackend(backend);
@@ -336,11 +359,41 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 
-	exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
+	// exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
 	return true;
 }
 
 void RendererImplemented::SetRestorationOfStatesFlag(bool flag) {}
+
+int32_t RendererImplemented::StrideBuffer::PushBuffer(const void* data, int32_t size)
+{
+	size_t offset = Buffer.size();
+	Buffer.resize(offset + size);
+	memcpy(Buffer.data() + offset, data, size);
+	return offset;
+}
+
+void RendererImplemented::ClearStrideBuffers()
+{
+	for (auto& buffer : strideBuffers_)
+	{
+		buffer->Buffer.clear();
+	}
+}
+std::shared_ptr<RendererImplemented::StrideBuffer> RendererImplemented::GetStrideBuffer(int32_t stride)
+{
+	auto it = strideToIndex_.find(stride);
+	if (it == strideToIndex_.end())
+	{
+		auto buffer = std::make_shared<StrideBuffer>();
+		buffer->Stride = stride;
+		strideToIndex_[stride] = strideBuffers_.size();
+		strideBuffers_.emplace_back(buffer);
+		return buffer;
+	}
+
+	return strideBuffers_[it->second];
+}
 
 bool RendererImplemented::BeginRendering()
 {
@@ -349,9 +402,12 @@ bool RendererImplemented::BeginRendering()
 	// Reset the renderer
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
-	exportedVertexBuffer.resize(0);
+	// exportedVertexBuffer.resize(0);
 	exportedInfoBuffer.resize(0);
 	renderParameters.resize(0);
+
+	ClearStrideBuffers();
+
 	return true;
 }
 
@@ -361,7 +417,7 @@ bool RendererImplemented::EndRendering()
 	m_standardRenderer->ResetAndRenderingIfRequired();
 
 	// ForUnity
-	AlignVertexBuffer(sizeof(UnityVertex));
+	// AlignVertexBuffer(sizeof(UnityVertex));
 
 	return true;
 }
@@ -511,11 +567,13 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex) + customDataStride;
-		AlignVertexBuffer(rp.VertexBufferStride);
+		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+		// AlignVertexBuffer(rp.VertexBufferStride);
 
-		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		int32_t startOffset = strideBuffer->GetOffset();
 
-		const int32_t stride = static_cast<int>(sizeof(EffekseerRenderer::DynamicVertex)) + customDataStride;
+		const int32_t stride = rp.VertexBufferStride;
 
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
@@ -547,7 +605,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			unity_v.Tangent = UnpackVector3DF(v.Tangent);
 			unity_v.Normal = UnpackVector3DF(v.Normal);
 
-			AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
+			strideBuffer->PushBuffer(&unity_v, sizeof(UnityDynamicVertex));
+			// AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
 
 			if (nativeMaterial->GetCustomData1Count() > 0)
 			{
@@ -555,7 +614,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				auto c = (float*)(&custom1[vi]);
 				memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
 
-				AddVertexBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
+				strideBuffer->PushBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
+				// AddVertexBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
 			}
 
 			if (nativeMaterial->GetCustomData2Count() > 0)
@@ -563,8 +623,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				std::array<float, 4> customData2;
 				auto c = (float*)(&custom2[vi]);
 				memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
-
-				AddVertexBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
+				strideBuffer->PushBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
+				// AddVertexBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
 			}
 		}
 
@@ -583,8 +643,11 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
-		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+		int32_t startOffset = strideBuffer->GetOffset();
+
+		// AlignVertexBuffer(rp.VertexBufferStride);
+		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
@@ -592,7 +655,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v);
+				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
 			}
 		}
 		else
@@ -601,15 +664,17 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v);
+				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
 			}
 
-			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v);
+				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
 			}
 		}
 
@@ -627,8 +692,10 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 	{
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
-		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		// AlignVertexBuffer(rp.VertexBufferStride);
+		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+		int32_t startOffset = strideBuffer->GetOffset();
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 		{
@@ -636,7 +703,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v);
+				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
 			}
 		}
 		else
@@ -645,15 +712,17 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v);
+				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
 			}
 
-			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
+			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v);
+				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
 			}
 		}
 
@@ -669,8 +738,10 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
 	{
 		rp.VertexBufferStride = sizeof(UnityVertex);
-		AlignVertexBuffer(rp.VertexBufferStride);
-		int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		// AlignVertexBuffer(rp.VertexBufferStride);
+		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+		int32_t startOffset = strideBuffer->GetOffset();
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
 		{
@@ -678,7 +749,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsVertex(v);
+				AddVertexBufferAsVertex(v, *strideBuffer);
 			}
 		}
 		else
@@ -687,15 +758,17 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsVertex(v);
+				AddVertexBufferAsVertex(v, *strideBuffer);
 			}
 
-			AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
+			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
+			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
+			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v);
+				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
 			}
 		}
 
@@ -778,7 +851,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	}
 
 	rp.ElementCount = static_cast<int32_t>(matrixes.size());
-	
+
 	rp.CustomData1BufferOffset = 0;
 	rp.CustomData2BufferOffset = 0;
 
@@ -814,7 +887,6 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
 		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
 		modelParameter.AlphaThreshold = alphaThresholds[i];
-
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
 	}
 
@@ -898,6 +970,17 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 			}
 		}
 	}
+}
+
+int32_t RendererImplemented::GetStrideBufferCount() const { return static_cast<int32_t>(strideBuffers_.size()); }
+
+StrideBufferParameter RendererImplemented::GetStrideBufferParameter(int32_t index) const
+{
+	StrideBufferParameter param;
+	param.Ptr = strideBuffers_[index]->Buffer.data();
+	param.Size = static_cast<int32_t>(strideBuffers_[index]->Buffer.size());
+	param.Stride = strideBuffers_[index]->Stride;
+	return param;
 }
 
 } // namespace EffekseerRendererUnity
