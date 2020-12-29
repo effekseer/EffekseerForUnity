@@ -139,6 +139,9 @@ namespace Effekseer
 		[SerializeField]
 		public Shader grabDepthShader = null;
 
+		[SerializeField]
+		public Shader fixedShader = null;
+
 		/// <summary>
 		/// A shader to avoid a unity bug
 		/// </summary>
@@ -217,6 +220,7 @@ namespace Effekseer
 				asset.texture2DBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DBlitShader.shader");
 				asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
 				asset.grabDepthShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/GrabDepthShader.shader");
+				asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedhader.shader");
 
 				AssetDatabase.CreateAsset(asset, assetPath);
 				AssetDatabase.Refresh();
@@ -239,6 +243,16 @@ namespace Effekseer
 					asset.grabDepthShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/GrabDepthShader.shader");
 
 					if (asset.grabDepthShader != null)
+					{
+						dirtied = true;
+					}
+				}
+
+				if (asset.fixedShader == null)
+				{
+					asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedhader.shader");
+
+					if (asset.fixedShader != null)
 					{
 						dirtied = true;
 					}

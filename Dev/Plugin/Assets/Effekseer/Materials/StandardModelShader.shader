@@ -59,7 +59,7 @@ SubShader{
 
 		ModelVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
-		float3 localPos = v.Position;
+		float3 localPos = v.Pos;
 		float4 worldPos = mul(buf_matrix, float4(localPos, 1.0f));
 		//float4 worldPos = float4(localPos, 1.0f);
 		o.pos = mul(UNITY_MATRIX_VP, worldPos);

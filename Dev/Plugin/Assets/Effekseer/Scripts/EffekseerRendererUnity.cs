@@ -1,4 +1,5 @@
 ﻿//#define EFFEKSEER_INTERNAL_DEBUG
+#define NEW_SHADER
 
 using System;
 using System.Collections.Generic;
@@ -877,6 +878,46 @@ namespace Effekseer.Internal
 
 		public EffekseerRendererUnity()
 		{
+#if NEW_SHADER
+
+			var fixedShader = EffekseerSettings.Instance.fixedShader;
+#if UNITY_EDITOR
+			if (fixedShader == null)
+			{
+				EffekseerSettings.AssignAssets();
+			}
+			fixedShader = EffekseerSettings.Instance.fixedShader;
+#endif
+
+			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, true).Keywords = new string[] { "_MODEL_" };
+
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, false).Keywords = new string[] { "ENABLE_DISTORTION" };
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Keywords = new string[] { "_MODEL_", "ENABLE_DISTORTION" };
+
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Keywords = new string[] { "_MODEL_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING" };
+
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedUnlit, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedUnlit, false).Keywords = new string[] { "_ADVANCED_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedUnlit, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedUnlit, true).Keywords = new string[] { "_MODEL_", "_ADVANCED_" };
+
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedBackDistortion, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedBackDistortion, false).Keywords = new string[] { "ENABLE_DISTORTION", "_ADVANCED_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedBackDistortion, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedBackDistortion, true).Keywords = new string[] { "_MODEL_", "ENABLE_DISTORTION", "_ADVANCED_" };
+
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Keywords = new string[] { "_MODEL_", "_ADVANCED_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Shader = EffekseerSettings.Instance.fixedShader;
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING", "_ADVANCED_" };
+#else
 			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, false).Shader = EffekseerSettings.Instance.standardShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, false).Shader = EffekseerSettings.Instance.standardDistortionShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerSettings.Instance.standardLightingShader;
@@ -885,6 +926,8 @@ namespace Effekseer.Internal
 			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Shader = EffekseerSettings.Instance.standardModelDistortionShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerSettings.Instance.standardLightingShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_" };
+#endif
+
 		}
 
 		// RenderPath per Camera
@@ -1191,18 +1234,10 @@ namespace Effekseer.Internal
 			key.ZWrite = parameter.ZWrite > 0;
 			key.Cull = (int)UnityEngine.Rendering.CullMode.Off;
 
-#if UNITY_PS4
-			{
-				var vertexBuffer = (byte*)Plugin.GetUnityRenderVertexBuffer();
-				vertexBuffer += parameter.VertexBufferOffset;
-				Marshal.Copy(new IntPtr(vertexBuffer), computeBuffer.GetCPUData(), parameter.VertexBufferOffset, parameter.ElementCount * 4 * parameter.VertexBufferStride);
-			}
-
-			computeBuffer.CopyCPUToGPU(parameter.VertexBufferStride, parameter.VertexBufferOffset, parameter.ElementCount * 4 * parameter.VertexBufferStride);
-#endif
 			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
 
+			prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 
 			var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
 				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
@@ -1355,6 +1390,8 @@ namespace Effekseer.Internal
 				prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
 				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
+				prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
+
 				ApplyTextures(parameter, prop, background);
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
@@ -1490,7 +1527,11 @@ namespace Effekseer.Internal
 
 			{
 				var colorTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+#if NEW_SHADER
+				prop.SetTexture("_colorTex", colorTexture);
+#else
 				prop.SetTexture("_ColorTex", colorTexture);
+#endif
 				textureOffset += 1;
 			}
 
@@ -1553,6 +1594,7 @@ namespace Effekseer.Internal
 			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
 			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
 			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
+			prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 		}
 
 		public void OnPostRender(Camera camera)

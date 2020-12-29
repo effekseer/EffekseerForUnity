@@ -330,6 +330,7 @@ namespace Effekseer
 			public FalloffParameter FalloffParam;
 			public float EmissiveScaling;
 			public EdgeParameters EdgeParams;
+			public Vector4 SoftParticleParam;
 
 			public int ZTest;
 

@@ -18,7 +18,7 @@ struct SpriteLitDistMatVertex
 
 struct ModelVertex
 {
-	float3 Position;
+	float3 Pos;
 	float3 Normal;
 	float3 Binormal;
 	float3 Tangent;
@@ -47,7 +47,7 @@ struct ModelParameter2
 };
 
 
-struct AdvancedParameter
+struct SpriteAdvancedParameter
 {
 	float2 AlphaUV;
 	float2 UVDistortionUV;
