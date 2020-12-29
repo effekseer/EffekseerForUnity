@@ -22,12 +22,6 @@ class ModelLoader : public Effekseer::ModelLoader
 	EffekseerPlugin::ModelLoaderLoad load;
 	EffekseerPlugin::ModelLoaderUnload unload;
 
-	struct ModelResource
-	{
-		int referenceCount = 1;
-		Effekseer::ModelRef internalData;
-	};
-	std::map<std::u16string, ModelResource> resources;
 	std::vector<uint8_t> internalBuffer;
 
 public:

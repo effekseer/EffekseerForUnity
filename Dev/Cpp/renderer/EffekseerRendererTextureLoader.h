@@ -30,13 +30,6 @@ class TextureLoader : public Effekseer::TextureLoader
 protected:
 	EffekseerPlugin::TextureLoaderLoad load;
 	EffekseerPlugin::TextureLoaderUnload unload;
-
-	struct TextureResource
-	{
-		int referenceCount = 1;
-		Effekseer::TextureRef textureDataPtr = nullptr;
-	};
-	std::map<std::u16string, TextureResource> resources;
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
 public:

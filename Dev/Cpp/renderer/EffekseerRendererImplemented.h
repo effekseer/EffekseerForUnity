@@ -83,6 +83,8 @@ extern "C"
 		float EmissiveScaling = 1;
 		EdgeParameters EdgeParams;
 
+		std::array<float, 4> SoftParticleParam;
+
 		int ZTest = 0;
 
 		int ZWrite = 0;

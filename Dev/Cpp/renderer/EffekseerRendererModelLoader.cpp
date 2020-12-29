@@ -12,18 +12,7 @@ ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin:
 
 Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 {
-	const auto key = std::u16string(path);
-
-	// find it from resource table and if it exists, it is reused.
-	auto it = resources.find(key);
-	if (it != resources.end())
-	{
-		it->second.referenceCount++;
-		return it->second.internalData;
-	}
-
 	// Load with unity
-	ModelResource res;
 	int requiredDataSize = 0;
 	void* modelPtr = nullptr;
 
@@ -52,10 +41,7 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 
 	auto model = Effekseer::MakeRefPtr<Model>(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
 	model->InternalPtr = modelPtr;
-	res.internalData = model;
-
-	resources.emplace(key, res);
-	return res.internalData;
+	return model;
 }
 
 void ModelLoader::Unload(Effekseer::ModelRef source)
@@ -66,23 +52,7 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 	}
 
 	// find a model
-	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, ModelResource>& pair) {
-		return pair.second.internalData == source;
-	});
-	if (it == resources.end())
-	{
-		return;
-	}
-
-	// if refrercen count is zero, it is released
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		auto model = it->second.internalData.DownCast<Model>().Get();
-		unload(it->first.c_str(), model->InternalPtr);
-		ES_SAFE_DELETE(model);
-		it->second.internalData = nullptr;
-		resources.erase(it);
-	}
+	auto model = source.DownCast<Model>().Get();
+	unload(source->GetPath().c_str(), model->InternalPtr);
 }
 } // namespace EffekseerRendererUnity

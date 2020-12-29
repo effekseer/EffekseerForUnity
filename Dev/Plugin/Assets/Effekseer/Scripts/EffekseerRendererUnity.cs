@@ -1238,6 +1238,7 @@ namespace Effekseer.Internal
 			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
 
 			prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
+			prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
 
 			var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
 				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
@@ -1314,7 +1315,11 @@ namespace Effekseer.Internal
 				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 				{
+#if NEW_SHADER
+					prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
+#else
 					prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
+#endif
 
 					if (background != null)
 					{
@@ -1391,6 +1396,7 @@ namespace Effekseer.Internal
 				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
 
 				prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
+				prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
 
 				ApplyTextures(parameter, prop, background);
 
@@ -1472,8 +1478,11 @@ namespace Effekseer.Internal
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 					{
+#if NEW_SHADER
+						prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
+#else
 						prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
-
+#endif
 						if (background != null)
 						{
 							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
@@ -1540,7 +1549,12 @@ namespace Effekseer.Internal
 			{
 				if (background != null)
 				{
+#if NEW_SHADER
+					prop.SetTexture("_backTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
+#else
 					prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
+#endif
+
 				}
 				textureOffset += 1;
 			}
@@ -1549,7 +1563,13 @@ namespace Effekseer.Internal
 				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 			{
 				var normalTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+
+
+#if NEW_SHADER
+				prop.SetTexture("_normalTex", normalTexture);
+#else
 				prop.SetTexture("_NormalTex", normalTexture);
+#endif
 				textureOffset += 1;
 			}
 

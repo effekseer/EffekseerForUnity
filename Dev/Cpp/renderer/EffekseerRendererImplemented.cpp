@@ -515,6 +515,7 @@ void StorePixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::Pixel
 	rp.EdgeParams.Threshold = constantBuffer->EdgeParam.Threshold;
 	rp.EdgeParams.ColorScaling = constantBuffer->EdgeParam.ColorScaling;
 	rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
+	rp.SoftParticleParam = constantBuffer->SoftParticleParam.softParticleParams;
 }
 
 void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::PixelConstantBufferDistortion* constantBuffer)
@@ -524,6 +525,7 @@ void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp, EffekseerRende
 	rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
 	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
 	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
+	rp.SoftParticleParam = constantBuffer->SoftParticleParam.softParticleParams;
 }
 
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
