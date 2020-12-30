@@ -357,6 +357,10 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::BackDistortion));
 	litShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Lit));
 
+	adUnlitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedUnlit));
+	adBackDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion));
+	adLitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedLit));
+
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 
 	// exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
@@ -756,7 +760,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 		else
 		{
-			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			auto vs = (EffekseerRenderer::AdvancedSimpleVertex*)m_vertexBuffer->GetResource();
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -932,6 +936,19 @@ Shader* RendererImplemented::GetShader(::EffekseerRenderer::RendererShaderType m
 	{
 		return unlitShader_.get();
 	}
+	if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
+	{
+		return adBackDistortedShader_.get();
+	}
+	else if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedLit)
+	{
+		return adLitShader_.get();
+	}
+	else if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+	{
+		return adUnlitShader_.get();
+	}
+
 
 	// retuan as a default shader
 	return unlitShader_.get();

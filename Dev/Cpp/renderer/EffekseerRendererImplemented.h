@@ -223,6 +223,9 @@ protected:
 	std::unique_ptr<Shader> unlitShader_;
 	std::unique_ptr<Shader> backDistortedShader_;
 	std::unique_ptr<Shader> litShader_;
+	std::unique_ptr<Shader> adUnlitShader_;
+	std::unique_ptr<Shader> adBackDistortedShader_;
+	std::unique_ptr<Shader> adLitShader_;
 
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;

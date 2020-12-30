@@ -251,6 +251,18 @@ namespace Effekseer
 		#region UnityRenderer
 
 		[StructLayout(LayoutKind.Sequential)]
+		public unsafe struct AdvancedVertexParameter
+		{
+			public Vector2 AlphaUV;
+			public Vector2 UVDistortionUV;
+			public Vector2 BlendUV;
+			public Vector2 BlendAlphaUV;
+			public Vector2 BlendUVDistortionUV;
+			public float FlipbookIndexAndNextRate;
+			public float AlphaThreshold;
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
 		public unsafe struct StrideBufferParameter
 		{
 			public int Stride;

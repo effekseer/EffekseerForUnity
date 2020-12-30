@@ -375,6 +375,7 @@ float buf_offset;
 #endif
 
 StructuredBuffer<SpriteAdvancedParameter> buf_ad;
+float buf_ad_offset;
 
 #if defined(ENABLE_LIGHTING) || defined(ENABLE_DISTORTION)
 
@@ -466,12 +467,12 @@ VS_Output vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 #endif
 
 	VS_Input_Internal Input_Internal = (VS_Input_Internal)0;
-	Input_Internal.Alpha_Dist_UV.xy = buf_ad[buf_offset + qind * 4 + v_offset[vind]].AlphaUV;
-	Input_Internal.Alpha_Dist_UV.zw = buf_ad[buf_offset + qind * 4 + v_offset[vind]].UVDistortionUV;
-	Input_Internal.BlendUV = buf_ad[buf_offset + qind * 4 + v_offset[vind]].BlendUV;
-	Input_Internal.Blend_Alpha_Dist_UV.xy = buf_ad[buf_offset + qind * 4 + v_offset[vind]].BlendAlphaUV;
-	Input_Internal.FlipbookIndex = buf_ad[buf_offset + qind * 4 + v_offset[vind]].FlipbookIndexAndNextRate;
-	Input_Internal.AlphaThreshold = buf_ad[buf_offset + qind * 4 + v_offset[vind]].AlphaThreshold;
+	Input_Internal.Alpha_Dist_UV.xy = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].AlphaUV;
+	Input_Internal.Alpha_Dist_UV.zw = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].UVDistortionUV;
+	Input_Internal.BlendUV = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].BlendUV;
+	Input_Internal.Blend_Alpha_Dist_UV.xy = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].BlendAlphaUV;
+	Input_Internal.FlipbookIndex = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].FlipbookIndexAndNextRate;
+	Input_Internal.AlphaThreshold = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].AlphaThreshold;
 
 	// UV
 #if defined(ENABLE_LIGHTING) || defined(ENABLE_DISTORTION)

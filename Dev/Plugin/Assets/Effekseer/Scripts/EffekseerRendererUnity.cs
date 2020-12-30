@@ -1246,6 +1246,9 @@ namespace Effekseer.Internal
 
 			if (isAdvanced)
 			{
+				prop.SetBuffer("buf_ad", computeBuffer.Get(sizeof(Effekseer.Plugin.AdvancedVertexParameter)));
+				prop.SetFloat("buf_ad_offset", parameter.AdvancedDataOffset / sizeof(Effekseer.Plugin.AdvancedVertexParameter));
+
 				ApplyAdvancedParameter(parameter, prop);
 			}
 
