@@ -98,8 +98,8 @@ LOCAL_SRC_FILES += \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
-TextureLoader.cpp
-ModelLoader.cpp
+	$(LIB_SRC_PATH)/TextureLoader.cpp \
+	$(LIB_SRC_PATH)/ModelLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.IndexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
@@ -117,7 +117,6 @@ ModelLoader.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
-
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.IndexBuffer.cpp \
