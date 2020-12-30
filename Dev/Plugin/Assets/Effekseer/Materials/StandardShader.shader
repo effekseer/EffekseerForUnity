@@ -27,17 +27,11 @@
 	#pragma fragment frag
 
 	#include "UnityCG.cginc"
+	#include "EffekseerShaderCommon.cginc"
 
 	sampler2D _ColorTex;
 
-	struct SimpleVertex
-	{
-		float3 Pos;
-		float2 UV;
-		float4 Color;
-	};
-
-	StructuredBuffer<SimpleVertex> buf_vertex;
+	StructuredBuffer<SpriteUnlitVertex> buf_vertex;
 	float buf_offset;
 
 	struct ps_input
@@ -62,7 +56,7 @@
 		v_offset[4] = 2;
 		v_offset[5] = 3;
 
-		SimpleVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
+		SpriteUnlitVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
 		
 		float3 worldPos = v.Pos;
 		o.pos = mul(UNITY_MATRIX_VP, float4(worldPos,1.0f));

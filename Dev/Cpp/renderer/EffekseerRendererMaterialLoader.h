@@ -21,7 +21,7 @@ class MaterialLoader : public Effekseer::MaterialLoader
 	struct MaterialResource
 	{
 		int referenceCount = 1;
-		Effekseer::MaterialData* internalData;
+		Effekseer::MaterialRef internalData;
 	};
 	std::map<std::u16string, MaterialResource> resources;
 	EffekseerPlugin::MemoryFile memoryFile_;
@@ -31,8 +31,8 @@ public:
 	MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, EffekseerPlugin::MaterialLoaderUnload unload);
 
 	virtual ~MaterialLoader();
-	Effekseer::MaterialData* Load(const EFK_CHAR* path) override;
-	void Unload(Effekseer::MaterialData* data) override;
+	Effekseer::MaterialRef Load(const EFK_CHAR* path) override;
+	void Unload(Effekseer::MaterialRef data) override;
 };
 
 

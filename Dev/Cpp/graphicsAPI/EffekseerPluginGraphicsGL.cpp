@@ -1,4 +1,4 @@
-﻿
+
 #include "EffekseerPluginGraphicsGL.h"
 #include <algorithm>
 #include <assert.h>
@@ -6,7 +6,6 @@
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #else
 #include <EffekseerRenderer/EffekseerRendererGL.MaterialLoader.h>
-#include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
 #endif
 
 #include "../common/EffekseerPluginMaterial.h"
@@ -19,33 +18,40 @@ class TextureLoaderGL : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
+		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 	std::map<std::u16string, TextureResource> resources;
-	std::map<void*, void*> textureData2NativePtr;
+	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 	UnityGfxRenderer gfxRenderer;
 
 public:
-	TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer);
+	TextureLoaderGL(TextureLoaderLoad load,
+					TextureLoaderUnload unload,
+					Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
+					UnityGfxRenderer renderer);
 
 	virtual ~TextureLoaderGL();
 
-	virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
+	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType);
 
-	virtual void Unload(Effekseer::TextureData* source);
+	virtual void Unload(Effekseer::TextureRef source);
 };
 
 bool IsPowerOfTwo(uint32_t x) { return (x & (x - 1)) == 0; }
 
-TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load, TextureLoaderUnload unload, UnityGfxRenderer renderer)
-	: TextureLoader(load, unload), gfxRenderer(renderer)
+TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load,
+								 TextureLoaderUnload unload,
+								 Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
+								 UnityGfxRenderer renderer)
+	: TextureLoader(load, unload), graphicsDevice_(graphicsDevice), gfxRenderer(renderer)
 {
 }
 
 TextureLoaderGL::~TextureLoaderGL() {}
 
-Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
 	// リソーステーブルを検索して存在したらそれを使う
 	auto it = resources.find((const char16_t*)path);
@@ -65,14 +71,9 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 	// リソーステーブルに追加
 	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 	TextureResource& res = added.first->second;
-	res.textureDataPtr = new Effekseer::TextureData();
-	res.textureDataPtr->Width = width;
-	res.textureDataPtr->Height = height;
-	res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
-	res.textureDataPtr->UserID = textureID;
 #if !defined(_WIN32)
-	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(res.textureDataPtr->Width) && IsPowerOfTwo(res.textureDataPtr->Height)))
+	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(width) && IsPowerOfTwo(height)))
 	{
 		// テクスチャのミップマップを生成する
 		glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
@@ -83,10 +84,14 @@ Effekseer::TextureData* TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::T
 
 	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
 
+	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
+	res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+	res.textureDataPtr->SetBackend(backend);
+
 	return res.textureDataPtr;
 }
 
-void TextureLoaderGL::Unload(Effekseer::TextureData* source)
+void TextureLoaderGL::Unload(Effekseer::TextureRef source)
 {
 	if (source == nullptr)
 	{
@@ -95,7 +100,7 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 
 	// アンロードするテクスチャを検索
 	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return pair.second.textureDataPtr->UserID == source->UserID;
+		return pair.second.textureDataPtr == source;
 	});
 	if (it == resources.end())
 	{
@@ -109,15 +114,11 @@ void TextureLoaderGL::Unload(Effekseer::TextureData* source)
 		// Unity側でアンロード
 		unload(it->first.c_str(), textureData2NativePtr[source]);
 		textureData2NativePtr.erase(source);
-		ES_SAFE_DELETE(it->second.textureDataPtr);
 		resources.erase(it);
 	}
 }
 
-GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer)
-{
-	MaterialEvent::Initialize();
-}
+GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer) { MaterialEvent::Initialize(); }
 
 GraphicsGL::~GraphicsGL() {}
 
@@ -140,25 +141,24 @@ bool GraphicsGL::Initialize(IUnityInterfaces* unityInterfaces)
 		break;
 	}
 
-	graphicsDevice_ = ::EffekseerRendererGL::CreateDevice(openglDeviceType);
+	graphicsDevice_ = ::EffekseerRendererGL::CreateGraphicsDevice(openglDeviceType);
 
 	return true;
 }
 
 void GraphicsGL::Shutdown(IUnityInterfaces* unityInterface)
 {
-	renderer_ = nullptr;
-	ES_SAFE_RELEASE(graphicsDevice_);
-
+	renderer_.Reset();
+	graphicsDevice_.Reset();
 	MaterialEvent::Terminate();
 }
 
-EffekseerRenderer::Renderer* GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
+EffekseerRenderer::RendererRef GraphicsGL::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 #ifdef __ANDROID__
 	squareMaxCount = 600;
 #endif
-	auto renderer = EffekseerRendererGL::Renderer::Create(squareMaxCount, graphicsDevice_);
+	auto renderer = EffekseerRendererGL::Renderer::Create(graphicsDevice_, squareMaxCount);
 	renderer_ = renderer;
 	return renderer;
 }
@@ -170,27 +170,23 @@ void GraphicsGL::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* ren
 
 void GraphicsGL::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
 
-Effekseer::TextureLoader* GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return new TextureLoaderGL(load, unload, gfxRenderer);
+	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, graphicsDevice_, gfxRenderer);
 }
 
-Effekseer::ModelLoader* GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
-	auto loader = new ModelLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
 
-#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
-#else
-	auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
-#endif
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
 
-Effekseer::MaterialLoader* GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
 {
-	auto loader = new MaterialLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
 	auto internalLoader = ::EffekseerRendererGL::CreateMaterialLoader(graphicsDevice_);
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

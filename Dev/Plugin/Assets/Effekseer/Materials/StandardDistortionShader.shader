@@ -27,20 +27,12 @@
 		#pragma fragment frag
 
 		#include "UnityCG.cginc"
-
+		#include "EffekseerShaderCommon.cginc"
+		
 		sampler2D _ColorTex;
 		sampler2D _BackTex;
 
-		struct SimpleVertex
-		{
-			float3 Pos;
-			float2 UV;
-			float4 Color;
-			float3 Tangent;
-			float3 Binormal;
-		};
-
-		StructuredBuffer<SimpleVertex> buf_vertex;
+		StructuredBuffer<SpriteLitDistMatVertex> buf_vertex;
 		float buf_offset;
 
 		float distortionIntensity;
@@ -70,9 +62,11 @@
 			v_offset[4] = 2;
 			v_offset[5] = 3;
 
-			SimpleVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
+			SpriteLitDistMatVertex v = buf_vertex[buf_offset + qind * 4 + v_offset[vind]];
             
-			float4 localBinormal = float4((v.Pos + v.Binormal), 1.0);
+			float3 binormal = cross(v.Normal, v.Tangent);
+
+			float4 localBinormal = float4((v.Pos + binormal), 1.0);
 			float4 localTangent = float4((v.Pos + v.Tangent), 1.0);
 			localBinormal = mul(UNITY_MATRIX_V, localBinormal);
 			localTangent = mul(UNITY_MATRIX_V, localTangent);
@@ -90,7 +84,7 @@
 
 			float3 worldPos = v.Pos;
 			o.pos = mul(UNITY_MATRIX_VP, float4(worldPos,1.0f));
-			o.uv = v.UV;
+			o.uv = v.UV1;
 			o.uv.y = 1.0 - o.uv.y;
 			o.color = (float4)v.Color;
 			return o;

@@ -19,24 +19,27 @@ class TextureLoaderDX11 : public TextureLoader
 	struct TextureResource
 	{
 		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
+		Effekseer::TextureRef textureDataPtr = nullptr;
 	};
 
 	std::map<std::u16string, TextureResource> resources;
-	std::map<void*, void*> textureData2NativePtr;
+	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
-	ID3D11Device* d3d11Device = nullptr;
+	ID3D11Device* d3d11Device_ = nullptr;
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 
 public:
-	TextureLoaderDX11(TextureLoaderLoad load, TextureLoaderUnload unload, ID3D11Device* device)
-		: TextureLoader(load, unload), d3d11Device(device)
+	TextureLoaderDX11(TextureLoaderLoad load,
+					  TextureLoaderUnload unload,
+					  ID3D11Device* d3d11Device,
+					  Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
+		: TextureLoader(load, unload), d3d11Device_(d3d11Device), graphicsDevice_(graphicsDevice)
 	{
-		ES_SAFE_ADDREF(device);
 	}
 
-	virtual ~TextureLoaderDX11() { ES_SAFE_RELEASE(d3d11Device); }
+	virtual ~TextureLoaderDX11() override = default;
 
-	virtual Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
 		// リソーステーブルを検索して存在したらそれを使う
 		auto it = resources.find((const char16_t*)path);
@@ -57,10 +60,6 @@ public:
 		// リソーステーブルに追加
 		auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
 		TextureResource& res = added.first->second;
-		res.textureDataPtr = new Effekseer::TextureData();
-		res.textureDataPtr->Width = width;
-		res.textureDataPtr->Height = height;
-		res.textureDataPtr->TextureFormat = (Effekseer::TextureFormatType)format;
 
 		// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
 		// ID3D11ShaderResourceViewを作成する
@@ -77,20 +76,24 @@ public:
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		desc.Texture2D.MostDetailedMip = 0;
 		desc.Texture2D.MipLevels = texDesc.MipLevels;
-		hr = d3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
+		hr = d3d11Device_->CreateShaderResourceView(textureDX11, &desc, &srv);
 		if (FAILED(hr))
 		{
 			return nullptr;
 		}
 
-		res.textureDataPtr->UserPtr = srv;
+		auto backend = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
+		res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+		res.textureDataPtr->SetBackend(backend);
 
 		textureData2NativePtr[res.textureDataPtr] = texturePtr;
+
+		ES_SAFE_RELEASE(srv);
 
 		return res.textureDataPtr;
 	}
 
-	virtual void Unload(Effekseer::TextureData* source)
+	virtual void Unload(Effekseer::TextureRef source)
 	{
 		if (source == nullptr)
 		{
@@ -99,7 +102,7 @@ public:
 
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.textureDataPtr->UserPtr == source->UserPtr;
+			return pair.second.textureDataPtr == source;
 		});
 		if (it == resources.end())
 		{
@@ -110,15 +113,9 @@ public:
 		it->second.referenceCount--;
 		if (it->second.referenceCount <= 0)
 		{
-
-			// 作成したID3D11ShaderResourceViewを解放する
-			ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)source->UserPtr;
-			srv->Release();
-
 			// Unload from unity
 			unload(it->first.c_str(), textureData2NativePtr[source]);
 			textureData2NativePtr.erase(source);
-			ES_SAFE_DELETE(it->second.textureDataPtr);
 			resources.erase(it);
 		}
 	}
@@ -138,6 +135,7 @@ bool GraphicsDX11::Initialize(IUnityInterfaces* unityInterface)
 	d3d11Device->GetImmediateContext(&d3d11Context);
 	ES_SAFE_ADDREF(d3d11Device);
 	MaterialEvent::Initialize();
+	graphicsDevice_ = EffekseerRendererDX11::CreateGraphicsDevice(d3d11Device, d3d11Context);
 	return true;
 }
 
@@ -150,12 +148,13 @@ void GraphicsDX11::AfterReset(IUnityInterfaces* unityInterface)
 void GraphicsDX11::Shutdown(IUnityInterfaces* unityInterface)
 {
 	MaterialEvent::Terminate();
+	graphicsDevice_.Reset();
 	renderer_ = nullptr;
 	ES_SAFE_RELEASE(d3d11Context);
 	ES_SAFE_RELEASE(d3d11Device);
 }
 
-EffekseerRenderer::Renderer* GraphicsDX11::CreateRenderer(int squareMaxCount, bool reversedDepth)
+EffekseerRenderer::RendererRef GraphicsDX11::CreateRenderer(int squareMaxCount, bool reversedDepth)
 {
 	const D3D11_COMPARISON_FUNC depthFunc = (reversedDepth) ? D3D11_COMPARISON_GREATER_EQUAL : D3D11_COMPARISON_LESS_EQUAL;
 	auto renderer = EffekseerRendererDX11::Renderer::Create(d3d11Device, d3d11Context, squareMaxCount, depthFunc);
@@ -221,25 +220,28 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 	}
 }
 
-Effekseer::TextureLoader* GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return new TextureLoaderDX11(load, unload, d3d11Device);
+	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, d3d11Device, graphicsDevice_);
 }
 
-Effekseer::ModelLoader* GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
-{
-	auto loader = new ModelLoader(load, unload);
-	auto internalLoader = EffekseerRendererDX11::CreateModelLoader(d3d11Device, loader->GetFileInterface());
-	loader->SetInternalLoader(internalLoader);
-	return loader;
-}
-
-Effekseer::MaterialLoader* GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = new MaterialLoader(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
+	auto internalLoader = EffekseerRendererDX11::CreateModelLoader(renderer_->GetGraphicsDevice(), loader->GetFileInterface());
+	loader->SetInternalLoader(internalLoader);
+	return loader;
+}
+
+Effekseer::MaterialLoaderRef GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+{
+	if (renderer_ == nullptr)
+		return nullptr;
+
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
 	auto internalLoader = renderer_->CreateMaterialLoader();
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

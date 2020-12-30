@@ -104,8 +104,8 @@ UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererNull;
 
 Graphics* g_graphics = nullptr;
 
-Effekseer::Manager* g_EffekseerManager = NULL;
-EffekseerRenderer::Renderer* g_EffekseerRenderer = NULL;
+Effekseer::ManagerRef g_EffekseerManager = NULL;
+EffekseerRenderer::RendererRef g_EffekseerRenderer = NULL;
 float g_time = 0.0f;
 Effekseer::Vector3D g_lightDirection = Effekseer::Vector3D(1, 1, -1);
 Effekseer::Color g_lightColor = Effekseer::Color(255, 255, 255);
@@ -203,11 +203,7 @@ void TermRenderer()
 		g_graphics->WaitFinish();
 	}
 
-	if (g_EffekseerRenderer != NULL)
-	{
-		g_EffekseerRenderer->Destroy();
-		g_EffekseerRenderer = NULL;
-	}
+	g_EffekseerRenderer.Reset();
 
 	g_frontRenderPasses.clear();
 	g_backRenderPasses.clear();
@@ -221,7 +217,7 @@ void TermRenderer()
 void SetBackGroundTexture(void* backgroundTexture)
 {
 	if (g_graphics != nullptr)
-		g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer, backgroundTexture);
+		g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(), backgroundTexture);
 }
 
 UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
@@ -471,7 +467,7 @@ extern "C"
 		if (renderPath != nullptr)
 		{
 			renderPath->Begin(nullptr);
-			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), renderPath.get());
 		}
 
 		Effekseer::Manager::DrawParameter drawParameter;
@@ -485,7 +481,7 @@ extern "C"
 		{
 			renderPath->End();
 			renderPath->Execute();
-			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), nullptr);
 		}
 
 		// 背景テクスチャを解除
@@ -527,7 +523,7 @@ extern "C"
 			}
 
 			renderPass->Begin(backRenderPass.get());
-			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPass.get());
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), renderPass.get());
 		}
 
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
@@ -542,7 +538,7 @@ extern "C"
 		{
 			renderPass->End();
 			renderPass->Execute();
-			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), nullptr);
 		}
 
 		// 背景テクスチャを解除
@@ -693,7 +689,7 @@ extern "C"
 		if (renderPath != nullptr)
 		{
 			renderPath->Begin(nullptr);
-			g_graphics->SetRenderPath(g_EffekseerRenderer, renderPath.get());
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), renderPath.get());
 		}
 
 		// render
@@ -711,7 +707,7 @@ extern "C"
 		{
 			renderPath->End();
 			renderPath->Execute();
-			g_graphics->SetRenderPath(g_EffekseerRenderer, nullptr);
+			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), nullptr);
 		}
 	}
 
@@ -772,11 +768,7 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerTerm()
 	{
-		if (g_EffekseerManager != NULL)
-		{
-			g_EffekseerManager->Destroy();
-			g_EffekseerManager = NULL;
-		}
+		g_EffekseerManager.Reset();
 
 		if (IsRequiredToInitOnRenderThread())
 		{
@@ -817,18 +809,23 @@ extern "C"
 		g_removingRenderPathes.push_back(renderID);
 		g_removingRenderPathMutex.unlock();
 	}
-
-	Effekseer::TextureLoader* TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
-	{
-		if (g_graphics != nullptr)
-			return g_graphics->Create(load, unload);
-		return nullptr;
-	}
-
-	Effekseer::ModelLoader* ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
-	{
-		if (g_graphics != nullptr)
-			return g_graphics->Create(load, unload);
-		return nullptr;
-	}
 }
+
+namespace EffekseerPlugin
+{
+
+Effekseer::RefPtr<Effekseer::TextureLoader> TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+{
+	if (g_graphics != nullptr)
+		return g_graphics->Create(load, unload);
+	return {};
+}
+
+Effekseer::RefPtr<Effekseer::ModelLoader> ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+{
+	if (g_graphics != nullptr)
+		return g_graphics->Create(load, unload);
+	return {};
+}
+
+} // namespace EffekseerPlugin

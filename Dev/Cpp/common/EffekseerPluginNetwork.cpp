@@ -4,7 +4,7 @@
 
 namespace EffekseerPlugin
 {
-	extern Effekseer::Manager*	g_EffekseerManager;
+	extern Effekseer::ManagerRef g_EffekseerManager;
 
 	std::shared_ptr<Network> Network::instance;
 
@@ -53,7 +53,7 @@ namespace EffekseerPlugin
 		}
 	}
 
-	void Network::Register(const char16_t* key, Effekseer::Effect* effect)
+	void Network::Register(const char16_t* key, Effekseer::EffectRef effect)
 	{
 		if (server != nullptr)
 		{
@@ -61,7 +61,7 @@ namespace EffekseerPlugin
 		}
 	}
 
-	void Network::Unregister(Effekseer::Effect* effect)
+	void Network::Unregister(Effekseer::EffectRef effect)
 	{
 		if (server != nullptr)
 		{

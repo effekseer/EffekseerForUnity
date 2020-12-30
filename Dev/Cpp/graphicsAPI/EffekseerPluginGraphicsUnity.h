@@ -12,7 +12,7 @@ private:
 public:
 	GraphicsUnity();
 
-	virtual ~GraphicsUnity();
+	~GraphicsUnity() override;
 
 	bool Initialize(IUnityInterfaces* unityInterface) override;
 
@@ -20,17 +20,17 @@ public:
 
 	void Shutdown(IUnityInterfaces* unityInterface) override;
 
-	EffekseerRenderer::Renderer* CreateRenderer(int squareMaxCount, bool reversedDepth) override;
+	Effekseer::RefPtr<EffekseerRenderer::Renderer> CreateRenderer(int squareMaxCount, bool reversedDepth) override;
 
 	void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) override;
 
 	void EffekseerSetBackGroundTexture(int renderId, void* texture) override;
 
-	Effekseer::TextureLoader* Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
+	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 
-	Effekseer::ModelLoader* Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+	Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
 
-	Effekseer::MaterialLoader* Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
+	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };

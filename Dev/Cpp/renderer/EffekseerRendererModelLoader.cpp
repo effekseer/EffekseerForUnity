@@ -10,22 +10,13 @@ ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin:
 	internalBuffer.resize(1024 * 1024);
 }
 
-void* ModelLoader::Load(const EFK_CHAR* path)
+Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 {
-	// find it from resource table and if it exists, it is reused.
-	auto it = resources.find((const char16_t*)path);
-	if (it != resources.end())
-	{
-		it->second.referenceCount++;
-		return it->second.internalData;
-	}
-
 	// Load with unity
-	ModelResource res;
 	int requiredDataSize = 0;
 	void* modelPtr = nullptr;
 
-	modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
+	modelPtr = load(path, internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()), requiredDataSize);
 
 	if (requiredDataSize == 0)
 	{
@@ -38,7 +29,7 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 		// reallocate a buffer
 		internalBuffer.resize(requiredDataSize);
 
-		modelPtr = load((const char16_t*)path, internalBuffer.data(), internalBuffer.size(), requiredDataSize);
+		modelPtr = load(path, internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()), requiredDataSize);
 
 		if (modelPtr == nullptr)
 		{
@@ -48,15 +39,12 @@ void* ModelLoader::Load(const EFK_CHAR* path)
 
 	internalBuffer.resize(requiredDataSize);
 
-	auto model = new Model(internalBuffer.data(), internalBuffer.size());
+	auto model = Effekseer::MakeRefPtr<Model>(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
 	model->InternalPtr = modelPtr;
-	res.internalData = model;
-
-	resources.insert(std::make_pair((const char16_t*)path, res));
-	return res.internalData;
+	return model;
 }
 
-void ModelLoader::Unload(void* source)
+void ModelLoader::Unload(Effekseer::ModelRef source)
 {
 	if (source == nullptr)
 	{
@@ -64,23 +52,7 @@ void ModelLoader::Unload(void* source)
 	}
 
 	// find a model
-	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, ModelResource>& pair) {
-		return pair.second.internalData == source;
-	});
-	if (it == resources.end())
-	{
-		return;
-	}
-
-	// if refrercen count is zero, it is released
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		auto model = (Model*)it->second.internalData;
-		unload(it->first.c_str(), model->InternalPtr);
-		ES_SAFE_DELETE(model);
-		it->second.internalData = nullptr;
-		resources.erase(it);
-	}
+	auto model = source.DownCast<Model>().Get();
+	unload(source->GetPath().c_str(), model->InternalPtr);
 }
 } // namespace EffekseerRendererUnity

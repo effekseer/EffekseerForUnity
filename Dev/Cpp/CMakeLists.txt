@@ -60,8 +60,6 @@ list(APPEND effekseer_src
 if(WIN32)
 
     list(APPEND effekseer_src
-        graphicsAPI/EffekseerPluginGraphicsDX9.h
-        graphicsAPI/EffekseerPluginGraphicsDX9.cpp
         graphicsAPI/EffekseerPluginGraphicsDX11.h
         graphicsAPI/EffekseerPluginGraphicsDX11.cpp
         windows/EffekseerUnity.def

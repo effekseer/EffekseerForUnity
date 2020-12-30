@@ -27,31 +27,15 @@ SubShader{
 	#pragma fragment frag
 
 	#include "UnityCG.cginc"
+	#include "EffekseerShaderCommon.cginc"
 
 	sampler2D _ColorTex;
 
-	struct SimpleVertex
-	{
-		float3 Position;
-		float3 Normal;
-		float3 Binormal;
-		float3 Tangent;
-		float2 UV;
-		float4 Color;
-	};
-
-	struct ModelParameter
-	{
-		float4x4 Mat;
-		float4 UV;
-		float4 Color;
-		int Time;
-	};
-
-	StructuredBuffer<SimpleVertex> buf_vertex;
+	StructuredBuffer<ModelVertex> buf_vertex;
 	StructuredBuffer<int> buf_index;
 
-	StructuredBuffer<ModelParameter> buf_model_parameter;
+	StructuredBuffer<ModelParameter1> buf_model_parameter;
+	StructuredBuffer<ModelParameter2> buf_model_parameter2;
 	StructuredBuffer<int> buf_vertex_offsets;
 	StructuredBuffer<int> buf_index_offsets;
 
@@ -69,13 +53,13 @@ SubShader{
 
 		float4x4 buf_matrix = buf_model_parameter[inst].Mat;
 		float4 buf_uv = buf_model_parameter[inst].UV;
-		float4 buf_color = buf_model_parameter[inst].Color;
+		float4 buf_color = buf_model_parameter[inst].VColor;
 		float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
 		float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
 
-		SimpleVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+		ModelVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
-		float3 localPos = v.Position;
+		float3 localPos = v.Pos;
 		float4 worldPos = mul(buf_matrix, float4(localPos, 1.0f));
 		//float4 worldPos = float4(localPos, 1.0f);
 		o.pos = mul(UNITY_MATRIX_VP, worldPos);

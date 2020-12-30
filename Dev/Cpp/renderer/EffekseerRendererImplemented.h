@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <Effekseer.Internal.h>
+#include <Effekseer.h>
 #include <EffekseerRenderer.ModelRendererBase.h>
 #include <EffekseerRenderer.RenderStateBase.h>
 #include <EffekseerRenderer.Renderer.h>
@@ -17,15 +17,47 @@
 
 extern "C"
 {
+	struct StrideBufferParameter
+	{
+		int32_t Stride;
+		int32_t Size;
+		void* Ptr;
+	};
+
+	struct FlipbookParameters
+	{
+		int32_t Enable = 0;
+		int32_t LoopType = 0;
+		int32_t DivideX = 1;
+		int32_t DivideY = 1;
+	};
+
+	struct EdgeParameters
+	{
+		std::array<float, 4> Color;
+		float Threshold = 0;
+		float ColorScaling = 1;
+	};
+
+	struct FalloffParameter
+	{
+		int32_t ColorBlendType = 0;
+		std::array<float, 4> BeginColor;
+		std::array<float, 4> EndColor;
+		float Pow = 1.0f;
+	};
+
 	struct UnityRenderParameter
 	{
 		//! 0 - procedual, 1 - model
 		int RenderMode = 0;
 
-		Effekseer::RendererMaterialType MaterialType = Effekseer::RendererMaterialType::Default;
+		EffekseerRenderer::RendererShaderType MaterialType = EffekseerRenderer::RendererShaderType::Unlit;
 
 		//! VertexBuffer
 		int VertexBufferOffset = 0;
+
+		int AdvancedBufferOffset = 0;
 
 		//! Stride for material
 		int VertexBufferStride = 0;
@@ -40,7 +72,18 @@ extern "C"
 		int UniformBufferOffset = 0;
 
 		//! Element count (Triangle) or instance
-		int32_t ElementCount;
+		int32_t ElementCount = 0;
+
+		FlipbookParameters FlipbookParams;
+		float UVDistortionIntensity = 1.0f;
+		int32_t TextureBlendType = -1;
+		float BlendUVDistortionIntensity = 1.0f;
+		int EnableFalloff = 0;
+		FalloffParameter FalloffParam;
+		float EmissiveScaling = 1;
+		EdgeParameters EdgeParams;
+
+		std::array<float, 4> SoftParticleParam;
 
 		int ZTest = 0;
 
@@ -75,6 +118,9 @@ extern "C"
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderCount();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityVertexBuffer();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityInfoBuffer();
+
+	UNITY_INTERFACE_EXPORT int32_t UNITY_INTERFACE_API GetUnityStrideBufferCount();
+	UNITY_INTERFACE_EXPORT StrideBufferParameter UNITY_INTERFACE_API GetUnityStrideBufferParameter(int32_t index);
 };
 
 namespace EffekseerRendererUnity
@@ -96,16 +142,8 @@ public:
 };
 
 using Vertex = EffekseerRenderer::SimpleVertex;
-using VertexDistortion = EffekseerRenderer::VertexDistortion;
+using VertexDistortion = EffekseerRenderer::LightingVertex;
 using DynamicVertex = EffekseerRenderer::DynamicVertex;
-
-struct ModelParameter
-{
-	Effekseer::Matrix44 Matrix;
-	Effekseer::Color VertexColors;
-	Effekseer::RectF UV;
-	int32_t Time;
-};
 
 typedef ::Effekseer::ModelRenderer::NodeParameter efkModelNodeParam;
 typedef ::Effekseer::ModelRenderer::InstanceParameter efkModelInstanceParam;
@@ -115,12 +153,13 @@ class ModelRenderer : public ::EffekseerRenderer::ModelRendererBase
 {
 private:
 	RendererImplemented* m_renderer;
-	ModelRenderer(RendererImplemented* renderer);
 
 public:
+	ModelRenderer(RendererImplemented* renderer);
+
 	virtual ~ModelRenderer();
 
-	static ModelRenderer* Create(RendererImplemented* renderer);
+	static ::Effekseer::ModelRendererRef Create(RendererImplemented* renderer);
 
 public:
 	void BeginRendering(const efkModelNodeParam& parameter, int32_t count, void* userData) override;
@@ -130,43 +169,134 @@ public:
 	void EndRendering(const efkModelNodeParam& parameter, void* userData) override;
 };
 
+struct UnityVertex
+{
+	::Effekseer::Vector3D Pos;
+	float UV[2];
+	float Col[4];
+};
+
+struct UnityDynamicVertex
+{
+	::Effekseer::Vector3D Pos;
+	float Col[4];
+	::Effekseer::Vector3D Normal;
+	::Effekseer::Vector3D Tangent;
+	float UV1[2];
+	float UV2[2];
+};
+
+struct AdvancedVertexParameter
+{
+	std::array<float, 2> AlphaUV;
+	std::array<float, 2> UVDistortionUV;
+	std::array<float, 2> BlendUV;
+	std::array<float, 2> BlendAlphaUV;
+	std::array<float, 2> BlendUVDistortionUV;
+	float FlipbookIndexAndNextRate;
+	float AlphaThreshold;
+};
+
 class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effekseer::ReferenceObject
 {
+	struct StrideBuffer
+	{
+		int32_t Stride = 0;
+		std::vector<uint8_t> Buffer;
+
+		int32_t PushBuffer(const void* data, int32_t size);
+
+		int32_t GetOffset() const { return static_cast<int32_t>(Buffer.size()); }
+	};
+
+	std::vector<std::shared_ptr<StrideBuffer>> strideBuffers_;
+	std::unordered_map<int32_t, int32_t> strideToIndex_;
+
+	void ClearStrideBuffers();
+	std::shared_ptr<StrideBuffer> GetStrideBuffer(int32_t stride);
+
 protected:
-	int32_t m_squareMaxCount;
+	int32_t m_squareMaxCount = 0;
 
 	VertexBuffer* m_vertexBuffer = nullptr;
 
-	std::unique_ptr<Shader> stanShader_;
+	std::unique_ptr<Shader> unlitShader_;
 	std::unique_ptr<Shader> backDistortedShader_;
-	std::unique_ptr<Shader> lightingShader_;
+	std::unique_ptr<Shader> litShader_;
+	std::unique_ptr<Shader> adUnlitShader_;
+	std::unique_ptr<Shader> adBackDistortedShader_;
+	std::unique_ptr<Shader> adLitShader_;
 
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;
 
-	int32_t textureCount_ = 0;
-	std::array<void*, Effekseer::TextureSlotMax> m_textures;
+	std::vector<void*> textures_;
 
 	std::vector<UnityRenderParameter> renderParameters;
-	std::vector<ModelParameter> modelParameters;
 
 	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
-	float m_distortionIntensity = 0.0f;
 
-	std::vector<uint8_t> exportedVertexBuffer;
+	//std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
 
-	Effekseer::TextureData backgroundData;
+	Effekseer::TextureRef backgroundData_;
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* m_standardRenderer = nullptr;
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
 
-	int32_t AddVertexBuffer(const void* data, int32_t size);
+	//int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
-	void AlignVertexBuffer(int32_t alignment);
 
+	//void AlignVertexBuffer(int32_t alignment);
+
+	template <typename T> void AddVertexBufferAsVertex(const T& v, StrideBuffer& strideBuffer)
+	{
+		UnityVertex dst;
+		dst.Pos = v.Pos;
+		dst.UV[0] = v.UV[0];
+		dst.UV[1] = v.UV[1];
+		dst.Col[0] = v.Col.R / 255.0f;
+		dst.Col[1] = v.Col.G / 255.0f;
+		dst.Col[2] = v.Col.B / 255.0f;
+		dst.Col[3] = v.Col.A / 255.0f;
+		strideBuffer.PushBuffer(&dst, sizeof(UnityVertex));
+		//AddVertexBuffer(&dst, sizeof(UnityVertex));
+	}
+
+	template <typename T> void AddVertexBufferAsDynamicVertex(const T& v, StrideBuffer& strideBuffer)
+	{
+		UnityDynamicVertex dst;
+		dst.Pos = v.Pos;
+		dst.UV1[0] = v.UV1[0];
+		dst.UV1[1] = v.UV1[1];
+		dst.UV2[0] = v.UV2[0];
+		dst.UV2[1] = v.UV2[1];
+		dst.Col[0] = v.Col.R / 255.0f;
+		dst.Col[1] = v.Col.G / 255.0f;
+		dst.Col[2] = v.Col.B / 255.0f;
+		dst.Col[3] = v.Col.A / 255.0f;
+		dst.Tangent = EffekseerRenderer::UnpackVector3DF(v.Tangent);
+		dst.Normal = EffekseerRenderer::UnpackVector3DF(v.Normal);
+		strideBuffer.PushBuffer(&dst, sizeof(UnityDynamicVertex));
+		//AddVertexBuffer(&dst, sizeof(UnityDynamicVertex));
+	}
+
+	template <typename T> void AddVertexBufferAsAdvancedData(const T& v, StrideBuffer& strideBuffer)
+	{
+		AdvancedVertexParameter dst;
+
+		dst.AlphaUV = EffekseerRenderer::GetVertexAlphaUV(v);
+		dst.UVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.BlendUV = EffekseerRenderer::GetVertexBlendUV(v);
+		dst.BlendAlphaUV = EffekseerRenderer::GetVertexBlendAlphaUV(v);
+		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.FlipbookIndexAndNextRate = EffekseerRenderer::GetVertexFlipbookIndexAndNextRate(v);
+		dst.AlphaThreshold = EffekseerRenderer::GetVertexAlphaThreshold(v);
+		strideBuffer.PushBuffer(&dst, sizeof(AdvancedVertexParameter));
+		//AddVertexBuffer(&dst, sizeof(AdvancedVertexParameter));
+	}
 
 public:
-	static RendererImplemented* Create();
+	static Effekseer::RefPtr<RendererImplemented> Create();
 
 	RendererImplemented();
 	virtual ~RendererImplemented();
@@ -178,11 +308,6 @@ public:
 	@brief	初期化
 	*/
 	bool Initialize(int32_t squareMaxCount);
-
-	/**
-	@brief	このインスタンスを破棄する。
-	*/
-	void Destroy() override;
 
 	/**
 	@brief	ステートを復帰するかどうかのフラグを設定する。
@@ -207,39 +332,39 @@ public:
 	/**
 	@brief	スプライトレンダラーを生成する。
 	*/
-	::Effekseer::SpriteRenderer* CreateSpriteRenderer() override;
+	::Effekseer::SpriteRendererRef CreateSpriteRenderer() override;
 
 	/**
 	@brief	リボンレンダラーを生成する。
 	*/
-	::Effekseer::RibbonRenderer* CreateRibbonRenderer() override;
+	::Effekseer::RibbonRendererRef CreateRibbonRenderer() override;
 
 	/**
 	@brief	リングレンダラーを生成する。
 	*/
-	::Effekseer::RingRenderer* CreateRingRenderer() override;
+	::Effekseer::RingRendererRef CreateRingRenderer() override;
 
 	/**
 	@brief	モデルレンダラーを生成する。
 	*/
-	::Effekseer::ModelRenderer* CreateModelRenderer() override;
+	::Effekseer::ModelRendererRef CreateModelRenderer() override;
 
 	/**
 	@brief	軌跡レンダラーを生成する。
 	*/
-	::Effekseer::TrackRenderer* CreateTrackRenderer() override;
+	::Effekseer::TrackRendererRef CreateTrackRenderer() override;
 
 	/**
 	@brief	標準のテクスチャ読込クラスを生成する。
 	*/
-	::Effekseer::TextureLoader* CreateTextureLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
 	/**
 	@brief	標準のモデル読込クラスを生成する。
 	*/
-	::Effekseer::ModelLoader* CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
 
-	::Effekseer::MaterialLoader* CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
+	::Effekseer::MaterialLoaderRef CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
 
 	/**
 	@brief	レンダーステートを強制的にリセットする。
@@ -256,15 +381,13 @@ public:
 	*/
 	void SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) override;
 
-	Effekseer::TextureData* GetBackground();
-
 	void SetBackground(void* image);
 
 	VertexBuffer* GetVertexBuffer();
 
 	IndexBuffer* GetIndexBuffer();
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader, Vertex, VertexDistortion>* GetStandardRenderer();
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* GetStandardRenderer();
 
 	::EffekseerRenderer::RenderStateBase* GetRenderState();
 
@@ -274,15 +397,22 @@ public:
 	void SetLayout(Shader* shader);
 	void DrawSprites(int32_t spriteCount, int32_t vertexOffset);
 
-	void DrawModel(void* model,
+	void DrawModel(Effekseer::ModelRef model,
 				   std::vector<Effekseer::Matrix44>& matrixes,
 				   std::vector<Effekseer::RectF>& uvs,
+				   std::vector<Effekseer::RectF>& alphaUVs,
+				   std::vector<Effekseer::RectF>& uvDistortionUVs,
+				   std::vector<Effekseer::RectF>& blendUVs,
+				   std::vector<Effekseer::RectF>& blendAlphaUVs,
+				   std::vector<Effekseer::RectF>& blendUVDistortionUVs,
+				   std::vector<float>& flipbookIndexAndNextRates,
+				   std::vector<float>& alphaThresholds,
 				   std::vector<Effekseer::Color>& colors,
 				   std::vector<int32_t>& times,
 				   std::vector<std::array<float, 4>>& customData1,
 				   std::vector<std::array<float, 4>>& customData2);
 
-	Shader* GetShader(bool useTexture, ::Effekseer::RendererMaterialType type) const;
+	Shader* GetShader(::EffekseerRenderer::RendererShaderType materialType) const;
 
 	void BeginShader(Shader* shader);
 	void EndShader(Shader* shader);
@@ -291,12 +421,14 @@ public:
 
 	void SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset);
 
-	void SetTextures(Shader* shader, Effekseer::TextureData** textures, int32_t count);
-	void SetDistortionIntensity(float value) { m_distortionIntensity = value; }
+	void SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count);
 
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
-	std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
+	//std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
 	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer; }
+
+	int32_t GetStrideBufferCount() const;
+	StrideBufferParameter GetStrideBufferParameter(int32_t index) const;
 
 	virtual int GetRef() { return ::Effekseer::ReferenceObject::GetRef(); }
 	virtual int AddRef() { return ::Effekseer::ReferenceObject::AddRef(); }

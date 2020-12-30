@@ -64,9 +64,9 @@ EXPORTS
 
   GetUnityRenderParameter
   GetUnityRenderParameterCount
-  GetUnityRenderVertexBuffer
-  GetUnityRenderVertexBufferCount
   GetUnityRenderInfoBuffer
+  GetUnityStrideBufferCount
+  GetUnityStrideBufferParameter
 
   StartNetwork
   StopNetwork

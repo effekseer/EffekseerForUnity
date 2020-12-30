@@ -28,15 +28,15 @@ namespace EffekseerPlugin
 		
 		struct ModelResource {
 			int referenceCount = 1;
-			void* internalData;
+			Effekseer::ModelRef internalData;
 		};
 		std::map<std::u16string, ModelResource> resources;
 		MemoryFile memoryFile;
 
-		std::unique_ptr<Effekseer::ModelLoader> internalLoader;
+		Effekseer::RefPtr<Effekseer::ModelLoader> internalLoader;
 		
 	public:
-		static Effekseer::ModelLoader* Create(
+		static Effekseer::RefPtr<Effekseer::ModelLoader> Create(
 			ModelLoaderLoad load,
 			ModelLoaderUnload unload);
 
@@ -45,14 +45,14 @@ namespace EffekseerPlugin
 			ModelLoaderUnload unload );
 		
 		virtual ~ModelLoader() = default;
-		virtual void* Load( const EFK_CHAR* path );
-		virtual void Unload( void* source );
+		virtual Effekseer::ModelRef Load(const char16_t* path) override;
+		virtual void Unload(Effekseer::ModelRef source) override;
 
 		Effekseer::FileInterface* GetFileInterface() {
 			return &memoryFile;
 		}
-		void SetInternalLoader( Effekseer::ModelLoader* loader ) {
-			internalLoader.reset( loader );
+		void SetInternalLoader(Effekseer::RefPtr<Effekseer::ModelLoader> loader) {
+			internalLoader = loader;
 		}
 	};
 	

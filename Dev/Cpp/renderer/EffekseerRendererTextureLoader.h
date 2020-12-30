@@ -15,25 +15,29 @@
 
 namespace EffekseerRendererUnity
 {
+
+class Texture : public Effekseer::Backend::Texture
+{
+public:
+	Texture(void* userData) : UserData(userData) {}
+	virtual ~Texture() = default;
+
+	void* UserData = nullptr;
+};
+
 class TextureLoader : public Effekseer::TextureLoader
 {
 protected:
 	EffekseerPlugin::TextureLoaderLoad load;
 	EffekseerPlugin::TextureLoaderUnload unload;
-
-	struct TextureResource
-	{
-		int referenceCount = 1;
-		Effekseer::TextureData* textureDataPtr = nullptr;
-	};
-	std::map<std::u16string, TextureResource> resources;
-	std::map<void*, void*> textureData2NativePtr;
+	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
 public:
-	static TextureLoader* Create(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload);
+	static Effekseer::RefPtr<Effekseer::TextureLoader> Create(EffekseerPlugin::TextureLoaderLoad load,
+															  EffekseerPlugin::TextureLoaderUnload unload);
 	TextureLoader(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload) : load(load), unload(unload) {}
-	virtual ~TextureLoader() {}
-	Effekseer::TextureData* Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
-	void Unload(Effekseer::TextureData* source) override;
+	~TextureLoader() override = default;
+	Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
+	void Unload(Effekseer::TextureRef source) override;
 };
 }; // namespace EffekseerRendererUnity

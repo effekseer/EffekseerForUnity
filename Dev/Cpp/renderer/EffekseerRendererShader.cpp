@@ -1,12 +1,14 @@
 #include "EffekseerRendererShader.h"
+#include <EffekseerRenderer.ModelRendererBase.h>
+#include <EffekseerRenderer.StandardRenderer.h>
 
 namespace EffekseerRendererUnity
 {
 
-Shader::Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> material, bool isModel, bool isRefraction)
+Shader::Shader(void* unityMaterial, std::shared_ptr<Effekseer::MaterialFile> material, bool isModel, bool isRefraction)
 	: unityMaterial_(unityMaterial)
 	, parameterGenerator_(*material, isModel, isRefraction ? 1 : 0, 1)
-	, type_(Effekseer::RendererMaterialType::File)
+	, shaderType_(EffekseerRenderer::RendererShaderType::Material)
 	, material_(material)
 	, isRefraction_(isRefraction)
 {
@@ -14,15 +16,22 @@ Shader::Shader(void* unityMaterial, std::shared_ptr<Effekseer::Material> materia
 	pixelConstantBuffer.resize(parameterGenerator_.PixelShaderUniformBufferSize);
 }
 
-Shader::Shader(Effekseer::RendererMaterialType type) : parameterGenerator_(::Effekseer::Material(), false, 0, 1), type_(type)
+Shader::Shader(EffekseerRenderer::RendererShaderType shaderType)
+	: parameterGenerator_(::Effekseer::MaterialFile(), false, 0, 1), shaderType_(shaderType)
 {
-	vertexConstantBuffer.resize(sizeof(::Effekseer::Matrix44) * 4);
-	pixelConstantBuffer.resize(sizeof(float) * 16);
+	auto vertexConstantBufferSize = sizeof(EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>);
+	vertexConstantBufferSize = std::max(vertexConstantBufferSize, sizeof(EffekseerRenderer::ModelRendererVertexConstantBuffer<1>));
+	vertexConstantBufferSize = std::max(vertexConstantBufferSize, sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
+
+	vertexConstantBuffer.resize(vertexConstantBufferSize);
+
+	pixelConstantBuffer.resize(
+		std::max(sizeof(EffekseerRenderer::PixelConstantBuffer), sizeof(EffekseerRenderer::PixelConstantBufferDistortion)));
 }
 
 Shader::~Shader() {}
 
-Effekseer::RendererMaterialType Shader::GetType() const { return type_; }
+EffekseerRenderer::RendererShaderType Shader::GetType() const { return shaderType_; }
 
 void* Shader::GetUnityMaterial() const { return unityMaterial_; }
 
