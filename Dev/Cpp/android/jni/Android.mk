@@ -87,9 +87,9 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Noise/PerlinNoise.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
 	$(LIB_SRC_PATH)/Parameter/Easing.cpp \
-	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat43f.cpp \
-	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat44f.cpp \
-	$(LIB_SRC_PATH)/SIMD/Effekseer.SIMDUtils.cpp \
+	$(LIB_SRC_PATH)/SIMD/Mat43f.cpp \
+	$(LIB_SRC_PATH)/SIMD/Mat44f.cpp \
+	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
 	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
