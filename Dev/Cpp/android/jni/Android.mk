@@ -57,14 +57,16 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Manager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix43.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix44.cpp \
+	$(LIB_SRC_PATH)/Effekseer.Random.cpp \
 	$(LIB_SRC_PATH)/Effekseer.RectF.cpp \
+	$(LIB_SRC_PATH)/Effekseer.Resource.cpp \
+	$(LIB_SRC_PATH)/Effekseer.ResourceManager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Server.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Setting.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Socket.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
-	$(LIB_SRC_PATH)/Effekseer.Random.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Grid.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Layer.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Matrix44.cpp \
@@ -72,17 +74,23 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Culling/Culling3D.ReferenceObject.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.Vector3DF.cpp \
 	$(LIB_SRC_PATH)/Culling/Culling3D.WorldInternal.cpp \
+	$(LIB_SRC_PATH)/ForceField/ForceFields.cpp \
 	$(LIB_SRC_PATH)/IO/Effekseer.EfkEfcFactory.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
-	$(LIB_SRC_PATH)/Material/Effekseer.Material.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
-	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp \
+	$(LIB_SRC_PATH)/Material/Effekseer.MaterialFile.cpp \
+	$(LIB_SRC_PATH)/Model/Model.cpp \
+	$(LIB_SRC_PATH)/Model/ModelLoader.cpp \
+	$(LIB_SRC_PATH)/Model/ProcedualModelGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/SplineGenerator.cpp \
+	$(LIB_SRC_PATH)/Noise/CurlNoise.cpp \
+	$(LIB_SRC_PATH)/Noise/PerlinNoise.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
+	$(LIB_SRC_PATH)/Parameter/Easing.cpp \
 	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat43f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Effekseer.Mat44f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Effekseer.SIMDUtils.cpp \
-	$(LIB_SRC_PATH)/ForceField/ForceFields.cpp
-
+	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
 LOCAL_SRC_FILES += \
@@ -90,6 +98,8 @@ LOCAL_SRC_FILES += \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
+TextureLoader.cpp
+ModelLoader.cpp
 	$(LIB_SRC_PATH)/EffekseerRenderer.IndexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
@@ -102,14 +112,15 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
+
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.IndexBuffer.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.MaterialLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \
@@ -118,6 +129,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.TextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexArray.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObjectCollection.cpp
+	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObjectCollection.cpp \
+	$(LIB_SRC_PATH)/GraphicsDevice.cpp
 
 include $(BUILD_SHARED_LIBRARY)
