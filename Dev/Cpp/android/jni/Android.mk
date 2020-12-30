@@ -125,7 +125,6 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.RenderState.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Shader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.TextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexArray.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObjectCollection.cpp \
