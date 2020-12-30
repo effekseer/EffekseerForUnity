@@ -1,6 +1,6 @@
 #include "EffekseerRendererShader.h"
-#include "EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h"
-#include "EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h"
+#include <EffekseerRenderer.ModelRendererBase.h>
+#include <EffekseerRenderer.StandardRenderer.h>
 
 namespace EffekseerRendererUnity
 {

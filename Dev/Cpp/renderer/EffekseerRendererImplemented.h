@@ -274,8 +274,8 @@ protected:
 		dst.Col[1] = v.Col.G / 255.0f;
 		dst.Col[2] = v.Col.B / 255.0f;
 		dst.Col[3] = v.Col.A / 255.0f;
-		dst.Tangent = UnpackVector3DF(v.Tangent);
-		dst.Normal = UnpackVector3DF(v.Normal);
+		dst.Tangent = EffekseerRenderer::UnpackVector3DF(v.Tangent);
+		dst.Normal = EffekseerRenderer::UnpackVector3DF(v.Normal);
 		strideBuffer.PushBuffer(&dst, sizeof(UnityDynamicVertex));
 		//AddVertexBuffer(&dst, sizeof(UnityDynamicVertex));
 	}

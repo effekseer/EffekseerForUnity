@@ -1,4 +1,4 @@
-﻿
+
 #include "EffekseerPluginGraphicsGL.h"
 #include <algorithm>
 #include <assert.h>
@@ -6,7 +6,6 @@
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #else
 #include <EffekseerRenderer/EffekseerRendererGL.MaterialLoader.h>
-#include <EffekseerRenderer/EffekseerRendererGL.ModelLoader.h>
 #endif
 
 #include "../common/EffekseerPluginMaterial.h"
@@ -74,7 +73,7 @@ Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::Tex
 	TextureResource& res = added.first->second;
 
 #if !defined(_WIN32)
-	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(res.textureDataPtr->Width) && IsPowerOfTwo(res.textureDataPtr->Height)))
+	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(width) && IsPowerOfTwo(height)))
 	{
 		// テクスチャのミップマップを生成する
 		glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
@@ -180,11 +179,7 @@ Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUn
 {
 	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
 
-#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
-#else
-	auto internalLoader = new EffekseerRendererGL::ModelLoader(loader->GetFileInterface());
-#endif
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
