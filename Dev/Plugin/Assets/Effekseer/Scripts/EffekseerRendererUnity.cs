@@ -1609,7 +1609,7 @@ namespace Effekseer.Internal
 				parameter.FlipbookParams.DivideY));
 
 			// TODO : Check UV inversed
-			prop.SetVector("fUVDistortionParameter", new Vector4(parameter.DistortionIntensity, parameter.UVDistortionIntensity, 1.0f, 0.0f));
+			prop.SetVector("fUVDistortionParameter", new Vector4(parameter.UVDistortionIntensity, parameter.BlendUVDistortionIntensity, 1.0f, 0.0f));
 			prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));
 			prop.SetVector("fFalloffParameter", new Vector4(parameter.EnableFalloff, parameter.FalloffParam.ColorBlendType, parameter.FalloffParam.Pow, 0.0f));
 			prop.SetVector("fFalloffBeginColor", parameter.FalloffParam.BeginColor);

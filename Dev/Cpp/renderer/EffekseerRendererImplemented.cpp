@@ -847,6 +847,8 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBufferDistortion*>(m_currentShader->GetPixelConstantBuffer());
 
 			rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
+
+			StoreDistortionPixelConstantBuffer(rp, constantBuffer);
 		}
 		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
 				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
