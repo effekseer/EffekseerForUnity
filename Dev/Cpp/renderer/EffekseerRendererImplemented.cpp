@@ -216,6 +216,10 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 	for (int stageInd = 0; stageInd < stageCount; stageInd++)
 	{
+		auto isBackgroundRequired = collector_.IsBackgroundRequiredOnFirstPass && stageInd == 0;
+
+		if (isBackgroundRequired && m_renderer->GetBackground() == 0)
+			return;
 
 		Shader* shader = nullptr;
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
@@ -255,6 +259,11 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 		m_renderer->BeginShader(shader);
 
+		if (isBackgroundRequired)
+		{
+			collector_.Textures[collector_.BackgroundIndex] = m_renderer->GetBackground();
+		}
+
 		int32_t textureCount = collector_.TextureCount;
 		std::array<Effekseer::Backend::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
 
@@ -279,6 +288,47 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 			StoreFileUniform<RendererImplemented, Shader, 1>(
 				m_renderer, shader, material, materialParam, parameter, stageInd, cutomData1Ptr, cutomData2Ptr);
+		}
+		else
+		{
+			if (collector_.ShaderType == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
+			{
+				StoreFixedUniforms<RendererImplemented,
+								   Shader,
+								   1,
+								   EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>,
+								   true,
+								   true>(m_renderer, shader, parameter);
+			}
+			else if (collector_.ShaderType == EffekseerRenderer::RendererShaderType::AdvancedLit ||
+					 collector_.ShaderType == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+			{
+				StoreFixedUniforms<RendererImplemented,
+								   Shader,
+								   1,
+								   EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>,
+								   true,
+								   false>(m_renderer, shader, parameter);
+			}
+			else if (collector_.ShaderType == EffekseerRenderer::RendererShaderType::BackDistortion)
+			{
+				StoreFixedUniforms<RendererImplemented,
+								   Shader,
+								   1,
+								   EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>,
+								   false,
+								   true>(m_renderer, shader, parameter);
+			}
+			else if (collector_.ShaderType == EffekseerRenderer::RendererShaderType::Lit ||
+					 collector_.ShaderType == EffekseerRenderer::RendererShaderType::Unlit)
+			{
+				StoreFixedUniforms<RendererImplemented,
+								   Shader,
+								   1,
+								   EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>,
+								   false,
+								   false>(m_renderer, shader, parameter);
+			}
 		}
 
 		m_renderer->GetRenderState()->Update(false);
@@ -950,7 +1000,6 @@ Shader* RendererImplemented::GetShader(::EffekseerRenderer::RendererShaderType m
 	{
 		return adUnlitShader_.get();
 	}
-
 
 	// retuan as a default shader
 	return unlitShader_.get();

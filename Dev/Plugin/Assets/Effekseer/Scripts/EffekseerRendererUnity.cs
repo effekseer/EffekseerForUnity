@@ -914,7 +914,7 @@ namespace Effekseer.Internal
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedBackDistortion, true).Keywords = new string[] { "_MODEL_", "ENABLE_DISTORTION", "_ADVANCED_" };
 
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Shader = EffekseerSettings.Instance.fixedShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Keywords = new string[] { "_MODEL_", "_ADVANCED_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Keywords = new string[] { "ENABLE_LIGHTING", "_ADVANCED_" };
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Shader = EffekseerSettings.Instance.fixedShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING", "_ADVANCED_" };
 #else
@@ -1309,9 +1309,15 @@ namespace Effekseer.Internal
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 				{
-					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
-					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+#if NEW_SHADER
+					prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
+					prop.SetColor("fLightColor", EffekseerSystem.LightColor);
+					prop.SetColor("fLightAmbientColor", EffekseerSystem.LightAmbientColor);
+#else
+						prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
+						prop.SetColor("lightColor", EffekseerSystem.LightColor);
+						prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+#endif
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
@@ -1473,9 +1479,15 @@ namespace Effekseer.Internal
 					if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 					{
+#if NEW_SHADER
+						prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
+						prop.SetColor("fLightColor", EffekseerSystem.LightColor);
+						prop.SetColor("fLightAmbientColor", EffekseerSystem.LightAmbientColor);
+#else
 						prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 						prop.SetColor("lightColor", EffekseerSystem.LightColor);
 						prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+#endif
 						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
