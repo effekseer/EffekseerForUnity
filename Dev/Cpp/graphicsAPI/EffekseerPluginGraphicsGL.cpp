@@ -15,14 +15,7 @@ namespace EffekseerPlugin
 
 class TextureLoaderGL : public TextureLoader
 {
-	struct TextureResource
-	{
-		int referenceCount = 1;
-		Effekseer::TextureRef textureDataPtr = nullptr;
-	};
-
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
-	std::map<std::u16string, TextureResource> resources;
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 	UnityGfxRenderer gfxRenderer;
 
@@ -53,42 +46,28 @@ TextureLoaderGL::~TextureLoaderGL() {}
 
 Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
-	// リソーステーブルを検索して存在したらそれを使う
-	auto it = resources.find((const char16_t*)path);
-	if (it != resources.end())
-	{
-		it->second.referenceCount++;
-		return it->second.textureDataPtr;
-	}
-
-	// Unityでテクスチャをロード
+	// Load with unity
 	int32_t width, height, format;
 	int64_t textureID = reinterpret_cast<int64_t>(load((const char16_t*)path, &width, &height, &format));
 	if (textureID == 0)
 	{
 		return nullptr;
 	}
-	// リソーステーブルに追加
-	auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
-	TextureResource& res = added.first->second;
 
 #if !defined(_WIN32)
 	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(width) && IsPowerOfTwo(height)))
 	{
-		// テクスチャのミップマップを生成する
 		glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 #endif
 
-	textureData2NativePtr[res.textureDataPtr] = (void*)textureID;
-
 	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
-	res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
-	res.textureDataPtr->SetBackend(backend);
-
-	return res.textureDataPtr;
+	auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+	textureDataPtr->SetBackend(backend);
+	textureData2NativePtr[textureDataPtr] = (void*)textureID;
+	return textureDataPtr;
 }
 
 void TextureLoaderGL::Unload(Effekseer::TextureRef source)
@@ -98,24 +77,8 @@ void TextureLoaderGL::Unload(Effekseer::TextureRef source)
 		return;
 	}
 
-	// アンロードするテクスチャを検索
-	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-		return pair.second.textureDataPtr == source;
-	});
-	if (it == resources.end())
-	{
-		return;
-	}
-
-	// 参照カウンタが0になったら実際にアンロード
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		// Unity側でアンロード
-		unload(it->first.c_str(), textureData2NativePtr[source]);
-		textureData2NativePtr.erase(source);
-		resources.erase(it);
-	}
+	unload(source->GetPath().c_str(), textureData2NativePtr[source]);
+	textureData2NativePtr.erase(source);
 }
 
 GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer) { MaterialEvent::Initialize(); }

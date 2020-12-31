@@ -220,7 +220,7 @@ namespace Effekseer
 				asset.texture2DBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DBlitShader.shader");
 				asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
 				asset.grabDepthShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/GrabDepthShader.shader");
-				asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedhader.shader");
+				asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedShader.shader");
 
 				AssetDatabase.CreateAsset(asset, assetPath);
 				AssetDatabase.Refresh();
@@ -250,7 +250,7 @@ namespace Effekseer
 
 				if (asset.fixedShader == null)
 				{
-					asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedhader.shader");
+					asset.fixedShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/EffekseerFixedShader.shader");
 
 					if (asset.fixedShader != null)
 					{

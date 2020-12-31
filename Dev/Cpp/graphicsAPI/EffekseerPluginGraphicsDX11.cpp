@@ -16,13 +16,6 @@ namespace EffekseerPlugin
 
 class TextureLoaderDX11 : public TextureLoader
 {
-	struct TextureResource
-	{
-		int referenceCount = 1;
-		Effekseer::TextureRef textureDataPtr = nullptr;
-	};
-
-	std::map<std::u16string, TextureResource> resources;
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 
 	ID3D11Device* d3d11Device_ = nullptr;
@@ -41,15 +34,7 @@ public:
 
 	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
-		// リソーステーブルを検索して存在したらそれを使う
-		auto it = resources.find((const char16_t*)path);
-		if (it != resources.end())
-		{
-			it->second.referenceCount++;
-			return it->second.textureDataPtr;
-		}
-
-		// Unityでテクスチャをロード
+		// Load from unity
 		int32_t width, height, format;
 		void* texturePtr = load((const char16_t*)path, &width, &height, &format);
 		if (texturePtr == nullptr)
@@ -57,12 +42,7 @@ public:
 			return nullptr;
 		}
 
-		// リソーステーブルに追加
-		auto added = resources.insert(std::make_pair((const char16_t*)path, TextureResource()));
-		TextureResource& res = added.first->second;
-
-		// DX11の場合、UnityがロードするのはID3D11Texture2Dなので、
-		// ID3D11ShaderResourceViewを作成する
+		// Create ID3D11ShaderResourceView from ID3D11Texture2D
 		HRESULT hr;
 		ID3D11Texture2D* textureDX11 = (ID3D11Texture2D*)texturePtr;
 
@@ -83,14 +63,14 @@ public:
 		}
 
 		auto backend = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
-		res.textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
-		res.textureDataPtr->SetBackend(backend);
-
-		textureData2NativePtr[res.textureDataPtr] = texturePtr;
+		auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
+		textureDataPtr->SetBackend(backend);
+		
+		textureData2NativePtr[textureDataPtr] = texturePtr;
 
 		ES_SAFE_RELEASE(srv);
 
-		return res.textureDataPtr;
+		return textureDataPtr;
 	}
 
 	virtual void Unload(Effekseer::TextureRef source)
@@ -100,24 +80,8 @@ public:
 			return;
 		}
 
-		// アンロードするテクスチャを検索
-		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.textureDataPtr == source;
-		});
-		if (it == resources.end())
-		{
-			return;
-		}
-
-		// 参照カウンタが0になったら実際にアンロード
-		it->second.referenceCount--;
-		if (it->second.referenceCount <= 0)
-		{
-			// Unload from unity
-			unload(it->first.c_str(), textureData2NativePtr[source]);
-			textureData2NativePtr.erase(source);
-			resources.erase(it);
-		}
+		unload(source->GetPath().c_str(), textureData2NativePtr[source]);
+		textureData2NativePtr.erase(source);
 	}
 };
 

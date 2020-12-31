@@ -18,12 +18,6 @@ class MaterialLoader : public Effekseer::MaterialLoader
 	EffekseerPlugin::MaterialLoaderLoad load_ = nullptr;
 	EffekseerPlugin::MaterialLoaderUnload unload_ = nullptr;
 
-	struct MaterialResource
-	{
-		int referenceCount = 1;
-		Effekseer::MaterialRef internalData;
-	};
-	std::map<std::u16string, MaterialResource> resources;
 	EffekseerPlugin::MemoryFile memoryFile_;
 	EffekseerPlugin::MemoryFile memoryFileForCache_;
 

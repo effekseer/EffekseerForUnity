@@ -5,67 +5,66 @@
 namespace EffekseerPlugin
 {
 
-
-LazyMaterialData::LazyMaterialData(const std::shared_ptr<MaterialLoaderHolder>& loader,
-                 const Effekseer::CustomVector<uint8_t>& data,
-                 int32_t dataSize,
-                 const Effekseer::CustomVector<uint8_t>& compiledData,
-                 int32_t compiledDataSize)
-    : internalLoader_(loader)
+LazyMaterial::LazyMaterial(const std::shared_ptr<MaterialLoaderHolder>& loader,
+								   const Effekseer::CustomVector<uint8_t>& data,
+								   int32_t dataSize,
+								   const Effekseer::CustomVector<uint8_t>& compiledData,
+								   int32_t compiledDataSize)
+	: internalLoader_(loader)
 {
-    if (dataSize > 0)
-    {
-        data_.assign(data.begin(), data.begin() + dataSize);
-    }
+	if (dataSize > 0)
+	{
+		data_.assign(data.begin(), data.begin() + dataSize);
+	}
 
-    if (compiledDataSize > 0)
-    {
-        compiledData_.assign(compiledData.begin(), compiledData.begin() + compiledDataSize);
-    }
+	if (compiledDataSize > 0)
+	{
+		compiledData_.assign(compiledData.begin(), compiledData.begin() + compiledDataSize);
+	}
 }
 
-void LazyMaterialData::Load()
+void LazyMaterial::Load()
 {
-    if (compiledData_.size() > 0)
-    {
-        internalData_ = internalLoader_->Get()->Load(compiledData_.data(), compiledData_.size(), Effekseer::MaterialFileType::Compiled);
-    }
+	if (compiledData_.size() > 0)
+	{
+		internalData_ = internalLoader_->Get()->Load(compiledData_.data(), compiledData_.size(), Effekseer::MaterialFileType::Compiled);
+	}
 
-    if (internalData_ == nullptr && data_.size() > 0)
-    {
-        internalData_ = internalLoader_->Get()->Load(data_.data(), data_.size(), Effekseer::MaterialFileType::Code);
-    }
+	if (internalData_ == nullptr && data_.size() > 0)
+	{
+		internalData_ = internalLoader_->Get()->Load(data_.data(), data_.size(), Effekseer::MaterialFileType::Code);
+	}
 
-    data_.clear();
-    data_.shrink_to_fit();
+	data_.clear();
+	data_.shrink_to_fit();
 
-    compiledData_.clear();
-    compiledData_.shrink_to_fit();
+	compiledData_.clear();
+	compiledData_.shrink_to_fit();
 
-    if (internalData_ != nullptr)
-    {
-        this->ShadingModel = internalData_->ShadingModel;
-        this->IsSimpleVertex = internalData_->IsSimpleVertex;
-        this->IsRefractionRequired = internalData_->IsRefractionRequired;
-        this->CustomData1 = internalData_->CustomData1;
-        this->CustomData2 = internalData_->CustomData2;
-        this->TextureCount = internalData_->TextureCount;
-        this->UniformCount = internalData_->UniformCount;
-        this->TextureWrapTypes = internalData_->TextureWrapTypes;
-        this->UserPtr = internalData_->UserPtr;
-        this->ModelUserPtr = internalData_->ModelUserPtr;
-        this->RefractionUserPtr = internalData_->RefractionUserPtr;
-        this->RefractionModelUserPtr = internalData_->RefractionModelUserPtr;
-    }
+	if (internalData_ != nullptr)
+	{
+		this->ShadingModel = internalData_->ShadingModel;
+		this->IsSimpleVertex = internalData_->IsSimpleVertex;
+		this->IsRefractionRequired = internalData_->IsRefractionRequired;
+		this->CustomData1 = internalData_->CustomData1;
+		this->CustomData2 = internalData_->CustomData2;
+		this->TextureCount = internalData_->TextureCount;
+		this->UniformCount = internalData_->UniformCount;
+		this->TextureWrapTypes = internalData_->TextureWrapTypes;
+		this->UserPtr = internalData_->UserPtr;
+		this->ModelUserPtr = internalData_->ModelUserPtr;
+		this->RefractionUserPtr = internalData_->RefractionUserPtr;
+		this->RefractionModelUserPtr = internalData_->RefractionModelUserPtr;
+	}
 }
 
-void LazyMaterialData::Unload()
+void LazyMaterial::Unload()
 {
-    if (internalData_ != nullptr)
-    {
-        internalLoader_->Get()->Unload(internalData_);
-        internalData_ = nullptr;
-    }
+	if (internalData_ != nullptr)
+	{
+		internalLoader_->Get()->Unload(internalData_);
+		internalData_ = nullptr;
+	}
 }
 
 std::shared_ptr<MaterialEvent> MaterialEvent::instance_;
@@ -83,7 +82,7 @@ void MaterialEvent::Terminate()
 
 std::shared_ptr<MaterialEvent> MaterialEvent::GetInstance() { return instance_; }
 
-void MaterialEvent::Load(Effekseer::RefPtr<LazyMaterialData> data)
+void MaterialEvent::Load(Effekseer::RefPtr<LazyMaterial> data)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 
@@ -93,7 +92,7 @@ void MaterialEvent::Load(Effekseer::RefPtr<LazyMaterialData> data)
 	commands_.emplace_back(c);
 }
 
-void MaterialEvent::UnloadAndDelete(Effekseer::RefPtr<LazyMaterialData> data)
+void MaterialEvent::UnloadAndDelete(Effekseer::RefPtr<LazyMaterial> data)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 
@@ -133,15 +132,7 @@ MaterialLoader::MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unl
 
 Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
-	auto it = resources.find((const char16_t*)path);
-	if (it != resources.end())
-	{
-		it->second.referenceCount++;
-		return it->second.internalData;
-	}
-
 	// Load with unity
-	MaterialResource res;
 	int requiredDataSize = 0;
 	int requiredCachedDataSize = 0;
 
@@ -195,12 +186,12 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 
 	if (memoryFileForCache_.LoadedSize > 0 || memoryFile_.LoadedSize > 0)
 	{
-		auto data = Effekseer::MakeRefPtr<LazyMaterialData>(internalLoader_,
+		auto data = Effekseer::MakeRefPtr<LazyMaterial>(internalLoader_,
 															memoryFile_.LoadedBuffer,
 															memoryFile_.LoadedSize,
 															memoryFileForCache_.LoadedBuffer,
 															memoryFileForCache_.LoadedSize);
-		res.internalData = data;
+		auto internalData = data;
 
 		auto eventInstance = MaterialEvent::GetInstance();
 
@@ -213,8 +204,7 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 			data->Load();
 		}
 
-		resources.insert(std::make_pair((const char16_t*)path, res));
-		return res.internalData;
+		return internalData;
 	}
 
 	return nullptr;
@@ -226,30 +216,17 @@ void MaterialLoader::Unload(Effekseer::MaterialRef data)
 		return;
 	}
 
-	auto it = std::find_if(resources.begin(), resources.end(), [data](const std::pair<std::u16string, MaterialResource>& pair) {
-		return pair.second.internalData == data;
-	});
-	if (it == resources.end())
+	auto eventInstance = MaterialEvent::GetInstance();
+
+	if (eventInstance != nullptr)
 	{
-		return;
+		eventInstance->UnloadAndDelete(data.DownCast<LazyMaterial>());
+	}
+	else
+	{
+		data.DownCast<LazyMaterial>()->Unload();
 	}
 
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		auto eventInstance = MaterialEvent::GetInstance();
-
-		if (eventInstance != nullptr)
-		{
-			eventInstance->UnloadAndDelete(it->second.internalData);
-		}
-		else
-		{
-			it->second.internalData->Unload();
-		}
-
-		unload_(it->first.c_str(), nullptr);
-		resources.erase(it);
-	}
+	unload_(data->GetPath().c_str(), nullptr);
 }
 } // namespace EffekseerPlugin

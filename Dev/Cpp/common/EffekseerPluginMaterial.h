@@ -28,7 +28,7 @@ using MaterialLoaderLoad = void*(UNITY_INTERFACE_API*)(const char16_t* path,
 
 using MaterialLoaderUnload = void(UNITY_INTERFACE_API*)(const char16_t* path, void* materialPointer);
 
-class LazyMaterialData;
+class LazyMaterial;
 
 /**
 	@vrief	an event queue of material
@@ -47,7 +47,7 @@ private:
 	struct Command
 	{
 		CommandType type = CommandType::Load;
-		Effekseer::RefPtr<LazyMaterialData> data = nullptr;
+		Effekseer::RefPtr<LazyMaterial> data = nullptr;
 	};
 
 	std::mutex mtx_;
@@ -62,9 +62,9 @@ public:
 
 	static std::shared_ptr<MaterialEvent> GetInstance();
 
-	void Load(Effekseer::RefPtr<LazyMaterialData> data);
+	void Load(Effekseer::RefPtr<LazyMaterial> data);
 
-	void UnloadAndDelete(Effekseer::RefPtr<LazyMaterialData> data);
+	void UnloadAndDelete(Effekseer::RefPtr<LazyMaterial> data);
 
 	void Execute();
 };
@@ -91,7 +91,7 @@ class MaterialLoader : public Effekseer::MaterialLoader
 	struct MaterialResource
 	{
 		int referenceCount = 1;
-		Effekseer::RefPtr<LazyMaterialData> internalData;
+		Effekseer::RefPtr<LazyMaterial> internalData;
 	};
 	std::map<std::u16string, MaterialResource> resources;
 	MemoryFile memoryFile_;
@@ -107,7 +107,7 @@ public:
 	void SetInternalLoader(const std::shared_ptr<MaterialLoaderHolder>& loader) { internalLoader_ = loader; }
 };
 
-class LazyMaterialData : public Effekseer::Material
+class LazyMaterial : public Effekseer::Material
 {
 private:
     Effekseer::MaterialRef internalData_ = nullptr;
@@ -117,7 +117,7 @@ private:
     std::shared_ptr<MaterialLoaderHolder> internalLoader_ = nullptr;
 
 public:
-    LazyMaterialData(const std::shared_ptr<MaterialLoaderHolder>& loader,
+    LazyMaterial(const std::shared_ptr<MaterialLoaderHolder>& loader,
                      const Effekseer::CustomVector<uint8_t>& data,
                      int32_t dataSize,
                      const Effekseer::CustomVector<uint8_t>& compiledData,

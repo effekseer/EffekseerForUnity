@@ -15,15 +15,7 @@ MaterialLoader::~MaterialLoader() {}
 
 Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
-	auto it = resources.find((const char16_t*)path);
-	if (it != resources.end())
-	{
-		it->second.referenceCount++;
-		return it->second.internalData;
-	}
-
 	// Load with unity
-	MaterialResource res;
 	int requiredDataSize = 0;
 	int requiredCachedDataSize = 0;
 
@@ -64,9 +56,9 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 		std::shared_ptr<Effekseer::MaterialFile> material = std::make_shared<Effekseer::MaterialFile>();
 		material->Load((const uint8_t*)memoryFile_.LoadedBuffer.data(), static_cast<int32_t>(memoryFile_.LoadedBuffer.size()));
 
-		res.internalData =  Effekseer::MakeRefPtr<::Effekseer::Material>();
+		auto internalData = Effekseer::MakeRefPtr<::Effekseer::Material>();
 
-		auto materialData = res.internalData;
+		auto materialData = internalData;
 
 		materialData->IsSimpleVertex = material->GetIsSimpleVertex();
 		materialData->IsRefractionRequired = material->GetHasRefraction();
@@ -90,8 +82,7 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 			materialData->RefractionModelUserPtr = new Shader(materialPtr, material, true, true);
 		}
 
-		resources.insert(std::make_pair((const char16_t*)path, res));
-		return res.internalData;
+		return internalData;
 	}
 
 	return nullptr;
@@ -103,36 +94,23 @@ void MaterialLoader::Unload(Effekseer::MaterialRef data)
 		return;
 	}
 
-	auto it = std::find_if(resources.begin(), resources.end(), [data](const std::pair<std::u16string, MaterialResource>& pair) {
-		return pair.second.internalData == data;
-	});
-	if (it == resources.end())
+	auto ss = static_cast<Shader*>(data->UserPtr);
+	auto sm = static_cast<Shader*>(data->ModelUserPtr);
+	auto srs = static_cast<Shader*>(data->RefractionUserPtr);
+	auto srm = static_cast<Shader*>(data->RefractionModelUserPtr);
+
+	void* ptr = nullptr;
+	if (ss != nullptr)
 	{
-		return;
+		ptr = ss->GetUnityMaterial();
 	}
 
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		auto ss = static_cast<Shader*>(it->second.internalData->UserPtr);
-		auto sm = static_cast<Shader*>(it->second.internalData->ModelUserPtr);
-		auto srs = static_cast<Shader*>(it->second.internalData->RefractionUserPtr);
-		auto srm = static_cast<Shader*>(it->second.internalData->RefractionModelUserPtr);
+	ES_SAFE_DELETE(ss);
+	ES_SAFE_DELETE(sm);
+	ES_SAFE_DELETE(srs);
+	ES_SAFE_DELETE(srm);
 
-		void* ptr = nullptr;
-		if (ss != nullptr)
-		{
-			ptr = ss->GetUnityMaterial();
-		}
-
-		ES_SAFE_DELETE(ss);
-		ES_SAFE_DELETE(sm);
-		ES_SAFE_DELETE(srs);
-		ES_SAFE_DELETE(srm);
-		
-		unload_(it->first.c_str(), ptr);
-		resources.erase(it);
-	}
+	unload_(data->GetPath().c_str(), ptr);
 }
 
 } // namespace EffekseerRendererUnity
