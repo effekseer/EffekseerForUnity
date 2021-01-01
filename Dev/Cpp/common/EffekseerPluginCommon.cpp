@@ -566,6 +566,25 @@ extern "C"
 		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload));
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProcedualModelGeneratorEvent(ProcedualModelGeneratorGenerate load,
+																							 ProcedualModelGeneratorUngenerate unload)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		if (g_graphics == nullptr)
+		{
+			return;
+		}
+
+		auto generator = g_graphics->Create(load, unload);
+		if (generator != nullptr)
+		{
+			g_EffekseerManager->GetSetting()->SetProcedualMeshGenerator(generator);
+		}
+	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundLoaderEvent(
 		SoundLoaderLoad load,

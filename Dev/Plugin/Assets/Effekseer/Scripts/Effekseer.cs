@@ -226,6 +226,36 @@ namespace Effekseer
 			IntPtr cachedMaterialBuffer, int cachedMaterialBufferSize, ref int requiredCachedMaterialBufferSize);
 		public delegate void EffekseerMaterialLoaderUnload(IntPtr path, IntPtr modelPtr);
 
+		[StructLayout(LayoutKind.Sequential)]
+		public struct ModelVertex
+		{
+			public Vector3 Position;
+			public Vector3 Normal;
+			public Vector3 Binormal;
+			public Vector3 Tangent;
+			public Vector2 UV;
+			public Color32 VColor;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct ModelFace
+		{
+			public int Index1;
+			public int Index2;
+			public int Index3;
+		}
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetProcedualModelGeneratorEvent(
+			EffekseerProcedualMaterialGeneratorGenerate load,
+			EffekseerProcedualMaterialGeneratorUngenerate unload);
+
+		public unsafe delegate IntPtr EffekseerProcedualMaterialGeneratorGenerate(ModelVertex* vertecies,
+																	int verteciesCount,
+																	ModelFace* faces,
+																	int facesCount);
+		public delegate void EffekseerProcedualMaterialGeneratorUngenerate(IntPtr modelPtr);
+
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundLoaderEvent(
 			EffekseerSoundLoaderLoad load,

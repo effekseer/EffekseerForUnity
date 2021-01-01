@@ -435,7 +435,7 @@ namespace Effekseer
 		/// <summary>
 		/// Don't touch it!!
 		/// </summary>
-		public void OnEnable() {
+		public unsafe void OnEnable() {
 			if (Instance == null) {
 				Instance = this;
 			}
@@ -464,6 +464,9 @@ namespace Effekseer
 			Plugin.EffekseerSetMaterialLoaderEvent(
 				MaterialLoaderLoad,
 				MaterialLoaderUnload);
+			Plugin.EffekseerSetProcedualModelGeneratorEvent(
+				ProcedualMaterialGeneratorGenerate,
+				ProcedualMaterialGeneratorUngenerate);
 
 #if UNITY_EDITOR
 			for (int i = 0; i < nativeEffectsKeys.Count; i++) {
@@ -805,6 +808,42 @@ namespace Effekseer
 					var material = cachedMaterials[materialPtr];
 					cachedMaterials.Remove(materialPtr);
 					cachedMaterialIDs.Remove(material.asset);
+				}
+			}
+		}
+
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProcedualMaterialGeneratorGenerate))]
+		private static unsafe IntPtr ProcedualMaterialGeneratorGenerate(Plugin.ModelVertex* vertecies,
+															int verteciesCount,
+															Plugin.ModelFace* faces,
+															int facesCount)
+		{
+			if (Instance.RendererType != EffekseerRendererType.Unity)
+			{
+				return IntPtr.Zero;
+			}
+
+			var unityRendererModel = new UnityRendererModel();
+			unityRendererModel.Initialize(model.bytes);
+
+			IntPtr ptr = unityRendererModel.VertexBuffer.GetNativeBufferPtr();
+			if (!cachedModels.ContainsKey(ptr))
+			{
+				cachedModels.Add(ptr, unityRendererModel);
+			}
+			return ptr;
+		}
+
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProcedualMaterialGeneratorUngenerate))]
+		private static void ProcedualMaterialGeneratorUngenerate(IntPtr modelPtr)
+		{
+			if (Instance.RendererType != EffekseerRendererType.Unity)
+			{
+				if (cachedModels.ContainsKey(modelPtr))
+				{
+					var model = cachedModels[modelPtr];
+					model.Dispose();
+					cachedModels.Remove(modelPtr);
 				}
 			}
 		}
