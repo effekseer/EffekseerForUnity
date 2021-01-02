@@ -1,4 +1,4 @@
-﻿/*
+﻿#if EFFEKSEER_URP_SUPPORT
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -60,4 +60,4 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 	}
 }
 
-*/
+#endif

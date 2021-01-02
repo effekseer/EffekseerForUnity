@@ -1,0 +1,22 @@
+{
+    "name": "Effekseer.PostProcessing",
+    "references": [
+        "GUID:6cd0664e68c0e6544bb81fede698d559",
+        "GUID:d60799ab2a985554ea1a39cd38695018"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.postprocessing",
+            "expression": "",
+            "define": "EFFEKSEER_POSTPROCESSING_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}

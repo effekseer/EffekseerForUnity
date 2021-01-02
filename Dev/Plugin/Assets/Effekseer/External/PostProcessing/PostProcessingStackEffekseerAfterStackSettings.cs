@@ -1,4 +1,4 @@
-﻿#if UNITY_POST_PROCESSING_STACK_V2
+﻿#if EFFEKSEER_POSTPROCESSING_SUPPORT
 
 using System;
 using UnityEngine;

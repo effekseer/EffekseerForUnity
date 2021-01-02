@@ -1,4 +1,5 @@
-﻿/*
+﻿#if EFFEKSEER_HDRP_SUPPORT
+
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -46,4 +47,3 @@ namespace Effekseer
 		}
 	}
 }
-*/
