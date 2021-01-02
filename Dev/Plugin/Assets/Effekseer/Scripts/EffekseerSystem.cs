@@ -824,7 +824,7 @@ namespace Effekseer
 			}
 
 			var unityRendererModel = new UnityRendererModel();
-			unityRendererModel.Initialize(model.bytes);
+			unityRendererModel.Initialize(vertecies, verteciesCount, faces, facesCount);
 
 			IntPtr ptr = unityRendererModel.VertexBuffer.GetNativeBufferPtr();
 			if (!cachedModels.ContainsKey(ptr))
