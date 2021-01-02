@@ -67,7 +67,7 @@ Properties{
 
 			ModelVertex v = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
 
-			float3 localPos = v.Position;
+			float3 localPos = v.Pos;
 			float4 vPos = mul(buf_matrix, float4(localPos, 1.0f));
 			float4 vBinormal = mul(buf_matrix, float4(v.Binormal, 0.0f));
 			float4 vTangent = mul(buf_matrix, float4(v.Tangent, 0.0f));

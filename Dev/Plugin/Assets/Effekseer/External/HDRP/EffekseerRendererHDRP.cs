@@ -47,3 +47,5 @@ namespace Effekseer
 		}
 	}
 }
+
+#endif

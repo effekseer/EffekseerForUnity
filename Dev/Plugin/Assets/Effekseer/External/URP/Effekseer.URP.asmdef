@@ -2,7 +2,8 @@
     "name": "Effekseer.URP",
     "references": [
         "Effekseer",
-        "Unity.RenderPipelines.Universal.Runtime"
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
