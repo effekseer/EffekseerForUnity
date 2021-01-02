@@ -1,9 +1,9 @@
 ﻿
 #include "EffekseerPluginGraphicsUnity.h"
 #include "../renderer/EffekseerRendererImplemented.h"
+#include "../renderer/EffekseerRendererMaterialLoader.h"
 #include "../renderer/EffekseerRendererModelLoader.h"
 #include "../renderer/EffekseerRendererTextureLoader.h"
-#include "../renderer/EffekseerRendererMaterialLoader.h"
 #include <algorithm>
 #include <assert.h>
 
@@ -55,8 +55,12 @@ Effekseer::MaterialLoaderRef GraphicsUnity::Create(MaterialLoaderLoad load, Mate
 	return Effekseer::MakeRefPtr<EffekseerRendererUnity::MaterialLoader>(load, unload);
 }
 
-void GraphicsUnity::ShiftViewportForStereoSinglePass(bool isShift) 
+Effekseer::ProcedualModelGeneratorRef GraphicsUnity::Create(ProcedualModelGeneratorGenerate generate,
+															ProcedualModelGeneratorUngenerate ungenerate)
 {
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ProcedualModelGenerator>(generate, ungenerate);
 }
+
+void GraphicsUnity::ShiftViewportForStereoSinglePass(bool isShift) {}
 
 } // namespace EffekseerPlugin

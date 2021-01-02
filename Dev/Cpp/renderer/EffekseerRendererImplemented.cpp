@@ -176,7 +176,17 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	if (parameter.ModelIndex < 0)
 		return;
 
-	auto model = parameter.EffectPointer->GetModel(parameter.ModelIndex);
+	Effekseer::ModelRef model;
+
+	if (parameter.IsProcedualMode)
+	{
+		model = parameter.EffectPointer->GetProcedualModel(parameter.ModelIndex);
+	}
+	else
+	{
+		model = parameter.EffectPointer->GetModel(parameter.ModelIndex);
+	}
+
 	if (model == nullptr)
 		return;
 

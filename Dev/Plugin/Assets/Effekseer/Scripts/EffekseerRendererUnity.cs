@@ -149,6 +149,51 @@ namespace Effekseer.Internal
 		public List<int> vertexOffsets = new List<int>();
 		public List<int> indexOffsets = new List<int>();
 
+		public unsafe void Initialize(Plugin.ModelVertex* vertecies,
+															int verteciesCount,
+															Plugin.ModelFace* faces,
+															int facesCount)
+		{
+			List<Vertex> vertexBuffer = new List<Vertex>();
+			List<int> indexBuffer = new List<int>();
+
+			for(int i = 0; i < verteciesCount; i++)
+			{
+				vertexBuffer.Add(
+					new Vertex
+					{
+						Position = vertecies[i].Position,
+						Normal = vertecies[i].Normal,
+						Binormal = vertecies[i].Binormal,
+						Tangent = vertecies[i].Tangent,
+						UV = vertecies[i].UV,
+						VColor = new Color(vertecies[i].VColor.r / 255.0f, vertecies[i].VColor.g / 255.0f, vertecies[i].VColor.b / 255.0f, vertecies[i].VColor.a / 255.0f)
+					});
+			}
+
+			for (int i = 0; i < facesCount; i++)
+			{
+				indexBuffer.Add(faces[i].Index1);
+				indexBuffer.Add(faces[i].Index2);
+				indexBuffer.Add(faces[i].Index3);
+			}
+
+			VertexBuffer = new ComputeBuffer(verteciesCount, sizeof(Vertex));
+			IndexBuffer = new ComputeBuffer(facesCount * 3, sizeof(int));
+
+			VertexBuffer.SetData(vertexBuffer, 0, 0, vertexBuffer.Count);
+			IndexBuffer.SetData(indexBuffer, 0, 0, indexBuffer.Count);
+
+			IndexCounts.Add(facesCount * 3);
+
+			vertexOffsets.Add(0);
+			indexOffsets.Add(0);
+
+			VertexOffsets = new ComputeBuffer(vertexOffsets.Count, sizeof(int));
+			IndexOffsets = new ComputeBuffer(indexOffsets.Count, sizeof(int));
+			VertexOffsets.SetData(vertexOffsets);
+			IndexOffsets.SetData(indexOffsets);
+		}
 
 		public unsafe void Initialize(byte[] buffer)
 		{

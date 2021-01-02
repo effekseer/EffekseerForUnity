@@ -62,6 +62,12 @@ public:
 
 	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
 
+	virtual Effekseer::ProcedualModelGeneratorRef Create(ProcedualModelGeneratorGenerate generate,
+														 ProcedualModelGeneratorUngenerate ungenerate)
+	{
+		return nullptr;
+	}
+
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 
 	virtual RenderPass* CreateRenderPass() { return nullptr; }

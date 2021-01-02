@@ -55,4 +55,32 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 	auto model = source.DownCast<Model>().Get();
 	unload(source->GetPath().c_str(), model->InternalPtr);
 }
+
+Effekseer::ModelRef ProcedualModelGenerator::Generate(const Effekseer::ProcedualModelParameter* parameter)
+{
+	auto original = Effekseer::ProcedualModelGenerator::Generate(parameter);
+
+	vertecies_.resize(original->GetVertexCount());
+	memcpy(vertecies_.data(), original->GetVertexes(), sizeof(Effekseer::Model::Vertex) * vertecies_.size());
+
+	faces_.resize(original->GetFaceCount());
+	memcpy(faces_.data(), original->GetFaces(), sizeof(Effekseer::Model::Face) * faces_.size());
+
+	auto ptr = generate_(vertecies_.data(), static_cast<int32_t>(vertecies_.size()), faces_.data(), static_cast<int32_t>(faces_.size()));
+
+	auto newmodel = Effekseer::MakeRefPtr<Model>(vertecies_, faces_);
+	newmodel->InternalPtr = ptr;
+	return newmodel;
+}
+
+void ProcedualModelGenerator::Ungenerate(Effekseer::ModelRef model)
+{
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	ungenerate_(model.DownCast<Model>()->InternalPtr);
+}
+
 } // namespace EffekseerRendererUnity

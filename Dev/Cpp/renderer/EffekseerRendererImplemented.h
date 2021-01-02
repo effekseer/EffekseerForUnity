@@ -136,6 +136,11 @@ class Model : public Effekseer::Model
 public:
 	Model(void* data, int32_t size) : Effekseer::Model(data, size) {}
 
+	Model(const Effekseer::CustomVector<Effekseer::Model::Vertex>& vertecies, const Effekseer::CustomVector<Effekseer::Model::Face>& faces)
+		: Effekseer::Model(vertecies, faces)
+	{
+	}
+
 	virtual ~Model() = default;
 
 	void* InternalPtr = nullptr;
@@ -236,17 +241,17 @@ protected:
 
 	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
 
-	//std::vector<uint8_t> exportedVertexBuffer;
+	// std::vector<uint8_t> exportedVertexBuffer;
 	std::vector<uint8_t> exportedInfoBuffer;
 
 	Effekseer::TextureRef backgroundData_;
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
 
-	//int32_t AddVertexBuffer(const void* data, int32_t size);
+	// int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
 
-	//void AlignVertexBuffer(int32_t alignment);
+	// void AlignVertexBuffer(int32_t alignment);
 
 	template <typename T> void AddVertexBufferAsVertex(const T& v, StrideBuffer& strideBuffer)
 	{
@@ -259,7 +264,7 @@ protected:
 		dst.Col[2] = v.Col.B / 255.0f;
 		dst.Col[3] = v.Col.A / 255.0f;
 		strideBuffer.PushBuffer(&dst, sizeof(UnityVertex));
-		//AddVertexBuffer(&dst, sizeof(UnityVertex));
+		// AddVertexBuffer(&dst, sizeof(UnityVertex));
 	}
 
 	template <typename T> void AddVertexBufferAsDynamicVertex(const T& v, StrideBuffer& strideBuffer)
@@ -277,7 +282,7 @@ protected:
 		dst.Tangent = EffekseerRenderer::UnpackVector3DF(v.Tangent);
 		dst.Normal = EffekseerRenderer::UnpackVector3DF(v.Normal);
 		strideBuffer.PushBuffer(&dst, sizeof(UnityDynamicVertex));
-		//AddVertexBuffer(&dst, sizeof(UnityDynamicVertex));
+		// AddVertexBuffer(&dst, sizeof(UnityDynamicVertex));
 	}
 
 	template <typename T> void AddVertexBufferAsAdvancedData(const T& v, StrideBuffer& strideBuffer)
@@ -292,7 +297,7 @@ protected:
 		dst.FlipbookIndexAndNextRate = EffekseerRenderer::GetVertexFlipbookIndexAndNextRate(v);
 		dst.AlphaThreshold = EffekseerRenderer::GetVertexAlphaThreshold(v);
 		strideBuffer.PushBuffer(&dst, sizeof(AdvancedVertexParameter));
-		//AddVertexBuffer(&dst, sizeof(AdvancedVertexParameter));
+		// AddVertexBuffer(&dst, sizeof(AdvancedVertexParameter));
 	}
 
 public:
@@ -424,7 +429,7 @@ public:
 	void SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count);
 
 	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
-	//std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
+	// std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
 	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer; }
 
 	int32_t GetStrideBufferCount() const;
