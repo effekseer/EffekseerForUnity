@@ -1,0 +1,23 @@
+{
+    "name": "Effekseer.HDRP",
+    "references": [
+        "Effekseer",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "EFFEKSEER_HDRP_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}

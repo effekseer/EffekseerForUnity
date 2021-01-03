@@ -1,0 +1,23 @@
+{
+    "name": "Effekseer.URP",
+    "references": [
+        "Effekseer",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "EFFEKSEER_URP_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}
