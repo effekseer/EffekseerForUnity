@@ -639,7 +639,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 		int32_t startOffset = strideBuffer->GetOffset();
 
-		const int32_t stride = rp.VertexBufferStride;
+		const int32_t stride = sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
+		const int32_t unityStride = rp.VertexBufferStride;
 
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
 		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(

@@ -131,9 +131,12 @@ namespace Effekseer.Internal
 				materialsRefraction.Keywords = new string[] { "_MATERIAL_REFRACTION_" };
 				materialsModelRefraction.Shader = asset.shader;
 				materialsModelRefraction.Keywords = new string[] { "_MODEL_", "_MATERIAL_REFRACTION_" };
-
-
 			}
+		}
+
+		public bool IsValid
+		{
+			get { return asset != null && asset.shader != null; }
 		}
 	}
 
@@ -1306,6 +1309,13 @@ namespace Effekseer.Internal
 				{
 					return;
 				}
+
+				if(!efkMaterial.IsValid)
+				{
+					Debug.LogWarning("Please reimport effekseer materials.");
+					return;
+				}
+
 				Material material = null;
 
 				if (parameter.IsRefraction > 0)
@@ -1461,9 +1471,32 @@ namespace Effekseer.Internal
 					{
 						offset += allocated;
 						count -= allocated;
+						continue;
+					}
+
+					if (!efkMaterial.IsValid)
+					{
+						Debug.LogWarning("Please reimport effekseer materials.");
+						offset += allocated;
+						count -= allocated;
+						continue;
 					}
 
 					Material material = null;
+
+					if (parameter.IsRefraction > 0)
+					{
+						if (efkMaterial.materialsRefraction == null)
+						{
+							return;
+						}
+
+						material = efkMaterial.materialsRefraction.GetMaterial(ref key);
+					}
+					else
+					{
+						material = efkMaterial.materials.GetMaterial(ref key);
+					}
 
 					if (parameter.IsRefraction > 0)
 					{
