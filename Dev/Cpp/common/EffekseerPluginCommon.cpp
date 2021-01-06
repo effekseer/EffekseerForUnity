@@ -143,16 +143,36 @@ extern "C"
 	// エフェクトのリソースのリロード
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReloadResources(Effect* effect)
 	{
+		if (g_EffekseerManager != nullptr)
+		{
+			g_EffekseerManager->LockRendering();
+		}
+
 		if (effect != NULL) {
 			effect->ReloadResources();
+		}
+
+		if (g_EffekseerManager != nullptr)
+		{
+			g_EffekseerManager->UnlockRendering();
 		}
 	}
 
 	// エフェクトのリソースのリロード
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnloadResources(Effect* effect)
 	{
+		if (g_EffekseerManager != nullptr)
+		{
+			g_EffekseerManager->LockRendering();
+		}
+
 		if (effect != NULL) {
 			effect->UnloadResources();
+		}
+
+		if (g_EffekseerManager != nullptr)
+		{
+			g_EffekseerManager->UnlockRendering();
 		}
 	}
 
