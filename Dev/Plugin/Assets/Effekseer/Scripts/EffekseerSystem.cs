@@ -260,6 +260,7 @@ namespace Effekseer
 			int id = effectAsset.GetInstanceID();
 			IntPtr nativeEffect;
 			if (nativeEffects.TryGetValue(id, out nativeEffect)) {
+				Plugin.EffekseerUnloadResources(nativeEffect);
 				Plugin.EffekseerReleaseEffect(nativeEffect);
 				nativeEffects.Remove(id);
 				//loadedEffects.Remove(effectAsset);
@@ -407,6 +408,8 @@ namespace Effekseer
 		public void TermPlugin() {
 
 			StopNetwork();
+
+			StopAllEffects();
 
 			//Debug.Log("EffekseerSystem.TermPlugin");
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets) {
