@@ -394,12 +394,14 @@ namespace Effekseer
 
 			// Create dummy texture
 			normalTexture = new Texture2D(16, 16);
+			normalTexture.name = "EffekseerNormalTexture";
 			Color[] normalColor = new Color[16 * 16];
 			for(int i = 0; i < normalColor.Length; i++)
 			{
 				normalColor[i] = new Color(0.5f, 0.5f, 1.0f);
 			}
-			normalTexture.SetPixels(0, 0, 16, 16, normalColor);
+			normalTexture.SetPixels(normalColor);
+			normalTexture.Apply();
 		}
 
 		/// <summary>
