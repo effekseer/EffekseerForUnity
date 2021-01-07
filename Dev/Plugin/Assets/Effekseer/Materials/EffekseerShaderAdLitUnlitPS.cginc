@@ -111,7 +111,6 @@ struct PS_Input
 float4 frag(const PS_Input Input)
 	: SV_Target
 {
-	// TODO : Fix it
 	float4 fCameraFrontDirection = -float4(UNITY_MATRIX_V[2].xyz, 1.0);
 
 	AdvancedParameter advancedParam = DisolveAdvancedParameter(Input);
