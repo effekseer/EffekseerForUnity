@@ -19,6 +19,11 @@ When importing the *.efk, efkproj, *efkefc file, EffectAsset is generated in add
 It is no problem that you remove .efk, efkproj, efkefc files.
 Please don't include .efk, efkproj, efkefc in custom packages currently. 
 
+Materials and their caches, .efkmat and .efkmatd, are also supported.
+
+If you import textures, effects, materials, etc. at the same time, resources may not be assigned and the appearance may become strange.
+In such a case, please Reimport.
+
 ### Scale
 
 The loaded effect scale may be small. In that case, select EffectAssset and change the parameter of ** Scale **.
