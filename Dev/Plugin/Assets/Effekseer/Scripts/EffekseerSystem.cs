@@ -150,19 +150,11 @@ namespace Effekseer
 
 		internal Effekseer.EffekseerRendererType RendererType { get; private set; }
 
-		private static Dictionary<IntPtr, Texture> cachedTextures = new Dictionary<IntPtr, Texture>();
+		private static CachedTextureContainer cachedTextures = new CachedTextureContainer();
 
-		private static Dictionary<Texture, IntPtr> cachedTextureIDs = new Dictionary<Texture, IntPtr>();
+		private static CachedModelContainer cachedModels = new CachedModelContainer();
 
-		private static int textureIDCounter = 0;
-
-		private static Dictionary<IntPtr, UnityRendererModel> cachedModels = new Dictionary<IntPtr, UnityRendererModel>();
-
-		private static int materialIDCounter = 0;
-
-		private static Dictionary<IntPtr, UnityRendererMaterial> cachedMaterials = new Dictionary<IntPtr, UnityRendererMaterial>();
-
-		private static Dictionary<EffekseerMaterialAsset, IntPtr> cachedMaterialIDs = new Dictionary<EffekseerMaterialAsset, IntPtr>();
+		private static CachedMaterialContainer cachedMaterials = new CachedMaterialContainer();
 
 		static Vector3 lightDirection = new Vector3(1, 1, -1);
 
@@ -560,9 +552,11 @@ namespace Effekseer
 
 		internal static Texture GetCachedTexture(IntPtr key, DummyTextureType type)
 		{
-			if(cachedTextures.ContainsKey(key))
+			var cache = cachedTextures.GetResource(key);
+
+			if(cache != null)
 			{
-				return cachedTextures[key];
+				return cache;
 			}
 
 			if(type == DummyTextureType.White)
@@ -577,20 +571,12 @@ namespace Effekseer
 
 		internal static UnityRendererModel GetCachedModel(IntPtr key)
 		{
-			if (cachedModels.ContainsKey(key))
-			{
-				return cachedModels[key];
-			}
-			return null;
+			return cachedModels.GetResource(key);
 		}
 
 		internal static UnityRendererMaterial GetCachedMaterial(IntPtr key)
 		{
-			if (cachedMaterials.ContainsKey(key))
-			{
-				return cachedMaterials[key];
-			}
-			return null;
+			return cachedMaterials.GetResource(key);
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderLoad))]
@@ -616,30 +602,7 @@ namespace Effekseer
 				{
 					// metal has a bug in GetNativeTexturePtr
 					// to avoid to call GetNativeTexturePtr, use textureID
-					if (cachedTextureIDs.ContainsKey(texture))
-					{
-						//Debug.Log("LoadCache(Unity) " + pathstr.ToString());
-						return cachedTextureIDs[texture];
-					}
-					else
-					{
-						var ptr = new IntPtr();
-						do
-						{
-							textureIDCounter++;
-							if (textureIDCounter > int.MaxValue / 2)
-							{
-								textureIDCounter = 0;
-							}
-							ptr = new IntPtr(textureIDCounter);
-						}
-						while (cachedTextures.ContainsKey(ptr));
-
-						cachedTextures.Add(ptr, texture);
-						cachedTextureIDs.Add(texture, ptr);
-						//Debug.Log("Load(Unity) " + pathstr.ToString());
-						return ptr;
-					}
+					return cachedTextures.Load(texture, pathstr);
 				}
 				else
 				{
@@ -660,10 +623,7 @@ namespace Effekseer
 
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				var texture = cachedTextures[nativePtr];
-				cachedTextureIDs.Remove(texture);
-				cachedTextures.Remove(nativePtr);
-				//Debug.Log("Unload(Unity) " + pathstr.ToString());
+				cachedTextures.Unload(nativePtr);
 			}
 		}
 
@@ -683,14 +643,7 @@ namespace Effekseer
 
 					if(Instance.RendererType == EffekseerRendererType.Unity)
 					{
-						var unityRendererModel = new UnityRendererModel();
-						unityRendererModel.Initialize(model.bytes);
-
-						IntPtr ptr = unityRendererModel.VertexBuffer.GetNativeBufferPtr();
-						if (!cachedModels.ContainsKey(ptr)) {
-							cachedModels.Add(ptr, unityRendererModel);
-						}
-						return ptr;
+						return cachedModels.Load(model, pathstr);
 					}
 
 					return new IntPtr(1);
@@ -704,12 +657,7 @@ namespace Effekseer
 		private static void ModelLoaderUnload(IntPtr path, IntPtr modelPtr) {
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				if(cachedModels.ContainsKey(modelPtr))
-				{
-					var model = cachedModels[modelPtr];
-					model.Dispose();
-					cachedModels.Remove(modelPtr);
-				}
+				cachedModels.Unload(modelPtr);
 			}
 		}
 
@@ -728,45 +676,22 @@ namespace Effekseer
 			{
 				if (Instance.RendererType == EffekseerRendererType.Unity)
 				{
-					if (cachedMaterialIDs.ContainsKey(material))
+					int status = 0;
+
+					if (requiredMaterialBufferSize == 0 && material.materialBuffers != null)
 					{
-						return cachedMaterialIDs[material];
+						requiredMaterialBufferSize = material.materialBuffers.Length;
+
+						status += 1;
+						return new IntPtr(status);
 					}
-					else
+
+					if (material.materialBuffers.Length <= materialBufferSize)
 					{
-						int status = 0;
-
-						if (requiredMaterialBufferSize == 0 && material.materialBuffers != null)
-						{
-							requiredMaterialBufferSize = material.materialBuffers.Length;
-
-							status += 1;
-							return new IntPtr(status);
-						}
-
-						if (material.materialBuffers.Length <= materialBufferSize)
-						{
-							Marshal.Copy(material.materialBuffers, 0, materialBuffer, material.materialBuffers.Length);
-						}
-
-						var ptr = new IntPtr();
-						do
-						{
-							materialIDCounter++;
-							if (materialIDCounter > int.MaxValue / 2)
-							{
-								materialIDCounter = 0;
-							}
-							ptr = new IntPtr(materialIDCounter);
-						}
-						while (cachedMaterials.ContainsKey(ptr));
-
-						var unityRendererMaterial = new UnityRendererMaterial(material);
-
-						cachedMaterials.Add(ptr, unityRendererMaterial);
-						cachedMaterialIDs.Add(material, ptr);
-						return ptr;
+						Marshal.Copy(material.materialBuffers, 0, materialBuffer, material.materialBuffers.Length);
 					}
+
+					return cachedMaterials.Load(material, pathstr);
 				}
 				else
 				{
@@ -808,12 +733,7 @@ namespace Effekseer
 		{
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				if (cachedMaterials.ContainsKey(materialPtr))
-				{
-					var material = cachedMaterials[materialPtr];
-					cachedMaterials.Remove(materialPtr);
-					cachedMaterialIDs.Remove(material.asset);
-				}
+				cachedMaterials.Unload(materialPtr);
 			}
 		}
 
@@ -868,6 +788,127 @@ namespace Effekseer
 		private static void SoundLoaderUnload(IntPtr path) {
 		}
 
-#endregion
+		abstract class CachedResourceContainer<Resource, GeneratedResource> where Resource : class where GeneratedResource : class 
+		{
+			class ResourceContainer
+			{
+				public int Reference;
+				public Resource Resource;
+				public GeneratedResource GeneratedResource;
+				public string Info;
+			}
+
+			Dictionary<IntPtr, ResourceContainer> idToResource = new Dictionary<IntPtr, ResourceContainer>();
+
+			Dictionary<Resource, IntPtr> resourceToIDs = new Dictionary<Resource, IntPtr>();
+
+			protected abstract GeneratedResource GenerateResource(Resource resource);
+
+			protected virtual void DisposeGeneratedResource(GeneratedResource resource) { }
+
+			public GeneratedResource GetResource(IntPtr id)
+			{
+				ResourceContainer r;
+				idToResource.TryGetValue(id, out r);
+				if (r == null)
+					return null;
+
+				return r.GeneratedResource;
+			}
+
+			int currentId = 0;
+			public IntPtr Load(Resource key, string info)
+			{
+				if (resourceToIDs.ContainsKey(key))
+				{
+					var id = resourceToIDs[key];
+					idToResource[id].Reference++;
+					return id;
+				}
+
+				IntPtr ptr;
+				var generated = GenerateResource(key);
+				if (generated == null)
+				{
+					return IntPtr.Zero;
+				}
+
+				do
+				{
+					currentId++;
+					if (currentId > int.MaxValue / 2)
+					{
+						currentId = 1;
+					}
+					ptr = new IntPtr(currentId);
+				}
+				while (idToResource.ContainsKey(ptr));
+
+				idToResource.Add(ptr, new ResourceContainer { Resource = key, GeneratedResource = generated, Reference = 1, Info = info });
+				resourceToIDs.Add(key, ptr);
+				
+				// Debug.Log("Load(Unity) " + info);
+				return ptr;
+			}
+
+			public void Unload(IntPtr id)
+			{
+				if (id == IntPtr.Zero)
+				{
+					return;
+				}
+
+				ResourceContainer resource;
+				if (idToResource.TryGetValue(id, out resource))
+				{
+					resource.Reference--;
+					if (resource.Reference == 0)
+					{
+						var texture = resource.Resource;
+						resourceToIDs.Remove(texture);
+						idToResource.Remove(id);
+						DisposeGeneratedResource(resource.GeneratedResource);
+						// Debug.Log("Unload(Unity) " + resource.Info);
+					}
+				}
+				else
+				{
+					Debug.LogAssertion("Unload(Unity) Unload invalid resource " + id.ToString());
+				}
+			}
+		}
+
+		class CachedTextureContainer : CachedResourceContainer<Texture, Texture>
+		{
+			protected override Texture GenerateResource(Texture resource)
+			{
+				return resource;
+			}
+		}
+
+		class CachedModelContainer : CachedResourceContainer<EffekseerModelAsset, UnityRendererModel>
+		{
+			protected override UnityRendererModel GenerateResource(EffekseerModelAsset resource)
+			{
+				var unityRendererModel = new UnityRendererModel();
+				unityRendererModel.Initialize(resource.bytes);
+				return unityRendererModel;
+			}
+
+			protected override void DisposeGeneratedResource(UnityRendererModel resource)
+			{
+				resource.Dispose();
+			}
+		}
+
+		class CachedMaterialContainer : CachedResourceContainer<EffekseerMaterialAsset, UnityRendererMaterial>
+		{
+			protected override UnityRendererMaterial GenerateResource(EffekseerMaterialAsset resource)
+			{
+				return new UnityRendererMaterial(resource);
+			}
+		}
+
+		#endregion
 	}
 }
