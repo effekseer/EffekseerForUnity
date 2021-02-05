@@ -750,26 +750,15 @@ namespace Effekseer
 
 			var unityRendererModel = new UnityRendererModel();
 			unityRendererModel.Initialize(vertecies, verteciesCount, faces, facesCount);
-
-			IntPtr ptr = unityRendererModel.VertexBuffer.GetNativeBufferPtr();
-			if (!cachedModels.ContainsKey(ptr))
-			{
-				cachedModels.Add(ptr, unityRendererModel);
-			}
-			return ptr;
+			return cachedModels.Load(unityRendererModel, "ProcedualModel");
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProcedualMaterialGeneratorUngenerate))]
 		private static void ProcedualMaterialGeneratorUngenerate(IntPtr modelPtr)
 		{
-			if (Instance.RendererType != EffekseerRendererType.Unity)
+			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{
-				if (cachedModels.ContainsKey(modelPtr))
-				{
-					var model = cachedModels[modelPtr];
-					model.Dispose();
-					cachedModels.Remove(modelPtr);
-				}
+				cachedModels.Unload(modelPtr);
 			}
 		}
 
@@ -886,13 +875,26 @@ namespace Effekseer
 			}
 		}
 
-		class CachedModelContainer : CachedResourceContainer<EffekseerModelAsset, UnityRendererModel>
+		class CachedModelContainer : CachedResourceContainer<object, UnityRendererModel>
 		{
-			protected override UnityRendererModel GenerateResource(EffekseerModelAsset resource)
+			protected override UnityRendererModel GenerateResource(object resource)
 			{
-				var unityRendererModel = new UnityRendererModel();
-				unityRendererModel.Initialize(resource.bytes);
-				return unityRendererModel;
+				var asset = resource as EffekseerModelAsset;
+
+				if (asset != null)
+				{
+					var unityRendererModel = new UnityRendererModel();
+					unityRendererModel.Initialize(asset.bytes);
+					return unityRendererModel;
+				}
+
+				var model = resource as UnityRendererModel;
+				if (model != null)
+				{
+					return model;
+				}
+
+				throw new InvalidDataException();
 			}
 
 			protected override void DisposeGeneratedResource(UnityRendererModel resource)
