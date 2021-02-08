@@ -65,7 +65,7 @@ public:
 		auto backend = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
 		auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 		textureDataPtr->SetBackend(backend);
-		
+
 		textureData2NativePtr[textureDataPtr] = texturePtr;
 
 		ES_SAFE_RELEASE(srv);
@@ -129,6 +129,30 @@ EffekseerRenderer::RendererRef GraphicsDX11::CreateRenderer(int squareMaxCount, 
 void GraphicsDX11::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture)
 {
 	((EffekseerRendererDX11::Renderer*)renderer)->SetBackground((ID3D11ShaderResourceView*)backgroundTexture);
+}
+
+void GraphicsDX11::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
+											 const Effekseer::Matrix44& projectionMatrix,
+											 void* depthTexture)
+{
+	if (depthTexture == nullptr)
+	{
+		renderer->SetDepth(nullptr, EffekseerRenderer::DepthReconstructionParameter{});
+		return;
+	}
+
+	EffekseerRenderer::DepthReconstructionParameter param;
+	param.DepthBufferScale = 1.0f;
+	param.DepthBufferOffset = 0.0f;
+	param.ProjectionMatrix33 = projectionMatrix.Values[2][2];
+	param.ProjectionMatrix43 = projectionMatrix.Values[2][3];
+	param.ProjectionMatrix34 = projectionMatrix.Values[3][2];
+	param.ProjectionMatrix44 = projectionMatrix.Values[3][3];
+
+	auto srv = static_cast<ID3D11ShaderResourceView*>(depthTexture);
+
+	auto texture = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
+	renderer->SetDepth(texture, param);
 }
 
 void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)

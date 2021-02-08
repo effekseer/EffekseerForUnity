@@ -53,6 +53,8 @@ public:
 
 	virtual void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) = 0;
 
+	virtual void SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer, const Effekseer::Matrix44& projectionMatrix, void* depthTexture) {}
+
 	virtual void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) = 0;
 
 	virtual Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
