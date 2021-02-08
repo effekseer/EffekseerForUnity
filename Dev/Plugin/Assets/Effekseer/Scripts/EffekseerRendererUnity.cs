@@ -1144,11 +1144,11 @@ namespace Effekseer.Internal
 			// assign a dinsotrion texture
 			if (path.renderTexture != null)
 			{
-				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.ptr);
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, path.renderTexture.ptr);
 			}
 			else
 			{
-				Plugin.EffekseerSetBackGroundTexture(path.renderId, IntPtr.Zero);
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, IntPtr.Zero);
 			}
 
 			// update view matrixes
@@ -1159,6 +1159,28 @@ namespace Effekseer.Internal
 
 			// Reset command buffer
 			path.ResetBuffers();
+
+			// copy depth
+			if(EffekseerRendererUtils.IsDistortionEnabled)
+			{
+				if (renderTargetProperty != null)
+				{
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
+
+					if (renderTargetProperty.Viewport.width > 0)
+					{
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+					}
+				}
+				else
+				{
+					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+
+					// TODO : copy depth
+
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+				}
+			}
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
@@ -1206,6 +1228,9 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+
+					// TODO : copy depth
+
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 				}
 			}

@@ -102,6 +102,29 @@ namespace Effekseer
 		[SerializeField]
 		public bool enableDistortionMobile = false;
 
+
+		/// <summary xml:lang="en">
+		/// Enables depth.
+		/// When It has set false, rendering will be faster.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// 深度を有効にします。
+		/// falseにすると描画処理が軽くなります。
+		/// </summary>
+		[SerializeField]
+		public bool enableDepth = true;
+
+		/// <summary xml:lang="en">
+		/// Enables depth on mobile environment (iOS,Android,WebGL,Switch).
+		/// When It has set false, rendering will be faster.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// モバイル環境(iOS,Android,WebGL,Switch)で深度を有効にします。
+		/// falseにすると描画処理が軽くなります。
+		/// </summary>
+		[SerializeField]
+		public bool enableDepthMobile = false;
+
 		/*
 		/// <summary xml:lang="en">
 		/// The scale of buffer for distortion.

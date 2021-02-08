@@ -131,13 +131,13 @@ void GraphicsDX11::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* r
 	((EffekseerRendererDX11::Renderer*)renderer)->SetBackground((ID3D11ShaderResourceView*)backgroundTexture);
 }
 
-void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
+void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 {
 	HRESULT hr;
 
 	// create ID3D11ShaderResourceView because a texture type is ID3D11Texture2D from Unity on DX11
 	ID3D11Texture2D* textureDX11 = (ID3D11Texture2D*)texture;
-	ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)renderSettings[renderId].backgroundTexture;
+	ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)renderSettings[renderId].externalTextures[static_cast<int>(type)];
 
 	if (srv != nullptr)
 	{
@@ -148,7 +148,7 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 			// if texture is not same, delete it
 			srv->Release();
 			srv = nullptr;
-			renderSettings[renderId].backgroundTexture = nullptr;
+			renderSettings[renderId].externalTextures[static_cast<int>(type)] = nullptr;
 		}
 		ES_SAFE_RELEASE(res);
 	}
@@ -179,7 +179,7 @@ void GraphicsDX11::EffekseerSetBackGroundTexture(int renderId, void* texture)
 		hr = d3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
 		if (SUCCEEDED(hr))
 		{
-			renderSettings[renderId].backgroundTexture = srv;
+			renderSettings[renderId].externalTextures[static_cast<int>(type)] = srv;
 		}
 	}
 }

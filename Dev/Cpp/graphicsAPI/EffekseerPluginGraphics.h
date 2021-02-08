@@ -1,9 +1,9 @@
 ﻿
 #pragma once
 
+#include "../common/EffekseerPluginMaterial.h"
 #include "../common/EffekseerPluginModel.h"
 #include "../common/EffekseerPluginTexture.h"
-#include "../common/EffekseerPluginMaterial.h"
 #include "../unity/IUnityGraphics.h"
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
@@ -19,7 +19,6 @@ class Renderer;
 
 namespace EffekseerPlugin
 {
-
 
 class RenderPass
 {
@@ -54,7 +53,7 @@ public:
 
 	virtual void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) = 0;
 
-	virtual void EffekseerSetBackGroundTexture(int renderId, void* texture) = 0;
+	virtual void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) = 0;
 
 	virtual Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
 

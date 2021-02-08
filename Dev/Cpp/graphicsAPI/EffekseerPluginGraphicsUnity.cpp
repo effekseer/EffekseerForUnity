@@ -38,7 +38,10 @@ void GraphicsUnity::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* 
 	((EffekseerRendererUnity::RendererImplemented*)renderer)->SetBackground(backgroundTexture);
 }
 
-void GraphicsUnity::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
+void GraphicsUnity::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
+{
+	renderSettings[renderId].externalTextures[static_cast<int>(type)] = texture;
+}
 
 Effekseer::TextureLoaderRef GraphicsUnity::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {

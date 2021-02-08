@@ -23,7 +23,7 @@ EXPORTS
   EffekseerSetProjectionMatrix
   EffekseerSetCameraMatrix
   EffekseerSetStereoRenderingMatrix
-  EffekseerSetBackGroundTexture
+  EffekseerSetExternalTexture
   EffekseerSetRenderSettings
   EffekseerSetRenderingCameraCullingMask
   EffekseerPlayEffect

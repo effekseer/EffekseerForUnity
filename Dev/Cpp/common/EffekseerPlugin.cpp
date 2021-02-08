@@ -189,12 +189,19 @@ void TermRenderer()
 	{
 		if (g_UnityRendererType == kUnityGfxRendererD3D11)
 		{
-			if (renderSettings[i].backgroundTexture)
+			for (size_t j = 0; j < renderSettings[i].externalTextures.size(); j++)
 			{
-				((ID3D11ShaderResourceView*)renderSettings[i].backgroundTexture)->Release();
+				if (renderSettings[i].externalTextures[j])
+				{
+					((ID3D11ShaderResourceView*)renderSettings[i].externalTextures[j])->Release();
+				}
 			}
 		}
-		renderSettings[i].backgroundTexture = nullptr;
+
+		for (size_t j = 0; j < renderSettings[i].externalTextures.size(); j++)
+		{
+			renderSettings[i].externalTextures[j] = nullptr;
+		}
 	}
 #endif
 
@@ -444,7 +451,7 @@ extern "C"
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// 背景テクスチャをセット
-		SetBackGroundTexture(settings.backgroundTexture);
+		SetBackGroundTexture(settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
 
 		// render
 
@@ -668,7 +675,7 @@ extern "C"
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// 背景テクスチャをセット
-		SetBackGroundTexture(settings.backgroundTexture);
+		SetBackGroundTexture(settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
 
 		std::shared_ptr<RenderPass> renderPath = nullptr;
 		auto it = g_backRenderPasses.find(renderId);
@@ -788,11 +795,11 @@ extern "C"
 		}
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetBackGroundTexture(int renderId, void* texture)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 	{
 		if (g_graphics != nullptr)
 		{
-			g_graphics->EffekseerSetBackGroundTexture(renderId, texture);
+			g_graphics->SetExternalTexture(renderId, type, texture);
 		}
 	}
 

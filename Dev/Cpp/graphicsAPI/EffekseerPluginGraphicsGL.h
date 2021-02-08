@@ -39,7 +39,7 @@ public:
 
 	void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) override;
 
-	void EffekseerSetBackGroundTexture(int renderId, void* texture) override;
+	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
 
 	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
 

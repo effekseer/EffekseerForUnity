@@ -18,9 +18,13 @@ namespace Effekseer.Internal
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public BackgroundRenderTexture renderTexture;
+			public DepthRenderTexture depthTexture;
+
 			public int LifeTime = 5;
 
 			bool isDistortionEnabled = false;
+
+			bool isDepthEnabld = false;
 
 			/// <summary>
 			/// Distortion is disabled forcely because of VR
@@ -53,10 +57,11 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty
+			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty
 				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
+				isDepthEnabld = enableDepth;
 				isDistortionMakeDisabledForcely = false;
 
 				// Create a command buffer that is effekseer renderer
@@ -74,6 +79,8 @@ namespace Effekseer.Internal
 				}
 
 				SetupBackgroundBuffer(this.isDistortionEnabled, renderTargetProperty);
+
+				RendererUtils.SetupDepthBuffer(ref depthTexture, isDistortionEnabled, camera, renderTargetProperty);
 
 				if(!isCommandBufferFromExternal)
 				{
@@ -123,6 +130,30 @@ namespace Effekseer.Internal
 				if(cmbBuf == null)
 				{
 					return;
+				}
+
+				if (this.depthTexture != null)
+				{
+					if (renderTargetProperty != null)
+					{
+						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture);
+
+						if (renderTargetProperty.Viewport.width > 0)
+						{
+							cmbBuf.SetViewport(renderTargetProperty.Viewport);
+						}
+					}
+					else
+					{
+						cmbBuf.Blit(BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture);
+						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+
+						// to reset shader settings. SetRenderTarget is not applied until drawing
+						if (fakeMaterial != null)
+						{
+							cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
+						}
+					}
 				}
 
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
@@ -188,6 +219,12 @@ namespace Effekseer.Internal
 					this.renderTexture.Release();
 					this.renderTexture = null;
 				}
+
+				if (depthTexture != null)
+				{
+					depthTexture.Release();
+					depthTexture = null;
+				}
 			}
 
 			public bool IsValid(RenderTargetProperty renderTargetProperty)
@@ -199,6 +236,14 @@ namespace Effekseer.Internal
 				else
 				{
 					if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+				}
+
+				if (this.isDepthEnabld != EffekseerRendererUtils.IsDepthEnabled)
+				{
+					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
+
+					return targetSize.x == this.depthTexture.width &&
+						targetSize.y == this.depthTexture.height;
 				}
 
 				if (this.renderTexture != null)
@@ -358,7 +403,7 @@ namespace Effekseer.Internal
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, stereoRenderingType);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -367,7 +412,7 @@ namespace Effekseer.Internal
 			{
 				path.Dispose();
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, stereoRenderingType);
 			}
 
 			path.LifeTime = 60;
@@ -407,7 +452,20 @@ namespace Effekseer.Internal
 			// assign a dinsotrion texture
 			if (path.renderTexture != null)
 			{
-				Plugin.EffekseerSetBackGroundTexture(path.renderId, path.renderTexture.ptr);
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, path.renderTexture.ptr);
+			}
+			else
+			{
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, IntPtr.Zero);
+			}
+
+			if (path.depthTexture != null)
+			{
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, path.depthTexture.ptr);
+			}
+			else
+			{
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, IntPtr.Zero);
 			}
 
 			SpecifyRenderingMatrix(camera, path);

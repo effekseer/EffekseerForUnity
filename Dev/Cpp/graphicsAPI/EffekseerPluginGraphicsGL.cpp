@@ -131,7 +131,10 @@ void GraphicsGL::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* ren
 	((EffekseerRendererGL::Renderer*)renderer)->SetBackground((GLuint)(uintptr_t)backgroundTexture);
 }
 
-void GraphicsGL::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
+void GraphicsGL::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
+{
+	renderSettings[renderId].externalTextures[static_cast<int>(type)]= texture;
+}
 
 Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
