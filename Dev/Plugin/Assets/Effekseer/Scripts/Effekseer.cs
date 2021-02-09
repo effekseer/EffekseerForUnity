@@ -381,6 +381,12 @@ namespace Effekseer
 			public EdgeParameters EdgeParams;
 			public Vector4 SoftParticleParam;
 
+			public Vector4 ReconstrcutionParam1;
+			public Vector4 ReconstrcutionParam2;
+
+			//! For a material
+			public Vector4 PredefinedUniform;
+
 			public int ZTest;
 
 			public int ZWrite;

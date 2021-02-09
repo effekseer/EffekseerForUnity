@@ -726,11 +726,13 @@ namespace Effekseer.Internal
 			public CameraEvent cameraEvent;
 			public int renderId;
 			public BackgroundRenderTexture renderTexture;
+			public DepthRenderTexture depthTexture;
 			public ComputeBufferCollection computeBufferFront;
 			public ComputeBufferCollection computeBufferBack;
 			public int LifeTime = 5;
 
 			bool isDistortionEnabled = false;
+			bool isDepthEnabled = false;
 
 			public MaterialPropCollection materiaProps = null;
 			public ModelBufferCollection modelBuffers = null;
@@ -777,11 +779,14 @@ namespace Effekseer.Internal
 				}
 			}
 
-			public void Init(bool enableDistortion, RenderTargetProperty renderTargetProperty)
+			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty)
 			{
 				isDistortionEnabled = enableDistortion;
+				isDepthEnabled = enableDepth;
 
 				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
+
+				RendererUtils.SetupDepthBuffer(ref depthTexture, isDistortionEnabled, camera, renderTargetProperty);
 
 				// Create a command buffer that is effekseer renderer
 				if (!isCommandBufferFromExternal)
@@ -853,6 +858,14 @@ namespace Effekseer.Internal
 			public bool IsValid(RenderTargetProperty renderTargetProperty)
 			{
 				if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
+
+				if (this.isDepthEnabled != EffekseerRendererUtils.IsDepthEnabled)
+				{
+					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
+
+					return targetSize.x == this.depthTexture.width &&
+						targetSize.y == this.depthTexture.height;
+				}
 
 				if (this.renderTexture != null)
 				{
@@ -1114,7 +1127,7 @@ namespace Effekseer.Internal
 				}
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -1122,7 +1135,7 @@ namespace Effekseer.Internal
 			if (!path.IsValid(renderTargetProperty))
 			{
 				path.Dispose();
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, renderTargetProperty);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty);
 			}
 
 			path.Update();
@@ -1151,6 +1164,15 @@ namespace Effekseer.Internal
 				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, IntPtr.Zero);
 			}
 
+			if (path.depthTexture != null)
+			{
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, path.depthTexture.ptr);
+			}
+			else
+			{
+				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, IntPtr.Zero);
+			}
+
 			// update view matrixes
 			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
 				GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
@@ -1160,7 +1182,7 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
-			// copy depth
+			// copy back
 			if(EffekseerRendererUtils.IsDistortionEnabled)
 			{
 				if (renderTargetProperty != null)
@@ -1175,9 +1197,24 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+				}
+			}
 
-					// TODO : copy depth
+			if (path.depthTexture != null)
+			{
+				if (renderTargetProperty != null)
+				{
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture);
 
+					if (renderTargetProperty.Viewport.width > 0)
+					{
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+					}
+				}
+				else
+				{
+					path.commandBuffer.Blit(BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 				}
 			}
@@ -1199,7 +1236,7 @@ namespace Effekseer.Internal
 				path.ReallocateComputeBuffer(maxmumSize);
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferBack, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture, path.depthTexture);
 
 			// Distortion
 			if (EffekseerRendererUtils.IsDistortionEnabled &&
@@ -1228,9 +1265,6 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
-
-					// TODO : copy depth
-
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 				}
 			}
@@ -1251,17 +1285,18 @@ namespace Effekseer.Internal
 				path.ReallocateComputeBuffer(maxmumSize);
 			}
 
-			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture);
+			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture, path.depthTexture);
 		}
 
-		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DummyTextureType type)
+		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth,  DummyTextureType type)
 		{
 			if (background != null && background.ptr == key) return background.renderTexture;
+			if (depth != null && depth.ptr == key) return depth.renderTexture;
 
 			return EffekseerSystem.GetCachedTexture(key, type);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background)
+		unsafe void RenderInternal(CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
@@ -1286,18 +1321,18 @@ namespace Effekseer.Internal
 
 					if (parameter.RenderMode == 1)
 					{
-						RenderModdel(parameter, infoBuffer, commandBuffer, matPropCol, modelBufferCol, customDataBufferCol, background);
+						RenderModdel(parameter, infoBuffer, commandBuffer, matPropCol, modelBufferCol, customDataBufferCol, background, depth);
 					}
 					else
 					{
-						RenderSprite(parameter, infoBuffer, commandBuffer, computeBuffer, matPropCol, background);
+						RenderSprite(parameter, infoBuffer, commandBuffer, computeBuffer, matPropCol, background, depth);
 					}
 				}
 			}
 
 		}
 
-		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background)
+		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			var prop = matPropCol.GetNext();
 
@@ -1325,7 +1360,7 @@ namespace Effekseer.Internal
 				ApplyAdvancedParameter(parameter, prop);
 			}
 
-			ApplyTextures(parameter, prop, background);
+			ApplyTextures(parameter, prop, background, depth);
 
 			if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 			{
@@ -1360,10 +1395,13 @@ namespace Effekseer.Internal
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
 				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+				prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
+				prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
+				prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
 				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 				{
-					var texture = GetAndApplyParameterToTexture(parameter, ti, background, DummyTextureType.White);
+					var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 					if (texture != null)
 					{
 						prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
@@ -1378,7 +1416,12 @@ namespace Effekseer.Internal
 
 				if (parameter.IsRefraction > 0 && background != null)
 				{
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, DummyTextureType.White));
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+				}
+
+				if (depth != null)
+				{
+					prop.SetTexture("_depthTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length + 1), background, depth, DummyTextureType.White));
 				}
 
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
@@ -1389,26 +1432,16 @@ namespace Effekseer.Internal
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 				{
-#if NEW_SHADER
 					prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 					prop.SetColor("fLightAmbientColor", EffekseerSystem.LightAmbientColor);
-#else
-						prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
-						prop.SetColor("lightColor", EffekseerSystem.LightColor);
-						prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-#endif
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 				{
-#if NEW_SHADER
 					prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
-#else
-					prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
-#endif
 
 					if (background != null)
 					{
@@ -1423,7 +1456,7 @@ namespace Effekseer.Internal
 			
 		}
 
-		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background)
+		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			// Draw model
 			var modelParameters1 = ((Plugin.UnityRenderModelParameter1*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));
@@ -1487,7 +1520,7 @@ namespace Effekseer.Internal
 				prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 				prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
 
-				ApplyTextures(parameter, prop, background);
+				ApplyTextures(parameter, prop, background, depth);
 
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
@@ -1535,10 +1568,13 @@ namespace Effekseer.Internal
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
 					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
+					prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
+					prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
+					prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
 					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
 					{
-						var texture = GetAndApplyParameterToTexture(parameter, ti, background, DummyTextureType.White);
+						var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 						if (texture != null)
 						{
 							prop.SetTexture(efkMaterial.asset.textures[ti].Name, texture);
@@ -1571,7 +1607,12 @@ namespace Effekseer.Internal
 
 					if (parameter.IsRefraction > 0 && background != null)
 					{
-						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, DummyTextureType.White));
+						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+					}
+
+					if (depth != null)
+					{
+						prop.SetTexture("_depthTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length + 1), background, depth, DummyTextureType.White));
 					}
 
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
@@ -1582,25 +1623,15 @@ namespace Effekseer.Internal
 					if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 					{
-#if NEW_SHADER
 						prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
 						prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 						prop.SetColor("fLightAmbientColor", EffekseerSystem.LightAmbientColor);
-#else
-						prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
-						prop.SetColor("lightColor", EffekseerSystem.LightColor);
-						prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-#endif
 						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 					{
-#if NEW_SHADER
 						prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
-#else
-						prop.SetFloat("distortionIntensity", parameter.DistortionIntensity);
-#endif
 						if (background != null)
 						{
 							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
@@ -1619,9 +1650,9 @@ namespace Effekseer.Internal
 			}
 		}
 
-		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DummyTextureType dummyTextureType)
+		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType dummyTextureType)
 		{
-			var texture = GetCachedTexture(parameter.GetTexturePtr(index), background, dummyTextureType);
+			var texture = GetCachedTexture(parameter.GetTexturePtr(index), background, depth, dummyTextureType);
 			if(texture == null)
 			{
 				return null;
@@ -1648,17 +1679,13 @@ namespace Effekseer.Internal
 			return texture;
 		}
 
-		unsafe void ApplyTextures(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop, BackgroundRenderTexture background)
+		unsafe void ApplyTextures(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			int textureOffset = 0;
 
 			{
-				var colorTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
-#if NEW_SHADER
+				var colorTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White);
 				prop.SetTexture("_colorTex", colorTexture);
-#else
-				prop.SetTexture("_ColorTex", colorTexture);
-#endif
 				textureOffset += 1;
 			}
 
@@ -1667,12 +1694,7 @@ namespace Effekseer.Internal
 			{
 				if (background != null)
 				{
-#if NEW_SHADER
-					prop.SetTexture("_backTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
-#else
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.TexturePtrs1, background, DummyTextureType.White));
-#endif
-
+					prop.SetTexture("_backTex", GetCachedTexture(parameter.TexturePtrs1, background, depth, DummyTextureType.White));
 				}
 				textureOffset += 1;
 			}
@@ -1680,38 +1702,41 @@ namespace Effekseer.Internal
 			if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 				parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
 			{
-				var normalTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				var normalTexture = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.Normal);
 
 
-#if NEW_SHADER
 				prop.SetTexture("_normalTex", normalTexture);
-#else
-				prop.SetTexture("_NormalTex", normalTexture);
-#endif
 				textureOffset += 1;
 			}
 
 			if(parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 			{
-				var alphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				var alphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White);
 				prop.SetTexture("_alphaTex", alphaTex);
 				textureOffset += 1;
 
-				var uvDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				var uvDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.Normal);
 				prop.SetTexture("_uvDistortionTex", uvDistortionTex);
 				textureOffset += 1;
 
-				var blendTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				var blendTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White);
 				prop.SetTexture("_blendTex", blendTex);
 				textureOffset += 1;
 
-				var blendAlphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.White);
+				var blendAlphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White);
 				prop.SetTexture("_blendAlphaTex", blendAlphaTex);
 				textureOffset += 1;
 
-				var blendUVDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, DummyTextureType.Normal);
+				var blendUVDistortionTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.Normal);
 				prop.SetTexture("_blendUVDistortionTex", blendUVDistortionTex);
 				textureOffset += 1;
+			}
+
+			{
+				if (depth != null)
+				{
+					prop.SetTexture("_depthTex", GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White));
+				}
 			}
 		}
 
@@ -1733,6 +1758,8 @@ namespace Effekseer.Internal
 			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
 			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
 			prop.SetVector("softParticleParam", parameter.SoftParticleParam);
+			prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
+			prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
 		}
 
 		public void OnPostRender(Camera camera)

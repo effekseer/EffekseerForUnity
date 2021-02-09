@@ -444,6 +444,7 @@ Cull[_Cull]
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
 		@endif
+		sampler2D _depthTex;
 
 		%TEX_VARIABLE%
 
@@ -516,6 +517,9 @@ Cull[_Cull]
 		float4 lightDirection;
 		float4 lightColor;
 		float4 lightAmbientColor;
+		float4 predefined_uniform;
+		float4 reconstructionParam1;
+		float4 reconstructionParam2;
 
 		float2 GetUV(float2 uv)
 		{
@@ -528,6 +532,21 @@ Cull[_Cull]
 			uv.y = uv.y;
 			return uv;
 		}
+
+		float CalcDepthFade(float2 screenUV, float meshZ, float softParticleParam)
+		{
+			float backgroundZ = tex2D(_depthTex, GetUVBack(screenUV)).x;
+			float distance = softParticleParam * predefined_uniform.y;
+			float2 rescale = reconstructionParam1.xy;
+			float4 params = reconstructionParam2;
+
+			float2 zs = float2(backgroundZ * rescale.x + rescale.y, meshZ);
+
+			float2 depth = (zs * params.w - params.y) / (params.x - zs* params.z);
+
+			return min(max((depth.y - depth.x) / distance, 0.0), 1.0);
+		}
+
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
