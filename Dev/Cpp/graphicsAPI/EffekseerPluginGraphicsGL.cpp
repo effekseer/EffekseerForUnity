@@ -149,7 +149,7 @@ void GraphicsGL::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer
 	param.ProjectionMatrix34 = projectionMatrix.Values[3][2];
 	param.ProjectionMatrix44 = projectionMatrix.Values[3][3];
 
-	auto texture = EffekseerRendererGL::CreateTexture(graphicsDevice_, reinterpret_cast<GLuint>(depthTexture), false, []() -> void {});
+	auto texture = EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)depthTexture, false, []() -> void {});
 	renderer->SetDepth(texture, param);
 }
 
