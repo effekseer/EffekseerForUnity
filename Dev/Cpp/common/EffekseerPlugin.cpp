@@ -189,12 +189,19 @@ void TermRenderer()
 	{
 		if (g_UnityRendererType == kUnityGfxRendererD3D11)
 		{
-			if (renderSettings[i].backgroundTexture)
+			for (size_t j = 0; j < renderSettings[i].externalTextures.size(); j++)
 			{
-				((ID3D11ShaderResourceView*)renderSettings[i].backgroundTexture)->Release();
+				if (renderSettings[i].externalTextures[j])
+				{
+					((ID3D11ShaderResourceView*)renderSettings[i].externalTextures[j])->Release();
+				}
 			}
 		}
-		renderSettings[i].backgroundTexture = nullptr;
+
+		for (size_t j = 0; j < renderSettings[i].externalTextures.size(); j++)
+		{
+			renderSettings[i].externalTextures[j] = nullptr;
+		}
 	}
 #endif
 
@@ -218,6 +225,12 @@ void SetBackGroundTexture(void* backgroundTexture)
 {
 	if (g_graphics != nullptr)
 		g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(), backgroundTexture);
+}
+
+void SetDepthTexture(const Effekseer::Matrix44& projectionMatrix, void* backgroundTexture)
+{
+	if (g_graphics != nullptr)
+		g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, backgroundTexture);
 }
 
 UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
@@ -443,8 +456,11 @@ extern "C"
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
-		// 背景テクスチャをセット
-		SetBackGroundTexture(settings.backgroundTexture);
+		// Specify textures
+		SetBackGroundTexture(settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
+
+
+		SetDepthTexture(projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)]);
 
 		// render
 
@@ -484,8 +500,8 @@ extern "C"
 			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), nullptr);
 		}
 
-		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
+		SetDepthTexture(projectionMatrix, nullptr);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderFront(int renderId)
@@ -543,6 +559,7 @@ extern "C"
 
 		// 背景テクスチャを解除
 		SetBackGroundTexture(nullptr);
+		SetDepthTexture({}, nullptr);
 
 		// Viewportを初期化
 		if (settings.stereoRenderingType == StereoRenderingType::SinglePass)
@@ -667,8 +684,9 @@ extern "C"
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
-		// 背景テクスチャをセット
-		SetBackGroundTexture(settings.backgroundTexture);
+		// Specify textures
+		SetBackGroundTexture(settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
+		SetDepthTexture(projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)]);
 
 		std::shared_ptr<RenderPass> renderPath = nullptr;
 		auto it = g_backRenderPasses.find(renderId);
@@ -788,11 +806,11 @@ extern "C"
 		}
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetBackGroundTexture(int renderId, void* texture)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 	{
 		if (g_graphics != nullptr)
 		{
-			g_graphics->EffekseerSetBackGroundTexture(renderId, texture);
+			g_graphics->SetExternalTexture(renderId, type, texture);
 		}
 	}
 

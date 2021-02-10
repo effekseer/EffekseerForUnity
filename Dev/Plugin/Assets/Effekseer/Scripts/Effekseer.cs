@@ -21,7 +21,14 @@ namespace Effekseer
 			return time * 60.0f;
 		}
 	}
-	
+
+	enum ExternalTextureType : int
+	{
+		Background,
+		Depth,
+		Max,
+	}
+
 	internal static class Plugin
 	{
 #if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_WEBGL || UNITY_SWITCH)
@@ -78,7 +85,7 @@ namespace Effekseer
 		public static extern void EffekseerSetStereoRenderingMatrix(int renderId, int renderType, float[] camCenterMat, float[] projMatL, float[] projMatR, float[] camMatL, float[] camMatR);
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerSetBackGroundTexture(int renderId, IntPtr background);
+		public static extern void EffekseerSetExternalTexture(int renderId, ExternalTextureType type, IntPtr background);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetRenderSettings(int renderId, bool renderIntoTexture);
@@ -373,6 +380,12 @@ namespace Effekseer
 			public float EmissiveScaling;
 			public EdgeParameters EdgeParams;
 			public Vector4 SoftParticleParam;
+
+			public Vector4 ReconstrcutionParam1;
+			public Vector4 ReconstrcutionParam2;
+
+			//! For a material
+			public Vector4 PredefinedUniform;
 
 			public int ZTest;
 

@@ -444,6 +444,7 @@ Cull[_Cull]
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
 		@endif
+		sampler2D _depthTex;
 
 		%TEX_VARIABLE%
 
@@ -508,7 +509,8 @@ Cull[_Cull]
 			float3 WorldN : TEXCOORD3;
 			float3 WorldT : TEXCOORD4;
 			float3 WorldB : TEXCOORD5;
-			float2 ScreenUV : TEXCOORD6;
+			float4 PosP : TEXCOORD6;
+			//float2 ScreenUV : TEXCOORD6;
 			//%CUSTOM_VSPS_INOUT1%
 			//%CUSTOM_VSPS_INOUT2%
 		};
@@ -516,6 +518,9 @@ Cull[_Cull]
 		float4 lightDirection;
 		float4 lightColor;
 		float4 lightAmbientColor;
+		float4 predefined_uniform;
+		float4 reconstructionParam1;
+		float4 reconstructionParam2;
 
 		float2 GetUV(float2 uv)
 		{
@@ -528,6 +533,21 @@ Cull[_Cull]
 			uv.y = uv.y;
 			return uv;
 		}
+
+		float CalcDepthFade(float2 screenUV, float meshZ, float softParticleParam)
+		{
+			float backgroundZ = tex2D(_depthTex, GetUVBack(screenUV)).x;
+			float distance = softParticleParam * predefined_uniform.y;
+			float2 rescale = reconstructionParam1.xy;
+			float4 params = reconstructionParam2;
+
+			float2 zs = float2(backgroundZ * rescale.x + rescale.y, meshZ);
+
+			float2 depth = (zs * params.w - params.y) / (params.x - zs* params.z);
+
+			return min(max((depth.y - depth.x) / distance, 0.0), 1.0);
+		}
+
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
@@ -613,6 +633,10 @@ Cull[_Cull]
 			float4 vcolor = Input.Color;
 			@endif
 
+			// Dummy
+			float2 screenUV = float2(0.0, 0.0);
+			float meshZ =  0.0f;
+
 			%VSCODE%
 
 			worldPos = worldPos + worldPositionOffset;
@@ -626,8 +650,9 @@ Cull[_Cull]
 			Output.VColor = vcolor;
 			Output.UV1 = uv1;
 			Output.UV2 = uv2;
-			Output.ScreenUV = Output.Position.xy / Output.Position.w;
-			Output.ScreenUV.xy = float2(Output.ScreenUV.x + 1.0, 1.0 - Output.ScreenUV.y) * 0.5;
+			Output.PosP = Output.Position;
+			// Output.ScreenUV = Output.Position.xy / Output.Position.w;
+			// Output.ScreenUV.xy = float2(Output.ScreenUV.x + 1.0, 1.0 - Output.ScreenUV.y) * 0.5;
 		
 			return Output;
 		}
@@ -706,6 +731,9 @@ Cull[_Cull]
 		
 			float3 pixelNormalDir = worldNormal;
 			float4 vcolor = Input.VColor;
+			float2 screenUV = Input.PosP.xy / Input.PosP.w;
+			float meshZ =  Input.PosP.z / Input.PosP.w;
+			screenUV.xy = float2(screenUV.x + 1.0, 1.0 - screenUV.y) * 0.5;
 
 			float3 objectScale = float3(1.0, 1.0, 1.0);
 		
@@ -718,7 +746,7 @@ Cull[_Cull]
 
 			float2 distortUV = 	dir.xy * (refraction - airRefraction);
 
-			distortUV += Input.ScreenUV;
+			distortUV += screenUV;
 			distortUV = GetUVBack(distortUV);	
 
 			float4 bg = tex2D(_BackTex, distortUV);

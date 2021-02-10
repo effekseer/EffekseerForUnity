@@ -277,6 +277,23 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		int32_t textureCount = collector_.TextureCount;
 		std::array<Effekseer::Backend::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
 
+		::Effekseer::Backend::TextureRef depthTexture = nullptr;
+		::EffekseerRenderer::DepthReconstructionParameter reconstructionParam;
+		m_renderer->GetImpl()->GetDepth(depthTexture, reconstructionParam);
+
+
+		if (collector_.IsDepthRequired)
+		{
+			if (depthTexture == nullptr ||
+				(parameter.BasicParameterPtr->SoftParticleDistanceFar == 0.0f && parameter.BasicParameterPtr->SoftParticleDistanceNear == 0.0f &&
+				 parameter.BasicParameterPtr->SoftParticleDistanceNearOffset == 0.0f && collector_.ShaderType != EffekseerRenderer::RendererShaderType::Material))
+			{
+				depthTexture = m_renderer->GetImpl()->GetProxyTexture(EffekseerRenderer::ProxyTextureType::White);
+			}
+
+			textures[collector_.DepthIndex] = depthTexture;
+		}
+
 		for (int32_t i = 0; i < textureCount; i++)
 		{
 			state.TextureFilterTypes[i] = parameter.BasicParameterPtr->TextureFilters[i];
@@ -422,7 +439,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	adLitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedLit));
 
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
-
+	GetImpl()->isSoftParticleEnabled = true;
 	// exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
 	return true;
 }
@@ -580,6 +597,8 @@ void StorePixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::Pixel
 	rp.EdgeParams.ColorScaling = constantBuffer->EdgeParam.ColorScaling;
 	rp.EdgeParams.Color = constantBuffer->EdgeParam.EdgeColor;
 	rp.SoftParticleParam = constantBuffer->SoftParticleParam.softParticleParams;
+	rp.ReconstrcutionParam1 = constantBuffer->SoftParticleParam.reconstructionParam1;
+	rp.ReconstrcutionParam2 = constantBuffer->SoftParticleParam.reconstructionParam2;
 }
 
 void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::PixelConstantBufferDistortion* constantBuffer)
@@ -590,6 +609,8 @@ void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp, EffekseerRende
 	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
 	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
 	rp.SoftParticleParam = constantBuffer->SoftParticleParam.softParticleParams;
+	rp.ReconstrcutionParam1 = constantBuffer->SoftParticleParam.reconstructionParam1;
+	rp.ReconstrcutionParam2 = constantBuffer->SoftParticleParam.reconstructionParam2;
 }
 
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
@@ -651,6 +672,21 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 																				vertexOffset + spriteCount * 4);
 
 		// Uniform
+		memcpy(rp.ReconstrcutionParam1.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam1Offset,
+			   sizeof(float) * 4);
+
+		memcpy(rp.ReconstrcutionParam2.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam2Offset,
+			   sizeof(float) * 4);
+
+		memcpy(rp.PredefinedUniform.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelPredefinedOffset,
+			   sizeof(float) * 4);
+
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
 		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);
@@ -965,6 +1001,21 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		assert(!nativeMaterial->GetIsSimpleVertex());
 
 		// Uniform
+		memcpy(rp.ReconstrcutionParam1.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam1Offset,
+			   sizeof(float) * 4);
+
+		memcpy(rp.ReconstrcutionParam2.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam2Offset,
+			   sizeof(float) * 4);
+
+		memcpy(rp.PredefinedUniform.data(),
+			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
+				   m_currentShader->GetParameterGenerator()->PixelPredefinedOffset,
+			   sizeof(float) * 4);
+
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
 		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);

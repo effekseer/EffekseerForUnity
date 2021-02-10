@@ -38,7 +38,31 @@ void GraphicsUnity::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* 
 	((EffekseerRendererUnity::RendererImplemented*)renderer)->SetBackground(backgroundTexture);
 }
 
-void GraphicsUnity::EffekseerSetBackGroundTexture(int renderId, void* texture) { renderSettings[renderId].backgroundTexture = texture; }
+void GraphicsUnity::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
+										   const Effekseer::Matrix44& projectionMatrix,
+										   void* depthTexture)
+{
+	if (depthTexture == nullptr)
+	{
+		renderer->SetDepth(nullptr, EffekseerRenderer::DepthReconstructionParameter{});
+		return;
+	}
+
+	EffekseerRenderer::DepthReconstructionParameter param;
+	param.DepthBufferScale = 1.0f;
+	param.DepthBufferOffset = 0.0f;
+	param.ProjectionMatrix33 = projectionMatrix.Values[2][2];
+	param.ProjectionMatrix43 = projectionMatrix.Values[2][3];
+	param.ProjectionMatrix34 = projectionMatrix.Values[3][2];
+	param.ProjectionMatrix44 = projectionMatrix.Values[3][3];
+
+	renderer->SetDepth(Effekseer::MakeRefPtr<EffekseerRendererUnity::Texture>(depthTexture), param);
+}
+
+void GraphicsUnity::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
+{
+	renderSettings[renderId].externalTextures[static_cast<int>(type)] = texture;
+}
 
 Effekseer::TextureLoaderRef GraphicsUnity::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {

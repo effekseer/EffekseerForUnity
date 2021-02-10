@@ -84,6 +84,11 @@ extern "C"
 		EdgeParameters EdgeParams;
 
 		std::array<float, 4> SoftParticleParam;
+		std::array<float, 4> ReconstrcutionParam1;
+		std::array<float, 4> ReconstrcutionParam2;
+
+		//! For a material
+		std::array<float, 4> PredefinedUniform;
 
 		int ZTest = 0;
 

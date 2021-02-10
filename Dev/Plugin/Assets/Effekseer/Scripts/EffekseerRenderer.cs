@@ -6,6 +6,36 @@ using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
+	class RendererUtils
+	{
+		public static void SetupDepthBuffer(ref DepthRenderTexture depthRenderTexure, bool enabled, Camera camera, RenderTargetProperty renderTargetProperty)
+		{
+			if (depthRenderTexure != null)
+			{
+				depthRenderTexure.Release();
+				depthRenderTexure = null;
+			}
+
+			if (enabled)
+			{
+				var targetSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
+
+#if UNITY_IOS || UNITY_ANDROID
+					RenderTextureFormat format = RenderTextureFormat.ARGB32;
+#else
+				RenderTextureFormat format = (camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+#endif
+				depthRenderTexure = new DepthRenderTexture(targetSize.x, targetSize.y, renderTargetProperty);
+
+				// HACK for some smart phone
+				if (depthRenderTexure == null || !depthRenderTexure.Create())
+				{
+					depthRenderTexure = null;
+				}
+			}
+		}
+	}
+
 	public class RenderTargetProperty
 	{
 		/// <summary>
@@ -21,6 +51,8 @@ namespace Effekseer.Internal
 		public bool isRequiredToChangeViewport = false;
 		public RenderTexture colorTargetRenderTexture = null;
 
+
+
 		public bool isRequiredToCopyBackground = false;
 
 		int blitArrayMaterialOffset = 0;
@@ -28,8 +60,40 @@ namespace Effekseer.Internal
 		List<Material> blitMaterials = new List<Material>();
 		List<Material> blitArrayMaterials = new List<Material>();
 
+		Material grabDepthMat;
+
 		public RenderTargetProperty()
 		{
+		}
+
+		internal void ApplyToCommandBuffer(CommandBuffer cb, DepthRenderTexture depthRenderTexture)
+		{
+			if (depthRenderTexture != null && depthTargetIdentifier.HasValue)
+			{
+#if UNITY_EDITOR
+				if (grabDepthMat == null)
+				{
+					Effekseer.EffekseerSettings.AssignAssets();
+				}
+#endif
+
+				if (grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
+				{
+					grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
+				}
+
+				cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+
+				// restore
+				if (depthTargetIdentifier.HasValue)
+				{
+					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
+				}
+				else
+				{
+					cb.SetRenderTarget(colorTargetIdentifier);
+				}
+			}
 		}
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
@@ -67,6 +131,7 @@ namespace Effekseer.Internal
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 
+				// restore
 				if (depthTargetIdentifier.HasValue)
 				{
 					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
@@ -80,10 +145,8 @@ namespace Effekseer.Internal
 			else
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
-			}
-			
-			if(!isRequiredToCopyBackground)
-			{
+
+				// restore
 				if (depthTargetIdentifier.HasValue)
 				{
 					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
@@ -169,6 +232,18 @@ namespace Effekseer.Internal
 				return EffekseerSettings.Instance.enableDistortionMobile;
 #else
 				return EffekseerSettings.Instance.enableDistortion;
+#endif
+			}
+		}
+
+		internal static bool IsDepthEnabled
+		{
+			get
+			{
+#if UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL || UNITY_SWITCH
+				return EffekseerSettings.Instance.enableDepthMobile;
+#else
+				return EffekseerSettings.Instance.enableDepth;
 #endif
 			}
 		}
@@ -262,6 +337,75 @@ namespace Effekseer.Internal
 				renderTexture.Release();
 				renderTexture = null;
 				ptr = IntPtr.Zero;
+			}
+		}
+	}
+
+
+
+	internal class DepthRenderTexture
+	{
+		internal RenderTexture renderTexture;
+		public IntPtr ptr = IntPtr.Zero;
+
+		Material grabDepthMat;
+
+		public DepthRenderTexture(int width, int height,  RenderTargetProperty renderTargetProperty)
+		{
+			if (renderTargetProperty != null)
+			{
+				width = renderTargetProperty.colorTargetDescriptor.width;
+				height = renderTargetProperty.colorTargetDescriptor.height;
+			}
+
+			var depthDescriptor = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
+
+			renderTexture = new RenderTexture(depthDescriptor);
+
+			if (renderTexture != null)
+			{
+				renderTexture.name = "EffekseerDepth";
+			}
+		}
+
+		public bool Create()
+		{
+			// HACK for ZenPhone
+			if (this.renderTexture == null || !this.renderTexture.Create())
+			{
+				this.renderTexture = null;
+				return false;
+			}
+
+			this.ptr = this.renderTexture.GetNativeTexturePtr();
+			return true;
+		}
+
+		public void Release()
+		{
+			if (renderTexture != null)
+			{
+				renderTexture.Release();
+				renderTexture = null;
+				ptr = IntPtr.Zero;
+			}
+		}
+
+		public int width
+		{
+			get
+			{
+				if (renderTexture != null) return renderTexture.width;
+				return 0;
+			}
+		}
+
+		public int height
+		{
+			get
+			{
+				if (renderTexture != null) return renderTexture.height;
+				return 0;
 			}
 		}
 	}
