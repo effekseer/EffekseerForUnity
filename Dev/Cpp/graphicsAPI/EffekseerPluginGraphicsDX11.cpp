@@ -193,6 +193,9 @@ void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, vo
 		case DXGI_FORMAT_R16G16B16A16_TYPELESS:
 			desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 			break;
+		case DXGI_FORMAT_R16_TYPELESS:
+			desc.Format = DXGI_FORMAT_R16_FLOAT;
+			break;
 		default:
 			desc.Format = texDesc.Format;
 			break;

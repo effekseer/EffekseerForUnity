@@ -358,7 +358,7 @@ namespace Effekseer.Internal
 				height = renderTargetProperty.colorTargetDescriptor.height;
 			}
 
-			var depthDescriptor = new RenderTextureDescriptor(width, height, RenderTextureFormat.Depth, 16);
+			var depthDescriptor = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
 
 			renderTexture = new RenderTexture(depthDescriptor);
 
@@ -377,7 +377,6 @@ namespace Effekseer.Internal
 				return false;
 			}
 
-			// TODO : is it OK???? for metal
 			this.ptr = this.renderTexture.GetNativeTexturePtr();
 			return true;
 		}
