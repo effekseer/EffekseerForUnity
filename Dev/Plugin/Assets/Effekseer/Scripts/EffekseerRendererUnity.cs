@@ -1296,6 +1296,12 @@ namespace Effekseer.Internal
 			return EffekseerSystem.GetCachedTexture(key, type);
 		}
 
+		Texture GetDepthTexture(DepthRenderTexture depth)
+		{
+			if (depth != null) return depth.renderTexture;
+			return EffekseerSystem.GetCachedTexture(IntPtr.Zero, DummyTextureType.White);
+		}
+
 		unsafe void RenderInternal(CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
@@ -1359,11 +1365,13 @@ namespace Effekseer.Internal
 
 				ApplyAdvancedParameter(parameter, prop);
 			}
-
-			ApplyTextures(parameter, prop, background, depth);
+			ApplyReconstructionParameter(parameter, prop);
+			prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 
 			if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 			{
+				prop.SetTexture("_depthTex", GetDepthTexture(depth));
+
 				var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
 				if (efkMaterial == null)
 				{
@@ -1395,8 +1403,6 @@ namespace Effekseer.Internal
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
 				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-				prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
-				prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
 				prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
 				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
@@ -1419,15 +1425,12 @@ namespace Effekseer.Internal
 					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
 				}
 
-				if (depth != null)
-				{
-					prop.SetTexture("_depthTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length + 1), background, depth, DummyTextureType.White));
-				}
-
 				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
 			else
 			{
+				ApplyTextures(parameter, prop, background, depth);
+
 				var material = GetMaterialCollection(parameter.MaterialType, false).GetMaterial(ref key);
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
@@ -1504,6 +1507,8 @@ namespace Effekseer.Internal
 				{
 					ApplyAdvancedParameter(parameter, prop);
 				}
+				ApplyReconstructionParameter(parameter, prop);
+				prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 
 				prop.SetBuffer("buf_model_parameter", computeBuf1);
 
@@ -1520,10 +1525,10 @@ namespace Effekseer.Internal
 				prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 				prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
 
-				ApplyTextures(parameter, prop, background, depth);
-
 				if (parameter.MaterialType == Plugin.RendererMaterialType.Material)
 				{
+					prop.SetTexture("_depthTex", GetDepthTexture(depth));
+
 					var efkMaterial = EffekseerSystem.GetCachedMaterial(parameter.MaterialPtr);
 					if (efkMaterial == null)
 					{
@@ -1568,8 +1573,6 @@ namespace Effekseer.Internal
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
 					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
-					prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
-					prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
 					prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
 					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
@@ -1610,15 +1613,12 @@ namespace Effekseer.Internal
 						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
 					}
 
-					if (depth != null)
-					{
-						prop.SetTexture("_depthTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length + 1), background, depth, DummyTextureType.White));
-					}
-
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
 				else
 				{
+					ApplyTextures(parameter, prop, background, depth);
+
 					var material = GetMaterialCollection(parameter.MaterialType, true).GetMaterial(ref key);
 					if (parameter.MaterialType == Plugin.RendererMaterialType.Lit ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit)
@@ -1757,7 +1757,10 @@ namespace Effekseer.Internal
 			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
 			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
 			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
-			prop.SetVector("softParticleParam", parameter.SoftParticleParam);
+		}
+
+		void ApplyReconstructionParameter(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop)
+		{
 			prop.SetVector("reconstructionParam1", parameter.ReconstrcutionParam1);
 			prop.SetVector("reconstructionParam2", parameter.ReconstrcutionParam2);
 		}

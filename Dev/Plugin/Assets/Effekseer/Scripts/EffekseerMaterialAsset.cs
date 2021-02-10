@@ -509,7 +509,8 @@ Cull[_Cull]
 			float3 WorldN : TEXCOORD3;
 			float3 WorldT : TEXCOORD4;
 			float3 WorldB : TEXCOORD5;
-			float2 ScreenUV : TEXCOORD6;
+			float4 PosP : TEXCOORD6;
+			//float2 ScreenUV : TEXCOORD6;
 			//%CUSTOM_VSPS_INOUT1%
 			//%CUSTOM_VSPS_INOUT2%
 		};
@@ -632,6 +633,10 @@ Cull[_Cull]
 			float4 vcolor = Input.Color;
 			@endif
 
+			// Dummy
+			float2 screenUV = float2(0.0, 0.0);
+			float meshZ =  0.0f;
+
 			%VSCODE%
 
 			worldPos = worldPos + worldPositionOffset;
@@ -645,8 +650,9 @@ Cull[_Cull]
 			Output.VColor = vcolor;
 			Output.UV1 = uv1;
 			Output.UV2 = uv2;
-			Output.ScreenUV = Output.Position.xy / Output.Position.w;
-			Output.ScreenUV.xy = float2(Output.ScreenUV.x + 1.0, 1.0 - Output.ScreenUV.y) * 0.5;
+			Output.PosP = Output.Position;
+			// Output.ScreenUV = Output.Position.xy / Output.Position.w;
+			// Output.ScreenUV.xy = float2(Output.ScreenUV.x + 1.0, 1.0 - Output.ScreenUV.y) * 0.5;
 		
 			return Output;
 		}
@@ -725,6 +731,9 @@ Cull[_Cull]
 		
 			float3 pixelNormalDir = worldNormal;
 			float4 vcolor = Input.VColor;
+			float2 screenUV = Input.PosP.xy / Input.PosP.w;
+			float meshZ =  Input.PosP.z / Input.PosP.w;
+			screenUV.xy = float2(screenUV.x + 1.0, 1.0 - screenUV.y) * 0.5;
 
 			float3 objectScale = float3(1.0, 1.0, 1.0);
 		
@@ -737,7 +746,7 @@ Cull[_Cull]
 
 			float2 distortUV = 	dir.xy * (refraction - airRefraction);
 
-			distortUV += Input.ScreenUV;
+			distortUV += screenUV;
 			distortUV = GetUVBack(distortUV);	
 
 			float4 bg = tex2D(_BackTex, distortUV);
