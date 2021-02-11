@@ -3,6 +3,7 @@
 #include "EffekseerPluginModel.h"
 #include "EffekseerPluginSound.h"
 #include "EffekseerPluginNetwork.h"
+#include "EffekseerPluginCurve.h"
 #include "../graphicsAPI/EffekseerPluginGraphics.h"
 
 using namespace Effekseer;
@@ -633,5 +634,15 @@ extern "C"
 		} else {
 			g_EffekseerManager->SetSoundPlayer(nullptr);
 		}
+	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetCurveLoaderEvent(CurveLoaderLoad load, ModelLoaderUnload unload)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload));
 	}
 }

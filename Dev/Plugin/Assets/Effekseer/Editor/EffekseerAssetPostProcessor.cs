@@ -60,6 +60,10 @@ namespace Effekseer.Editor
 				{
 					EffekseerModelAsset.CreateAsset(assetPath);
 				}
+				if (Path.GetExtension(assetPath) == ".efkcurve")
+				{
+					EffekseerCurveAsset.CreateAsset(assetPath);
+				}
 				if (Path.GetExtension(assetPath) == ".efkmat")
 				{
 					EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();

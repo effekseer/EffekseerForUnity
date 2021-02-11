@@ -226,12 +226,20 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetMaterialLoaderEvent(
-	EffekseerMaterialLoaderLoad load,
-	EffekseerMaterialLoaderUnload unload);
+			EffekseerMaterialLoaderLoad load,
+			EffekseerMaterialLoaderUnload unload);
 		public delegate IntPtr EffekseerMaterialLoaderLoad(IntPtr path,
 			IntPtr materialBuffer, int materialBufferSize, ref int requiredMaterialBufferSize,
 			IntPtr cachedMaterialBuffer, int cachedMaterialBufferSize, ref int requiredCachedMaterialBufferSize);
 		public delegate void EffekseerMaterialLoaderUnload(IntPtr path, IntPtr modelPtr);
+
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetCurveLoaderEvent(
+			EffekseerCurveLoaderLoad load,
+			EffekseerCurveLoaderUnload unload);
+		public delegate IntPtr EffekseerCurveLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize);
+		public delegate void EffekseerCurveLoaderUnload(IntPtr path, IntPtr curvePtr);
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct ModelVertex
