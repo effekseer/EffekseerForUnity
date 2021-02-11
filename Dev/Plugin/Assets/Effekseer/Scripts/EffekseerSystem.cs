@@ -464,6 +464,9 @@ namespace Effekseer
 			Plugin.EffekseerSetProcedualModelGeneratorEvent(
 				ProcedualMaterialGeneratorGenerate,
 				ProcedualMaterialGeneratorUngenerate);
+			Plugin.EffekseerSetCurveLoaderEvent(
+				CurveLoaderLoad, CurveLoaderUnload
+				);
 
 #if UNITY_EDITOR
 			for (int i = 0; i < nativeEffectsKeys.Count; i++) {
@@ -502,6 +505,8 @@ namespace Effekseer
 			Plugin.EffekseerSetModelLoaderEvent(null, null);
 			Plugin.EffekseerSetSoundLoaderEvent(null, null);
 			Plugin.EffekseerSetMaterialLoaderEvent(null, null);
+			Plugin.EffekseerSetProcedualModelGeneratorEvent(null, null);
+			Plugin.EffekseerSetCurveLoaderEvent(null, null);
 		}
 
 #if UNITY_EDITOR
@@ -775,6 +780,34 @@ namespace Effekseer
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundLoaderUnload))]
 		private static void SoundLoaderUnload(IntPtr path) {
+		}
+
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerCurveLoaderLoad))]
+		private static IntPtr CurveLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize)
+		{
+			var pathstr = Marshal.PtrToStringUni(path);
+			pathstr = Path.ChangeExtension(pathstr, ".asset");
+			var asset = Instance.effectAssetInLoading;
+			var res = asset.FindCurve(pathstr);
+			var curve = (res != null) ? res.asset : null;
+
+			if (curve != null)
+			{
+				requiredBufferSize = curve.bytes.Length;
+
+				if (curve.bytes.Length <= bufferSize)
+				{
+					Marshal.Copy(curve.bytes, 0, buffer, curve.bytes.Length);
+					return new IntPtr(1);
+				}
+			}
+
+			return IntPtr.Zero;
+		}
+
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerModelLoaderUnload))]
+		private static void CurveLoaderUnload(IntPtr path, IntPtr modelPtr)
+		{
 		}
 
 		abstract class CachedResourceContainer<Resource, GeneratedResource> where Resource : class where GeneratedResource : class 

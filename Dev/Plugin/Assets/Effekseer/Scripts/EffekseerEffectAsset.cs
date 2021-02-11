@@ -53,6 +53,7 @@ namespace Effekseer
 		public List<string> SoundPathList = new List<string>();
 		public List<string> ModelPathList = new List<string>();
 		public List<string> MaterialPathList = new List<string>();
+		public List<string> CurvePathList = new List<string>();
 	}
 
 
@@ -69,6 +70,8 @@ namespace Effekseer
 		public EffekseerModelResource[] modelResources;
 		[SerializeField]
 		public EffekseerMaterialResource[] materialResources;
+		[SerializeField]
+		public EffekseerCurveResource[] curveResources;
 
 		[SerializeField]
 		public float Scale = 1.0f;
@@ -186,6 +189,12 @@ namespace Effekseer
 			return (index >= 0) ? materialResources[index] : null;
 		}
 
+		public EffekseerCurveResource FindCurve(string path)
+		{
+			int index = Array.FindIndex(curveResources, (r) => (path == r.path));
+			return (index >= 0) ? curveResources[index] : null;
+		}
+
 		public static bool ReadResourcePath(byte[] data, ref EffekseerResourcePath resourcePath)
 		{
 			if (data.Length < 4 || data[0] != 'S' || data[1] != 'K' || data[2] != 'F' || data[3] != 'E')
@@ -202,6 +211,7 @@ namespace Effekseer
 			resourcePath.TexturePathList = new List<string>();
 			resourcePath.SoundPathList = new List<string>();
 			resourcePath.ModelPathList = new List<string>();
+			resourcePath.CurvePathList = new List<string>();
 
 			// Get color texture paths
 			{
@@ -261,6 +271,16 @@ namespace Effekseer
 				for (int i = 0; i < materialCount; i++)
 				{
 					resourcePath.MaterialPathList.Add(ReadString(data, ref filepos));
+				}
+			}
+
+			if (resourcePath.Version >= 1607)
+			{
+				int curveCount = BitConverter.ToInt32(data, filepos);
+				filepos += 4;
+				for (int i = 0; i < curveCount; i++)
+				{
+					resourcePath.CurvePathList.Add(ReadString(data, ref filepos));
 				}
 			}
 
@@ -349,6 +369,17 @@ namespace Effekseer
 				if (asset.materialResources[i].asset == null)
 				{
 					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.MaterialPathList[i]));
+				}
+			}
+
+			asset.curveResources = new EffekseerCurveResource[resourcePath.CurvePathList.Count];
+			for (int i = 0; i < resourcePath.CurvePathList.Count; i++)
+			{
+				asset.curveResources[i] = EffekseerCurveResource.LoadAsset(assetDir, resourcePath.CurvePathList[i]);
+
+				if (asset.curveResources[i].asset == null)
+				{
+					Debug.LogWarning(string.Format("Failed to load {0}", resourcePath.CurvePathList[i]));
 				}
 			}
 

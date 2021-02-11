@@ -55,7 +55,7 @@ namespace Effekseer.Editor
 		bool soundVisible = true;
 		bool modelVisible = true;
 		bool materialVisible = true;
-
+		bool curveVisible = true;
 		public override void OnInspectorGUI()
 		{
 			var asset = target as EffekseerEffectAsset;
@@ -117,6 +117,23 @@ namespace Effekseer.Editor
 					foreach (var res in asset.materialResources)
 					{
 						if (EffekseerMaterialResource.InspectorField(res))
+						{
+							EditorUtility.SetDirty(asset);
+						}
+					}
+					EditorGUI.indentLevel--;
+				}
+			}
+
+			if (asset.curveResources != null)
+			{
+				curveVisible = EditorGUILayout.Foldout(curveVisible, "Curve Resources: " + asset.curveResources.Length);
+				if (curveVisible)
+				{
+					EditorGUI.indentLevel++;
+					foreach (var res in asset.curveResources)
+					{
+						if (EffekseerCurveResource.InspectorField(res))
 						{
 							EditorUtility.SetDirty(asset);
 						}
