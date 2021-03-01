@@ -76,7 +76,15 @@ namespace Effekseer
 			Vector3 axis;
 			float angle;
 			rotation.ToAngleAxis(out angle, out axis);
-			Plugin.EffekseerSetRotation(m_handle, axis.x, axis.y, axis.z, angle * Mathf.Deg2Rad);
+
+			if(float.IsNaN(axis.x) || float.IsInfinity(axis.x))
+			{
+				Plugin.EffekseerSetRotation(m_handle, 0.0f, -1.0f, 0.0f, 360.0f * Mathf.Deg2Rad);
+			}
+			else
+			{
+				Plugin.EffekseerSetRotation(m_handle, axis.x, axis.y, axis.z, angle * Mathf.Deg2Rad);
+			}
 		}
 	
 		/// <summary xml:lang="en">
