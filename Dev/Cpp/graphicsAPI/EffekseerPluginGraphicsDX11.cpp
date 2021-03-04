@@ -99,7 +99,7 @@ public:
 
 		// アンロードするテクスチャを検索
 		auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, TextureResource>& pair) {
-			return pair.second.textureDataPtr->UserPtr == source->UserPtr;
+			return pair.second.textureDataPtr == source;
 		});
 		if (it == resources.end())
 		{
