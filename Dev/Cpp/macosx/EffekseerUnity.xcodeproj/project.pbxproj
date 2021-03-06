@@ -37,6 +37,8 @@
 		2E3FAC38239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */; };
 		2E534B4725F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */; };
 		2E534B4825F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */; };
+		2E534B4C25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4B25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp */; };
+		2E534B4D25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4B25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp */; };
 		2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E81AF79259CC360008B6786 /* ModelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF71259CC360008B6786 /* ModelLoader.cpp */; };
@@ -274,6 +276,7 @@
 		2E534B4425F3E6F800E46A55 /* ProceduralModelGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProceduralModelGenerator.h; sourceTree = "<group>"; };
 		2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProceduralModelGenerator.cpp; sourceTree = "<group>"; };
 		2E534B4625F3E6F800E46A55 /* ProceduralModelParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProceduralModelParameter.h; sourceTree = "<group>"; };
+		2E534B4B25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.CurveLoader.cpp; sourceTree = "<group>"; };
 		2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InternalScript.h; sourceTree = "<group>"; };
 		2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InternalScript.cpp; sourceTree = "<group>"; };
 		2E81AF70259CC360008B6786 /* ModelLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelLoader.h; sourceTree = "<group>"; };
@@ -749,6 +752,7 @@
 				4861A3F8182FDB9300A8217D /* Effekseer.h */,
 				4861A2CC182F846200A8217D /* Effekseer.Base.h */,
 				4861A2CD182F846200A8217D /* Effekseer.Base.Pre.h */,
+				2E534B4B25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp */,
 				4861A2CE182F846200A8217D /* Effekseer.Client.cpp */,
 				4861A2CF182F846200A8217D /* Effekseer.Client.h */,
 				4861A2D0182F846200A8217D /* Effekseer.ClientImplemented.h */,
@@ -1061,6 +1065,7 @@
 				684C1F7519F610BE00E32FEC /* EffekseerRendererGL.DeviceObject.h in Sources */,
 				2E0B9C6C2352FCFC00C85A3B /* EffekseerMaterialCompilerGL.cpp in Sources */,
 				2E81AFBC259CCA4B008B6786 /* Easing.cpp in Sources */,
+				2E534B4C25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp in Sources */,
 				684C1F6319F6106D00E32FEC /* EffekseerRendererGL.GLExtension.cpp in Sources */,
 				684C1F7619F610BE00E32FEC /* EffekseerRendererGL.GLExtension.h in Sources */,
 				684C1F6419F6106D00E32FEC /* EffekseerRendererGL.IndexBuffer.cpp in Sources */,
@@ -1249,6 +1254,7 @@
 				48DA217C1C8C5C2C00CAA811 /* EffekseerRendererGL.Renderer.cpp in Sources */,
 				2E3FAC34239D5001000C336B /* MemoryFile.cpp in Sources */,
 				4847B92D1C8C6A79002723AE /* Culling3D.WorldInternal.cpp in Sources */,
+				2E534B4D25F3EDD200E46A55 /* Effekseer.CurveLoader.cpp in Sources */,
 				4847B92A1C8C6A79002723AE /* Culling3D.ObjectInternal.cpp in Sources */,
 				48DA21991C8C5C6B00CAA811 /* Effekseer.EffectNodeRoot.cpp in Sources */,
 				2EB27C7C222C27A100BF4C0E /* EffekseerRendererRenderState.cpp in Sources */,
