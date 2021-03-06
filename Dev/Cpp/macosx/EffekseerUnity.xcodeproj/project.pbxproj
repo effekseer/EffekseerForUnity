@@ -35,6 +35,8 @@
 		2E3FAC34239D5001000C336B /* MemoryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC31239D5001000C336B /* MemoryFile.cpp */; };
 		2E3FAC37239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */; };
 		2E3FAC38239D502B000C336B /* EffekseerPluginMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */; };
+		2E534B4725F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */; };
+		2E534B4825F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */; };
 		2E64BCCE22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E64BCCF22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */; };
 		2E81AF79259CC360008B6786 /* ModelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF71259CC360008B6786 /* ModelLoader.cpp */; };
@@ -43,8 +45,6 @@
 		2E81AF7C259CC360008B6786 /* SplineGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF75259CC360008B6786 /* SplineGenerator.cpp */; };
 		2E81AF7D259CC360008B6786 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF77259CC360008B6786 /* Model.cpp */; };
 		2E81AF7E259CC360008B6786 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF77259CC360008B6786 /* Model.cpp */; };
-		2E81AF7F259CC360008B6786 /* ProcedualModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF78259CC360008B6786 /* ProcedualModelGenerator.cpp */; };
-		2E81AF80259CC360008B6786 /* ProcedualModelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF78259CC360008B6786 /* ProcedualModelGenerator.cpp */; };
 		2E81AF85259CC38D008B6786 /* Effekseer.MaterialFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF83259CC38D008B6786 /* Effekseer.MaterialFile.cpp */; };
 		2E81AF86259CC38D008B6786 /* Effekseer.MaterialFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF83259CC38D008B6786 /* Effekseer.MaterialFile.cpp */; };
 		2E81AF8B259CC746008B6786 /* GraphicsDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E81AF8A259CC746008B6786 /* GraphicsDevice.cpp */; };
@@ -271,17 +271,17 @@
 		2E3FAC32239D5001000C336B /* MemoryFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemoryFile.h; path = ../common/MemoryFile.h; sourceTree = "<group>"; };
 		2E3FAC35239D502B000C336B /* EffekseerPluginMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EffekseerPluginMaterial.h; path = ../common/EffekseerPluginMaterial.h; sourceTree = "<group>"; };
 		2E3FAC36239D502B000C336B /* EffekseerPluginMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EffekseerPluginMaterial.cpp; path = ../common/EffekseerPluginMaterial.cpp; sourceTree = "<group>"; };
+		2E534B4425F3E6F800E46A55 /* ProceduralModelGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProceduralModelGenerator.h; sourceTree = "<group>"; };
+		2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProceduralModelGenerator.cpp; sourceTree = "<group>"; };
+		2E534B4625F3E6F800E46A55 /* ProceduralModelParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProceduralModelParameter.h; sourceTree = "<group>"; };
 		2E64BCCC22CE3AEF0054DB5B /* Effekseer.InternalScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.InternalScript.h; sourceTree = "<group>"; };
 		2E64BCCD22CE3AEF0054DB5B /* Effekseer.InternalScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.InternalScript.cpp; sourceTree = "<group>"; };
 		2E81AF70259CC360008B6786 /* ModelLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelLoader.h; sourceTree = "<group>"; };
 		2E81AF71259CC360008B6786 /* ModelLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelLoader.cpp; sourceTree = "<group>"; };
-		2E81AF72259CC360008B6786 /* ProcedualModelParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcedualModelParameter.h; sourceTree = "<group>"; };
-		2E81AF73259CC360008B6786 /* ProcedualModelGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcedualModelGenerator.h; sourceTree = "<group>"; };
 		2E81AF74259CC360008B6786 /* SplineGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplineGenerator.h; sourceTree = "<group>"; };
 		2E81AF75259CC360008B6786 /* SplineGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SplineGenerator.cpp; sourceTree = "<group>"; };
 		2E81AF76259CC360008B6786 /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
 		2E81AF77259CC360008B6786 /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
-		2E81AF78259CC360008B6786 /* ProcedualModelGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProcedualModelGenerator.cpp; sourceTree = "<group>"; };
 		2E81AF83259CC38D008B6786 /* Effekseer.MaterialFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Effekseer.MaterialFile.cpp; sourceTree = "<group>"; };
 		2E81AF84259CC38D008B6786 /* Effekseer.MaterialFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Effekseer.MaterialFile.h; sourceTree = "<group>"; };
 		2E81AF89259CC746008B6786 /* GraphicsDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsDevice.h; sourceTree = "<group>"; };
@@ -632,15 +632,15 @@
 		2E81AF6F259CC360008B6786 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				2E534B4525F3E6F800E46A55 /* ProceduralModelGenerator.cpp */,
+				2E534B4425F3E6F800E46A55 /* ProceduralModelGenerator.h */,
+				2E534B4625F3E6F800E46A55 /* ProceduralModelParameter.h */,
 				2E81AF70259CC360008B6786 /* ModelLoader.h */,
 				2E81AF71259CC360008B6786 /* ModelLoader.cpp */,
-				2E81AF72259CC360008B6786 /* ProcedualModelParameter.h */,
-				2E81AF73259CC360008B6786 /* ProcedualModelGenerator.h */,
 				2E81AF74259CC360008B6786 /* SplineGenerator.h */,
 				2E81AF75259CC360008B6786 /* SplineGenerator.cpp */,
 				2E81AF76259CC360008B6786 /* Model.h */,
 				2E81AF77259CC360008B6786 /* Model.cpp */,
-				2E81AF78259CC360008B6786 /* ProcedualModelGenerator.cpp */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1106,6 +1106,7 @@
 				48CF46EE1B3EFACB005AD8C4 /* Culling3D.Grid.cpp in Sources */,
 				2E81AFDD259CCA9D008B6786 /* Effekseer.Resource.cpp in Sources */,
 				48CF46F21B3EFACB005AD8C4 /* Culling3D.ReferenceObject.cpp in Sources */,
+				2E534B4725F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */,
 				48CF46DC1B3EF9B2005AD8C4 /* EffekseerRendererGL.VertexArray.cpp in Sources */,
 				4861A319182F846200A8217D /* Effekseer.Color.cpp in Sources */,
 				4861A31B182F846200A8217D /* Effekseer.DefaultEffectLoader.cpp in Sources */,
@@ -1137,7 +1138,6 @@
 				4861A32C182F846200A8217D /* Effekseer.Matrix44.cpp in Sources */,
 				4861A32D182F846200A8217D /* Effekseer.RectF.cpp in Sources */,
 				2E0B9C5C2352FC6500C85A3B /* Effekseer.MaterialCompiler.cpp in Sources */,
-				2E81AF7F259CC360008B6786 /* ProcedualModelGenerator.cpp in Sources */,
 				2E81AF85259CC38D008B6786 /* Effekseer.MaterialFile.cpp in Sources */,
 				4861A32E182F846200A8217D /* Effekseer.Server.cpp in Sources */,
 				2E81AFB1259CC84C008B6786 /* Mat43f.cpp in Sources */,
@@ -1221,13 +1221,13 @@
 				2E0B9C662352FC9C00C85A3B /* Effekseer.Parameters.cpp in Sources */,
 				48DA219F1C8C5C6B00CAA811 /* Effekseer.InstanceGlobal.cpp in Sources */,
 				2E81AF7A259CC360008B6786 /* ModelLoader.cpp in Sources */,
-				2E81AF80259CC360008B6786 /* ProcedualModelGenerator.cpp in Sources */,
 				2E81AFD0259CCA73008B6786 /* Effekseer.WorkerThread.cpp in Sources */,
 				4847B92C1C8C6A79002723AE /* Culling3D.Vector3DF.cpp in Sources */,
 				2E81AFC8259CCA5E008B6786 /* CurlNoise.cpp in Sources */,
 				48DA21901C8C5C6B00CAA811 /* Effekseer.Color.cpp in Sources */,
 				2E81AF8C259CC746008B6786 /* GraphicsDevice.cpp in Sources */,
 				48DA218D1C8C5C4200CAA811 /* EffekseerRenderer.TrackRendererBase.cpp in Sources */,
+				2E534B4825F3E6F800E46A55 /* ProceduralModelGenerator.cpp in Sources */,
 				48DA21AD1C8C5C8B00CAA811 /* EffekseerPluginModel.cpp in Sources */,
 				2E81AF7C259CC360008B6786 /* SplineGenerator.cpp in Sources */,
 				2EB27C8B222C2D4900BF4C0E /* EffekseerRenderer.CommonUtils.cpp in Sources */,
