@@ -38,6 +38,7 @@ LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
+	$(LIB_SRC_PATH)/Effekseer.CurveLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultFile.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Effect.cpp \
