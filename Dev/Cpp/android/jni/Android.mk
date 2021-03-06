@@ -82,7 +82,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialFile.cpp \
 	$(LIB_SRC_PATH)/Model/Model.cpp \
 	$(LIB_SRC_PATH)/Model/ModelLoader.cpp \
-	$(LIB_SRC_PATH)/Model/ProcedualModelGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/ProceduralModelGenerator.cpp \
 	$(LIB_SRC_PATH)/Model/SplineGenerator.cpp \
 	$(LIB_SRC_PATH)/Noise/CurlNoise.cpp \
 	$(LIB_SRC_PATH)/Noise/PerlinNoise.cpp \
