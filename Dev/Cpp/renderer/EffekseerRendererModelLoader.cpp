@@ -56,9 +56,9 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 	unload(source->GetPath().c_str(), model->InternalPtr);
 }
 
-Effekseer::ModelRef ProcedualModelGenerator::Generate(const Effekseer::ProcedualModelParameter* parameter)
+Effekseer::ModelRef ProceduralModelGenerator::Generate(const Effekseer::ProceduralModelParameter* parameter)
 {
-	auto original = Effekseer::ProcedualModelGenerator::Generate(parameter);
+	auto original = Effekseer::ProceduralModelGenerator::Generate(parameter);
 
 	vertecies_.resize(original->GetVertexCount());
 	memcpy(vertecies_.data(), original->GetVertexes(), sizeof(Effekseer::Model::Vertex) * vertecies_.size());
@@ -73,7 +73,7 @@ Effekseer::ModelRef ProcedualModelGenerator::Generate(const Effekseer::Procedual
 	return newmodel;
 }
 
-void ProcedualModelGenerator::Ungenerate(Effekseer::ModelRef model)
+void ProceduralModelGenerator::Ungenerate(Effekseer::ModelRef model)
 {
 	if (model == nullptr)
 	{

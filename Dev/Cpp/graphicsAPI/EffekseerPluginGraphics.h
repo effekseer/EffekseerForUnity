@@ -63,8 +63,8 @@ public:
 
 	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
 
-	virtual Effekseer::ProcedualModelGeneratorRef Create(ProcedualModelGeneratorGenerate generate,
-														 ProcedualModelGeneratorUngenerate ungenerate)
+	virtual Effekseer::ProceduralModelGeneratorRef Create(ProceduralModelGeneratorGenerate generate,
+														 ProceduralModelGeneratorUngenerate ungenerate)
 	{
 		return nullptr;
 	}

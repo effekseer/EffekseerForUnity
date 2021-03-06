@@ -11,7 +11,7 @@
 #include "Effekseer.h"
 #endif
 
-#include <Effekseer/Model/ProcedualModelGenerator.h>
+#include <Effekseer/Model/ProceduralModelGenerator.h>
 
 #include "../unity/IUnityInterface.h"
 
@@ -67,11 +67,11 @@ void Array2Matrix(Effekseer::Matrix44& matrix, float matrixArray[]);
 
 void CalculateCameraDirectionAndPosition(const Effekseer::Matrix44& matrix, Effekseer::Vector3D& direction, Effekseer::Vector3D& position);
 
-using ProcedualModelGeneratorGenerate = void*(UNITY_INTERFACE_API*)(Effekseer::Model::Vertex* vertecies,
+using ProceduralModelGeneratorGenerate = void*(UNITY_INTERFACE_API*)(Effekseer::Model::Vertex* vertecies,
 																	int verteciesCount,
 																	Effekseer::Model::Face* faces,
 																	int facesCount);
-using ProcedualModelGeneratorUngenerate = void(UNITY_INTERFACE_API*)(void* modelPointer);
+using ProceduralModelGeneratorUngenerate = void(UNITY_INTERFACE_API*)(void* modelPointer);
 
 } // namespace EffekseerPlugin
 

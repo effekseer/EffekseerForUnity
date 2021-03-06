@@ -261,15 +261,15 @@ namespace Effekseer
 		}
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerSetProcedualModelGeneratorEvent(
-			EffekseerProcedualMaterialGeneratorGenerate load,
-			EffekseerProcedualMaterialGeneratorUngenerate unload);
+		public static extern void EffekseerSetProceduralModelGeneratorEvent(
+			EffekseerProceduralMaterialGeneratorGenerate load,
+			EffekseerProceduralMaterialGeneratorUngenerate unload);
 
-		public unsafe delegate IntPtr EffekseerProcedualMaterialGeneratorGenerate(ModelVertex* vertecies,
+		public unsafe delegate IntPtr EffekseerProceduralMaterialGeneratorGenerate(ModelVertex* vertecies,
 																	int verteciesCount,
 																	ModelFace* faces,
 																	int facesCount);
-		public delegate void EffekseerProcedualMaterialGeneratorUngenerate(IntPtr modelPtr);
+		public delegate void EffekseerProceduralMaterialGeneratorUngenerate(IntPtr modelPtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundLoaderEvent(
@@ -355,7 +355,7 @@ namespace Effekseer
 		[StructLayout(LayoutKind.Sequential)]
 		public unsafe struct UnityRenderParameter
 		{
-			//! 0 - procedual, 1 - model
+			//! 0 - procedural, 1 - model
 			public int RenderMode;
 
 			public RendererMaterialType MaterialType;

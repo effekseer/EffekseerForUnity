@@ -49,7 +49,7 @@ extern "C"
 
 	struct UnityRenderParameter
 	{
-		//! 0 - procedual, 1 - model
+		//! 0 - procedural, 1 - model
 		int RenderMode = 0;
 
 		EffekseerRenderer::RendererShaderType MaterialType = EffekseerRenderer::RendererShaderType::Unlit;

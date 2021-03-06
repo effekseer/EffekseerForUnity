@@ -587,8 +587,8 @@ extern "C"
 		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload));
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProcedualModelGeneratorEvent(ProcedualModelGeneratorGenerate load,
-																							 ProcedualModelGeneratorUngenerate unload)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProceduralModelGeneratorEvent(ProceduralModelGeneratorGenerate load,
+																							 ProceduralModelGeneratorUngenerate unload)
 	{
 		if (g_EffekseerManager == nullptr)
 		{
@@ -603,7 +603,7 @@ extern "C"
 		auto generator = g_graphics->Create(load, unload);
 		if (generator != nullptr)
 		{
-			g_EffekseerManager->GetSetting()->SetProcedualMeshGenerator(generator);
+			g_EffekseerManager->GetSetting()->SetProceduralMeshGenerator(generator);
 		}
 	}
 

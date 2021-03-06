@@ -11,7 +11,7 @@
 #endif
 
 #include "../common/EffekseerPluginCommon.h"
-#include <Effekseer/Model/ProcedualModelGenerator.h>
+#include <Effekseer/Model/ProceduralModelGenerator.h>
 
 #include <map>
 #include <memory>
@@ -35,23 +35,23 @@ public:
 	virtual void Unload(Effekseer::ModelRef source);
 };
 
-class ProcedualModelGenerator : public Effekseer::ProcedualModelGenerator
+class ProceduralModelGenerator : public Effekseer::ProceduralModelGenerator
 {
 private:
-	EffekseerPlugin::ProcedualModelGeneratorGenerate generate_;
-	EffekseerPlugin::ProcedualModelGeneratorUngenerate ungenerate_;
+	EffekseerPlugin::ProceduralModelGeneratorGenerate generate_;
+	EffekseerPlugin::ProceduralModelGeneratorUngenerate ungenerate_;
 	Effekseer::CustomVector<Effekseer::Model::Vertex> vertecies_;
 	Effekseer::CustomVector<Effekseer::Model::Face> faces_;
 
 public:
-	ProcedualModelGenerator(EffekseerPlugin::ProcedualModelGeneratorGenerate generate,
-							EffekseerPlugin::ProcedualModelGeneratorUngenerate ungenerate)
+	ProceduralModelGenerator(EffekseerPlugin::ProceduralModelGeneratorGenerate generate,
+							EffekseerPlugin::ProceduralModelGeneratorUngenerate ungenerate)
 		: generate_(generate), ungenerate_(ungenerate)
 	{
 	}
-	~ProcedualModelGenerator() override = default;
+	~ProceduralModelGenerator() override = default;
 
-	Effekseer::ModelRef Generate(const Effekseer::ProcedualModelParameter* parameter) override;
+	Effekseer::ModelRef Generate(const Effekseer::ProceduralModelParameter* parameter) override;
 
 	void Ungenerate(Effekseer::ModelRef model) override;
 };

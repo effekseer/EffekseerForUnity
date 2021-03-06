@@ -461,9 +461,9 @@ namespace Effekseer
 			Plugin.EffekseerSetMaterialLoaderEvent(
 				MaterialLoaderLoad,
 				MaterialLoaderUnload);
-			Plugin.EffekseerSetProcedualModelGeneratorEvent(
-				ProcedualMaterialGeneratorGenerate,
-				ProcedualMaterialGeneratorUngenerate);
+			Plugin.EffekseerSetProceduralModelGeneratorEvent(
+				ProceduralMaterialGeneratorGenerate,
+				ProceduralMaterialGeneratorUngenerate);
 			Plugin.EffekseerSetCurveLoaderEvent(
 				CurveLoaderLoad, CurveLoaderUnload
 				);
@@ -505,7 +505,7 @@ namespace Effekseer
 			Plugin.EffekseerSetModelLoaderEvent(null, null);
 			Plugin.EffekseerSetSoundLoaderEvent(null, null);
 			Plugin.EffekseerSetMaterialLoaderEvent(null, null);
-			Plugin.EffekseerSetProcedualModelGeneratorEvent(null, null);
+			Plugin.EffekseerSetProceduralModelGeneratorEvent(null, null);
 			Plugin.EffekseerSetCurveLoaderEvent(null, null);
 		}
 
@@ -742,8 +742,8 @@ namespace Effekseer
 			}
 		}
 
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProcedualMaterialGeneratorGenerate))]
-		private static unsafe IntPtr ProcedualMaterialGeneratorGenerate(Plugin.ModelVertex* vertecies,
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProceduralMaterialGeneratorGenerate))]
+		private static unsafe IntPtr ProceduralMaterialGeneratorGenerate(Plugin.ModelVertex* vertecies,
 															int verteciesCount,
 															Plugin.ModelFace* faces,
 															int facesCount)
@@ -755,11 +755,11 @@ namespace Effekseer
 
 			var unityRendererModel = new UnityRendererModel();
 			unityRendererModel.Initialize(vertecies, verteciesCount, faces, facesCount);
-			return cachedModels.Load(unityRendererModel, "ProcedualModel");
+			return cachedModels.Load(unityRendererModel, "ProceduralModel");
 		}
 
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProcedualMaterialGeneratorUngenerate))]
-		private static void ProcedualMaterialGeneratorUngenerate(IntPtr modelPtr)
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerProceduralMaterialGeneratorUngenerate))]
+		private static void ProceduralMaterialGeneratorUngenerate(IntPtr modelPtr)
 		{
 			if (Instance.RendererType == EffekseerRendererType.Unity)
 			{

@@ -79,10 +79,10 @@ Effekseer::MaterialLoaderRef GraphicsUnity::Create(MaterialLoaderLoad load, Mate
 	return Effekseer::MakeRefPtr<EffekseerRendererUnity::MaterialLoader>(load, unload);
 }
 
-Effekseer::ProcedualModelGeneratorRef GraphicsUnity::Create(ProcedualModelGeneratorGenerate generate,
-															ProcedualModelGeneratorUngenerate ungenerate)
+Effekseer::ProceduralModelGeneratorRef GraphicsUnity::Create(ProceduralModelGeneratorGenerate generate,
+															ProceduralModelGeneratorUngenerate ungenerate)
 {
-	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ProcedualModelGenerator>(generate, ungenerate);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ProceduralModelGenerator>(generate, ungenerate);
 }
 
 void GraphicsUnity::ShiftViewportForStereoSinglePass(bool isShift) {}
