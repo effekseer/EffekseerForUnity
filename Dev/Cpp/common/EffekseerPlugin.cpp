@@ -448,17 +448,10 @@ extern "C"
 		::Effekseer::Vector3D cameraFrontDirection;
 		CalculateCameraDirectionAndPosition(cameraMatrix, cameraFrontDirection, cameraPosition);
 
-		// if (!g_isRightHandedCoordinate)
-		{
-			cameraFrontDirection = -cameraFrontDirection;
-			// cameraPosition.Z = -cameraPosition.Z;
-		}
-
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// Specify textures
 		SetBackGroundTexture(settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
-
 
 		SetDepthTexture(projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)]);
 
@@ -488,6 +481,9 @@ extern "C"
 
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		drawParameter.IsSortingEffectsEnabled = true;
+		drawParameter.CameraPosition = cameraPosition;
+		drawParameter.CameraFrontDirection = cameraFrontDirection;
 		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw(drawParameter);
@@ -542,9 +538,22 @@ extern "C"
 			g_graphics->SetRenderPath(g_EffekseerRenderer.Get(), renderPass.get());
 		}
 
+		Effekseer::Matrix44 projectionMatrix, cameraMatrix;
+
+		projectionMatrix = g_EffekseerRenderer->GetProjectionMatrix();
+		cameraMatrix = g_EffekseerRenderer->GetCameraMatrix();
+
+		// convert a right hand into a left hand
+		::Effekseer::Vector3D cameraPosition;
+		::Effekseer::Vector3D cameraFrontDirection;
+		CalculateCameraDirectionAndPosition(cameraMatrix, cameraFrontDirection, cameraPosition);
+
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		drawParameter.IsSortingEffectsEnabled = true;
+		drawParameter.CameraPosition = cameraPosition;
+		drawParameter.CameraFrontDirection = cameraFrontDirection;
 		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->DrawFront(drawParameter);
@@ -677,11 +686,6 @@ extern "C"
 		::Effekseer::Vector3D cameraFrontDirection;
 		CalculateCameraDirectionAndPosition(cameraPositionMatrix, cameraFrontDirection, cameraPosition);
 
-		// if (!g_isRightHandedCoordinate)
-		{
-			cameraFrontDirection = -cameraFrontDirection;
-		}
-
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
 		// Specify textures
@@ -713,6 +717,10 @@ extern "C"
 		// render
 		Effekseer::Manager::DrawParameter drawParameter;
 		drawParameter.CameraCullingMask = settings.cameraCullingMask;
+		drawParameter.IsSortingEffectsEnabled = true;
+		drawParameter.CameraPosition = cameraPosition;
+		drawParameter.CameraFrontDirection = cameraFrontDirection;
+
 		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->SetLightColor(g_lightColor);
 		g_EffekseerRenderer->SetLightAmbientColor(g_lightAmbientColor);
