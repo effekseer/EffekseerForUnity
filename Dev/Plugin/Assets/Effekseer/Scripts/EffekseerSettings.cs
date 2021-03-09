@@ -148,21 +148,6 @@ namespace Effekseer
 		*/
 
 		[SerializeField]
-		public Shader standardShader = null;
-
-		[SerializeField]
-		public Shader standardDistortionShader = null;
-
-		[SerializeField]
-		public Shader standardModelShader = null;
-
-		[SerializeField]
-		public Shader standardModelDistortionShader = null;
-
-		[SerializeField]
-		public Shader standardLightingShader = null;
-
-		[SerializeField]
 		public Shader texture2DArrayBlitMaterial = null;
 
 		[SerializeField]
@@ -243,11 +228,6 @@ namespace Effekseer
 			if (asset == null)
 			{
 				asset = CreateInstance<EffekseerSettings>();
-				asset.standardShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardShader.shader");
-				asset.standardDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardDistortionShader.shader");
-				asset.standardModelShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelShader.shader");
-				asset.standardModelDistortionShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardModelDistortionShader.shader");
-				asset.standardLightingShader = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/StandardLightingShader.shader");
 				asset.texture2DArrayBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DArrayBlitShader.shader");
 				asset.texture2DBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DBlitShader.shader");
 				asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
