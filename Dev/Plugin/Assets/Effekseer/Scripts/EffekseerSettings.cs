@@ -72,6 +72,15 @@ namespace Effekseer
 		public bool isRightEffekseerHandledCoordinateSystem = false;
 
 		/// <summary xml:lang="en">
+		/// The number of thread to update effects
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// エフェクトの更新に使用するスレッド数
+		/// </summary>
+		[SerializeField]
+		public int threadCount = 2;
+
+		/// <summary xml:lang="en">
 		/// Maximum number of sound instances.
 		/// </summary>
 		/// <summary xml:lang="ja">

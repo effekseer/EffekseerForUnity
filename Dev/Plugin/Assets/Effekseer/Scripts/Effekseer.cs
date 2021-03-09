@@ -43,7 +43,7 @@ namespace Effekseer
 #endif
 
 		[DllImport(pluginName)]
-		public static extern void EffekseerInit(int maxInstances, int maxSquares, int isRightHandedCoordinate, int reversedDepth, int rendererType);
+		public static extern void EffekseerInit(int maxInstances, int maxSquares, int isRightHandedCoordinate, int reversedDepth, int threadCount, int rendererType);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerTerm();

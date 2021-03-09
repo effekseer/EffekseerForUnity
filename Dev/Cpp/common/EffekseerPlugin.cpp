@@ -747,7 +747,7 @@ extern "C"
 	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderBackFunc(int renderId) { return EffekseerRenderBack; }
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API
-	EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int rendererType)
+	EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int threadCount, int rendererType)
 	{
 		g_maxInstances = maxInstances;
 		g_maxSquares = maxSquares;
@@ -756,6 +756,11 @@ extern "C"
 		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
+
+#ifndef __EMSCRIPTEN__
+		threadCount = Effekseer::Max(threadCount, 1);
+		g_EffekseerManager->LaunchWorkerThreads(threadCount);
+#endif
 
 		if (g_isRightHandedCoordinate)
 		{
