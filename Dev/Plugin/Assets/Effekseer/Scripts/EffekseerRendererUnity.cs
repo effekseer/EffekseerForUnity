@@ -1365,6 +1365,8 @@ namespace Effekseer.Internal
 
 				ApplyAdvancedParameter(parameter, prop);
 			}
+			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
+
 			ApplyReconstructionParameter(parameter, prop);
 			prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 
@@ -1507,6 +1509,8 @@ namespace Effekseer.Internal
 				{
 					ApplyAdvancedParameter(parameter, prop);
 				}
+				prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
+
 				ApplyReconstructionParameter(parameter, prop);
 				prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 
@@ -1754,7 +1758,6 @@ namespace Effekseer.Internal
 			prop.SetVector("fFalloffParameter", new Vector4(parameter.EnableFalloff, parameter.FalloffParam.ColorBlendType, parameter.FalloffParam.Pow, 0.0f));
 			prop.SetVector("fFalloffBeginColor", parameter.FalloffParam.BeginColor);
 			prop.SetVector("fFalloffEndColor", parameter.FalloffParam.EndColor);
-			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
 			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
 			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
 		}
