@@ -758,8 +758,10 @@ extern "C"
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 
 #ifndef __EMSCRIPTEN__
-		threadCount = Effekseer::Max(threadCount, 1);
-		g_EffekseerManager->LaunchWorkerThreads(threadCount);
+		if (threadCount >= 2)
+		{
+			g_EffekseerManager->LaunchWorkerThreads(threadCount);
+		}
 #endif
 
 		if (g_isRightHandedCoordinate)
