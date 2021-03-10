@@ -147,7 +147,10 @@ namespace Effekseer.Editor
 				emitter.StopImmediate();
 
 				// just in case
-				Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
+				if (Effekseer.EffekseerSystem.Instance != null)
+				{
+					Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
+				}
 				RepaintEffect();
 			}
 			GUILayout.EndHorizontal();
