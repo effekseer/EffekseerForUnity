@@ -66,6 +66,8 @@ namespace Effekseer.Internal
 		// Pooled instances
 		private List<EffekseerSoundInstance> childInstances = new List<EffekseerSoundInstance>();
 
+		List<Action> events = new List<Action>();
+
 		public EffekseerSoundPlayer()
 		{
 			Instance = this;
@@ -107,9 +109,30 @@ namespace Effekseer.Internal
 				SoundPlayerStopAll);
 		}
 
+		internal void Update()
+		{
+			lock (Instance)
+			{
+				foreach (var e in events)
+				{
+					e.Invoke();
+				}
+				events.Clear();
+			}
+		}
+
 		internal void OnDisable()
 		{
-			Plugin.EffekseerSetSoundPlayerEvent(null,null, null, null, null);
+			lock (Instance)
+			{
+				foreach (var e in events)
+				{
+					e.Invoke();
+				}
+				events.Clear();
+				Plugin.EffekseerSetSoundPlayerEvent(null, null, null, null, null);
+			}
+
 			Instance = null;
 		}
 		
@@ -117,23 +140,39 @@ namespace Effekseer.Internal
 		private static void SoundPlayerPlay(IntPtr tag, 
 				IntPtr data, float volume, float pan, float pitch, 
 				bool mode3D, float x, float y, float z, float distance) {
-			Instance.PlaySound(tag, data, volume, pan, pitch, mode3D, x, y, z, distance);
+
+			lock(Instance)
+			{
+				Instance.events.Add(() => { Instance.PlaySound(tag, data, volume, pan, pitch, mode3D, x, y, z, distance); });
+			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopTag))]
 		private static void SoundPlayerStopTag(IntPtr tag) {
-			Instance.StopSound(tag);
+			lock (Instance)
+			{
+				Instance.events.Add(() => { Instance.StopSound(tag); });
+			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPauseTag))]
 		private static void SoundPlayerPauseTag(IntPtr tag, bool pause) {
-			Instance.PauseSound(tag, pause);
+			lock (Instance)
+			{
+				Instance.events.Add(() => { Instance.PauseSound(tag, pause); });
+			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerCheckPlayingTag))]
 		private static bool SoundPlayerCheckPlayingTag(IntPtr tag) {
-			return Instance.CheckSound(tag);
+			lock (Instance)
+			{
+				return Instance.CheckSound(tag);
+			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopAll))]
 		private static void SoundPlayerStopAll() {
-			Instance.StopAllSounds();
+			lock (Instance)
+			{
+				Instance.events.Add(() => { Instance.StopAllSounds(); });
+			}
 		}
 
 		private void PlaySound(IntPtr tag, 

@@ -57,7 +57,7 @@ namespace Effekseer
 		}
 		
 		void OnDisable()
-		{;
+		{
 			soundPlayer.OnDisable();
 			system.OnDisable();
 		}
@@ -65,7 +65,7 @@ namespace Effekseer
 		void LateUpdate() {
 
 			Plugin.UpdateNetwork();
-
+			soundPlayer.Update();
 			system.Update(Time.deltaTime, Time.unscaledDeltaTime);
 		}
 	}
