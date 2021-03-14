@@ -88,47 +88,11 @@ jobs:
           cd build138
           emcmake cmake ..
           make
-          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
+          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
         uses: actions/upload-artifact@v1
         with:
           name: WebGL_1-38
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins
-  webgl_1-37:
-    name: WebGL Build with emsdk 1.37
-    runs-on: macOS-10.14
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache emsdk
-        id: cache
-        uses: actions/cache@v1
-        with:
-          path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_37-v1
-
-
-      - name: install emsdk 1.37
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
-          cd emsdk
-          ./emsdk install sdk-fastcomp-1.37.40-64bit
-          cd ..
-      - run: sh scripts/clone_dependencies.sh
-      - run: |
-          ./emsdk/emsdk activate sdk-fastcomp-1.37.40-64bit
-          source ./emsdk/emsdk_env.sh
-          cd ./Dev/Cpp/webgl
-          mkdir build137
-          cd build137
-          emcmake cmake ..
-          make
-          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
-
-      - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
-        with:
-          name: WebGL_1-37
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
   merge:
@@ -156,10 +120,6 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: WebGL_1-38
-      - name: Download webgl 1.37
-        uses: actions/download-artifact@v1
-        with:
-          name: WebGL_1-37
       - name: Copy
         run: |
           mv Android/Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
@@ -168,8 +128,7 @@ jobs:
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
           cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
-          mv WebGL_1-37/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
-          mv WebGL_1-38/WebGL/1.38.11-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/1.38.11-64bit/
+          mv WebGL_1-38/WebGL/1.38.11-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
       - name: Upload math result
