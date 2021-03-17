@@ -237,12 +237,22 @@ namespace Effekseer.Internal
 		public string audioTag;
 		public float lastPlayTime;
 
-		void Awake() {
+		/// <summary>
+		/// make thread safe
+		/// </summary>
+		bool isPlaying;
+
+		void Awake()
+		{
 			audio = gameObject.AddComponent<AudioSource>();
 			audio.playOnAwake = false;
 		}
-		void Update() {
-			if (audio.clip && !audio.isPlaying) {
+		void Update()
+		{
+			isPlaying = audio.isPlaying;
+
+			if (audio.clip && !audio.isPlaying)
+			{
 				audio.clip = null;
 			}
 		}
@@ -269,8 +279,9 @@ namespace Effekseer.Internal
 			if (paused) audio.Pause();
 			else audio.UnPause();
 		}
-		public bool CheckPlaying() {
-			return audio.isPlaying;
+		public bool CheckPlaying()
+		{
+			return isPlaying;
 		}
 	}
 }
