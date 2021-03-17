@@ -1,5 +1,4 @@
 ﻿//#define EFFEKSEER_INTERNAL_DEBUG
-#define NEW_SHADER
 
 using System;
 using System.Collections.Generic;
@@ -661,9 +660,13 @@ namespace Effekseer.Internal
 				cb.SetData(data, offset, offset, size);
 			}
 
+			public bool HasBuffer(int stride)
+			{
+				return computeBuffers.ContainsKey(stride);
+			}
 			public ComputeBuffer Get(int stride)
 			{
-				if (!computeBuffers.ContainsKey(stride))
+				if (!HasBuffer(stride))
 				{
 					var count = VertexMaxSize / stride;
 					if (count * stride != VertexMaxSize) count++;
@@ -939,8 +942,6 @@ namespace Effekseer.Internal
 
 		public EffekseerRendererUnity()
 		{
-#if NEW_SHADER
-
 			var fixedShader = EffekseerSettings.Instance.fixedShader;
 #if UNITY_EDITOR
 			if (fixedShader == null)
@@ -978,17 +979,6 @@ namespace Effekseer.Internal
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, false).Keywords = new string[] { "ENABLE_LIGHTING", "_ADVANCED_" };
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Shader = EffekseerSettings.Instance.fixedShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.AdvancedLit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING", "_ADVANCED_" };
-#else
-			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, false).Shader = EffekseerSettings.Instance.standardShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, false).Shader = EffekseerSettings.Instance.standardDistortionShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerSettings.Instance.standardLightingShader;
-
-			GetMaterialCollection(Plugin.RendererMaterialType.Unlit, true).Shader = EffekseerSettings.Instance.standardModelShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Shader = EffekseerSettings.Instance.standardModelDistortionShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerSettings.Instance.standardLightingShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_" };
-#endif
-
 		}
 
 		// RenderPath per Camera
@@ -1312,6 +1302,10 @@ namespace Effekseer.Internal
 				for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
 				{
 					var buf = Plugin.GetUnityStrideBufferParameter(i);
+					if(buf.Size == 0)
+					{
+						continue;
+					}
 
 					Marshal.Copy(buf.Ptr, computeBuffer.GetCPUData(), 0,buf.Size);
 					computeBuffer.CopyCPUToGPU(buf.Stride, 0, buf.Size);
@@ -1349,7 +1343,12 @@ namespace Effekseer.Internal
 			key.Cull = (int)UnityEngine.Rendering.CullMode.Off;
 
 			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
-			prop.SetBuffer("buf_vertex", computeBuffer.Get(parameter.VertexBufferStride));
+
+			Debug.Assert(computeBuffer.HasBuffer(parameter.VertexBufferStride));
+			var vertexBuffer = computeBuffer.Get(parameter.VertexBufferStride);
+			Debug.Assert(vertexBuffer != null && vertexBuffer.IsValid());
+
+			prop.SetBuffer("buf_vertex", vertexBuffer);
 
 			prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 			prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
