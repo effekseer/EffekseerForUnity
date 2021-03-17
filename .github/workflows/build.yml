@@ -128,7 +128,7 @@ jobs:
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
           cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
-          mv WebGL_1-38/WebGL/1.38.11-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
+          mv WebGL_1-38/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
       - name: Upload math result
