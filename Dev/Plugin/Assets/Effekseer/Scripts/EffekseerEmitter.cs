@@ -104,7 +104,7 @@ namespace Effekseer
 		/// Effekseer開発者以外は触ってはいけない
 		/// </summary>
 		public List<EffekseerHandle> handles = new List<EffekseerHandle>();
-	
+
 		/// <summary xml:lang="en">
 		/// Plays the effect.
 		/// <param name="name">Effect name</param>
@@ -129,7 +129,7 @@ namespace Effekseer
 			handles.Add(h);
 			return h;
 		}
-	
+
 		/// <summary xml:lang="en">
 		/// Plays the effect that has been set.
 		/// </summary>
@@ -140,7 +140,7 @@ namespace Effekseer
 		{
 			return Play(effectAsset);
 		}
-	
+
 		/// <summary xml:lang="en">
 		/// Stops the played effect.
 		/// All nodes will be destroyed.
@@ -151,7 +151,8 @@ namespace Effekseer
 		/// </summary>
 		public void Stop()
 		{
-			foreach (var handle in handles) {
+			foreach (var handle in handles)
+			{
 				handle.Stop();
 			}
 			handles.Clear();
@@ -162,14 +163,15 @@ namespace Effekseer
 		/// </summary>
 		public void StopImmediate()
 		{
-			foreach (var handle in handles) {
+			foreach (var handle in handles)
+			{
 				handle.Stop();
 				handle.UpdateHandle(1);
 			}
 			handles.Clear();
 			Plugin.EffekseerResetTime();
 		}
-	
+
 		/// <summary xml:lang="en">
 		/// Stops the root node of the played effect.
 		/// The root node will be destroyed. Then children also will be destroyed by their lifetime.
@@ -180,7 +182,8 @@ namespace Effekseer
 		/// </summary>
 		public void StopRoot()
 		{
-			foreach (var handle in handles) {
+			foreach (var handle in handles)
+			{
 				handle.StopRoot();
 			}
 			handles.Clear();
@@ -195,7 +198,8 @@ namespace Effekseer
 		/// <param name="color">Color</param>
 		public void SetAllColor(Color color)
 		{
-			foreach (var handle in handles) {
+			foreach (var handle in handles)
+			{
 				handle.SetAllColor(color);
 			}
 		}
@@ -210,7 +214,8 @@ namespace Effekseer
 		/// </summary>
 		public void SetTargetLocation(Vector3 targetLocation)
 		{
-			foreach (var handle in handles) {
+			foreach (var handle in handles)
+			{
 				handle.SetTargetLocation(targetLocation);
 			}
 		}
@@ -321,18 +326,21 @@ namespace Effekseer
 		/// </summary>
 		public bool paused
 		{
-			set {
+			set
+			{
 				_paused = value;
-				foreach (var handle in handles) {
+				foreach (var handle in handles)
+				{
 					Plugin.EffekseerSetPaused(handle.m_handle, value);
 				}
 			}
-			get {
+			get
+			{
 				return _paused;
 			}
 		}
 		private bool _paused = false;
-	
+
 		/// <summary xml:lang="en">
 		/// Showing the effect
 		/// <para>true:  It will be rendering.</para>
@@ -345,13 +353,16 @@ namespace Effekseer
 		/// </summary>
 		public bool shown
 		{
-			set {
+			set
+			{
 				_shown = value;
-				foreach (var handle in handles) {
+				foreach (var handle in handles)
+				{
 					Plugin.EffekseerSetShown(handle.m_handle, value);
 				}
 			}
-			get {
+			get
+			{
 				return _shown;
 			}
 		}
@@ -365,13 +376,16 @@ namespace Effekseer
 		/// </summary>
 		public float speed
 		{
-			set {
+			set
+			{
 				_speed = value;
-				foreach (var handle in handles) {
+				foreach (var handle in handles)
+				{
 					Plugin.EffekseerSetSpeed(handle.m_handle, value);
 				}
 			}
-			get {
+			get
+			{
 				return _speed;
 			}
 		}
@@ -389,9 +403,11 @@ namespace Effekseer
 		/// </summary>
 		public bool exists
 		{
-			get {
+			get
+			{
 				bool res = false;
-				foreach (var handle in handles) {
+				foreach (var handle in handles)
+				{
 					res |= handle.exists;
 				}
 				return res;
@@ -447,11 +463,12 @@ namespace Effekseer
 
 		void Start()
 		{
-			if (effectAsset && playOnStart) {
+			if (effectAsset && playOnStart)
+			{
 				Play();
 			}
 		}
-	
+
 		void OnDestroy()
 		{
 			Stop();
@@ -462,15 +479,18 @@ namespace Effekseer
 		/// </summary>
 		public void UpdateSelf()
 		{
-			for (int i = 0; i < handles.Count; ) {
+			for (int i = 0; i < handles.Count;)
+			{
 				var handle = handles[i];
-				if (handle.exists) {
+				if (handle.exists)
+				{
 					handle.SetLocation(transform.position);
 
 					ApplyRotationAndScale(ref handle);
 
 					i++;
-				} else if(isLooping && handles.Count == 1)
+				}
+				else if (isLooping && handles.Count == 1)
 				{
 					handles.RemoveAt(i);
 					var newHandle = Play();
@@ -481,7 +501,8 @@ namespace Effekseer
 						break;
 					}
 				}
-				else {
+				else
+				{
 					handles.RemoveAt(i);
 				}
 			}
@@ -489,7 +510,7 @@ namespace Effekseer
 
 		public void Update()
 		{
-			if(TimingOfUpdate == EffekseerEmitterTimingOfUpdate.Update)
+			if (TimingOfUpdate == EffekseerEmitterTimingOfUpdate.Update)
 			{
 				UpdateSelf();
 			}

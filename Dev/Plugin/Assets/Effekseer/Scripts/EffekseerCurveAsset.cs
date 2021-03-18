@@ -16,9 +16,10 @@ namespace Effekseer.Internal
 		public string path;
 		[SerializeField]
 		public EffekseerCurveAsset asset;
-			
+
 #if UNITY_EDITOR
-		public static EffekseerCurveResource LoadAsset(string dirPath, string resPath) {
+		public static EffekseerCurveResource LoadAsset(string dirPath, string resPath)
+		{
 			resPath = Path.ChangeExtension(resPath, ".asset");
 
 			EffekseerCurveAsset asset = AssetDatabase.LoadAssetAtPath<EffekseerCurveAsset>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
@@ -28,10 +29,12 @@ namespace Effekseer.Internal
 			res.asset = asset;
 			return res;
 		}
-		public static bool InspectorField(EffekseerCurveResource res) {
+		public static bool InspectorField(EffekseerCurveResource res)
+		{
 			EditorGUILayout.LabelField(res.path);
 			var result = EditorGUILayout.ObjectField(res.asset, typeof(EffekseerCurveAsset), false) as EffekseerCurveAsset;
-			if (result != res.asset) {
+			if (result != res.asset)
+			{
 				res.asset = result;
 				return true;
 			}
@@ -47,20 +50,21 @@ namespace Effekseer
 	{
 		[SerializeField]
 		public byte[] bytes;
-		
+
 #if UNITY_EDITOR
 		public static void CreateAsset(string path)
 		{
 			byte[] data = File.ReadAllBytes(path);
-			if (data == null) {
+			if (data == null)
+			{
 				return;
 			}
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
-			
+
 			var asset = CreateInstance<EffekseerCurveAsset>();
 			asset.bytes = data;
-			
+
 			AssetDatabase.CreateAsset(asset, assetPath);
 			AssetDatabase.Refresh();
 		}

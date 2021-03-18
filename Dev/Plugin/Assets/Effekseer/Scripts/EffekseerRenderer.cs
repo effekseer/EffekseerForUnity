@@ -98,9 +98,9 @@ namespace Effekseer.Internal
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
 		{
-			if(isRequiredToChangeViewport)
+			if (isRequiredToChangeViewport)
 			{
-				if(colorTargetRenderTexture.dimension == TextureDimension.Tex2DArray)
+				if (colorTargetRenderTexture.dimension == TextureDimension.Tex2DArray)
 				{
 					var m = AllocateBlitArrayMaterial();
 					m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
@@ -127,7 +127,7 @@ namespace Effekseer.Internal
 					cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
 				}
 			}
-			else if(isRequiredToCopyBackground)
+			else if (isRequiredToCopyBackground)
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 
@@ -160,9 +160,9 @@ namespace Effekseer.Internal
 
 		Material AllocateBlitArrayMaterial()
 		{
-			if(blitArrayMaterials.Count == 0)
+			if (blitArrayMaterials.Count == 0)
 			{
-				for(int i = 0; i < MaterialRingCount; i++)
+				for (int i = 0; i < MaterialRingCount; i++)
 				{
 					blitArrayMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DArrayBlitMaterial));
 				}
@@ -198,7 +198,7 @@ namespace Effekseer.Internal
 		void CleanUp();
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
-		
+
 		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer);
 
 		void OnPostRender(Camera camera);
@@ -265,7 +265,7 @@ namespace Effekseer.Internal
 				return new Vector2Int(width, height);
 			}
 
-			if(camera != null)
+			if (camera != null)
 			{
 				var width = EffekseerRendererUtils.ScaledClamp(camera.scaledPixelWidth, EffekseerRendererUtils.DistortionBufferScale);
 				var height = EffekseerRendererUtils.ScaledClamp(camera.scaledPixelHeight, EffekseerRendererUtils.DistortionBufferScale);
@@ -293,7 +293,7 @@ namespace Effekseer.Internal
 				renderTexture = new RenderTexture(width, height, 0, format);
 			}
 
-			if(renderTexture != null)
+			if (renderTexture != null)
 			{
 				renderTexture.name = "EffekseerBackground";
 			}
@@ -350,7 +350,7 @@ namespace Effekseer.Internal
 
 		Material grabDepthMat;
 
-		public DepthRenderTexture(int width, int height,  RenderTargetProperty renderTargetProperty)
+		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty)
 		{
 			if (renderTargetProperty != null)
 			{

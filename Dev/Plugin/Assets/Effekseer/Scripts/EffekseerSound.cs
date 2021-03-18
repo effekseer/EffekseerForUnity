@@ -16,27 +16,32 @@ namespace Effekseer.Internal
 		public string path;
 		[SerializeField]
 		public AudioClip clip;
-		
+
 		private GCHandle gch;
 
-		public EffekseerSoundResource() {
+		public EffekseerSoundResource()
+		{
 			this.gch = GCHandle.Alloc(this);
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			this.gch.Free();
 		}
-		
-		public IntPtr ToIntPtr() {
+
+		public IntPtr ToIntPtr()
+		{
 			return GCHandle.ToIntPtr(this.gch);
 		}
 
-		public static EffekseerSoundResource FromIntPtr(IntPtr ptr) {
+		public static EffekseerSoundResource FromIntPtr(IntPtr ptr)
+		{
 			return GCHandle.FromIntPtr(ptr).Target as EffekseerSoundResource;
 		}
 
 #if UNITY_EDITOR
-		public static EffekseerSoundResource LoadAsset(string dirPath, string resPath) {
+		public static EffekseerSoundResource LoadAsset(string dirPath, string resPath)
+		{
 			AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
 
 			EffekseerSoundResource res = new EffekseerSoundResource();
@@ -44,10 +49,12 @@ namespace Effekseer.Internal
 			res.clip = clip;
 			return res;
 		}
-		public static bool InspectorField(EffekseerSoundResource res) {
+		public static bool InspectorField(EffekseerSoundResource res)
+		{
 			EditorGUILayout.LabelField(res.path);
 			var result = EditorGUILayout.ObjectField(res.clip, typeof(AudioClip), false) as AudioClip;
-			if (result != res.clip) {
+			if (result != res.clip)
+			{
 				res.clip = result;
 				return true;
 			}
@@ -55,14 +62,14 @@ namespace Effekseer.Internal
 		}
 #endif
 	}
-	
+
 	[Serializable]
 	public class EffekseerSoundPlayer : IDisposable
 	{
 		// Singleton instance
 		public static EffekseerSoundPlayer Instance { get; private set; }
 		public static bool IsValid { get { return Instance != null; } }
-		
+
 		// Pooled instances
 		private List<EffekseerSoundInstance> childInstances = new List<EffekseerSoundInstance>();
 
@@ -86,10 +93,12 @@ namespace Effekseer.Internal
 
 		internal void Init(GameObject rootObj)
 		{
-			if (Application.isPlaying) {
+			if (Application.isPlaying)
+			{
 				var settings = EffekseerSettings.Instance;
 				// サウンドインスタンスを作る
-				for (int i = 0; i < settings.soundInstances; i++) {
+				for (int i = 0; i < settings.soundInstances; i++)
+				{
 					GameObject go = new GameObject();
 					go.name = "SoundInstance #" + i;
 					go.transform.parent = rootObj.transform;
@@ -103,9 +112,9 @@ namespace Effekseer.Internal
 			Instance = this;
 			Plugin.EffekseerSetSoundPlayerEvent(
 				SoundPlayerPlay,
-				SoundPlayerStopTag, 
-				SoundPlayerPauseTag, 
-				SoundPlayerCheckPlayingTag, 
+				SoundPlayerStopTag,
+				SoundPlayerPauseTag,
+				SoundPlayerCheckPlayingTag,
 				SoundPlayerStopAll);
 		}
 
@@ -135,97 +144,120 @@ namespace Effekseer.Internal
 
 			Instance = null;
 		}
-		
-		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPlay))]
-		private static void SoundPlayerPlay(IntPtr tag, 
-				IntPtr data, float volume, float pan, float pitch, 
-				bool mode3D, float x, float y, float z, float distance) {
 
-			lock(Instance)
+		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPlay))]
+		private static void SoundPlayerPlay(IntPtr tag,
+				IntPtr data, float volume, float pan, float pitch,
+				bool mode3D, float x, float y, float z, float distance)
+		{
+
+			lock (Instance)
 			{
 				Instance.events.Add(() => { Instance.PlaySound(tag, data, volume, pan, pitch, mode3D, x, y, z, distance); });
 			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopTag))]
-		private static void SoundPlayerStopTag(IntPtr tag) {
+		private static void SoundPlayerStopTag(IntPtr tag)
+		{
 			lock (Instance)
 			{
 				Instance.events.Add(() => { Instance.StopSound(tag); });
 			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPauseTag))]
-		private static void SoundPlayerPauseTag(IntPtr tag, bool pause) {
+		private static void SoundPlayerPauseTag(IntPtr tag, bool pause)
+		{
 			lock (Instance)
 			{
 				Instance.events.Add(() => { Instance.PauseSound(tag, pause); });
 			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerCheckPlayingTag))]
-		private static bool SoundPlayerCheckPlayingTag(IntPtr tag) {
+		private static bool SoundPlayerCheckPlayingTag(IntPtr tag)
+		{
 			lock (Instance)
 			{
 				return Instance.CheckSound(tag);
 			}
 		}
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerStopAll))]
-		private static void SoundPlayerStopAll() {
+		private static void SoundPlayerStopAll()
+		{
 			lock (Instance)
 			{
 				Instance.events.Add(() => { Instance.StopAllSounds(); });
 			}
 		}
 
-		private void PlaySound(IntPtr tag, 
-			IntPtr data, float volume, float pan, float pitch, 
+		private void PlaySound(IntPtr tag,
+			IntPtr data, float volume, float pan, float pitch,
 			bool mode3D, float x, float y, float z, float distance)
 		{
-			if (data == IntPtr.Zero) {
+			if (data == IntPtr.Zero)
+			{
 				return;
 			}
 			var resource = EffekseerSoundResource.FromIntPtr(data);
-			if (resource == null) {
+			if (resource == null)
+			{
 				return;
 			}
 
 			EffekseerSoundInstance optimalInstance = null;
-			foreach (var instance in childInstances) {
-				if (!instance.CheckPlaying()) {
+			foreach (var instance in childInstances)
+			{
+				if (!instance.CheckPlaying())
+				{
 					optimalInstance = instance;
 					break;
-				} else if (optimalInstance == null || instance.lastPlayTime < optimalInstance.lastPlayTime) {
+				}
+				else if (optimalInstance == null || instance.lastPlayTime < optimalInstance.lastPlayTime)
+				{
 					optimalInstance = instance;
 				}
 			}
-			if (optimalInstance != null) {
+			if (optimalInstance != null)
+			{
 				optimalInstance.Stop();
 				optimalInstance.Play(tag.ToString(), resource, volume, pan, pitch, mode3D, x, y, z, distance);
 			}
 		}
-		private void StopSound(IntPtr tag) {
-			foreach (var sound in childInstances) {
-				if (sound.audioTag == tag.ToString()) {
+		private void StopSound(IntPtr tag)
+		{
+			foreach (var sound in childInstances)
+			{
+				if (sound.audioTag == tag.ToString())
+				{
 					sound.Stop();
 				}
 			}
 		}
-		private void PauseSound(IntPtr tag, bool paused) {
-			foreach (var sound in childInstances) {
-				if (sound.audioTag == tag.ToString()) {
+		private void PauseSound(IntPtr tag, bool paused)
+		{
+			foreach (var sound in childInstances)
+			{
+				if (sound.audioTag == tag.ToString())
+				{
 					sound.Pause(paused);
 				}
 			}
 		}
-		private bool CheckSound(IntPtr tag) {
+		private bool CheckSound(IntPtr tag)
+		{
 			bool playing = false;
-			foreach (var sound in childInstances) {
-				if (sound.audioTag == tag.ToString()) {
+			foreach (var sound in childInstances)
+			{
+				if (sound.audioTag == tag.ToString())
+				{
 					playing |= sound.CheckPlaying();
 				}
 			}
 			return playing;
 		}
-		private void StopAllSounds() {
-			foreach (var sound in childInstances) {
+		private void StopAllSounds()
+		{
+			foreach (var sound in childInstances)
+			{
 				sound.Stop();
 			}
 		}
@@ -256,8 +288,8 @@ namespace Effekseer.Internal
 				audio.clip = null;
 			}
 		}
-		public void Play(string tag, EffekseerSoundResource resource, 
-			float volume, float pan, float pitch, 
+		public void Play(string tag, EffekseerSoundResource resource,
+			float volume, float pan, float pitch,
 			bool mode3D, float x, float y, float z, float distance)
 		{
 			this.audioTag = tag;
@@ -272,10 +304,12 @@ namespace Effekseer.Internal
 			audio.clip = resource.clip;
 			audio.Play();
 		}
-		public void Stop() {
+		public void Stop()
+		{
 			audio.Stop();
 		}
-		public void Pause(bool paused) {
+		public void Pause(bool paused)
+		{
 			if (paused) audio.Pause();
 			else audio.UnPause();
 		}

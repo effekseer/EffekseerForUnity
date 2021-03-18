@@ -14,7 +14,7 @@ namespace Effekseer
 		private EffekseerSystem system;
 		[SerializeField]
 		private EffekseerSoundPlayer soundPlayer;
-		
+
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		static void RuntimeInitializeOnLoad()
 		{
@@ -26,14 +26,15 @@ namespace Effekseer
 
 		void Awake()
 		{
-			if (system == null) {
+			if (system == null)
+			{
 				system = new EffekseerSystem();
 			}
 			system.InitPlugin();
 			soundPlayer = new EffekseerSoundPlayer();
 			soundPlayer.Init(gameObject);
 		}
-		
+
 		void OnDestroy()
 		{
 			soundPlayer.Dispose();
@@ -47,22 +48,23 @@ namespace Effekseer
 
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets)
 			{
-                EffekseerEffectAsset target = effectAsset.Value.Target as EffekseerEffectAsset;
+				EffekseerEffectAsset target = effectAsset.Value.Target as EffekseerEffectAsset;
 
-                if (target != null)
+				if (target != null)
 				{
 					EffekseerSystem.Instance.LoadEffect(target);
 				}
 			}
 		}
-		
+
 		void OnDisable()
 		{
 			soundPlayer.OnDisable();
 			system.OnDisable();
 		}
-		
-		void LateUpdate() {
+
+		void LateUpdate()
+		{
 
 			Plugin.UpdateNetwork();
 			soundPlayer.Update();

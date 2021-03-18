@@ -82,7 +82,7 @@ namespace Effekseer.Internal
 
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDistortionEnabled, camera, renderTargetProperty);
 
-				if(!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal)
 				{
 					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty);
 				}
@@ -127,7 +127,7 @@ namespace Effekseer.Internal
 				RenderTargetProperty renderTargetProperty)
 			{
 				// add a command to render effects.
-				if(cmbBuf == null)
+				if (cmbBuf == null)
 				{
 					return;
 				}
@@ -166,12 +166,12 @@ namespace Effekseer.Internal
 
 					if (renderTargetProperty != null)
 					{
-						if(renderTargetProperty.colorBufferID.HasValue)
+						if (renderTargetProperty.colorBufferID.HasValue)
 						{
 							cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
 							cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
 
-							if(renderTargetProperty.Viewport.width > 0)
+							if (renderTargetProperty.Viewport.width > 0)
 							{
 								cmbBuf.SetViewport(renderTargetProperty.Viewport);
 							}
@@ -192,7 +192,7 @@ namespace Effekseer.Internal
 						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 						// to reset shader settings. SetRenderTarget is not applied until drawing
-						if(fakeMaterial != null)
+						if (fakeMaterial != null)
 						{
 							cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
 						}
@@ -229,7 +229,7 @@ namespace Effekseer.Internal
 
 			public bool IsValid(RenderTargetProperty renderTargetProperty)
 			{
-				if(isDistortionMakeDisabledForcely)
+				if (isDistortionMakeDisabledForcely)
 				{
 
 				}
@@ -310,7 +310,7 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera)
 		{
-			if(!EffekseerSettings.Instance.renderAsPostProcessingStack)
+			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
 				Render(camera, null, null);
 			}

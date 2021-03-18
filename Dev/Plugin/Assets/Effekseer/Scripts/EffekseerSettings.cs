@@ -47,7 +47,7 @@ namespace Effekseer
 		/// エフェクトインスタンスの最大数
 		/// </summary>
 		[SerializeField]
-		public int effectInstances	= 8192;
+		public int effectInstances = 8192;
 
 		/// <summary xml:lang="en">
 		/// Maximum number of quads that can be drawn.
@@ -56,7 +56,7 @@ namespace Effekseer
 		/// 描画できる四角形の最大数
 		/// </summary>
 		[SerializeField]
-		public int maxSquares		= 8192;
+		public int maxSquares = 8192;
 
 		/// <summary xml:lang="en">
 		/// The coordinate system of effects.
@@ -87,7 +87,7 @@ namespace Effekseer
 		/// サウンドインスタンスの最大数
 		/// </summary>
 		[SerializeField]
-		public int soundInstances	= 16;
+		public int soundInstances = 16;
 
 		/// <summary xml:lang="en">
 		/// Enables distortion effect.
@@ -187,13 +187,17 @@ namespace Effekseer
 		#endregion
 
 		private static EffekseerSettings instance;
-		public static EffekseerSettings Instance {
-			get {
-				if (instance != null) {
+		public static EffekseerSettings Instance
+		{
+			get
+			{
+				if (instance != null)
+				{
 					return instance;
 				}
 				instance = Resources.Load<EffekseerSettings>("EffekseerSettings");
-				if (instance == null) {
+				if (instance == null)
+				{
 					instance = new EffekseerSettings();
 				}
 				return instance;
@@ -204,7 +208,7 @@ namespace Effekseer
 #if UNITY_2018_3_OR_NEWER
 #else
 		[MenuItem("Edit/Project Settings/Effekseer")]
-#endif 
+#endif
 		public static void EditOrCreateAsset()
 		{
 			var asset = AssignAssets();
@@ -244,7 +248,7 @@ namespace Effekseer
 				{
 					asset.fakeMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/FakeShader.shader");
 
-					if(asset.fakeMaterial != null)
+					if (asset.fakeMaterial != null)
 					{
 						dirtied = true;
 					}

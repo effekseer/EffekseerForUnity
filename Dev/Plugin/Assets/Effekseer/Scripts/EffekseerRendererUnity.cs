@@ -159,7 +159,7 @@ namespace Effekseer.Internal
 			List<Vertex> vertexBuffer = new List<Vertex>();
 			List<int> indexBuffer = new List<int>();
 
-			for(int i = 0; i < verteciesCount; i++)
+			for (int i = 0; i < verteciesCount; i++)
 			{
 				vertexBuffer.Add(
 					new Vertex
@@ -930,7 +930,7 @@ namespace Effekseer.Internal
 
 			materialCollections.TryGetValue(key, out var value);
 
-			if(value != null)
+			if (value != null)
 			{
 				return value;
 			}
@@ -1173,7 +1173,7 @@ namespace Effekseer.Internal
 			path.ResetBuffers();
 
 			// copy back
-			if(EffekseerRendererUtils.IsDistortionEnabled)
+			if (EffekseerRendererUtils.IsDistortionEnabled)
 			{
 				if (renderTargetProperty != null)
 				{
@@ -1278,7 +1278,7 @@ namespace Effekseer.Internal
 			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture, path.depthTexture);
 		}
 
-		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth,  DummyTextureType type)
+		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType type)
 		{
 			if (background != null && background.ptr == key) return background.renderTexture;
 			if (depth != null && depth.ptr == key) return depth.renderTexture;
@@ -1302,12 +1302,12 @@ namespace Effekseer.Internal
 				for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
 				{
 					var buf = Plugin.GetUnityStrideBufferParameter(i);
-					if(buf.Size == 0)
+					if (buf.Size == 0)
 					{
 						continue;
 					}
 
-					Marshal.Copy(buf.Ptr, computeBuffer.GetCPUData(), 0,buf.Size);
+					Marshal.Copy(buf.Ptr, computeBuffer.GetCPUData(), 0, buf.Size);
 					computeBuffer.CopyCPUToGPU(buf.Stride, 0, buf.Size);
 				}
 
@@ -1379,7 +1379,7 @@ namespace Effekseer.Internal
 					return;
 				}
 
-				if(!efkMaterial.IsValid)
+				if (!efkMaterial.IsValid)
 				{
 					Debug.LogWarning("Please reimport effekseer materials.");
 					return;
@@ -1457,7 +1457,7 @@ namespace Effekseer.Internal
 					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 			}
-			
+
 		}
 
 		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background, DepthRenderTexture depth)
@@ -1656,7 +1656,7 @@ namespace Effekseer.Internal
 		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType dummyTextureType)
 		{
 			var texture = GetCachedTexture(parameter.GetTexturePtr(index), background, depth, dummyTextureType);
-			if(texture == null)
+			if (texture == null)
 			{
 				return null;
 			}
@@ -1712,7 +1712,7 @@ namespace Effekseer.Internal
 				textureOffset += 1;
 			}
 
-			if(parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
+			if (parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit || parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
 			{
 				var alphaTex = GetAndApplyParameterToTexture(parameter, textureOffset, background, depth, DummyTextureType.White);
 				prop.SetTexture("_alphaTex", alphaTex);

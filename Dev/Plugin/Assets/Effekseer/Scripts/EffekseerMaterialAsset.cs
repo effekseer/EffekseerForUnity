@@ -18,9 +18,10 @@ namespace Effekseer.Internal
 		public string path;
 		[SerializeField]
 		public EffekseerMaterialAsset asset;
-			
+
 #if UNITY_EDITOR
-		public static EffekseerMaterialResource LoadAsset(string dirPath, string resPath) {
+		public static EffekseerMaterialResource LoadAsset(string dirPath, string resPath)
+		{
 			resPath = Path.ChangeExtension(resPath, ".asset");
 
 			EffekseerMaterialAsset asset = AssetDatabase.LoadAssetAtPath<EffekseerMaterialAsset>(EffekseerEffectAsset.NormalizeAssetPath(dirPath + "/" + resPath));
@@ -30,10 +31,12 @@ namespace Effekseer.Internal
 			res.asset = asset;
 			return res;
 		}
-		public static bool InspectorField(EffekseerMaterialResource res) {
+		public static bool InspectorField(EffekseerMaterialResource res)
+		{
 			EditorGUILayout.LabelField(res.path);
 			var result = EditorGUILayout.ObjectField(res.asset, typeof(EffekseerMaterialAsset), false) as EffekseerMaterialAsset;
-			if (result != res.asset) {
+			if (result != res.asset)
+			{
 				res.asset = result;
 				return true;
 			}
@@ -134,16 +137,16 @@ namespace Effekseer
 		public static void CreateAsset(string path, ImportingAsset importingAsset)
 		{
 			// modify
-			if(importingAsset.CustomData1Count > 0)
+			if (importingAsset.CustomData1Count > 0)
 				importingAsset.CustomData1Count = Math.Max(2, importingAsset.CustomData1Count);
-	
-			if(importingAsset.CustomData2Count > 0)
+
+			if (importingAsset.CustomData2Count > 0)
 				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
 
 			// modifiy importing asset to avoid invalid name
-			foreach(var texture in importingAsset.Textures)
+			foreach (var texture in importingAsset.Textures)
 			{
-				if(texture.Name == string.Empty)
+				if (texture.Name == string.Empty)
 				{
 					texture.Name = texture.UniformName;
 				}
@@ -168,7 +171,7 @@ namespace Effekseer
 				isNewAsset = true;
 			}
 
-			if(importingAsset.IsCacheFile)
+			if (importingAsset.IsCacheFile)
 			{
 				asset.cachedMaterialBuffers = importingAsset.Data;
 			}
@@ -183,13 +186,13 @@ namespace Effekseer
 				var shader = CreateShader(Path.ChangeExtension(path, ".shader"), importingAsset);
 
 				// sometimes return null
-				if(shader != null)
+				if (shader != null)
 				{
 					asset.shader = shader;
 				}
 			}
 
-			if(isNewAsset)
+			if (isNewAsset)
 			{
 				AssetDatabase.CreateAsset(asset, assetPath);
 			}
@@ -260,7 +263,7 @@ namespace Effekseer
 					baseCode = baseCode.Replace(
 									   keyP,
 									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",float4(GetUV(");
-					baseCode =baseCode.Replace(keyS, "),0,0))");
+					baseCode = baseCode.Replace(keyS, "),0,0))");
 				}
 				else
 				{
@@ -325,7 +328,7 @@ namespace Effekseer
 				codeVariable += "sampler2D " + importingAsset.Textures[i].Name + ";" + nl;
 			}
 
-			for(int i = 0; i < importingAsset.Uniforms.Count; i++)
+			for (int i = 0; i < importingAsset.Uniforms.Count; i++)
 			{
 				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
 			}
@@ -334,12 +337,12 @@ namespace Effekseer
 			// HACK for efk_xxx_1 and efk_xxx_12
 			{
 				var replacingUniforms = importingAsset.Uniforms.ToArray();
-				
+
 				replacingUniforms = replacingUniforms.OrderByDescending(_ => _.UniformName.Length).ToArray();
 
 				foreach (var kv in replacingUniforms)
 				{
-					if(kv.Name == string.Empty)
+					if (kv.Name == string.Empty)
 					{
 						continue;
 					}
@@ -358,12 +361,12 @@ namespace Effekseer
 			code = code.Replace("%PSCODE%", mainPSCode);
 			code = code.Replace("%MATERIAL_NAME%", System.IO.Path.GetFileNameWithoutExtension(path));
 
-			if(importingAsset.HasRefraction)
+			if (importingAsset.HasRefraction)
 			{
 				code = code.Replace("//PRAGMA_REFRACTION_FLAG", "#pragma multi_compile _ _MATERIAL_REFRACTION_");
 			}
 
-			if(importingAsset.ShadingModel == 0)
+			if (importingAsset.ShadingModel == 0)
 			{
 				code = code.Replace("//PRAGMA_LIT_FLAG", "#define _MATERIAL_LIT_ 1");
 			}
@@ -396,7 +399,7 @@ namespace Effekseer
 
 			AssetDatabase.Refresh(ImportAssetOptions.ImportRecursive);
 			AssetDatabase.ImportAsset(path, ImportAssetOptions.ImportRecursive);
-			
+
 			var asset = AssetDatabase.LoadAssetAtPath<Shader>(path);
 			return asset;
 		}

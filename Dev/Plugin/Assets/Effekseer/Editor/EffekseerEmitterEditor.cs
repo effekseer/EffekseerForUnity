@@ -14,7 +14,7 @@ namespace Effekseer.Editor
 		private double lastTime;
 		private bool systemInitialized;
 		private bool loop;
-		
+
 		void OnEnable()
 		{
 			emitter = (EffekseerEmitter)target;
@@ -35,7 +35,8 @@ namespace Effekseer.Editor
 
 		void InitSystem()
 		{
-			if (EffekseerEditor.instance.inEditor && emitter.effectAsset != null) {
+			if (EffekseerEditor.instance.inEditor && emitter.effectAsset != null)
+			{
 				EffekseerEditor.instance.InitSystem();
 				EffekseerSystem.Instance.LoadEffect(emitter.effectAsset);
 				lastTime = EditorApplication.timeSinceStartup;
@@ -43,10 +44,11 @@ namespace Effekseer.Editor
 			}
 			systemInitialized = true;
 		}
-		
+
 		void TermSystem()
 		{
-			if (EffekseerEditor.instance.inEditor) {
+			if (EffekseerEditor.instance.inEditor)
+			{
 				EditorApplication.update -= Update;
 				emitter.StopImmediate();
 				EffekseerEditor.instance.TermSystem();
@@ -60,18 +62,22 @@ namespace Effekseer.Editor
 			float deltaTime = (float)(currentTime - lastTime);
 			float deltaFrames = Utility.TimeToFrames(deltaTime);
 			lastTime = currentTime;
-			
-			if (emitter.exists) {
+
+			if (emitter.exists)
+			{
 				RepaintEffect();
-			} else if (loop) {
+			}
+			else if (loop)
+			{
 				emitter.Play();
 			}
 
-			foreach (var handle in emitter.handles) {
+			foreach (var handle in emitter.handles)
+			{
 				handle.UpdateHandle(deltaFrames);
 			}
 
-			if(EffekseerSystem.Instance != null)
+			if (EffekseerSystem.Instance != null)
 			{
 				EffekseerSystem.Instance.UpdateTime(deltaFrames);
 				EffekseerSystem.Instance.ApplyLightingToNative();
@@ -116,21 +122,23 @@ namespace Effekseer.Editor
 
 			Handles.BeginGUI();
 
-			float screenWidth  = sceneView.position.size.x;
+			float screenWidth = sceneView.position.size.x;
 			float screenHeight = sceneView.position.size.y;
-			
+
 			float width = 160;
 			float height = 120;
 
-			var boxRect  = new Rect(screenWidth - width - 30, screenHeight - height - 45, width + 20, height + 40);
+			var boxRect = new Rect(screenWidth - width - 30, screenHeight - height - 45, width + 20, height + 40);
 			var areaRect = new Rect(screenWidth - width - 20, screenHeight - height - 20, width, height);
 
 			GUI.Box(boxRect, "Effekseer Emitter");
 			GUILayout.BeginArea(areaRect);
 
 			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Play")) {
-				if (systemInitialized == false) {
+			if (GUILayout.Button("Play"))
+			{
+				if (systemInitialized == false)
+				{
 					InitSystem();
 				}
 
@@ -143,7 +151,8 @@ namespace Effekseer.Editor
 
 				emitter.Play();
 			}
-			if (GUILayout.Button("Stop")) {
+			if (GUILayout.Button("Stop"))
+			{
 				emitter.StopImmediate();
 
 				// just in case
@@ -154,19 +163,19 @@ namespace Effekseer.Editor
 				RepaintEffect();
 			}
 			GUILayout.EndHorizontal();
-			
+
 			GUILayout.Space(5);
-			
+
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Loop", GUILayout.Width(50));
 			loop = GUILayout.Toggle(loop, "");
 			GUILayout.EndHorizontal();
-			
+
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Paused", GUILayout.Width(50));
 			emitter.paused = GUILayout.Toggle(emitter.paused, "");
 			GUILayout.EndHorizontal();
-			
+
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Speed", GUILayout.Width(50));
 			emitter.speed = GUILayout.HorizontalSlider(emitter.speed, 0.0f, 2.0f);

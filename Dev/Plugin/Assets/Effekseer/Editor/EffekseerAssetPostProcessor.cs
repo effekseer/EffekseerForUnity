@@ -42,14 +42,14 @@ namespace Effekseer.Editor
 					{
 						var asset = AssetDatabase.LoadAssetAtPath<EffekseerMaterialAsset>(assetPath);
 
-						if(asset !=null)
+						if (asset != null)
 						{
 							asset.AttachShader(assetPath);
 						}
 					}
 				}
 			}
-		
+
 			foreach (string assetPath in importedAssets)
 			{
 				if (Path.GetExtension(assetPath) == ".efk")
@@ -70,7 +70,7 @@ namespace Effekseer.Editor
 					importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
 					importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
 					var info = new EffekseerTool.Utl.MaterialInformation();
-					info.Load( System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
+					info.Load(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
 
 					importingAsset.CustomData1Count = info.CustomData1Count;
 					importingAsset.CustomData2Count = info.CustomData2Count;

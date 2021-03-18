@@ -8,16 +8,18 @@ namespace Effekseer
 {
 	public static class Utility
 	{
-		public static float[] Matrix2Array(Matrix4x4 mat) {
+		public static float[] Matrix2Array(Matrix4x4 mat)
+		{
 			float[] res = new float[16];
-			res[ 0] = mat.m00; res[ 1] = mat.m01; res[ 2] = mat.m02; res[ 3] = mat.m03;
-			res[ 4] = mat.m10; res[ 5] = mat.m11; res[ 6] = mat.m12; res[ 7] = mat.m13;
-			res[ 8] = mat.m20; res[ 9] = mat.m21; res[10] = mat.m22; res[11] = mat.m23;
+			res[0] = mat.m00; res[1] = mat.m01; res[2] = mat.m02; res[3] = mat.m03;
+			res[4] = mat.m10; res[5] = mat.m11; res[6] = mat.m12; res[7] = mat.m13;
+			res[8] = mat.m20; res[9] = mat.m21; res[10] = mat.m22; res[11] = mat.m23;
 			res[12] = mat.m30; res[13] = mat.m31; res[14] = mat.m32; res[15] = mat.m33;
 			return res;
 		}
 
-		public static float TimeToFrames(float time) {
+		public static float TimeToFrames(float time)
+		{
 			return time * 60.0f;
 		}
 	}
@@ -94,10 +96,10 @@ namespace Effekseer
 		public static extern void EffekseerSetRenderingCameraCullingMask(int renderId, int cullingMask);
 
 		[DllImport(pluginName)]
-        public static extern void EffekseerSetIsTextureFlipped(int isFlipped);
+		public static extern void EffekseerSetIsTextureFlipped(int isFlipped);
 
-        [DllImport(pluginName)]
-        public static extern void EffekseerSetIsBackgroundTextureFlipped(int isFlipped);
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetIsBackgroundTextureFlipped(int isFlipped);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerAddRemovingRenderPath(int renderID);
@@ -280,13 +282,13 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundPlayerEvent(
-			EffekseerSoundPlayerPlay play, 
-			EffekseerSoundPlayerStopTag stopTag, 
-			EffekseerSoundPlayerPauseTag pauseTag, 
-			EffekseerSoundPlayerCheckPlayingTag checkPlayingTag, 
+			EffekseerSoundPlayerPlay play,
+			EffekseerSoundPlayerStopTag stopTag,
+			EffekseerSoundPlayerPauseTag pauseTag,
+			EffekseerSoundPlayerCheckPlayingTag checkPlayingTag,
 			EffekseerSoundPlayerStopAll atopAll);
-		public delegate void EffekseerSoundPlayerPlay(IntPtr tag, 
-			IntPtr data, float volume, float pan, float pitch, 
+		public delegate void EffekseerSoundPlayerPlay(IntPtr tag,
+			IntPtr data, float volume, float pan, float pitch,
 			bool mode3D, float x, float y, float z, float distance);
 		public delegate void EffekseerSoundPlayerStopTag(IntPtr tag);
 		public delegate void EffekseerSoundPlayerPauseTag(IntPtr tag, bool pause);

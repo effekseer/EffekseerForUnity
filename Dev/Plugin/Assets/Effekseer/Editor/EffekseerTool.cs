@@ -78,7 +78,7 @@ namespace EffekseerTool
 		public static void LoadCSV(string path)
 		{
 			LoadCSV(path, "en");
-			if(LanguageTable.Languages.Count > 0)
+			if (LanguageTable.Languages.Count > 0)
 			{
 				LoadCSV(path, LanguageTable.Languages[LanguageTable.SelectedIndex]);
 			}
@@ -90,7 +90,7 @@ namespace EffekseerTool
 			{
 				var records = Utils.CsvReaader.Read(streamReader.ReadToEnd());
 
-				foreach(var record in records)
+				foreach (var record in records)
 				{
 					if (record.Count < 2) continue;
 					if (record[0] == string.Empty) continue;
@@ -115,7 +115,7 @@ namespace EffekseerTool
 		public static string GetText(string key)
 		{
 			string ret = string.Empty;
-			if(texts.TryGetValue(key, out ret))
+			if (texts.TryGetValue(key, out ret))
 			{
 				return ret;
 			}
@@ -210,7 +210,8 @@ namespace EffekseerTool
 		/// </summary>
 		public static Language Language
 		{
-			get {
+			get
+			{
 				if (LanguageTable.Languages[LanguageTable.SelectedIndex] == "ja") return Language.Japanese;
 				return Language.English;
 			}
@@ -344,7 +345,7 @@ namespace EffekseerTool
 		{
 			get { return option; }
 		}
-		
+
 		public static Data.RecordingValues Recording
 		{
 			get { return recording; }
@@ -473,9 +474,9 @@ namespace EffekseerTool
 #endif
 			// change a separator
 			System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
-            customCulture.NumberFormat.NumberDecimalSeparator = ".";
-            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
-        }
+			customCulture.NumberFormat.NumberDecimalSeparator = ".";
+			System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+		}
 
 		public static void Initialize(string language = null)
 		{
@@ -488,7 +489,7 @@ namespace EffekseerTool
 
 			New();
 
-			if(!DoExecuteWithMLBundle())
+			if (!DoExecuteWithMLBundle())
 			{
 				InitializeScripts(entryDirectory);
 			}
@@ -615,9 +616,9 @@ namespace EffekseerTool
 		public static void Dispose()
 		{
 #if SCRIPT_ENABLED
-            Script.Compiler.Dispose();
+			Script.Compiler.Dispose();
 #endif
-            SaveOption();
+			SaveOption();
 		}
 
 		/// <summary>
@@ -749,7 +750,7 @@ namespace EffekseerTool
 			culling = new Data.EffectCullingValues();
 			globalValues = new Data.GlobalValues();
 
-			if(recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Local)
+			if (recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Local)
 			{
 				recording = new Data.RecordingValues();
 			}
@@ -812,7 +813,7 @@ namespace EffekseerTool
 
 			var dec = doc.CreateXmlDeclaration("1.0", "utf-8", null);
 			doc.InsertBefore(dec, project_root);
-	
+
 			IsChanged = false;
 
 			if (OnAfterSave != null)
@@ -932,7 +933,7 @@ namespace EffekseerTool
 				{
 					if ((node.Name == "RenderCommon") && node.ChildNodes.Count > 0)
 					{
-						if(node["Distortion"] != null && node["Distortion"].GetText() == "True")
+						if (node["Distortion"] != null && node["Distortion"].GetText() == "True")
 						{
 							node.RemoveChild(node["Material"]);
 							node.AppendChild(doc.CreateTextElement("Material", (int)Data.RendererCommonValues.MaterialType.BackDistortion));
@@ -970,7 +971,7 @@ namespace EffekseerTool
 
 				collectNodes(doc);
 
-				foreach(var node in nodes)
+				foreach (var node in nodes)
 				{
 					var rendererCommon = node["RendererCommonValues"];
 					var renderer = node["DrawingValues"];
@@ -995,7 +996,7 @@ namespace EffekseerTool
 					{
 						if (rendererCommon["Distortion"] != null && rendererCommon["Distortion"].GetText() == "True")
 						{
-							if(node["Material"] != null)
+							if (node["Material"] != null)
 							{
 								rendererCommon.RemoveChild(node["Material"]);
 							}
@@ -1010,7 +1011,7 @@ namespace EffekseerTool
 						{
 							if (renderer["Model"]["NormalTexture"] != null)
 							{
-								if(rendererCommon["Filter"] != null)
+								if (rendererCommon["Filter"] != null)
 								{
 									rendererCommon.AppendChild(doc.CreateTextElement("Filter2", rendererCommon["Filter"].GetText()));
 								}
@@ -1220,7 +1221,7 @@ namespace EffekseerTool
 						}
 					}
 
-					foreach(var c in n.Children)
+					foreach (var c in n.Children)
 					{
 						convert(c);
 					}
@@ -1228,7 +1229,7 @@ namespace EffekseerTool
 
 				convert(fcurves);
 			}
-			
+
 			Command.CommandManager.Clear();
 			IsChanged = false;
 
@@ -1294,7 +1295,7 @@ namespace EffekseerTool
 				br.Close();
 			}
 
-			if(isNewFormat)
+			if (isNewFormat)
 			{
 				var loader = new IO.EfkEfc();
 				return loader.Load(path);
@@ -1314,7 +1315,7 @@ namespace EffekseerTool
 		/// <returns></returns>
 		static public Data.OptionValues LoadOption(string defaultLanguage)
 		{
-            Data.OptionValues res = new Data.OptionValues();
+			Data.OptionValues res = new Data.OptionValues();
 			environments = new Data.EnvironmentValues();
 
 			var path = System.IO.Path.Combine(GetEntryDirectory(), OptionFilePath);
@@ -1332,24 +1333,25 @@ namespace EffekseerTool
 
 			doc.Load(path);
 
-            if (doc.ChildNodes.Count != 2) return res;
-            if (doc.ChildNodes[1].Name != "EffekseerProject") return res;
+			if (doc.ChildNodes.Count != 2) return res;
+			if (doc.ChildNodes[1].Name != "EffekseerProject") return res;
 
 			var optionElement = doc["EffekseerProject"]["Option"];
 			if (optionElement != null)
 			{
-                var o = res as object;
+				var o = res as object;
 				Data.IO.LoadObjectFromElement(optionElement as System.Xml.XmlElement, ref o, false);
 			}
 
 			var environment = doc["EffekseerProject"]["Environment"];
-			if (environment != null) {
+			if (environment != null)
+			{
 				var o = environments as object;
 				Data.IO.LoadObjectFromElement(environment as System.Xml.XmlElement, ref o, false);
 			}
 
 			var recordingElement = doc["EffekseerProject"]["Recording"];
-			if(recordingElement != null)
+			if (recordingElement != null)
 			{
 				var o = recording as object;
 				Data.IO.LoadObjectFromElement(recordingElement as System.Xml.XmlElement, ref o, false);
@@ -1357,7 +1359,7 @@ namespace EffekseerTool
 
 			IsChanged = false;
 
-            return res;
+			return res;
 		}
 
 		static public void SaveOption()
@@ -1370,8 +1372,8 @@ namespace EffekseerTool
 			var environmentElement = Data.IO.SaveObjectToElement(doc, "Environment", Environment, false);
 
 			System.Xml.XmlElement project_root = doc.CreateElement("EffekseerProject");
-			if(optionElement != null) project_root.AppendChild(optionElement);
-			if(environmentElement != null) project_root.AppendChild(environmentElement);
+			if (optionElement != null) project_root.AppendChild(optionElement);
+			if (environmentElement != null) project_root.AppendChild(environmentElement);
 
 			// recording option (this option is stored in local or global)
 			if (recording.RecordingStorageTarget.Value == Data.RecordingStorageTargetTyoe.Global)
@@ -1453,7 +1455,7 @@ namespace EffekseerTool
 		public static bool MoveNode(Data.Node movedNode, Data.NodeBase targetParent, int targetIndex)
 		{
 			// Check
-			if(movedNode.Parent == targetParent && targetIndex != int.MaxValue)
+			if (movedNode.Parent == targetParent && targetIndex != int.MaxValue)
 			{
 				var index = targetParent.Children.Internal.Select((i, n) => Tuple35.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
 
@@ -1464,21 +1466,21 @@ namespace EffekseerTool
 				}
 			}
 
-			if(movedNode == targetParent)
+			if (movedNode == targetParent)
 			{
 				return false;
 			}
 
 			Func<Data.Node, bool> isFound = null;
-			
+
 			isFound = (Data.Node n) =>
 			{
-				if(n.Children.Internal.Any(_=>_ == targetParent))
+				if (n.Children.Internal.Any(_ => _ == targetParent))
 				{
 					return true;
 				}
 
-				foreach(var n_ in n.Children.Internal)
+				foreach (var n_ in n.Children.Internal)
 				{
 					if (isFound(n_)) return true;
 				}
@@ -1486,30 +1488,30 @@ namespace EffekseerTool
 				return false;
 			};
 
-			if(isFound(movedNode))
+			if (isFound(movedNode))
 			{
 				return false;
 			}
 
 			// 
-			if(targetParent == movedNode.Parent && targetIndex != int.MaxValue)
+			if (targetParent == movedNode.Parent && targetIndex != int.MaxValue)
 			{
 				var index = targetParent.Children.Internal.Select((i, n) => Tuple35.Create(i, n)).FirstOrDefault(_ => _.Item1 == movedNode).Item2;
-				if(index < targetIndex)
+				if (index < targetIndex)
 				{
 					targetIndex -= 1;
 				}
 			}
 
 			Command.CommandManager.StartCollection();
-		
+
 			// because a node is unselected when removed
 			var isNodeSelected = SelectedNode == movedNode;
 
 			movedNode.Parent.RemoveChild(movedNode);
 			targetParent.AddChild(movedNode, targetIndex);
 
-			if(isNodeSelected)
+			if (isNodeSelected)
 			{
 				SelectedNode = movedNode;
 			}
@@ -1533,12 +1535,12 @@ namespace EffekseerTool
 					if (node.LocationValues.Type.Value == Data.LocationValues.ParamaterType.LocationFCurve)
 					{
 						var name = "Location";
-						if(Language == Language.Japanese)
+						if (Language == Language.Japanese)
 						{
 							name = "位置";
 						}
 
-						list.Add(Tuple35.Create(name,(object)node.LocationValues.LocationFCurve.FCurve));
+						list.Add(Tuple35.Create(name, (object)node.LocationValues.LocationFCurve.FCurve));
 					}
 
 					if (node.RotationValues.Type.Value == Data.RotationValues.ParamaterType.RotationFCurve)
@@ -1778,14 +1780,14 @@ namespace EffekseerTool
 			{
 				var n = node as Data.Node;
 
-				if(n != null)
+				if (n != null)
 				{
 					if (n.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.File && n.RendererCommonValues.MaterialFile.Path.GetAbsolutePath().Replace('\\', '/') == path)
 					{
 						Utl.MaterialInformation info = ResourceCache.LoadMaterialInformation(path);
-						
+
 						// is it correct?
-						if(info == null)
+						if (info == null)
 						{
 							info = new MaterialInformation();
 						}
@@ -1828,7 +1830,7 @@ namespace EffekseerTool
 	public delegate void ChangedValueEventHandler(object sender, ChangedValueEventArgs e);
 
 	public enum ChangedValueType
-	{ 
+	{
 		Execute,
 		Unexecute,
 	}
@@ -1868,11 +1870,11 @@ namespace EffekseerTool
 	/// </summary>
 	public enum Language
 	{
-        [Name(value = "日本語", language = Language.Japanese)]
-        [Name(value = "Japanese", language = Language.English)]
+		[Name(value = "日本語", language = Language.Japanese)]
+		[Name(value = "Japanese", language = Language.English)]
 		Japanese,
-        [Name(value = "英語", language = Language.Japanese)]
-        [Name(value = "English", language = Language.English)]
+		[Name(value = "英語", language = Language.Japanese)]
+		[Name(value = "English", language = Language.English)]
 		English,
 	}
 
@@ -1894,27 +1896,27 @@ namespace EffekseerTool
 		}
 	}
 
-    // アセンブリからリソースファイルをロードする
-    // Resources.GetString(...) に介して取得する場合、
-    // カルチャーによってローカライズ済の文字列が得られます。
-    public static class Resources
-    {
+	// アセンブリからリソースファイルをロードする
+	// Resources.GetString(...) に介して取得する場合、
+	// カルチャーによってローカライズ済の文字列が得られます。
+	public static class Resources
+	{
 		static Dictionary<string, string> keyToStrings = new Dictionary<string, string>();
 
 		static Resources()
-        {
-        }
+		{
+		}
 
 		public static string GetString(string name)
-        {
-			if(MultiLanguageTextProvider.HasKey(name))
+		{
+			if (MultiLanguageTextProvider.HasKey(name))
 			{
 				return MultiLanguageTextProvider.GetText(name);
 			}
-            
-            return string.Empty;
-        }
-    }
+
+			return string.Empty;
+		}
+	}
 
 	/// <summary>
 	/// attribute for parameter's key
@@ -1959,9 +1961,9 @@ namespace EffekseerTool
 	Inherited = false)]
 	public class NameAttribute : Attribute
 	{
-        static NameAttribute()
-        {
-        }
+		static NameAttribute()
+		{
+		}
 
 		public NameAttribute()
 		{
@@ -1999,9 +2001,9 @@ namespace EffekseerTool
 			{
 				foreach (var attribute in attributes.OfType<NameAttribute>())
 				{
-                    // search from resources at first
-                    var value = Resources.GetString(attribute.value);
-                    if (!String.IsNullOrEmpty(value)) return value;
+					// search from resources at first
+					var value = Resources.GetString(attribute.value);
+					if (!String.IsNullOrEmpty(value)) return value;
 
 					if (attribute.language == Core.Language)
 					{
@@ -2073,7 +2075,7 @@ namespace EffekseerTool
 				{
 					// search from resources at first
 					var value = Resources.GetString(attribute.value);
-                    if (!String.IsNullOrEmpty(value)) return value;
+					if (!String.IsNullOrEmpty(value)) return value;
 
 					if (attribute.language == Core.Language)
 					{
@@ -2120,7 +2122,7 @@ namespace EffekseerTool
 			get;
 			set;
 		}
-		
+
 		/// <summary>
 		/// アイコン属性を探す。
 		/// </summary>
@@ -2157,107 +2159,107 @@ namespace EffekseerTool
 		}
 	}
 
-    public class Tuple35<T1, T2>
-    {
-        public T1 Item1;
-        public T2 Item2;
+	public class Tuple35<T1, T2>
+	{
+		public T1 Item1;
+		public T2 Item2;
 
-        public Tuple35()
-        {
-            Item1 = default(T1);
-            Item2 = default(T2);
-        }
+		public Tuple35()
+		{
+			Item1 = default(T1);
+			Item2 = default(T2);
+		}
 
-        public Tuple35(T1 t1, T2 t2)
-        {
-            Item1 = t1;
-            Item2 = t2;
-        }
-    }
+		public Tuple35(T1 t1, T2 t2)
+		{
+			Item1 = t1;
+			Item2 = t2;
+		}
+	}
 
-    public class Tuple35
-    {
-        public static Tuple35<TV1, TV2> Create<TV1, TV2>(TV1 t1, TV2 t2)
-        {
-            return new Tuple35<TV1, TV2>(t1, t2);
-        }
-    }
+	public class Tuple35
+	{
+		public static Tuple35<TV1, TV2> Create<TV1, TV2>(TV1 t1, TV2 t2)
+		{
+			return new Tuple35<TV1, TV2>(t1, t2);
+		}
+	}
 }
 
 namespace EffekseerTool.Binary
 {
-    class AlphaCrunchValues
-    {
-        public static byte[] GetBytes(Data.AlphaCrunchValues value)
-        {
-            List<byte[]> data = new List<byte[]>();
-            data.Add(value.Type.GetValueAsInt().GetBytes());
+	class AlphaCrunchValues
+	{
+		public static byte[] GetBytes(Data.AlphaCrunchValues value)
+		{
+			List<byte[]> data = new List<byte[]>();
+			data.Add(value.Type.GetValueAsInt().GetBytes());
 
-            if (value.Type == Data.AlphaCrunchValues.ParameterType.Fixed)
-            {
-                var refBuf = value.Fixed.Threshold.DynamicEquation.Index.GetBytes();
-                var mainBuf = value.Fixed.Threshold.GetBytes();
-                data.Add( (mainBuf.Count() + refBuf.Count()).GetBytes() );
-                data.Add(refBuf);
-                data.Add(mainBuf);
-            }
-            else if (value.Type == Data.AlphaCrunchValues.ParameterType.FourPointInterpolation)
-            {
-                List<byte[]> _data = new List<byte[]>();
-                _data.Add(value.FourPointInterpolation.BeginThreshold.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.BeginThreshold.Min.GetBytes());
-                _data.Add(value.FourPointInterpolation.TransitionFrameNum.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.TransitionFrameNum.Min.GetBytes());
-                _data.Add(value.FourPointInterpolation.No2Threshold.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.No2Threshold.Min.GetBytes());
-                _data.Add(value.FourPointInterpolation.No3Threshold.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.No3Threshold.Min.GetBytes());
-                _data.Add(value.FourPointInterpolation.TransitionFrameNum2.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.TransitionFrameNum2.Min.GetBytes());
-                _data.Add(value.FourPointInterpolation.EndThreshold.Max.GetBytes());
-                _data.Add(value.FourPointInterpolation.EndThreshold.Min.GetBytes());
+			if (value.Type == Data.AlphaCrunchValues.ParameterType.Fixed)
+			{
+				var refBuf = value.Fixed.Threshold.DynamicEquation.Index.GetBytes();
+				var mainBuf = value.Fixed.Threshold.GetBytes();
+				data.Add((mainBuf.Count() + refBuf.Count()).GetBytes());
+				data.Add(refBuf);
+				data.Add(mainBuf);
+			}
+			else if (value.Type == Data.AlphaCrunchValues.ParameterType.FourPointInterpolation)
+			{
+				List<byte[]> _data = new List<byte[]>();
+				_data.Add(value.FourPointInterpolation.BeginThreshold.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.BeginThreshold.Min.GetBytes());
+				_data.Add(value.FourPointInterpolation.TransitionFrameNum.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.TransitionFrameNum.Min.GetBytes());
+				_data.Add(value.FourPointInterpolation.No2Threshold.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.No2Threshold.Min.GetBytes());
+				_data.Add(value.FourPointInterpolation.No3Threshold.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.No3Threshold.Min.GetBytes());
+				_data.Add(value.FourPointInterpolation.TransitionFrameNum2.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.TransitionFrameNum2.Min.GetBytes());
+				_data.Add(value.FourPointInterpolation.EndThreshold.Max.GetBytes());
+				_data.Add(value.FourPointInterpolation.EndThreshold.Min.GetBytes());
 
-                var __data = _data.ToArray().ToArray();
+				var __data = _data.ToArray().ToArray();
 
-                data.Add(__data.Count().GetBytes());
-                data.Add(__data);
-            }
-            else if (value.Type == Data.AlphaCrunchValues.ParameterType.Easing)
-            {
-                var easing = Utl.MathUtl.Easing((float)value.Easing.StartSpeed.Value, (float)value.Easing.EndSpeed.Value);
+				data.Add(__data.Count().GetBytes());
+				data.Add(__data);
+			}
+			else if (value.Type == Data.AlphaCrunchValues.ParameterType.Easing)
+			{
+				var easing = Utl.MathUtl.Easing((float)value.Easing.StartSpeed.Value, (float)value.Easing.EndSpeed.Value);
 
-                var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
-                var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
-                var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
-                var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
+				var refBuf1_1 = value.Easing.Start.DynamicEquationMax.Index.GetBytes();
+				var refBuf1_2 = value.Easing.Start.DynamicEquationMin.Index.GetBytes();
+				var refBuf2_1 = value.Easing.End.DynamicEquationMax.Index.GetBytes();
+				var refBuf2_2 = value.Easing.End.DynamicEquationMin.Index.GetBytes();
 
-                List<byte[]> _data = new List<byte[]>();
-                _data.Add(refBuf1_1);
-                _data.Add(refBuf1_2);
-                _data.Add(refBuf2_1);
-                _data.Add(refBuf2_2);
-                _data.Add(value.Easing.Start.Max.GetBytes());
-                _data.Add(value.Easing.Start.Min.GetBytes());
-                _data.Add(value.Easing.End.Max.GetBytes());
-                _data.Add(value.Easing.End.Min.GetBytes());
-                _data.Add(BitConverter.GetBytes(easing[0]));
-                _data.Add(BitConverter.GetBytes(easing[1]));
-                _data.Add(BitConverter.GetBytes(easing[2]));
-                var __data = _data.ToArray().ToArray();
+				List<byte[]> _data = new List<byte[]>();
+				_data.Add(refBuf1_1);
+				_data.Add(refBuf1_2);
+				_data.Add(refBuf2_1);
+				_data.Add(refBuf2_2);
+				_data.Add(value.Easing.Start.Max.GetBytes());
+				_data.Add(value.Easing.Start.Min.GetBytes());
+				_data.Add(value.Easing.End.Max.GetBytes());
+				_data.Add(value.Easing.End.Min.GetBytes());
+				_data.Add(BitConverter.GetBytes(easing[0]));
+				_data.Add(BitConverter.GetBytes(easing[1]));
+				_data.Add(BitConverter.GetBytes(easing[2]));
+				var __data = _data.ToArray().ToArray();
 
-                data.Add(__data.Count().GetBytes());
-                data.Add(__data);
-            }
-            else if (value.Type == Data.AlphaCrunchValues.ParameterType.FCurve)
-            {
-                var _data = value.FCurve.GetBytes();
-                data.Add(_data.Count().GetBytes());
-                data.Add(_data);
-            }
+				data.Add(__data.Count().GetBytes());
+				data.Add(__data);
+			}
+			else if (value.Type == Data.AlphaCrunchValues.ParameterType.FCurve)
+			{
+				var _data = value.FCurve.GetBytes();
+				data.Add(_data.Count().GetBytes());
+				data.Add(_data);
+			}
 
-            return data.ToArray().ToArray();
-        }
-    }
+			return data.ToArray().ToArray();
+		}
+	}
 }
 
 namespace EffekseerTool.Binary
@@ -2362,12 +2364,12 @@ namespace EffekseerTool.Binary
 namespace EffekseerTool.Binary
 {
 	enum NodeType : int
-	{ 
+	{
 		Root = -1,
 		None = 0,
 		Sprite = 2,
 		Ribbon = 3,
-        Ring = 4,
+		Ring = 4,
 		Model = 5,
 		Track = 6,
 	};
@@ -2395,7 +2397,7 @@ namespace EffekseerTool.Binary
 			{
 				Language language = Language.English;
 
-				if(Core.Option != null && Core.Option.LanguageSelector != null)
+				if (Core.Option != null && Core.Option.LanguageSelector != null)
 				{
 					language = Core.Language;
 				}
@@ -2404,7 +2406,7 @@ namespace EffekseerTool.Binary
 					language = LanguageGetter.GetLanguage();
 				}
 
-				if(language == Language.Japanese)
+				if (language == Language.Japanese)
 				{
 					Core.OnOutputLog(LogLevel.Warning, path + " が見つかりません。");
 				}
@@ -2466,7 +2468,7 @@ namespace EffekseerTool.Binary
 
 			UsedDistortionTextures = new HashSet<string>();
 
-            Sounds = new HashSet<string>();
+			Sounds = new HashSet<string>();
 
 			Models = new HashSet<string>();
 
@@ -2479,9 +2481,9 @@ namespace EffekseerTool.Binary
 					{
 						var _node = node as Data.Node;
 
-						if(IsRenderedNode(_node))
+						if (IsRenderedNode(_node))
 						{
-							if(_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.Default)
+							if (_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.Default)
 							{
 								var relative_path = _node.RendererCommonValues.ColorTexture.RelativePath;
 								if (relative_path != string.Empty)
@@ -2503,7 +2505,7 @@ namespace EffekseerTool.Binary
 								}
 #endif
 							}
-							if (_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.BackDistortion )
+							if (_node.RendererCommonValues.Material.Value == Data.RendererCommonValues.MaterialType.BackDistortion)
 							{
 								var relative_path = _node.RendererCommonValues.ColorTexture.RelativePath;
 								if (relative_path != string.Empty)
@@ -2599,15 +2601,15 @@ namespace EffekseerTool.Binary
 
 			get_textures(Core.Root);
 
-            Dictionary<string, int> texture_and_index = new Dictionary<string, int>();
-            {
-                int index = 0;
-                foreach (var texture in UsedTextures.ToList().OrderBy(_ => _))
-                {
-                    texture_and_index.Add(texture, index);
-                    index++;
-                }
-            }
+			Dictionary<string, int> texture_and_index = new Dictionary<string, int>();
+			{
+				int index = 0;
+				foreach (var texture in UsedTextures.ToList().OrderBy(_ => _))
+				{
+					texture_and_index.Add(texture, index);
+					index++;
+				}
+			}
 
 			Dictionary<string, int> normalTexture_and_index = new Dictionary<string, int>();
 			{
@@ -2629,12 +2631,12 @@ namespace EffekseerTool.Binary
 				}
 			}
 
-            Action<Data.NodeBase> get_waves = null;
-            get_waves = (node) =>
-            {
-                if (node is Data.Node)
-                {
-                    var _node = node as Data.Node;
+			Action<Data.NodeBase> get_waves = null;
+			get_waves = (node) =>
+			{
+				if (node is Data.Node)
+				{
+					var _node = node as Data.Node;
 
 					if (IsRenderedNode(_node))
 					{
@@ -2653,25 +2655,25 @@ namespace EffekseerTool.Binary
 							}
 						}
 					}
-                }
+				}
 
-                for (int i = 0; i < node.Children.Count; i++)
-                {
-                    get_waves(node.Children[i]);
-                }
-            };
+				for (int i = 0; i < node.Children.Count; i++)
+				{
+					get_waves(node.Children[i]);
+				}
+			};
 
-            get_waves(Core.Root);
+			get_waves(Core.Root);
 
-            Dictionary<string, int> wave_and_index = new Dictionary<string, int>();
-            {
-                int index = 0;
-                foreach (var wave in Sounds.ToList().OrderBy(_ => _))
-                {
-                    wave_and_index.Add(wave, index);
-                    index++;
-                }
-            }
+			Dictionary<string, int> wave_and_index = new Dictionary<string, int>();
+			{
+				int index = 0;
+				foreach (var wave in Sounds.ToList().OrderBy(_ => _))
+				{
+					wave_and_index.Add(wave, index);
+					index++;
+				}
+			}
 
 			Action<Data.NodeBase> get_models = null;
 			get_models = (node) =>
@@ -2684,34 +2686,8 @@ namespace EffekseerTool.Binary
 					{
 						var relative_path = _node.DrawingValues.Model.Model.RelativePath;
 
-                        if (!string.IsNullOrEmpty(relative_path))
-                        {
-							if(string.IsNullOrEmpty(System.IO.Path.GetDirectoryName(relative_path)))
-							{
-								relative_path = System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
-							}
-							else
-							{
-								relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
-							}
-
-							if (relative_path != string.Empty)
-                            {
-                                if (!Models.Contains(relative_path))
-                                {
-                                    Models.Add(relative_path);
-                                }
-                            }
-                        }
-                       
-					}
-
-					if (_node.GenerationLocationValues.Type.Value == Data.GenerationLocationValues.ParameterType.Model)
-					{
-						var relative_path = _node.GenerationLocationValues.Model.Model.RelativePath;
-
-                        if (!string.IsNullOrEmpty(relative_path))
-                        {
+						if (!string.IsNullOrEmpty(relative_path))
+						{
 							if (string.IsNullOrEmpty(System.IO.Path.GetDirectoryName(relative_path)))
 							{
 								relative_path = System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
@@ -2722,13 +2698,39 @@ namespace EffekseerTool.Binary
 							}
 
 							if (relative_path != string.Empty)
-                            {
-                                if (!Models.Contains(relative_path))
-                                {
-                                    Models.Add(relative_path);
-                                }
-                            }
-                        }
+							{
+								if (!Models.Contains(relative_path))
+								{
+									Models.Add(relative_path);
+								}
+							}
+						}
+
+					}
+
+					if (_node.GenerationLocationValues.Type.Value == Data.GenerationLocationValues.ParameterType.Model)
+					{
+						var relative_path = _node.GenerationLocationValues.Model.Model.RelativePath;
+
+						if (!string.IsNullOrEmpty(relative_path))
+						{
+							if (string.IsNullOrEmpty(System.IO.Path.GetDirectoryName(relative_path)))
+							{
+								relative_path = System.IO.Path.GetFileNameWithoutExtension(relative_path) + ".efkmodel";
+							}
+							else
+							{
+								relative_path = System.IO.Path.ChangeExtension(relative_path, ".efkmodel");
+							}
+
+							if (relative_path != string.Empty)
+							{
+								if (!Models.Contains(relative_path))
+								{
+									Models.Add(relative_path);
+								}
+							}
+						}
 					}
 				}
 
@@ -2800,7 +2802,7 @@ namespace EffekseerTool.Binary
 					nodes.Add(_node);
 				}
 
-				var children = node.Children.Internal.Where(_ =>IsRenderedNodeGroup(_)).ToList();
+				var children = node.Children.Internal.Where(_ => IsRenderedNodeGroup(_)).ToList();
 
 				for (int i = 0; i < children.Count; i++)
 				{
@@ -2815,8 +2817,8 @@ namespace EffekseerTool.Binary
 				OrderBy(_ => _.Item1.DepthValues.DrawingPriority.Value * 255 + _.Item2).
 				Select((v, i) => Tuple35.Create(v.Item1, i)).ToList();
 
-				// ファイルにテクスチャ一覧出力
-				data.Add(BitConverter.GetBytes(texture_and_index.Count));
+			// ファイルにテクスチャ一覧出力
+			data.Add(BitConverter.GetBytes(texture_and_index.Count));
 			foreach (var texture in texture_and_index)
 			{
 				var path = Encoding.Unicode.GetBytes(texture.Key);
@@ -2843,15 +2845,15 @@ namespace EffekseerTool.Binary
 				data.Add(new byte[] { 0, 0 });
 			}
 
-            // ファイルにウェーブ一覧出力
-            data.Add(BitConverter.GetBytes(wave_and_index.Count));
-            foreach (var wave in wave_and_index)
-            {
-                var path = Encoding.Unicode.GetBytes(wave.Key);
-                data.Add(((path.Count() + 2) / 2).GetBytes());
-                data.Add(path);
-                data.Add(new byte[] { 0, 0 });
-            }
+			// ファイルにウェーブ一覧出力
+			data.Add(BitConverter.GetBytes(wave_and_index.Count));
+			foreach (var wave in wave_and_index)
+			{
+				var path = Encoding.Unicode.GetBytes(wave.Key);
+				data.Add(((path.Count() + 2) / 2).GetBytes());
+				data.Add(path);
+				data.Add(new byte[] { 0, 0 });
+			}
 
 			// ファイルにモデル一覧出力
 			data.Add(BitConverter.GetBytes(model_and_index.Count));
@@ -2889,11 +2891,11 @@ namespace EffekseerTool.Binary
 			{
 				var cx = compiler.Compile(value.Code.Value);
 
-				var cs = new []{ cx };
+				var cs = new[] { cx };
 
-				foreach(var c in cs)
+				foreach (var c in cs)
 				{
-					if(c.Bytecode != null)
+					if (c.Bytecode != null)
 					{
 						data.Add(BitConverter.GetBytes((int)c.Bytecode.Length));
 						data.Add(c.Bytecode);
@@ -2928,7 +2930,7 @@ namespace EffekseerTool.Binary
 				data.Add(BitConverter.GetBytes(Core.Culling.Sphere.Location.Y));
 				data.Add(BitConverter.GetBytes(Core.Culling.Sphere.Location.Z));
 			}
-			
+
 			// ノード情報出力
 			Action<Data.NodeRoot> outout_rootnode = null;
 			Action<Data.Node> outout_node = null;
@@ -3011,7 +3013,7 @@ namespace EffekseerTool.Binary
 				// render order
 				{
 					var s = snode2ind.FirstOrDefault(_ => _.Item1 == n);
-					if(s.Item1 != null)
+					if (s.Item1 != null)
 					{
 						node_data.Add(BitConverter.GetBytes(s.Item2));
 					}
@@ -3029,7 +3031,7 @@ namespace EffekseerTool.Binary
 				node_data.Add(GenerationLocationValues.GetBytes(n.GenerationLocationValues, n.CommonValues.ScaleEffectType, model_and_index));
 
 				// Export depth
-                node_data.Add(n.DepthValues.DepthOffset.Value.GetBytes());
+				node_data.Add(n.DepthValues.DepthOffset.Value.GetBytes());
 				node_data.Add(BitConverter.GetBytes(n.DepthValues.IsScaleChangedDependingOnDepthOffset.Value ? 1 : 0));
 				node_data.Add(BitConverter.GetBytes(n.DepthValues.IsDepthOffsetChangedDependingOnParticleScale.Value ? 1 : 0));
 
@@ -3043,7 +3045,7 @@ namespace EffekseerTool.Binary
 				{
 					node_data.Add(((float)n.DepthValues.DepthClipping.Value.Value).GetBytes());
 				}
-				
+
 				node_data.Add(((int)n.DepthValues.ZSort.Value).GetBytes());
 				node_data.Add(n.DepthValues.DrawingPriority.Value.GetBytes());
 				node_data.Add(n.DepthValues.SoftParticle.Value.GetBytes());
@@ -3096,7 +3098,7 @@ namespace EffekseerTool.Binary
 			if (IsRenderedNode(node))
 				return true;
 
-			foreach(var n in node.Children.Internal)
+			foreach (var n in node.Children.Internal)
 			{
 				if (IsRenderedNodeGroup(n))
 					return true;
@@ -3142,7 +3144,7 @@ namespace EffekseerTool.Binary
 			{
 				var relative_path = value.Model.Model.RelativePath;
 
-				if(!string.IsNullOrEmpty(relative_path))
+				if (!string.IsNullOrEmpty(relative_path))
 				{
 					if (string.IsNullOrEmpty(System.IO.Path.GetDirectoryName(relative_path)))
 					{
@@ -3167,7 +3169,7 @@ namespace EffekseerTool.Binary
 					data.Add(((int)-1).GetBytes());
 				}
 
-				data.Add( ((int)value.Model.Type.Value).GetBytes());
+				data.Add(((int)value.Model.Type.Value).GetBytes());
 			}
 			else if (value.Type.GetValue() == Data.GenerationLocationValues.ParameterType.Circle)
 			{
@@ -3220,11 +3222,11 @@ namespace EffekseerTool.Binary
 
 			data.Add((lffs.Count).GetBytes());
 
-			foreach(var lff in lffs)
+			foreach (var lff in lffs)
 			{
 				data.Add(lff.Type.GetValueAsInt().GetBytes());
 
-				if(lff.Type.Value == Data.LocalForceFieldType.Turbulence)
+				if (lff.Type.Value == Data.LocalForceFieldType.Turbulence)
 				{
 					data.Add(lff.Turbulence.Seed.Value.GetBytes());
 					data.Add(lff.Turbulence.FieldScale.Value.GetBytes());
@@ -3273,7 +3275,7 @@ namespace EffekseerTool.Binary
 			return s_value;
 		}
 	}
-	
+
 	[StructLayout(LayoutKind.Sequential)]
 	struct TranslationAbs_AttractiveForce_Values
 	{
@@ -3403,7 +3405,7 @@ namespace EffekseerTool.Binary
 		static public Translation_PVA_Values Create(Data.LocationValues.PVAParamater value, float magnification)
 		{
 			var s_value = new Translation_PVA_Values();
-	
+
 			s_value.Position_Min = new Vector3D(
 				value.Location.X.Min * magnification,
 				value.Location.Y.Min * magnification,
@@ -3461,24 +3463,24 @@ namespace EffekseerTool.Binary
 
 			data.Add(((int)value.Material.Value).GetBytes());
 
-			Func<Data.Value.PathForImage, int, Dictionary<string,int>, int> getTexIDAndStoreSize = (Data.Value.PathForImage image, int number, Dictionary<string, int> texAndInd) =>
-			{
-				var tempTexInfo = new TextureInformation();
+			Func<Data.Value.PathForImage, int, Dictionary<string, int>, int> getTexIDAndStoreSize = (Data.Value.PathForImage image, int number, Dictionary<string, int> texAndInd) =>
+			 {
+				 var tempTexInfo = new TextureInformation();
 
-				if (texAndInd.ContainsKey(image.RelativePath) && tempTexInfo.Load(image.AbsolutePath))
-				{
-					if(value.UVTextureReferenceTarget.Value != Data.UVTextureReferenceTargetType.None && number == (int)value.UVTextureReferenceTarget.Value)
-					{
-						texInfo.Load(image.AbsolutePath);
-					}
+				 if (texAndInd.ContainsKey(image.RelativePath) && tempTexInfo.Load(image.AbsolutePath))
+				 {
+					 if (value.UVTextureReferenceTarget.Value != Data.UVTextureReferenceTargetType.None && number == (int)value.UVTextureReferenceTarget.Value)
+					 {
+						 texInfo.Load(image.AbsolutePath);
+					 }
 
-					return texAndInd[image.RelativePath];
-				}
-				else
-				{
-					return -1;
-				}
-			};
+					 return texAndInd[image.RelativePath];
+				 }
+				 else
+				 {
+					 return -1;
+				 }
+			 };
 
 #if __EFFEKSEER_BUILD_VERSION16__
 			GetTexIDAndInfo getTexIDAndInfo = (Data.Value.PathForImage image, Dictionary<string, int> texAndInd, ref TextureInformation texInfoRef) =>
@@ -3537,7 +3539,7 @@ namespace EffekseerTool.Binary
 			else
 			{
 				var materialInfo = Core.ResourceCache.LoadMaterialInformation(value.MaterialFile.Path.AbsolutePath);
-				if(materialInfo == null)
+				if (materialInfo == null)
 				{
 					materialInfo = new MaterialInformation();
 				}
@@ -3546,12 +3548,12 @@ namespace EffekseerTool.Binary
 				var uniforms = value.MaterialFile.GetUniforms(materialInfo);
 
 				// maximum slot limitation
-				if(textures.Length > Constant.UserTextureSlotCount)
+				if (textures.Length > Constant.UserTextureSlotCount)
 				{
 					textures = textures.Take(Constant.UserTextureSlotCount).ToArray();
 				}
 
-				if(material_and_index.ContainsKey(value.MaterialFile.Path.RelativePath))
+				if (material_and_index.ContainsKey(value.MaterialFile.Path.RelativePath))
 				{
 					data.Add(material_and_index[value.MaterialFile.Path.RelativePath].GetBytes());
 				}
@@ -3584,12 +3586,12 @@ namespace EffekseerTool.Binary
 				foreach (var uniform in uniforms)
 				{
 					float[] floats = new float[4];
-					
-					if(uniform.Item1 == null)
+
+					if (uniform.Item1 == null)
 					{
 						floats = uniform.Item2.DefaultValues.ToArray();
 					}
-					else if(uniform.Item1.Value is Data.Value.Float)
+					else if (uniform.Item1.Value is Data.Value.Float)
 					{
 						floats[0] = (uniform.Item1.Value as Data.Value.Float).Value;
 					}
@@ -3710,7 +3712,7 @@ namespace EffekseerTool.Binary
 				{
 					data.Add(value_.FrameLength.Value.Value.GetBytes());
 				}
-			
+
 				data.Add(value_.FrameCountX.Value.GetBytes());
 				data.Add(value_.FrameCountY.Value.GetBytes());
 				data.Add(value_.LoopType);
@@ -3780,7 +3782,7 @@ namespace EffekseerTool.Binary
 
 			// Custom data1 from 1.5
 			data.Add(value.CustomData1.CustomData);
-			if(value.CustomData1.CustomData.Value == Data.CustomDataType.Fixed2D)
+			if (value.CustomData1.CustomData.Value == Data.CustomDataType.Fixed2D)
 			{
 				data.Add(BitConverter.GetBytes(value.CustomData1.Fixed.X.Value));
 				data.Add(BitConverter.GetBytes(value.CustomData1.Fixed.Y.Value));
@@ -3804,7 +3806,7 @@ namespace EffekseerTool.Binary
 				var __data = _data.ToArray().ToArray();
 				data.Add(__data);
 			}
-			else if(value.CustomData1.CustomData.Value == Data.CustomDataType.FCurve2D)
+			else if (value.CustomData1.CustomData.Value == Data.CustomDataType.FCurve2D)
 			{
 				var value_ = value.CustomData1.FCurve;
 				var bytes1 = value_.GetBytes(1.0f);
@@ -3980,7 +3982,7 @@ namespace EffekseerTool.Binary
 			List<byte[]> data = new List<byte[]>();
 			data.Add(BitConverter.GetBytes((int)value.Type.Value));
 
-			if(value.Type.Value == Data.RingShapeType.Donut)
+			if (value.Type.Value == Data.RingShapeType.Donut)
 			{
 			}
 			else if (value.Type.Value == Data.RingShapeType.Crescent)
@@ -4052,7 +4054,7 @@ namespace EffekseerTool.Binary
 			List<byte[]> data = new List<byte[]>();
 			data.Add(BitConverter.GetBytes((int)value.Type.Value));
 
-			if(value.Type.Value == Data.TextureUVType.Tile)
+			if (value.Type.Value == Data.TextureUVType.Tile)
 			{
 				data.Add(value.TileEdgeHead.Value.GetBytes());
 				data.Add(value.TileEdgeTail.Value.GetBytes());
@@ -4078,15 +4080,15 @@ namespace EffekseerTool.Binary
 			{
 				data.Add(value.Type.GetValueAsInt().GetBytes());
 			}
-			
+
 
 			if (value == null)
-			{ 
-			
+			{
+
 			}
 			else if (value.Type.Value == Data.RendererValues.ParamaterType.None)
 			{
-				
+
 			}
 			else if (value.Type.Value == Data.RendererValues.ParamaterType.Sprite)
 			{
@@ -4123,13 +4125,13 @@ namespace EffekseerTool.Binary
 					var bytes = param.ColorAll_FCurve.FCurve.GetBytes();
 					data.Add(bytes);
 				}
-				
+
 				// 部分色
 				data.Add(param.Color);
 
 				if (param.Color.Value == Data.RendererValues.SpriteParamater.ColorType.Default)
 				{
-					
+
 				}
 				else if (param.Color.Value == Data.RendererValues.SpriteParamater.ColorType.Fixed)
 				{
@@ -4142,7 +4144,7 @@ namespace EffekseerTool.Binary
 					data.Add(color_lr);
 					data.Add(color_ul);
 					data.Add(color_ur);
-					
+
 				}
 
 				// 座標
@@ -4273,197 +4275,197 @@ namespace EffekseerTool.Binary
 				}
 				*/
 			}
-            else if (value.Type.Value == Data.RendererValues.ParamaterType.Ring)
-            {
-                var ringParamater = value.Ring;
+			else if (value.Type.Value == Data.RendererValues.ParamaterType.Ring)
+			{
+				var ringParamater = value.Ring;
 
-                data.Add(ringParamater.RenderingOrder);
-                //data.Add(ringParamater.AlphaBlend);
-                data.Add(ringParamater.Billboard);
+				data.Add(ringParamater.RenderingOrder);
+				//data.Add(ringParamater.AlphaBlend);
+				data.Add(ringParamater.Billboard);
 
 				// from 1.5
 				data.Add(RingShapeParameter.GetBytes(ringParamater.RingShape));
 
-                data.Add(ringParamater.VertexCount.Value.GetBytes());
+				data.Add(ringParamater.VertexCount.Value.GetBytes());
 
 				// viewing angle (it will removed)
-				
-                data.Add(ringParamater.ViewingAngle);
-                if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Fixed)
-                {
-                    data.Add(ringParamater.ViewingAngle_Fixed.Value.GetBytes());
-                }
-                else if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Random)
-                {
-                    data.Add(ringParamater.ViewingAngle_Random.Max.GetBytes());
-                    data.Add(ringParamater.ViewingAngle_Random.Min.GetBytes());
-                }
-                else if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.ViewingAngle_Easing.StartSpeed.Value,
-                        (float)ringParamater.ViewingAngle_Easing.EndSpeed.Value);
 
-                    data.Add(ringParamater.ViewingAngle_Easing.Start.Max.GetBytes());
-                    data.Add(ringParamater.ViewingAngle_Easing.Start.Min.GetBytes());
-                    data.Add(ringParamater.ViewingAngle_Easing.End.Max.GetBytes());
-                    data.Add(ringParamater.ViewingAngle_Easing.End.Min.GetBytes());
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
-				
+				data.Add(ringParamater.ViewingAngle);
+				if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Fixed)
+				{
+					data.Add(ringParamater.ViewingAngle_Fixed.Value.GetBytes());
+				}
+				else if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Random)
+				{
+					data.Add(ringParamater.ViewingAngle_Random.Max.GetBytes());
+					data.Add(ringParamater.ViewingAngle_Random.Min.GetBytes());
+				}
+				else if (ringParamater.ViewingAngle.GetValue() == Data.RendererValues.RingParamater.ViewingAngleType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.ViewingAngle_Easing.StartSpeed.Value,
+						(float)ringParamater.ViewingAngle_Easing.EndSpeed.Value);
 
-                data.Add(ringParamater.Outer);
-                if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.Fixed)
-                {
-                    data.Add((ringParamater.Outer_Fixed.Location.X.Value).GetBytes());
+					data.Add(ringParamater.ViewingAngle_Easing.Start.Max.GetBytes());
+					data.Add(ringParamater.ViewingAngle_Easing.Start.Min.GetBytes());
+					data.Add(ringParamater.ViewingAngle_Easing.End.Max.GetBytes());
+					data.Add(ringParamater.ViewingAngle_Easing.End.Min.GetBytes());
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
+
+
+				data.Add(ringParamater.Outer);
+				if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.Fixed)
+				{
+					data.Add((ringParamater.Outer_Fixed.Location.X.Value).GetBytes());
 					data.Add((ringParamater.Outer_Fixed.Location.Y.Value).GetBytes());
-                }
-                else if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.PVA)
-                {
+				}
+				else if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.PVA)
+				{
 					data.Add(ringParamater.Outer_PVA.Location.GetBytes());
 					data.Add(ringParamater.Outer_PVA.Velocity.GetBytes());
 					data.Add(ringParamater.Outer_PVA.Acceleration.GetBytes());
-                }
-                else if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.Outer_Easing.StartSpeed.Value, 
-                        (float)ringParamater.Outer_Easing.EndSpeed.Value);
+				}
+				else if (ringParamater.Outer.GetValue() == Data.RendererValues.RingParamater.LocationType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.Outer_Easing.StartSpeed.Value,
+						(float)ringParamater.Outer_Easing.EndSpeed.Value);
 
-                    data.Add((byte[])ringParamater.Outer_Easing.Start.GetBytes());
-                    data.Add((byte[])ringParamater.Outer_Easing.End.GetBytes());
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+					data.Add((byte[])ringParamater.Outer_Easing.Start.GetBytes());
+					data.Add((byte[])ringParamater.Outer_Easing.End.GetBytes());
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                data.Add(ringParamater.Inner);
-                if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.Fixed)
-                {
+				data.Add(ringParamater.Inner);
+				if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.Fixed)
+				{
 					data.Add((ringParamater.Inner_Fixed.Location.X.Value).GetBytes());
 					data.Add((ringParamater.Inner_Fixed.Location.Y.Value).GetBytes());
-                }
-                else if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.PVA)
-                {
+				}
+				else if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.PVA)
+				{
 					data.Add(ringParamater.Inner_PVA.Location.GetBytes());
 					data.Add(ringParamater.Inner_PVA.Velocity.GetBytes());
 					data.Add(ringParamater.Inner_PVA.Acceleration.GetBytes());
-                }
-                else if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.Inner_Easing.StartSpeed.Value,
-                        (float)ringParamater.Inner_Easing.EndSpeed.Value);
+				}
+				else if (ringParamater.Inner.GetValue() == Data.RendererValues.RingParamater.LocationType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.Inner_Easing.StartSpeed.Value,
+						(float)ringParamater.Inner_Easing.EndSpeed.Value);
 
-                    data.Add((byte[])ringParamater.Inner_Easing.Start.GetBytes());
-                    data.Add((byte[])ringParamater.Inner_Easing.End.GetBytes());
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+					data.Add((byte[])ringParamater.Inner_Easing.Start.GetBytes());
+					data.Add((byte[])ringParamater.Inner_Easing.End.GetBytes());
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                data.Add(ringParamater.CenterRatio);
-                if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Fixed)
-                {
-                    data.Add(ringParamater.CenterRatio_Fixed.Value.GetBytes());
-                }
-                else if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Random)
-                {
-                    data.Add(ringParamater.CenterRatio_Random.Max.GetBytes());
-                    data.Add(ringParamater.CenterRatio_Random.Min.GetBytes());
-                }
-                else if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.CenterRatio_Easing.StartSpeed.Value,
-                        (float)ringParamater.CenterRatio_Easing.EndSpeed.Value);
+				data.Add(ringParamater.CenterRatio);
+				if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Fixed)
+				{
+					data.Add(ringParamater.CenterRatio_Fixed.Value.GetBytes());
+				}
+				else if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Random)
+				{
+					data.Add(ringParamater.CenterRatio_Random.Max.GetBytes());
+					data.Add(ringParamater.CenterRatio_Random.Min.GetBytes());
+				}
+				else if (ringParamater.CenterRatio.GetValue() == Data.RendererValues.RingParamater.CenterRatioType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.CenterRatio_Easing.StartSpeed.Value,
+						(float)ringParamater.CenterRatio_Easing.EndSpeed.Value);
 
-                    data.Add(ringParamater.CenterRatio_Easing.Start.Max.GetBytes());
-                    data.Add(ringParamater.CenterRatio_Easing.Start.Min.GetBytes());
-                    data.Add(ringParamater.CenterRatio_Easing.End.Max.GetBytes());
-                    data.Add(ringParamater.CenterRatio_Easing.End.Min.GetBytes());
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+					data.Add(ringParamater.CenterRatio_Easing.Start.Max.GetBytes());
+					data.Add(ringParamater.CenterRatio_Easing.Start.Min.GetBytes());
+					data.Add(ringParamater.CenterRatio_Easing.End.Max.GetBytes());
+					data.Add(ringParamater.CenterRatio_Easing.End.Min.GetBytes());
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                data.Add(ringParamater.OuterColor);
-                if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
-                {
-                    data.Add((byte[])ringParamater.OuterColor_Fixed);
-                }
-                else if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
-                {
-                    data.Add((byte[])ringParamater.OuterColor_Random);
-                }
-                else if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.OuterColor_Easing.StartSpeed.Value, 
-                        (float)ringParamater.OuterColor_Easing.EndSpeed.Value);
-                    data.Add((byte[])ringParamater.OuterColor_Easing.Start);
-                    data.Add((byte[])ringParamater.OuterColor_Easing.End);
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+				data.Add(ringParamater.OuterColor);
+				if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
+				{
+					data.Add((byte[])ringParamater.OuterColor_Fixed);
+				}
+				else if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
+				{
+					data.Add((byte[])ringParamater.OuterColor_Random);
+				}
+				else if (ringParamater.OuterColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.OuterColor_Easing.StartSpeed.Value,
+						(float)ringParamater.OuterColor_Easing.EndSpeed.Value);
+					data.Add((byte[])ringParamater.OuterColor_Easing.Start);
+					data.Add((byte[])ringParamater.OuterColor_Easing.End);
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                data.Add(ringParamater.CenterColor);
-                if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
-                {
-                    data.Add((byte[])ringParamater.CenterColor_Fixed);
-                }
-                else if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
-                {
-                    data.Add((byte[])ringParamater.CenterColor_Random);
-                }
-                else if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.CenterColor_Easing.StartSpeed.Value,
-                        (float)ringParamater.CenterColor_Easing.EndSpeed.Value);
-                    data.Add((byte[])ringParamater.CenterColor_Easing.Start);
-                    data.Add((byte[])ringParamater.CenterColor_Easing.End);
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+				data.Add(ringParamater.CenterColor);
+				if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
+				{
+					data.Add((byte[])ringParamater.CenterColor_Fixed);
+				}
+				else if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
+				{
+					data.Add((byte[])ringParamater.CenterColor_Random);
+				}
+				else if (ringParamater.CenterColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.CenterColor_Easing.StartSpeed.Value,
+						(float)ringParamater.CenterColor_Easing.EndSpeed.Value);
+					data.Add((byte[])ringParamater.CenterColor_Easing.Start);
+					data.Add((byte[])ringParamater.CenterColor_Easing.End);
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                data.Add(ringParamater.InnerColor);
-                if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
-                {
-                    data.Add((byte[])ringParamater.InnerColor_Fixed);
-                }
-                else if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
-                {
-                    data.Add((byte[])ringParamater.InnerColor_Random);
-                }
-                else if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
-                {
-                    var easing = Utl.MathUtl.Easing(
-                        (float)ringParamater.InnerColor_Easing.StartSpeed.Value,
-                        (float)ringParamater.InnerColor_Easing.EndSpeed.Value);
-                    data.Add((byte[])ringParamater.InnerColor_Easing.Start);
-                    data.Add((byte[])ringParamater.InnerColor_Easing.End);
-                    data.Add(BitConverter.GetBytes(easing[0]));
-                    data.Add(BitConverter.GetBytes(easing[1]));
-                    data.Add(BitConverter.GetBytes(easing[2]));
-                }
+				data.Add(ringParamater.InnerColor);
+				if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Fixed)
+				{
+					data.Add((byte[])ringParamater.InnerColor_Fixed);
+				}
+				else if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Random)
+				{
+					data.Add((byte[])ringParamater.InnerColor_Random);
+				}
+				else if (ringParamater.InnerColor.Value == Data.RendererValues.RingParamater.ColorType.Easing)
+				{
+					var easing = Utl.MathUtl.Easing(
+						(float)ringParamater.InnerColor_Easing.StartSpeed.Value,
+						(float)ringParamater.InnerColor_Easing.EndSpeed.Value);
+					data.Add((byte[])ringParamater.InnerColor_Easing.Start);
+					data.Add((byte[])ringParamater.InnerColor_Easing.End);
+					data.Add(BitConverter.GetBytes(easing[0]));
+					data.Add(BitConverter.GetBytes(easing[1]));
+					data.Add(BitConverter.GetBytes(easing[2]));
+				}
 
-                // テクスチャ番号
-                /*
+				// テクスチャ番号
+				/*
 				if (ringParamater.ColorTexture.RelativePath != string.Empty)
-                {
-                    data.Add(texture_and_index[ringParamater.ColorTexture.RelativePath].GetBytes());
-                }
-                else
-                {
-                    data.Add((-1).GetBytes());
-                }
+				{
+					data.Add(texture_and_index[ringParamater.ColorTexture.RelativePath].GetBytes());
+				}
+				else
+				{
+					data.Add((-1).GetBytes());
+				}
 				*/
-            }
+			}
 			else if (value.Type.Value == Data.RendererValues.ParamaterType.Model)
 			{
 				var param = value.Model;
@@ -4511,7 +4513,7 @@ namespace EffekseerTool.Binary
 
 				data.Add(param.TrackSizeBack);
 				data.Add(BitConverter.GetBytes(param.TrackSizeBack_Fixed.Value));
-				
+
 				data.Add(BitConverter.GetBytes(param.SplineDivision.Value));
 
 				OutputStandardColor(data, param.ColorLeft, param.ColorLeft_Fixed, param.ColorLeft_Random, param.ColorLeft_Easing, param.ColorLeft_FCurve);
@@ -4528,7 +4530,7 @@ namespace EffekseerTool.Binary
 		}
 
 		private static void OutputStandardColor(
-			List<byte[]> data, 
+			List<byte[]> data,
 			Data.Value.Enum<Data.StandardColorType> color,
 			Data.Value.Color color_fixed,
 			Data.Value.ColorWithRandom color_Random,
@@ -4706,7 +4708,7 @@ namespace EffekseerTool.Binary
 			if (value.Type.GetValue() == Data.ScaleValues.ParamaterType.Fixed)
 			{
 				var refBuf = value.Fixed.Scale.DynamicEquation.Index.GetBytes();
-				var mainBuf = Scaling_Fixed_Values.Create(value.Fixed,magnification).GetBytes();
+				var mainBuf = Scaling_Fixed_Values.Create(value.Fixed, magnification).GetBytes();
 				data.Add((mainBuf.Count() + refBuf.Count()).GetBytes());
 				data.Add(refBuf);
 				data.Add(mainBuf);
@@ -4768,13 +4770,13 @@ namespace EffekseerTool.Binary
 					(float)value.SingleEasing.EndSpeed.Value);
 
 				List<byte[]> _data = new List<byte[]>();
-                _data.Add(value.SingleEasing.Start.Max.GetBytes());
-                _data.Add(value.SingleEasing.Start.Min.GetBytes());
-                _data.Add(value.SingleEasing.End.Max.GetBytes());
-                _data.Add(value.SingleEasing.End.Min.GetBytes());
-                _data.Add(BitConverter.GetBytes(easing[0]));
-                _data.Add(BitConverter.GetBytes(easing[1]));
-                _data.Add(BitConverter.GetBytes(easing[2]));
+				_data.Add(value.SingleEasing.Start.Max.GetBytes());
+				_data.Add(value.SingleEasing.Start.Min.GetBytes());
+				_data.Add(value.SingleEasing.End.Max.GetBytes());
+				_data.Add(value.SingleEasing.End.Min.GetBytes());
+				_data.Add(BitConverter.GetBytes(easing[0]));
+				_data.Add(BitConverter.GetBytes(easing[1]));
+				_data.Add(BitConverter.GetBytes(easing[2]));
 				var __data = _data.ToArray().ToArray();
 				data.Add(__data.Count().GetBytes());
 				data.Add(__data);
@@ -4903,40 +4905,40 @@ namespace EffekseerTool.Binary
 			{
 				data.Add(value.Type.GetValueAsInt().GetBytes());
 			}
-			
+
 
 			if (value == null)
-			{ 
-			
-			}
-            else if (value.Type.Value == Data.SoundValues.ParamaterType.None)
 			{
-				
+
+			}
+			else if (value.Type.Value == Data.SoundValues.ParamaterType.None)
+			{
+
 			}
 			else if (value.Type.Value == Data.SoundValues.ParamaterType.Use)
 			{
 				var sound_parameter = value.Sound;
 
-                // ウェーブ番号
-                if (sound_parameter.Wave.RelativePath != string.Empty)
-                {
-                    data.Add(wave_and_index[sound_parameter.Wave.RelativePath].GetBytes());
-                }
-                else
-                {
-                    data.Add((-1).GetBytes());
-                }
+				// ウェーブ番号
+				if (sound_parameter.Wave.RelativePath != string.Empty)
+				{
+					data.Add(wave_and_index[sound_parameter.Wave.RelativePath].GetBytes());
+				}
+				else
+				{
+					data.Add((-1).GetBytes());
+				}
 
-                data.Add(sound_parameter.Volume.Max.GetBytes());
-                data.Add(sound_parameter.Volume.Min.GetBytes());
-                data.Add(sound_parameter.Pitch.Max.GetBytes());
-                data.Add(sound_parameter.Pitch.Min.GetBytes());
-                data.Add(sound_parameter.PanType.GetValueAsInt().GetBytes());
-                data.Add(sound_parameter.Pan.Max.GetBytes());
-                data.Add(sound_parameter.Pan.Min.GetBytes());
-                data.Add(sound_parameter.Distance.GetValue().GetBytes());
-                data.Add(sound_parameter.Delay.Max.GetBytes());
-                data.Add(sound_parameter.Delay.Min.GetBytes());
+				data.Add(sound_parameter.Volume.Max.GetBytes());
+				data.Add(sound_parameter.Volume.Min.GetBytes());
+				data.Add(sound_parameter.Pitch.Max.GetBytes());
+				data.Add(sound_parameter.Pitch.Min.GetBytes());
+				data.Add(sound_parameter.PanType.GetValueAsInt().GetBytes());
+				data.Add(sound_parameter.Pan.Max.GetBytes());
+				data.Add(sound_parameter.Pan.Min.GetBytes());
+				data.Add(sound_parameter.Distance.GetValue().GetBytes());
+				data.Add(sound_parameter.Delay.Max.GetBytes());
+				data.Add(sound_parameter.Delay.Min.GetBytes());
 			}
 
 			return data.ToArray().ToArray();
@@ -4967,7 +4969,7 @@ namespace EffekseerTool.Command
 		/// 次の命令を挿入するインデックス
 		/// </summary>
 		static int cmds_ind = 0;
-		
+
 		/// <summary>
 		/// 命令をグループ化する際のコンテナ
 		/// </summary>
@@ -5041,7 +5043,7 @@ namespace EffekseerTool.Command
 				cmd_combined.Clear();
 
 				cmds.Add(cmdCollection);
-				cmds_ind++;	
+				cmds_ind++;
 			}
 			else
 			{
@@ -5149,7 +5151,7 @@ namespace EffekseerTool.Command
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -5163,12 +5165,12 @@ namespace EffekseerTool.Command
 			{
 				return false;
 			}
-			else if( cmds_ind < cmds.Count)
+			else if (cmds_ind < cmds.Count)
 			{
 				if (isCombinedMode) throw new InvalidOperationException("CombinedMode is true.");
 
 				cmds[cmds_ind].Execute();
-				
+
 				cmds_ind++;
 
 				if (Changed != null)
@@ -5246,8 +5248,8 @@ namespace EffekseerTool.Command
 			List<ICommand> cmds = new List<ICommand>();
 
 			public CommandCollection()
-			{ 
-			
+			{
+
 			}
 
 			public void Add(ICommand cmd)
@@ -5345,111 +5347,111 @@ namespace EffekseerTool.Command
 
 namespace EffekseerTool.Data
 {
-    public class AlphaCrunchValues
-    {
-        [Selector(ID = 0)]
-        [IO(Export = true)]
-        public Value.Enum<ParameterType> Type { get; private set; }
+	public class AlphaCrunchValues
+	{
+		[Selector(ID = 0)]
+		[IO(Export = true)]
+		public Value.Enum<ParameterType> Type { get; private set; }
 
-        [Selected(ID = 0, Value = 0)]
-        [IO(Export = true)]
-        public FixedParameter Fixed { get; private set; }
+		[Selected(ID = 0, Value = 0)]
+		[IO(Export = true)]
+		public FixedParameter Fixed { get; private set; }
 
-        [Selected(ID = 0, Value = 1)]
-        [IO(Export = true)]
-        public FourPointInterpolationParameter FourPointInterpolation { get; private set; }
+		[Selected(ID = 0, Value = 1)]
+		[IO(Export = true)]
+		public FourPointInterpolationParameter FourPointInterpolation { get; private set; }
 
-        [Selected(ID = 0, Value = 2)]
-        [IO(Export = true)]
-        public FloatEasingParamater Easing { get; private set; }
+		[Selected(ID = 0, Value = 2)]
+		[IO(Export = true)]
+		public FloatEasingParamater Easing { get; private set; }
 
-        [Selected(ID = 0, Value = 3)]
-        [Name(language = Language.Japanese, value = "Fカーブ")]
-        [IO(Export = true)]
-        public Value.FCurveScalar FCurve { get; private set; }
+		[Selected(ID = 0, Value = 3)]
+		[Name(language = Language.Japanese, value = "Fカーブ")]
+		[IO(Export = true)]
+		public Value.FCurveScalar FCurve { get; private set; }
 
-        public AlphaCrunchValues()
-        {
-            Type = new Value.Enum<ParameterType>(ParameterType.Fixed);
-            Fixed = new FixedParameter();
-            FourPointInterpolation = new FourPointInterpolationParameter();
-            Easing = new FloatEasingParamater(0.0f, 1.0f, 0.0f);
-            FCurve = new Value.FCurveScalar(0.0f, 100.0f);
+		public AlphaCrunchValues()
+		{
+			Type = new Value.Enum<ParameterType>(ParameterType.Fixed);
+			Fixed = new FixedParameter();
+			FourPointInterpolation = new FourPointInterpolationParameter();
+			Easing = new FloatEasingParamater(0.0f, 1.0f, 0.0f);
+			FCurve = new Value.FCurveScalar(0.0f, 100.0f);
 
-            Fixed.Threshold.CanSelectDynamicEquation = true;
-            Easing.Start.CanSelectDynamicEquation = true;
-            Easing.End.CanSelectDynamicEquation = true;
-        }
+			Fixed.Threshold.CanSelectDynamicEquation = true;
+			Easing.Start.CanSelectDynamicEquation = true;
+			Easing.End.CanSelectDynamicEquation = true;
+		}
 
-        public class FixedParameter
-        {
-            [Name(language = Language.Japanese, value = "アルファ閾値")]
-            [Name(language = Language.English, value = "Alpha Threshold")]
-            public Value.Float Threshold { get; private set; }
+		public class FixedParameter
+		{
+			[Name(language = Language.Japanese, value = "アルファ閾値")]
+			[Name(language = Language.English, value = "Alpha Threshold")]
+			public Value.Float Threshold { get; private set; }
 
-            internal FixedParameter()
-            {
-                Threshold = new Value.Float(0.0f, 1.0f, 0.0f, 0.05f);
-            }
-        }
+			internal FixedParameter()
+			{
+				Threshold = new Value.Float(0.0f, 1.0f, 0.0f, 0.05f);
+			}
+		}
 
-        public class FourPointInterpolationParameter
-        {
-            [Name(language = Language.Japanese, value = "生成時アルファ閾値")]
-            [Name(language = Language.English, value = "Begin Alpha Threshold")]
-            public Value.FloatWithRandom BeginThreshold { get; private set; }
+		public class FourPointInterpolationParameter
+		{
+			[Name(language = Language.Japanese, value = "生成時アルファ閾値")]
+			[Name(language = Language.English, value = "Begin Alpha Threshold")]
+			public Value.FloatWithRandom BeginThreshold { get; private set; }
 
-            [Name(language = Language.Japanese, value = "遷移フレーム(生成時 -> 第2)")]
-            [Name(language = Language.English, value = "Sequence Frame Num")]
-            public Value.IntWithRandom TransitionFrameNum { get; private set; }
+			[Name(language = Language.Japanese, value = "遷移フレーム(生成時 -> 第2)")]
+			[Name(language = Language.English, value = "Sequence Frame Num")]
+			public Value.IntWithRandom TransitionFrameNum { get; private set; }
 
-            [Name(language = Language.Japanese, value = "第2アルファ閾値")]
-            [Name(language = Language.English, value = "Second Alpha Threshold")]
-            public Value.FloatWithRandom No2Threshold { get; private set; }
+			[Name(language = Language.Japanese, value = "第2アルファ閾値")]
+			[Name(language = Language.English, value = "Second Alpha Threshold")]
+			public Value.FloatWithRandom No2Threshold { get; private set; }
 
-            [Name(language = Language.Japanese, value = "第3アルファ閾値")]
-            [Name(language = Language.English, value = "Third Alpha Threshold")]
-            public Value.FloatWithRandom No3Threshold { get; private set; }
+			[Name(language = Language.Japanese, value = "第3アルファ閾値")]
+			[Name(language = Language.English, value = "Third Alpha Threshold")]
+			public Value.FloatWithRandom No3Threshold { get; private set; }
 
-            [Name(language = Language.Japanese, value = "遷移フレーム(第3 -> 消滅時)")]
-            [Name(language = Language.English, value = "Sequence Frame Num")]
-            public Value.IntWithRandom TransitionFrameNum2 { get; private set; }
+			[Name(language = Language.Japanese, value = "遷移フレーム(第3 -> 消滅時)")]
+			[Name(language = Language.English, value = "Sequence Frame Num")]
+			public Value.IntWithRandom TransitionFrameNum2 { get; private set; }
 
-            [Name(language = Language.Japanese, value = "消滅時アルファ閾値")]
-            [Name(language = Language.English, value = "End Alpha Threshold")]
-            public Value.FloatWithRandom EndThreshold { get; private set; }
+			[Name(language = Language.Japanese, value = "消滅時アルファ閾値")]
+			[Name(language = Language.English, value = "End Alpha Threshold")]
+			public Value.FloatWithRandom EndThreshold { get; private set; }
 
 
-            internal FourPointInterpolationParameter()
-            {
-                BeginThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
-                TransitionFrameNum = new Value.IntWithRandom(0, int.MaxValue, 0);
-                No2Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
-                No3Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
-                TransitionFrameNum2 = new Value.IntWithRandom(0, int.MaxValue, 0);
-                EndThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
-            }
-        }
+			internal FourPointInterpolationParameter()
+			{
+				BeginThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+				TransitionFrameNum = new Value.IntWithRandom(0, int.MaxValue, 0);
+				No2Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+				No3Threshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+				TransitionFrameNum2 = new Value.IntWithRandom(0, int.MaxValue, 0);
+				EndThreshold = new Value.FloatWithRandom(0.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.05f);
+			}
+		}
 
-        public enum ParameterType : int
-        {
-            [Name(value = "アルファ閾値", language = Language.Japanese)]
-            [Name(value = "Set Alpha Threshold", language = Language.English)]
-            Fixed = 0,
+		public enum ParameterType : int
+		{
+			[Name(value = "アルファ閾値", language = Language.Japanese)]
+			[Name(value = "Set Alpha Threshold", language = Language.English)]
+			Fixed = 0,
 
-            [Name(value = "4点補間", language = Language.Japanese)]
-            [Name(value = "Four Point Interpolation", language = Language.English)]
-            FourPointInterpolation = 1,
+			[Name(value = "4点補間", language = Language.Japanese)]
+			[Name(value = "Four Point Interpolation", language = Language.English)]
+			FourPointInterpolation = 1,
 
-            [Name(value = "イージング", language = Language.Japanese)]
-            [Name(value = "Easing", language = Language.English)]
-            Easing = 2,
+			[Name(value = "イージング", language = Language.Japanese)]
+			[Name(value = "Easing", language = Language.English)]
+			Easing = 2,
 
-            [Name(value = "アルファ閾値(Fカーブ)", language = Language.Japanese)]
-            [Name(value = "F-Curve", language = Language.English)]
-            FCurve = 3,
-        }
-    }
+			[Name(value = "アルファ閾値(Fカーブ)", language = Language.Japanese)]
+			[Name(value = "F-Curve", language = Language.English)]
+			FCurve = 3,
+		}
+	}
 }
 
 namespace EffekseerTool.Data
@@ -5551,27 +5553,27 @@ namespace EffekseerTool.Data
 
 namespace EffekseerTool.Data
 {
-    public enum RecordingExporterType : int
-    {
-        Sprite,
-        SpriteSheet,
-        Gif,
-        Avi,
-    }
+	public enum RecordingExporterType : int
+	{
+		Sprite,
+		SpriteSheet,
+		Gif,
+		Avi,
+	}
 
-    public enum RecordingTransparentMethodType : int
-    {
-        None,
-        Original,
-        GenerateAlpha,
-    }
+	public enum RecordingTransparentMethodType : int
+	{
+		None,
+		Original,
+		GenerateAlpha,
+	}
 
 	public enum RecordingStorageTargetTyoe : int
 	{
 		Global,
 		Local,
 	}
-    public enum ParentEffectType : int
+	public enum ParentEffectType : int
 	{
 		[Key(key = "BasicSettings_ParentEffectType_NotBind")]
 		NotBind = 0,
@@ -5657,13 +5659,13 @@ namespace EffekseerTool.Data
 	}
 
 	public enum DrawnAs : int
-	{ 
+	{
 		MaxAndMin,
 		CenterAndAmplitude,
 	}
-	
+
 	public enum ColorSpace : int
-	{ 
+	{
 		RGBA,
 		HSVA,
 	}
@@ -5757,83 +5759,83 @@ namespace EffekseerTool.Data
 		}
 	}
 
-    public class FloatEasingParamater
-    {
+	public class FloatEasingParamater
+	{
 		[Key(key = "Easing_Start")]
 		public Value.FloatWithRandom Start
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
 		[Key(key = "Easing_End")]
 		public Value.FloatWithRandom End
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
 		[Key(key = "Easing_StartSpeed")]
 		public Value.Enum<EasingStart> StartSpeed
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
 		[Key(key = "Easing_EndSpeed")]
 		public Value.Enum<EasingEnd> EndSpeed
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
-        internal FloatEasingParamater(float value = 0.0f, float max = float.MaxValue, float min = float.MinValue)
-        {
-            Start = new Value.FloatWithRandom(value, max, min);
-            End = new Value.FloatWithRandom(value, max, min);
-            StartSpeed = new Value.Enum<EasingStart>(EasingStart.Start);
-            EndSpeed = new Value.Enum<EasingEnd>(EasingEnd.End);
-        }
-    }
+		internal FloatEasingParamater(float value = 0.0f, float max = float.MaxValue, float min = float.MinValue)
+		{
+			Start = new Value.FloatWithRandom(value, max, min);
+			End = new Value.FloatWithRandom(value, max, min);
+			StartSpeed = new Value.Enum<EasingStart>(EasingStart.Start);
+			EndSpeed = new Value.Enum<EasingEnd>(EasingEnd.End);
+		}
+	}
 
-    public class Vector2DEasingParamater
-    {
-		[Key(key="Easing_Start")]
-        public Value.Vector2DWithRandom Start
-        {
-            get;
-            private set;
-        }
+	public class Vector2DEasingParamater
+	{
+		[Key(key = "Easing_Start")]
+		public Value.Vector2DWithRandom Start
+		{
+			get;
+			private set;
+		}
 
-		[Key(key="Easing_End")]
+		[Key(key = "Easing_End")]
 		public Value.Vector2DWithRandom End
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
-		[Key(key="Easing_StartSpeed")]
+		[Key(key = "Easing_StartSpeed")]
 		public Value.Enum<EasingStart> StartSpeed
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
-		[Key(key="Easing_EndSpeed")]
+		[Key(key = "Easing_EndSpeed")]
 		public Value.Enum<EasingEnd> EndSpeed
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
-        internal Vector2DEasingParamater()
-        {
-            Start = new Value.Vector2DWithRandom(0, 0);
-            End = new Value.Vector2DWithRandom(0, 0);
-            StartSpeed = new Value.Enum<EasingStart>(EasingStart.Start);
-            EndSpeed = new Value.Enum<EasingEnd>(EasingEnd.End);
-        }
-    }
+		internal Vector2DEasingParamater()
+		{
+			Start = new Value.Vector2DWithRandom(0, 0);
+			End = new Value.Vector2DWithRandom(0, 0);
+			StartSpeed = new Value.Enum<EasingStart>(EasingStart.Start);
+			EndSpeed = new Value.Enum<EasingEnd>(EasingEnd.End);
+		}
+	}
 
 	public class Vector3DEasingParamater
 	{
@@ -5887,7 +5889,7 @@ namespace EffekseerTool.Data
 		public Vector3DFCurveParameter()
 		{
 			FCurve = new Value.FCurveVector3D();
-			
+
 			FCurve.X.DefaultValueRangeMax = 10.0f;
 			FCurve.X.DefaultValueRangeMin = -10.0f;
 			FCurve.Y.DefaultValueRangeMax = 10.0f;
@@ -6073,7 +6075,7 @@ namespace EffekseerTool.Data
 			var selectedAttributes = attributes.OfType<Data.SelectedAttribute>();
 			if (selectedAttributes.Count() > 0)
 			{
-				if(selectedAttributes.Select(_=>_.ID).Distinct().Count() > 1)
+				if (selectedAttributes.Select(_ => _.ID).Distinct().Count() > 1)
 				{
 					throw new Exception("Same IDs are required.");
 				}
@@ -6084,12 +6086,12 @@ namespace EffekseerTool.Data
 
 			var key = KeyAttribute.GetKey(attributes);
 			var nameKey = key + "_Name";
-			if(string.IsNullOrEmpty(key))
+			if (string.IsNullOrEmpty(key))
 			{
 				nameKey = info.ReflectedType.Name + "_" + info.Name + "_Name";
 			}
 
-			if(MultiLanguageTextProvider.HasKey(nameKey))
+			if (MultiLanguageTextProvider.HasKey(nameKey))
 			{
 				ret.Title = new MultiLanguageString(nameKey);
 			}
@@ -6162,17 +6164,17 @@ namespace EffekseerTool.Data
 
 
 	public class DepthValues
-    {
+	{
 
-        [Name(language = Language.Japanese, value = "Zオフセット")]
-        [Description(language = Language.Japanese, value = "描画時に奥行方向に移動されるオフセット")]
-        [Name(language = Language.English, value = "Z-Offset")]
-        [Description(language = Language.English, value = "An offset which shift Z direction when the particle is rendered.")]
-        public Value.Float DepthOffset
-        {
-            get;
-            private set;
-        }
+		[Name(language = Language.Japanese, value = "Zオフセット")]
+		[Description(language = Language.Japanese, value = "描画時に奥行方向に移動されるオフセット")]
+		[Name(language = Language.English, value = "Z-Offset")]
+		[Description(language = Language.English, value = "An offset which shift Z direction when the particle is rendered.")]
+		public Value.Float DepthOffset
+		{
+			get;
+			private set;
+		}
 
 		[Name(language = Language.Japanese, value = "Zオフセットによる拡大無効化")]
 		[Description(language = Language.Japanese, value = "Zオフセットにより大きさが変化しないようにするか")]
@@ -6244,9 +6246,9 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        public DepthValues()
-        {
-            DepthOffset = new Value.Float();
+		public DepthValues()
+		{
+			DepthOffset = new Value.Float();
 			IsScaleChangedDependingOnDepthOffset = new Value.Boolean();
 			IsDepthOffsetChangedDependingOnParticleScale = new Value.Boolean();
 			ZSort = new Value.Enum<ZSortType>(ZSortType.None);
@@ -6254,8 +6256,8 @@ namespace EffekseerTool.Data
 			SoftParticle = new Value.Float(0, float.MaxValue, 0.0f);
 			DepthClipping = new Value.IntWithInifinite(1024, true, int.MaxValue, 16);
 			SuppressionOfScalingByDepth = new Value.Float(1.0f, 1.0f, 0.0f, 0.1f);
-        }
-    }
+		}
+	}
 }
 
 namespace EffekseerTool.Data
@@ -6323,7 +6325,7 @@ namespace EffekseerTool.Data
 				() =>
 				{
 					values = new_value;
-					if(OnChanged != null)
+					if (OnChanged != null)
 					{
 						OnChanged(this, null);
 					}
@@ -6344,7 +6346,7 @@ namespace EffekseerTool.Data
 		{
 			List<EditableValue> ret = new List<EditableValue>();
 
-			for(int i = 0; i < values.Count; i++)
+			for (int i = 0; i < values.Count; i++)
 			{
 				EditableValue v = new EditableValue();
 
@@ -6447,7 +6449,7 @@ namespace EffekseerTool.Data
 				() =>
 				{
 					values = new_value;
-					
+
 					if (old_index < values.Count) selected = new_value[old_index];
 					else if (old_index > 0 && values.Count > 0) selected = new_value[old_index - 1];
 					else selected = null;
@@ -6506,7 +6508,7 @@ namespace EffekseerTool.Data
 		{
 			Inputs = new DynamicInputCollection();
 
-			for(int i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				Inputs.Add();
 			}
@@ -7318,7 +7320,7 @@ namespace EffekseerTool.Data
 
 			public ModelParameter()
 			{
-                Model = new Value.PathForModel(Resources.GetString("ModelFilter"), true, "");				
+				Model = new Value.PathForModel(Resources.GetString("ModelFilter"), true, "");
 				Type = new Value.Enum<ModelType>(ModelType.Random);
 			}
 		}
@@ -7410,7 +7412,7 @@ namespace EffekseerTool.Data
 			[Name(value = "モデル", language = Language.Japanese)]
 			[Name(value = "Model", language = Language.English)]
 			Model = 2,
-			
+
 		}
 
 		public enum ModelType : int
@@ -7486,7 +7488,7 @@ namespace EffekseerTool.Data
 
 		static Dictionary<Type, Action<XmlElement, object, bool>> loadEvents = new Dictionary<Type, Action<XmlElement, object, bool>>();
 
-		public static void ExtendSupportedType(Type type, Func<XmlDocument, string, object, bool, XmlElement>  save, Action<XmlElement, object, bool> load)
+		public static void ExtendSupportedType(Type type, Func<XmlDocument, string, object, bool, XmlElement> save, Action<XmlElement, object, bool> load)
 		{
 			saveEvents.Add(type, save);
 			loadEvents.Add(type, load);
@@ -7514,7 +7516,7 @@ namespace EffekseerTool.Data
 						e_o.AppendChild(element as XmlNode);
 					}
 				}
-				else if(saveEvents.ContainsKey(property.PropertyType))
+				else if (saveEvents.ContainsKey(property.PropertyType))
 				{
 					var property_value = property.GetValue(o, null);
 					var element = saveEvents[property.PropertyType](doc, property.Name, property_value, isClip);
@@ -7539,7 +7541,7 @@ namespace EffekseerTool.Data
 				}
 			}
 
-			if(e_o.ChildNodes.Count > 0) return e_o;
+			if (e_o.ChildNodes.Count > 0) return e_o;
 			return null;
 		}
 
@@ -7565,7 +7567,7 @@ namespace EffekseerTool.Data
 			var e = doc.CreateElement(element_name);
 
 			var e_path = SaveToElement(doc, "Path", mfp.Path, isClip);
-			if(e_path != null)
+			if (e_path != null)
 			{
 				e.AppendChild(e_path);
 			}
@@ -7579,11 +7581,11 @@ namespace EffekseerTool.Data
 
 			// check file info
 			var info = new Utl.MaterialInformation();
-			if(info.Load(mfp.Path.AbsolutePath))
+			if (info.Load(mfp.Path.AbsolutePath))
 			{
 				var uniforms = mfp.GetUniforms(info);
 
-				foreach(var uniform in uniforms.Where(_=>_.Item1 != null))
+				foreach (var uniform in uniforms.Where(_ => _.Item1 != null))
 				{
 					var status = uniform.Item1;
 
@@ -7592,7 +7594,7 @@ namespace EffekseerTool.Data
 						var v = status.Value as Data.Value.Vector4D;
 						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
 						var v_e = SaveToElement(doc, "Value", v, isClip);
-						if(v_e != null)
+						if (v_e != null)
 						{
 							var e_root = doc.CreateElement("KeyValue");
 							e_root.AppendChild(v_k);
@@ -7671,9 +7673,9 @@ namespace EffekseerTool.Data
 			}
 			else
 			{
-				foreach(var status in mfp.GetValueStatus())
+				foreach (var status in mfp.GetValueStatus())
 				{
-					if(status.Value is Data.Value.Vector4D)
+					if (status.Value is Data.Value.Vector4D)
 					{
 						var v = status.Value as Data.Value.Vector4D;
 						var v_k = doc.CreateTextElement("Key", status.Key.ToString());
@@ -7746,7 +7748,7 @@ namespace EffekseerTool.Data
 				}
 			}
 
-			if(e_float1.ChildNodes.Count > 0)
+			if (e_float1.ChildNodes.Count > 0)
 			{
 				e.AppendChild(e_float1);
 			}
@@ -7780,7 +7782,7 @@ namespace EffekseerTool.Data
 			for (int i = 0; i < collection.Values.Count; i++)
 			{
 				var e_node = SaveToElement(doc, collection.Values[i].GetType().Name, collection.Values[i], true);
-				if(e_node != null)
+				if (e_node != null)
 				{
 					e.AppendChild(e_node);
 				}
@@ -7829,7 +7831,7 @@ namespace EffekseerTool.Data
 
 		public static XmlElement SaveToElement(XmlDocument doc, string element_name, Value.Float value, bool isClip)
 		{
-			if(value.DynamicEquation.Index >= 0)
+			if (value.DynamicEquation.Index >= 0)
 			{
 				var e = doc.CreateElement(element_name);
 				var text = value.GetValue().ToString();
@@ -7857,7 +7859,7 @@ namespace EffekseerTool.Data
 			var e = doc.CreateElement(element_name);
 			var v = SaveToElement(doc, "Value", value.Value, isClip);
 			var i = SaveToElement(doc, "Infinite", value.Infinite, isClip);
-			
+
 			if (v != null) e.AppendChild(v);
 			if (i != null) e.AppendChild(i);
 
@@ -7894,7 +7896,7 @@ namespace EffekseerTool.Data
 			if (z != null) e.AppendChild(z);
 
 			var d = SaveToElement(doc, "DynamicEquation", value.DynamicEquation, isClip);
-			if(d != null)
+			if (d != null)
 			{
 				e.AppendChild(d);
 			}
@@ -8061,7 +8063,7 @@ namespace EffekseerTool.Data
 			if (value.DefaultValue == value.GetAbsolutePath() && !isClip) return null;
 
 			var text = "";
-			if(!isClip && value.IsRelativeSaved)
+			if (!isClip && value.IsRelativeSaved)
 				text = value.GetRelativePath();
 			else
 				text = value.GetAbsolutePath();
@@ -8304,7 +8306,7 @@ namespace EffekseerTool.Data
 					var property_value = property.GetValue(o, null);
 					method.Invoke(null, new object[] { ch_node, property_value, isClip });
 				}
-				else if(loadEvents.ContainsKey(property.PropertyType))
+				else if (loadEvents.ContainsKey(property.PropertyType))
 				{
 					var property_value = property.GetValue(o, null);
 					loadEvents[property.PropertyType](ch_node, property_value, isClip);
@@ -8343,7 +8345,7 @@ namespace EffekseerTool.Data
 		public static void LoadFromElement(XmlElement e, MaterialFileParameter mfp, bool isClip)
 		{
 			var e_path = e["Path"] as XmlElement;
-			if(e_path != null)
+			if (e_path != null)
 			{
 				LoadFromElement(e_path, mfp.Path, isClip);
 			}
@@ -8363,7 +8365,7 @@ namespace EffekseerTool.Data
 					// compatibility
 					string key = string.Empty;
 					XmlElement valueElement = null;
-					if(MaterialFileParameter.GetVersionOfKey(e_child.Name) == 0)
+					if (MaterialFileParameter.GetVersionOfKey(e_child.Name) == 0)
 					{
 						key = e_child.Name;
 						valueElement = e_child;
@@ -8372,8 +8374,8 @@ namespace EffekseerTool.Data
 					{
 						var e_k = e_child["Key"] as XmlElement;
 						valueElement = e_child["Value"] as XmlElement;
-						
-						if(e_k != null)
+
+						if (e_k != null)
 						{
 							key = e_k.GetText();
 						}
@@ -8579,12 +8581,12 @@ namespace EffekseerTool.Data
 
 		public static void LoadFromElement(XmlElement e, Value.Float value, bool isClip)
 		{
-			if(e.HasChildNodes && e.ChildNodes[0].HasChildNodes)
+			if (e.HasChildNodes && e.ChildNodes[0].HasChildNodes)
 			{
 				// with dynamic equation
 				var e_value = e["Value"] as XmlElement;
 
-				if(e_value != null)
+				if (e_value != null)
 				{
 					LoadFromElement(e_value, value, isClip);
 				}
@@ -8615,7 +8617,7 @@ namespace EffekseerTool.Data
 			var e_infinite = e["Infinite"] as XmlElement;
 
 			// Convert int into intWithInfinit
-			if(e_value == null && e_infinite == null)
+			if (e_value == null && e_infinite == null)
 			{
 				var i = e.GetTextAsInt();
 				value.Value.SetValue(i);
@@ -8655,7 +8657,7 @@ namespace EffekseerTool.Data
 			if (e_y != null) LoadFromElement(e_y, value.Y, isClip);
 			if (e_z != null) LoadFromElement(e_z, value.Z, isClip);
 
-			if (e_d != null) 
+			if (e_d != null)
 			{
 				LoadFromElement(e_d, value.DynamicEquation, isClip);
 				value.IsDynamicEquationEnabled.SetValue(true);
@@ -8803,9 +8805,9 @@ namespace EffekseerTool.Data
 			var e_da = e["DrawnAs"];
 
 			// Convert Vector2D into Vector2DWithRandom
-			if(e_x != null)
+			if (e_x != null)
 			{
-				if(e_da == null && e_x["Max"] == null && e_x["Min"] == null && e_x["Center"] == null)
+				if (e_da == null && e_x["Max"] == null && e_x["Min"] == null && e_x["Center"] == null)
 				{
 					var x = e_x.GetTextAsFloat();
 					value.X.SetCenter(x);
@@ -9332,7 +9334,7 @@ namespace EffekseerTool.Data
 				Gravity = new Value.Vector3D(0, 0, 0);
 			}
 		}
-		
+
 		public class AttractiveForceParamater
 		{
 			[Name(language = Language.Japanese, value = "引力")]
@@ -9344,7 +9346,7 @@ namespace EffekseerTool.Data
 				get;
 				private set;
 			}
-			
+
 			[Name(language = Language.Japanese, value = "制御")]
 			[Description(language = Language.Japanese, value = "移動方向をターゲット方向へ補正量")]
 			[Name(language = Language.English, value = "Resistance")]
@@ -9354,7 +9356,7 @@ namespace EffekseerTool.Data
 				get;
 				private set;
 			}
-			
+
 			[Name(language = Language.Japanese, value = "最小範囲")]
 			[Description(language = Language.Japanese, value = "この範囲以内では引力がフルに掛かります")]
 			[Name(language = Language.English, value = "Minimum Range")]
@@ -9383,7 +9385,7 @@ namespace EffekseerTool.Data
 				MaxRange = new Value.Float(0.0f, 1000.0f, 0.0f, 1.0f);
 			}
 		}
-	
+
 		public enum ParamaterType : int
 		{
 			[Name(value = "無し", language = Language.Japanese)]
@@ -9566,14 +9568,14 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [IO(Export = true)]
-        public DepthValues DepthValues
-        {
-            get;
-            private set;
-        }
+		[IO(Export = true)]
+		public DepthValues DepthValues
+		{
+			get;
+			private set;
+		}
 
-        [IO(Export = true)]
+		[IO(Export = true)]
 		public RendererCommonValues RendererCommonValues
 		{
 			get;
@@ -9587,12 +9589,12 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [IO(Export = true)]
-        public SoundValues SoundValues
-        {
-            get;
-            private set;
-        }
+		[IO(Export = true)]
+		public SoundValues SoundValues
+		{
+			get;
+			private set;
+		}
 
 #if __EFFEKSEER_BUILD_VERSION16__
 		[IO(Export = true)]
@@ -9607,7 +9609,7 @@ namespace EffekseerTool.Data
 		/// コンストラクタ
 		/// </summary>
 		internal Node(NodeBase parent)
-			:base(parent)
+			: base(parent)
 		{
 			Name.SetValueDirectly("Node");
 			CommonValues = new Data.CommonValues();
@@ -9616,10 +9618,10 @@ namespace EffekseerTool.Data
 			ScalingValues = new Data.ScaleValues();
 			LocationAbsValues = new Data.LocationAbsValues();
 			GenerationLocationValues = new Data.GenerationLocationValues();
-            DepthValues = new DepthValues();
+			DepthValues = new DepthValues();
 			RendererCommonValues = new Data.RendererCommonValues();
-            DrawingValues = new RendererValues();
-            SoundValues = new SoundValues();
+			DrawingValues = new RendererValues();
+			SoundValues = new SoundValues();
 #if __EFFEKSEER_BUILD_VERSION16__
 			AlphaCrunchValues = new Data.AlphaCrunchValues();
 #endif
@@ -9647,7 +9649,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-		[IO(Export=false)]
+		[IO(Export = false)]
 		public NodeBase Parent
 		{
 			get;
@@ -9685,7 +9687,7 @@ namespace EffekseerTool.Data
 		/// <returns></returns>
 		public Node AddChild(Node node = null, int index = int.MaxValue)
 		{
-			if(node == null)
+			if (node == null)
 			{
 				node = new Node(this);
 			}
@@ -9695,13 +9697,13 @@ namespace EffekseerTool.Data
 			var old_value = children;
 			var new_value = new List<Node>(children);
 
-			if(index == int.MaxValue)
+			if (index == int.MaxValue)
 			{
 				new_value.Add(node);
 			}
 			else
 			{
-				if(index >= children.Count)
+				if (index >= children.Count)
 				{
 					new_value.Add(node);
 				}
@@ -9875,7 +9877,7 @@ namespace EffekseerTool.Data
 			new_value[ind1] = node2;
 			new_value[ind2] = node1;
 
-			
+
 
 			var cmd = new Command.DelegateCommand(
 				() =>
@@ -9973,7 +9975,7 @@ namespace EffekseerTool.Data
 
 			internal ChildrenCollection(NodeBase node)
 			{
-				_node = node; 
+				_node = node;
 			}
 
 			internal void SetChildren(List<Node> children)
@@ -10021,7 +10023,7 @@ namespace EffekseerTool.Data
 	public class NodeRoot : NodeBase
 	{
 		internal NodeRoot()
-			:base(null)
+			: base(null)
 		{
 			Name.SetValueDirectly("Root");
 		}
@@ -10052,7 +10054,7 @@ namespace EffekseerTool.Data
 
 	public enum FontType
 	{
-		[Key(key ="FontType_Normal")]
+		[Key(key = "FontType_Normal")]
 		Normal,
 
 		[Key(key = "FontType_Bold")]
@@ -10235,7 +10237,7 @@ namespace EffekseerTool.Data
 			RenderingMode = new Value.Enum<RenderMode>(RenderMode.Normal);
 			ViewerMode = new Value.Enum<ViewMode>(ViewMode._3D);
 			GridColor = new Value.Color(255, 255, 255, 255);
-			
+
 			IsGridShown = new Value.Boolean(true);
 			IsXYGridShown = new Value.Boolean(false);
 			IsXZGridShown = new Value.Boolean(true);
@@ -10262,7 +10264,7 @@ namespace EffekseerTool.Data
 
 			LanguageSelector = new LanguageSelector();
 		}
-		
+
 		public enum RenderMode : int
 		{
 			[Key(key = "RenderMode_Normal")]
@@ -10337,13 +10339,13 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [Selected(ID = 0, Value = 0)]
-        [IO(Export = true)]
+		[Selected(ID = 0, Value = 0)]
+		[IO(Export = true)]
 		public NoneParamater BloomNone
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
 		[Selected(ID = 0, Value = 1)]
 		[IO(Export = true)]
@@ -10365,13 +10367,13 @@ namespace EffekseerTool.Data
 			private set;
 		}
 		
-        [Selected(ID = 0, Value = 0)]
-        [IO(Export = true)]
+		[Selected(ID = 0, Value = 0)]
+		[IO(Export = true)]
 		public NoneParamater TonemapNone
-        {
-            get;
-            private set;
-        }
+		{
+			get;
+			private set;
+		}
 
 		[Selected(ID = 0, Value = 1)]
 		[IO(Export = true)]
@@ -10381,7 +10383,7 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        public PostEffectValues()
+		public PostEffectValues()
 		{
 			BloomSwitch = new Value.Enum<EffectSwitch>();
 			BloomNone = new NoneParamater();
@@ -10554,7 +10556,7 @@ namespace EffekseerTool.Data
 {
 	public enum UVTextureReferenceTargetType
 	{
-		[Key(key= "UVTextureReferenceTargetType_None")]
+		[Key(key = "UVTextureReferenceTargetType_None")]
 		None = 0,
 		[Key(key = "UVTextureReferenceTargetType_Texture1")]
 		Texture1 = 1,
@@ -10650,7 +10652,7 @@ namespace EffekseerTool.Data
 			EditableValue ev = new EditableValue();
 			ev.Value = CustomData;
 
-			if(Name != string.Empty)
+			if (Name != string.Empty)
 			{
 				ev.Title = Name;
 				ev.Description = Desc;
@@ -10689,7 +10691,7 @@ namespace EffekseerTool.Data
 
 		public void Changed()
 		{
-			if(OnChanged != null)
+			if (OnChanged != null)
 			{
 				OnChanged(this, null);
 			}
@@ -10721,7 +10723,7 @@ namespace EffekseerTool.Data
 		{
 			var statusKey = StatusKey.From(key);
 
-			foreach(var kv in valueStatuses)
+			foreach (var kv in valueStatuses)
 			{
 				if (blacklist != null && blacklist.Contains(kv)) continue;
 				if (kv.Key.IsSame(statusKey, withName)) return kv;
@@ -10745,7 +10747,7 @@ namespace EffekseerTool.Data
 
 			ApplyMaterial(info);
 
-			if(info.CustomData.Count() > 0)
+			if (info.CustomData.Count() > 0)
 			{
 				rcValues.CustomData1.Name = info.CustomData[0].Summaries[Core.Language];
 				rcValues.CustomData1.Desc = info.CustomData[0].Descriptions[Core.Language];
@@ -10788,7 +10790,7 @@ namespace EffekseerTool.Data
 
 			var propPath = EditableValue.Create(Path, this.GetType().GetProperty("Path"));
 
-			if(!string.IsNullOrEmpty(selfSummary))
+			if (!string.IsNullOrEmpty(selfSummary))
 			{
 				propPath.Title = selfSummary;
 			}
@@ -10846,8 +10848,8 @@ namespace EffekseerTool.Data
 
 			HashSet<ValueStatus> usedValueStatuses = new HashSet<ValueStatus>();
 			HashSet<object> finished = new HashSet<object>();
-			
-			foreach (var withNameFlag in new[] { false, true} )
+
+			foreach (var withNameFlag in new[] { false, true })
 			{
 				foreach (var texture in info.Textures)
 				{
@@ -10900,7 +10902,7 @@ namespace EffekseerTool.Data
 						}
 
 						// update default path
-						if(texture.IsParam)
+						if (texture.IsParam)
 						{
 							if ((foundValue.Value as Value.PathForImage).AbsolutePath == string.Empty)
 							{
@@ -10912,7 +10914,7 @@ namespace EffekseerTool.Data
 						}
 						else
 						{
-							if((foundValue.Value as Value.PathForImage).AbsolutePath != texture.DefaultPath)
+							if ((foundValue.Value as Value.PathForImage).AbsolutePath != texture.DefaultPath)
 							{
 								(foundValue.Value as Value.PathForImage).SetAbsolutePathDirectly(texture.DefaultPath);
 								isChanged = true;
@@ -10933,7 +10935,7 @@ namespace EffekseerTool.Data
 						status.Priority = texture.Priority;
 						valueStatuses.Add(status);
 
-						if(!string.IsNullOrEmpty(texture.DefaultPath))
+						if (!string.IsNullOrEmpty(texture.DefaultPath))
 						{
 							value.SetAbsolutePathDirectly(texture.DefaultPath);
 						}
@@ -10995,7 +10997,7 @@ namespace EffekseerTool.Data
 					if (foundValue != null)
 					{
 						status = foundValue;
-						
+
 						status.IsShown = true;
 						isChanged = true;
 
@@ -11015,7 +11017,7 @@ namespace EffekseerTool.Data
 						{
 							(status.Value as Value.Vector4D).ChangeDefaultValue(uniform.DefaultValues[0], uniform.DefaultValues[1], uniform.DefaultValues[2], uniform.DefaultValues[3]);
 						}
-						
+
 					}
 					else
 					{
@@ -11033,7 +11035,7 @@ namespace EffekseerTool.Data
 							valueStatuses.Add(status);
 							isChanged = true;
 						}
-						else if(uniform.Type == 1)
+						else if (uniform.Type == 1)
 						{
 							status = new ValueStatus();
 							var value = new Value.Vector2D(uniform.DefaultValues[0], uniform.DefaultValues[1]);
@@ -11087,7 +11089,7 @@ namespace EffekseerTool.Data
 
 			foreach (var kts in valueStatuses)
 			{
-				if(!usedValueStatuses.Contains(kts))
+				if (!usedValueStatuses.Contains(kts))
 				{
 					var status = kts;
 					if (status.IsShown)
@@ -11098,7 +11100,7 @@ namespace EffekseerTool.Data
 				}
 			}
 
-			if(info.CustomData.Count() > 0)
+			if (info.CustomData.Count() > 0)
 			{
 				rcValues.CustomData1.Fixed4.ChangeDefaultValue(
 					info.CustomData[0].DefaultValues[0],
@@ -11207,7 +11209,7 @@ namespace EffekseerTool.Data
 
 				StatusKey status = new StatusKey();
 
-				if(version > 0)
+				if (version > 0)
 				{
 					// TODO : rename to unity flag
 #if SCRIPT_ENABLED
@@ -11540,7 +11542,7 @@ namespace EffekseerTool.Data
 			Wrap2 = new Value.Enum<WrapType>(WrapType.Repeat);
 
 			AlphaBlend = new Value.Enum<AlphaBlendType>(AlphaBlendType.Blend);
-			
+
 			FadeInType = new Value.Enum<FadeType>(FadeType.None);
 			FadeInNone = new NoneParamater();
 			FadeIn = new FadeInParamater();
@@ -11997,7 +11999,7 @@ namespace EffekseerTool.Data
 		}
 
 		[IO(Export = true)]
-		[Selected(ID = 0, Value=(int)RingShapeType.Crescent)]
+		[Selected(ID = 0, Value = (int)RingShapeType.Crescent)]
 		public RingShapeCrescentParameter Crescent { get; private set; }
 
 		public RingShapeParameter()
@@ -12019,7 +12021,7 @@ namespace EffekseerTool.Data
 		[Selected(ID = 0, Value = 3)]
 		[Selected(ID = 0, Value = 6)]
 		[IO(Export = true)]
-		public TextureUVTypeParameter TextureUVType { get; private set; } 
+		public TextureUVTypeParameter TextureUVType { get; private set; }
 
 		[Selected(ID = 0, Value = 2)]
 		[IO(Export = true)]
@@ -12045,13 +12047,13 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [Selected(ID = 0, Value = 4)]
-        [IO(Export = true)]
-        public RingParamater Ring
-        {
-            get;
-            private set;
-        }
+		[Selected(ID = 0, Value = 4)]
+		[IO(Export = true)]
+		public RingParamater Ring
+		{
+			get;
+			private set;
+		}
 
 		[Selected(ID = 0, Value = 5)]
 		[IO(Export = true)]
@@ -12067,9 +12069,9 @@ namespace EffekseerTool.Data
 			TextureUVType = new TextureUVTypeParameter();
 
 			Sprite = new SpriteParamater();
-            Ribbon = new RibbonParamater();
+			Ribbon = new RibbonParamater();
 			Track = new TrackParameter();
-            Ring = new RingParamater();
+			Ring = new RingParamater();
 			Model = new ModelParamater();
 		}
 
@@ -12188,7 +12190,7 @@ namespace EffekseerTool.Data
 				Color_Fixed_LR = new Value.Color(255, 255, 255, 255);
 				Color_Fixed_UL = new Value.Color(255, 255, 255, 255);
 				Color_Fixed_UR = new Value.Color(255, 255, 255, 255);
-				
+
 
 				Position = new Value.Enum<PositionType>(PositionType.Default);
 				Position_Fixed_LL = new Value.Vector2D(-0.5f, -0.5f);
@@ -12198,25 +12200,25 @@ namespace EffekseerTool.Data
 				ColorTexture = new Value.Path("画像ファイル (*.png)|*.png", true, "");
 			}
 
-            public enum ColorType : int
-            {
-                [Name(value = "標準", language = Language.Japanese)]
+			public enum ColorType : int
+			{
+				[Name(value = "標準", language = Language.Japanese)]
 				[Name(value = "Default", language = Language.English)]
-                Default = 0,
-                [Name(value = "固定", language = Language.Japanese)]
+				Default = 0,
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 1,
-            }
+				Fixed = 1,
+			}
 
-            public enum PositionType : int
-            {
-                [Name(value = "標準", language = Language.Japanese)]
+			public enum PositionType : int
+			{
+				[Name(value = "標準", language = Language.Japanese)]
 				[Name(value = "Default", language = Language.English)]
-                Default = 0,
-                [Name(value = "固定", language = Language.Japanese)]
+				Default = 0,
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 1,
-            }
+				Fixed = 1,
+			}
 		}
 
 		public class RibbonParamater
@@ -12321,73 +12323,73 @@ namespace EffekseerTool.Data
 				ColorTexture = new Value.Path(Resources.GetString("ImageFilter"), true, "");
 			}
 
-            public enum ColorAllType : int
-            {
-                [Name(value = "固定", language = Language.Japanese)]
+			public enum ColorAllType : int
+			{
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 0,
-                [Name(value = "ランダム", language = Language.Japanese)]
+				Fixed = 0,
+				[Name(value = "ランダム", language = Language.Japanese)]
 				[Name(value = "Random", language = Language.English)]
-                Random = 1,
-                [Name(value = "イージング", language = Language.Japanese)]
+				Random = 1,
+				[Name(value = "イージング", language = Language.Japanese)]
 				[Name(value = "Easing", language = Language.English)]
-                Easing = 2,
-            }
+				Easing = 2,
+			}
 
-            public enum ColorType : int
-            {
-                [Name(value = "標準", language = Language.Japanese)]
+			public enum ColorType : int
+			{
+				[Name(value = "標準", language = Language.Japanese)]
 				[Name(value = "Default", language = Language.English)]
-                Default = 0,
-                [Name(value = "固定", language = Language.Japanese)]
+				Default = 0,
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 1,
-            }
+				Fixed = 1,
+			}
 
-            public enum PositionType : int
-            {
-                [Name(value = "標準", language = Language.Japanese)]
+			public enum PositionType : int
+			{
+				[Name(value = "標準", language = Language.Japanese)]
 				[Name(value = "Default", language = Language.English)]
-                Default = 0,
-                [Name(value = "固定", language = Language.Japanese)]
+				Default = 0,
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 1,
-            }
+				Fixed = 1,
+			}
 		}
 
-        public class RingParamater
-        {
+		public class RingParamater
+		{
 			[Name(language = Language.English, value = "Shape")]
 			[IO(Export = true)]
 			public RingShapeParameter RingShape { get; private set; }
 
-            [Name(language = Language.Japanese, value = "描画順")]
+			[Name(language = Language.Japanese, value = "描画順")]
 			[Name(language = Language.English, value = "Rendering Order")]
-            public Value.Enum<RenderingOrder> RenderingOrder { get; private set; }
+			public Value.Enum<RenderingOrder> RenderingOrder { get; private set; }
 
-            [Name(language = Language.Japanese, value = "配置方法")]
+			[Name(language = Language.Japanese, value = "配置方法")]
 			[Name(language = Language.English, value = "Configuration")]
-            public Value.Enum<BillboardType> Billboard { get; private set; }
+			public Value.Enum<BillboardType> Billboard { get; private set; }
 
-            [Name(language = Language.Japanese, value = "ブレンド")]
+			[Name(language = Language.Japanese, value = "ブレンド")]
 			[Name(language = Language.English, value = "Blend")]
 			[IO(Export = false)]
 			[Shown(Shown = false)]
-            public Value.Enum<AlphaBlendType> AlphaBlend { get; private set; }
+			public Value.Enum<AlphaBlendType> AlphaBlend { get; private set; }
 
-            [Name(language = Language.Japanese, value = "頂点数")]
+			[Name(language = Language.Japanese, value = "頂点数")]
 			[Name(language = Language.English, value = "Vertex Count")]
-            public Value.Int VertexCount { get; private set; }
+			public Value.Int VertexCount { get; private set; }
 
 			/// <summary>
 			/// for compatibility
 			/// </summary>
-            [Selector(ID = 0)]
+			[Selector(ID = 0)]
 			[Shown(Shown = false)]
 			[IO(Export = false)]
-            [Name(language = Language.Japanese, value = "表示角度")]
+			[Name(language = Language.Japanese, value = "表示角度")]
 			[Name(language = Language.English, value = "Viewing Angle")]
-            public Value.Enum<ViewingAngleType> ViewingAngle { get; private set; }
+			public Value.Enum<ViewingAngleType> ViewingAngle { get; private set; }
 
 			/// <summary>
 			/// for compatibility
@@ -12413,281 +12415,281 @@ namespace EffekseerTool.Data
 			[Shown(Shown = false)]
 			[IO(Export = false)]
 			public FloatEasingParamater ViewingAngle_Easing { get; private set; }
-			
 
-            [Selector(ID = 1)]
-            [Name(language = Language.Japanese, value = "外輪")]
+
+			[Selector(ID = 1)]
+			[Name(language = Language.Japanese, value = "外輪")]
 			[Name(language = Language.English, value = "Outer")]
-            public Value.Enum<LocationType> Outer { get; private set; }
+			public Value.Enum<LocationType> Outer { get; private set; }
 
-            [Selected(ID = 1, Value = 0)]
+			[Selected(ID = 1, Value = 0)]
 			[IO(Export = true)]
-            public FixedLocation Outer_Fixed { get; private set; }
+			public FixedLocation Outer_Fixed { get; private set; }
 
-            [Selected(ID = 1, Value = 1)]
+			[Selected(ID = 1, Value = 1)]
 			[IO(Export = true)]
-            public PVALocation Outer_PVA { get; private set; }
+			public PVALocation Outer_PVA { get; private set; }
 
-            [Selected(ID = 1, Value = 2)]
-            [IO(Export = true)]
-            public Vector2DEasingParamater Outer_Easing { get; private set; }
+			[Selected(ID = 1, Value = 2)]
+			[IO(Export = true)]
+			public Vector2DEasingParamater Outer_Easing { get; private set; }
 
-            [Selector(ID = 2)]
-            [Name(language = Language.Japanese, value = "内輪")]
+			[Selector(ID = 2)]
+			[Name(language = Language.Japanese, value = "内輪")]
 			[Name(language = Language.English, value = "Inner")]
-            public Value.Enum<LocationType> Inner { get; private set; }
+			public Value.Enum<LocationType> Inner { get; private set; }
 
-            [Selected(ID = 2, Value = 0)]
+			[Selected(ID = 2, Value = 0)]
 			[IO(Export = true)]
-            public FixedLocation Inner_Fixed { get; private set; }
+			public FixedLocation Inner_Fixed { get; private set; }
 
-            [Selected(ID = 2, Value = 1)]
+			[Selected(ID = 2, Value = 1)]
 			[IO(Export = true)]
-            public PVALocation Inner_PVA { get; private set; }
+			public PVALocation Inner_PVA { get; private set; }
 
-            [Selected(ID = 2, Value = 2)]
-            [IO(Export = true)]
-            public Vector2DEasingParamater Inner_Easing { get; private set; }
+			[Selected(ID = 2, Value = 2)]
+			[IO(Export = true)]
+			public Vector2DEasingParamater Inner_Easing { get; private set; }
 
-            [Selector(ID = 3)]
-            [Name(language = Language.Japanese, value = "中心比率")]
+			[Selector(ID = 3)]
+			[Name(language = Language.Japanese, value = "中心比率")]
 			[Name(language = Language.English, value = "Center Ratio")]
-            public Value.Enum<CenterRatioType> CenterRatio { get; private set; }
+			public Value.Enum<CenterRatioType> CenterRatio { get; private set; }
 
-            [Selected(ID = 3, Value = 0)]
-            public Value.Float CenterRatio_Fixed { get; private set; }
+			[Selected(ID = 3, Value = 0)]
+			public Value.Float CenterRatio_Fixed { get; private set; }
 
-            [Selected(ID = 3, Value = 1)]
-            public Value.FloatWithRandom CenterRatio_Random { get; private set; }
+			[Selected(ID = 3, Value = 1)]
+			public Value.FloatWithRandom CenterRatio_Random { get; private set; }
 
-            [Selected(ID = 3, Value = 2)]
-            [IO(Export = true)]
-            public FloatEasingParamater CenterRatio_Easing { get; private set; }
+			[Selected(ID = 3, Value = 2)]
+			[IO(Export = true)]
+			public FloatEasingParamater CenterRatio_Easing { get; private set; }
 
-            [Selector(ID = 4)]
-            [Name(language = Language.Japanese, value = "外輪色")]
+			[Selector(ID = 4)]
+			[Name(language = Language.Japanese, value = "外輪色")]
 			[Name(language = Language.English, value = "Outer Color")]
-            public Value.Enum<ColorType> OuterColor { get; private set; }
+			public Value.Enum<ColorType> OuterColor { get; private set; }
 
-            [Selected(ID = 4, Value = 0)]
-            public Value.Color OuterColor_Fixed { get; private set; }
+			[Selected(ID = 4, Value = 0)]
+			public Value.Color OuterColor_Fixed { get; private set; }
 
-            [Selected(ID = 4, Value = 1)]
-            public Value.ColorWithRandom OuterColor_Random { get; private set; }
+			[Selected(ID = 4, Value = 1)]
+			public Value.ColorWithRandom OuterColor_Random { get; private set; }
 
-            [Selected(ID = 4, Value = 2)]
-            [IO(Export = true)]
-            public ColorEasingParamater OuterColor_Easing { get; private set; }
+			[Selected(ID = 4, Value = 2)]
+			[IO(Export = true)]
+			public ColorEasingParamater OuterColor_Easing { get; private set; }
 
-            [Selector(ID = 5)]
-            [Name(language = Language.Japanese, value = "中心色")]
+			[Selector(ID = 5)]
+			[Name(language = Language.Japanese, value = "中心色")]
 			[Name(language = Language.English, value = "Center Color")]
-            public Value.Enum<ColorType> CenterColor { get; private set; }
+			public Value.Enum<ColorType> CenterColor { get; private set; }
 
-            [Selected(ID = 5, Value = 0)]
+			[Selected(ID = 5, Value = 0)]
 			[IO(Export = true)]
-            public Value.Color CenterColor_Fixed { get; private set; }
+			public Value.Color CenterColor_Fixed { get; private set; }
 
-            [Selected(ID = 5, Value = 1)]
+			[Selected(ID = 5, Value = 1)]
 			[IO(Export = true)]
-            public Value.ColorWithRandom CenterColor_Random { get; private set; }
+			public Value.ColorWithRandom CenterColor_Random { get; private set; }
 
-            [Selected(ID = 5, Value = 2)]
-            [IO(Export = true)]
-            public ColorEasingParamater CenterColor_Easing { get; private set; }
+			[Selected(ID = 5, Value = 2)]
+			[IO(Export = true)]
+			public ColorEasingParamater CenterColor_Easing { get; private set; }
 
-            [Selector(ID = 6)]
-            [Name(language = Language.Japanese, value = "内輪色")]
+			[Selector(ID = 6)]
+			[Name(language = Language.Japanese, value = "内輪色")]
 			[Name(language = Language.English, value = "Inner Color")]
-            public Value.Enum<ColorType> InnerColor { get; private set; }
+			public Value.Enum<ColorType> InnerColor { get; private set; }
 
-            [Selected(ID = 6, Value = 0)]
-            public Value.Color InnerColor_Fixed { get; private set; }
+			[Selected(ID = 6, Value = 0)]
+			public Value.Color InnerColor_Fixed { get; private set; }
 
-            [Selected(ID = 6, Value = 1)]
-            public Value.ColorWithRandom InnerColor_Random { get; private set; }
+			[Selected(ID = 6, Value = 1)]
+			public Value.ColorWithRandom InnerColor_Random { get; private set; }
 
-            [Selected(ID = 6, Value = 2)]
-            [IO(Export = true)]
-            public ColorEasingParamater InnerColor_Easing { get; private set; }
+			[Selected(ID = 6, Value = 2)]
+			[IO(Export = true)]
+			public ColorEasingParamater InnerColor_Easing { get; private set; }
 
 
-            [Name(language = Language.Japanese, value = "色画像")]
-            [Description(language = Language.Japanese, value = "リボンの色を表す画像")]
+			[Name(language = Language.Japanese, value = "色画像")]
+			[Description(language = Language.Japanese, value = "リボンの色を表す画像")]
 			[Name(language = Language.English, value = "Color Image")]
 			[Description(language = Language.English, value = "Image representing the color of the ribbon")]
 			[IO(Export = false)]
 			[Shown(Shown = false)]
-            public Value.Path ColorTexture
-            {
-                get;
-                private set;
-            }
+			public Value.Path ColorTexture
+			{
+				get;
+				private set;
+			}
 
-            public RingParamater()
-            {
+			public RingParamater()
+			{
 				RingShape = new RingShapeParameter();
-                RenderingOrder = new Value.Enum<Data.RenderingOrder>(Data.RenderingOrder.FirstCreatedInstanceIsFirst);
+				RenderingOrder = new Value.Enum<Data.RenderingOrder>(Data.RenderingOrder.FirstCreatedInstanceIsFirst);
 
-                Billboard = new Value.Enum<BillboardType>(BillboardType.Fixed);
-                AlphaBlend = new Value.Enum<AlphaBlendType>(AlphaBlendType.Blend);
+				Billboard = new Value.Enum<BillboardType>(BillboardType.Fixed);
+				AlphaBlend = new Value.Enum<AlphaBlendType>(AlphaBlendType.Blend);
 
-                VertexCount = new Value.Int(16, 256, 3);
+				VertexCount = new Value.Int(16, 256, 3);
 
 				/// for compatibility
 				ViewingAngle = new Value.Enum<ViewingAngleType>(ViewingAngleType.Fixed);
-                ViewingAngle_Fixed = new Value.Float(360.0f, 360.0f, 0.0f);
-                ViewingAngle_Random = new Value.FloatWithRandom(360.0f, 360.0f, 0.0f);
-                ViewingAngle_Easing = new FloatEasingParamater(360.0f, 360.0f, 0.0f);
-				
+				ViewingAngle_Fixed = new Value.Float(360.0f, 360.0f, 0.0f);
+				ViewingAngle_Random = new Value.FloatWithRandom(360.0f, 360.0f, 0.0f);
+				ViewingAngle_Easing = new FloatEasingParamater(360.0f, 360.0f, 0.0f);
 
-                Outer = new Value.Enum<LocationType>(LocationType.Fixed);
-                Outer_Fixed = new FixedLocation(2.0f, 0.0f);
-                Outer_PVA = new PVALocation(2.0f, 0.0f);
-                Outer_Easing = new Vector2DEasingParamater();
 
-                Inner = new Value.Enum<LocationType>(LocationType.Fixed);
-                Inner_Fixed = new FixedLocation(1.0f, 0.0f);
-                Inner_PVA = new PVALocation(1.0f, 0.0f);
-                Inner_Easing = new Vector2DEasingParamater();
+				Outer = new Value.Enum<LocationType>(LocationType.Fixed);
+				Outer_Fixed = new FixedLocation(2.0f, 0.0f);
+				Outer_PVA = new PVALocation(2.0f, 0.0f);
+				Outer_Easing = new Vector2DEasingParamater();
 
-                CenterRatio = new Value.Enum<CenterRatioType>(CenterRatioType.Fixed);
-                CenterRatio_Fixed = new Value.Float(0.5f, 1.0f, 0.0f);
-                CenterRatio_Random = new Value.FloatWithRandom(0.5f, 1.0f, 0.0f);
-                CenterRatio_Easing = new FloatEasingParamater(0.5f, 1.0f, 0.0f);
+				Inner = new Value.Enum<LocationType>(LocationType.Fixed);
+				Inner_Fixed = new FixedLocation(1.0f, 0.0f);
+				Inner_PVA = new PVALocation(1.0f, 0.0f);
+				Inner_Easing = new Vector2DEasingParamater();
 
-                OuterColor = new Value.Enum<ColorType>(ColorType.Fixed);
-                OuterColor_Fixed = new Value.Color(255, 255, 255, 0);
-                OuterColor_Random = new Value.ColorWithRandom(255, 255, 255, 0);
-                OuterColor_Easing = new ColorEasingParamater();
+				CenterRatio = new Value.Enum<CenterRatioType>(CenterRatioType.Fixed);
+				CenterRatio_Fixed = new Value.Float(0.5f, 1.0f, 0.0f);
+				CenterRatio_Random = new Value.FloatWithRandom(0.5f, 1.0f, 0.0f);
+				CenterRatio_Easing = new FloatEasingParamater(0.5f, 1.0f, 0.0f);
 
-                CenterColor = new Value.Enum<ColorType>(ColorType.Fixed);
-                CenterColor_Fixed = new Value.Color(255, 255, 255, 255);
-                CenterColor_Random = new Value.ColorWithRandom(255, 255, 255, 255);
-                CenterColor_Easing = new ColorEasingParamater();
+				OuterColor = new Value.Enum<ColorType>(ColorType.Fixed);
+				OuterColor_Fixed = new Value.Color(255, 255, 255, 0);
+				OuterColor_Random = new Value.ColorWithRandom(255, 255, 255, 0);
+				OuterColor_Easing = new ColorEasingParamater();
 
-                InnerColor = new Value.Enum<ColorType>(ColorType.Fixed);
-                InnerColor_Fixed = new Value.Color(255, 255, 255, 0);
-                InnerColor_Random = new Value.ColorWithRandom(255, 255, 255, 0);
-                InnerColor_Easing = new ColorEasingParamater();
+				CenterColor = new Value.Enum<ColorType>(ColorType.Fixed);
+				CenterColor_Fixed = new Value.Color(255, 255, 255, 255);
+				CenterColor_Random = new Value.ColorWithRandom(255, 255, 255, 255);
+				CenterColor_Easing = new ColorEasingParamater();
 
-                ColorTexture = new Value.Path(Resources.GetString("ImageFilter"), true, "");
-            }
+				InnerColor = new Value.Enum<ColorType>(ColorType.Fixed);
+				InnerColor_Fixed = new Value.Color(255, 255, 255, 0);
+				InnerColor_Random = new Value.ColorWithRandom(255, 255, 255, 0);
+				InnerColor_Easing = new ColorEasingParamater();
+
+				ColorTexture = new Value.Path(Resources.GetString("ImageFilter"), true, "");
+			}
 
 			/// <summary>
 			/// for compatibility
 			/// </summary>
 			public enum ViewingAngleType : int
-            {
-                [Name(value = "位置", language = Language.Japanese)]
+			{
+				[Name(value = "位置", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 0,
-                [Name(value = "ランダム", language = Language.Japanese)]
+				Fixed = 0,
+				[Name(value = "ランダム", language = Language.Japanese)]
 				[Name(value = "Random", language = Language.English)]
-                Random = 1,
-                [Name(value = "イージング", language = Language.Japanese)]
+				Random = 1,
+				[Name(value = "イージング", language = Language.Japanese)]
 				[Name(value = "Easing", language = Language.English)]
-                Easing = 2,
-            }
-			
+				Easing = 2,
+			}
 
-            public enum LocationType : int
-            {
-                [Name(value = "位置", language = Language.Japanese)]
+
+			public enum LocationType : int
+			{
+				[Name(value = "位置", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 0,
-                [Name(value = "位置・速度・加速度", language = Language.Japanese)]
+				Fixed = 0,
+				[Name(value = "位置・速度・加速度", language = Language.Japanese)]
 				[Name(value = "PVA", language = Language.English)]
-                PVA = 1,
-                [Name(value = "イージング", language = Language.Japanese)]
+				PVA = 1,
+				[Name(value = "イージング", language = Language.Japanese)]
 				[Name(value = "Easing", language = Language.English)]
-                Easing = 2,
-            }
+				Easing = 2,
+			}
 
-            public class FixedLocation
-            {
-                [Name(language = Language.Japanese, value = "位置")]
-                [Description(language = Language.Japanese, value = "インスタンスの位置")]
+			public class FixedLocation
+			{
+				[Name(language = Language.Japanese, value = "位置")]
+				[Description(language = Language.Japanese, value = "インスタンスの位置")]
 				[Name(language = Language.English, value = "Position")]
 				[Description(language = Language.English, value = "Position of the instance")]
-                public Value.Vector2D Location
-                {
-                    get;
-                    private set;
-                }
+				public Value.Vector2D Location
+				{
+					get;
+					private set;
+				}
 
-                internal FixedLocation(float x = 0.0f, float y = 0.0f)
-                {
-                    Location = new Value.Vector2D(x, y);
-                }
-            }
+				internal FixedLocation(float x = 0.0f, float y = 0.0f)
+				{
+					Location = new Value.Vector2D(x, y);
+				}
+			}
 
-            public enum CenterRatioType : int
-            {
-                [Name(value = "位置", language = Language.Japanese)]
+			public enum CenterRatioType : int
+			{
+				[Name(value = "位置", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 0,
-                [Name(value = "ランダム", language = Language.Japanese)]
+				Fixed = 0,
+				[Name(value = "ランダム", language = Language.Japanese)]
 				[Name(value = "Random", language = Language.English)]
-                Random = 1,
-                [Name(value = "イージング", language = Language.Japanese)]
+				Random = 1,
+				[Name(value = "イージング", language = Language.Japanese)]
 				[Name(value = "Easing", language = Language.English)]
-                Easing = 2,
-            }
+				Easing = 2,
+			}
 
-            public class PVALocation
-            {
-                [Name(language = Language.Japanese, value = "位置")]
-                [Description(language = Language.Japanese, value = "インスタンスの初期位置")]
+			public class PVALocation
+			{
+				[Name(language = Language.Japanese, value = "位置")]
+				[Description(language = Language.Japanese, value = "インスタンスの初期位置")]
 				[Name(language = Language.English, value = "Pos")]
 				[Description(language = Language.English, value = "Position of the instance")]
-                public Value.Vector2DWithRandom Location
-                {
-                    get;
-                    private set;
-                }
+				public Value.Vector2DWithRandom Location
+				{
+					get;
+					private set;
+				}
 
-                [Name(language = Language.Japanese, value = "速度")]
-                [Description(language = Language.Japanese, value = "インスタンスの初期速度")]
+				[Name(language = Language.Japanese, value = "速度")]
+				[Description(language = Language.Japanese, value = "インスタンスの初期速度")]
 				[Name(language = Language.English, value = "Speed")]
 				[Description(language = Language.English, value = "Initial velocity of the instance")]
-                public Value.Vector2DWithRandom Velocity
-                {
-                    get;
-                    private set;
-                }
+				public Value.Vector2DWithRandom Velocity
+				{
+					get;
+					private set;
+				}
 
-                [Name(language = Language.Japanese, value = "加速度")]
-                [Description(language = Language.Japanese, value = "インスタンスの初期加速度")]
+				[Name(language = Language.Japanese, value = "加速度")]
+				[Description(language = Language.Japanese, value = "インスタンスの初期加速度")]
 				[Name(language = Language.English, value = "Accel")]
 				[Description(language = Language.English, value = "Acceleration of the instance")]
-                public Value.Vector2DWithRandom Acceleration
-                {
-                    get;
-                    private set;
-                }
+				public Value.Vector2DWithRandom Acceleration
+				{
+					get;
+					private set;
+				}
 
-                internal PVALocation(float x = 0.0f, float y = 0.0f)
-                {
-                    Location = new Value.Vector2DWithRandom(x, y);
-                    Velocity = new Value.Vector2DWithRandom(0, 0);
-                    Acceleration = new Value.Vector2DWithRandom(0, 0);
-                }
-            }
+				internal PVALocation(float x = 0.0f, float y = 0.0f)
+				{
+					Location = new Value.Vector2DWithRandom(x, y);
+					Velocity = new Value.Vector2DWithRandom(0, 0);
+					Acceleration = new Value.Vector2DWithRandom(0, 0);
+				}
+			}
 
-            public enum ColorType : int
-            {
-                [Name(value = "固定", language = Language.Japanese)]
+			public enum ColorType : int
+			{
+				[Name(value = "固定", language = Language.Japanese)]
 				[Name(value = "Fixed", language = Language.English)]
-                Fixed = 0,
-                [Name(value = "ランダム", language = Language.Japanese)]
+				Fixed = 0,
+				[Name(value = "ランダム", language = Language.Japanese)]
 				[Name(value = "Random", language = Language.English)]
-                Random = 1,
-                [Name(value = "イージング", language = Language.Japanese)]
+				Random = 1,
+				[Name(value = "イージング", language = Language.Japanese)]
 				[Name(value = "Easing", language = Language.English)]
-                Easing = 2,
-            }
-        }
+				Easing = 2,
+			}
+		}
 
 		public class ModelParamater
 		{
@@ -12711,7 +12713,7 @@ namespace EffekseerTool.Data
 
 			public ModelParamater()
 			{
-                Model = new Value.PathForModel(Resources.GetString("ModelFilter"), true, "");
+				Model = new Value.PathForModel(Resources.GetString("ModelFilter"), true, "");
 
 				Billboard = new Value.Enum<BillboardType>(BillboardType.Fixed);
 
@@ -12893,7 +12895,7 @@ namespace EffekseerTool.Data
 			[IO(Export = true)]
 			public ColorFCurveParameter ColorRightMiddle_FCurve { get; private set; }
 
-			
+
 			public TrackParameter()
 			{
 				TrackSizeFor = new Value.Enum<TrackSizeType>(TrackSizeType.Fixed);
@@ -12975,15 +12977,15 @@ namespace EffekseerTool.Data
 			[Name(value = "リボン", language = Language.Japanese)]
 			[Name(value = "Ribbon", language = Language.English)]
 			[Icon(resourceName = "NodeRibbon")]
-            Ribbon = 3,
+			Ribbon = 3,
 			[Name(value = "軌跡", language = Language.Japanese)]
 			[Name(value = "Track", language = Language.English)]
 			[Icon(resourceName = "NodeTrack")]
 			Track = 6,
-            [Name(value = "リング", language = Language.Japanese)]
+			[Name(value = "リング", language = Language.Japanese)]
 			[Name(value = "Ring", language = Language.English)]
 			[Icon(resourceName = "NodeRing")]
-            Ring = 4,
+			Ring = 4,
 			[Name(value = "モデル", language = Language.Japanese)]
 			[Name(value = "Model", language = Language.English)]
 			[Icon(resourceName = "NodeModel")]
@@ -13155,7 +13157,7 @@ namespace EffekseerTool.Data
 				Acceleration = new Value.FloatWithRandom(0);
 			}
 		}
-		
+
 
 		public class AxisEasingParamater
 		{
@@ -13255,7 +13257,7 @@ namespace EffekseerTool.Data
 			get;
 			private set;
 		}
-		
+
 		[Selected(ID = 0, Value = 3)]
 		[IO(Export = true)]
 		public SinglePVAParamater SinglePVA
@@ -13263,7 +13265,7 @@ namespace EffekseerTool.Data
 			get;
 			private set;
 		}
-		
+
 		[Selected(ID = 0, Value = 4)]
 		[IO(Export = true)]
 		public FloatEasingParamater SingleEasing
@@ -13435,13 +13437,13 @@ namespace EffekseerTool.Data
 			private set;
 		}
 
-        [Selected(ID = 0, Value = 0)]
-        [IO(Export = true)]
-        public NoneParamater None
-        {
-            get;
-            private set;
-        }
+		[Selected(ID = 0, Value = 0)]
+		[IO(Export = true)]
+		public NoneParamater None
+		{
+			get;
+			private set;
+		}
 
 		[Selected(ID = 0, Value = 1)]
 		[IO(Export = true)]
@@ -13453,122 +13455,122 @@ namespace EffekseerTool.Data
 
 		internal SoundValues()
 		{
-            Type = new Value.Enum<ParamaterType>(ParamaterType.None);
-            None = new NoneParamater();
-            Sound = new SoundParamater();
+			Type = new Value.Enum<ParamaterType>(ParamaterType.None);
+			None = new NoneParamater();
+			Sound = new SoundParamater();
 		}
 
-        public class NoneParamater
-        {
-            internal NoneParamater()
-            {
-            }
-        }
+		public class NoneParamater
+		{
+			internal NoneParamater()
+			{
+			}
+		}
 
-        public class SoundParamater
-        {
-            [Name(language = Language.Japanese, value = "音データ")]
-            [Description(language = Language.Japanese, value = "再生する音のWAVデータ")]
+		public class SoundParamater
+		{
+			[Name(language = Language.Japanese, value = "音データ")]
+			[Description(language = Language.Japanese, value = "再生する音のWAVデータ")]
 			[Name(language = Language.English, value = "Sound Data")]
 			[Description(language = Language.English, value = "Using WAV files")]
-            public Value.PathForSound Wave
-            {
-                get;
-                private set;
-            }
-            [Name(value = "ボリューム", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "音の大きさ。\n範囲：0.0 ～ 1.0\n0で無音。1で原音の大きさ")]
+			public Value.PathForSound Wave
+			{
+				get;
+				private set;
+			}
+			[Name(value = "ボリューム", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "音の大きさ。\n範囲：0.0 ～ 1.0\n0で無音。1で原音の大きさ")]
 			[Name(value = "Volume", language = Language.English)]
 			[Description(language = Language.English, value = "Volume\nRange：0.0 ～ 1.0\n0 is silence, 1 is same as the original sound.")]
-            public Value.FloatWithRandom Volume
-            {
-                get;
-                private set;
-            }
-            [Name(value = "ピッチ", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "音の高さ（単位：オクターブ）。\n範囲：-4.0 ～ +4.0\n0.0で原音。+1.0で2倍。-1.0で1/2倍")]
+			public Value.FloatWithRandom Volume
+			{
+				get;
+				private set;
+			}
+			[Name(value = "ピッチ", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "音の高さ（単位：オクターブ）。\n範囲：-4.0 ～ +4.0\n0.0で原音。+1.0で2倍。-1.0で1/2倍")]
 			[Name(value = "Pitch", language = Language.English)]
 			[Description(language = Language.English, value = "Pitch（Units：Octave)\nRange：-4.0 ～ +4.0\n0.0 is same as original, +1.0 doubled pitch, -1.0 half pitch.")]
-            public Value.FloatWithRandom Pitch
-            {
-                get;
-                private set;
-            }
+			public Value.FloatWithRandom Pitch
+			{
+				get;
+				private set;
+			}
 
-            [Selector(ID = 0)]
-            [Name(value = "パンタイプ", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "パンタイプ")]
+			[Selector(ID = 0)]
+			[Name(value = "パンタイプ", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "パンタイプ")]
 			[Name(value = "Panning Type", language = Language.English)]
 			[Description(language = Language.English, value = "Panning Type")]
-            public Value.Enum<ParamaterPanType> PanType
-            {
-                get;
-                private set;
-            }
+			public Value.Enum<ParamaterPanType> PanType
+			{
+				get;
+				private set;
+			}
 
-            [Selected(ID = 0, Value = 0)]
-            [Name(value = "パン", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "音の定位。\n範囲：-1.0 ～ +1.0\n0.0で中央。-1.0で左から。1.0で右から")]
+			[Selected(ID = 0, Value = 0)]
+			[Name(value = "パン", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "音の定位。\n範囲：-1.0 ～ +1.0\n0.0で中央。-1.0で左から。1.0で右から")]
 			[Name(value = "Pan", language = Language.English)]
 			[Description(language = Language.English, value = "Panning of sound.\nRange: -1.0 ～ +1.0\n0.0 is centered, -1.0 is left, 1.0 is right.")]
-            public Value.FloatWithRandom Pan
-            {
-                get;
-                private set;
-            }
+			public Value.FloatWithRandom Pan
+			{
+				get;
+				private set;
+			}
 
-            [Selected(ID = 0, Value = 1)]
-            [Name(value = "減衰距離", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "距離による減衰開始距離")]
+			[Selected(ID = 0, Value = 1)]
+			[Name(value = "減衰距離", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "距離による減衰開始距離")]
 			[Name(value = "Damping Range", language = Language.English)]
 			[Description(language = Language.English, value = "Distance in which damping of the sound occurs")]
-            public Value.Float Distance
-            {
-                get;
-                private set;
-            }
+			public Value.Float Distance
+			{
+				get;
+				private set;
+			}
 
-            [Name(value = "ディレイ", language = Language.Japanese)]
-            [Description(language = Language.Japanese, value = "生成から再生開始までのフレーム数")]
+			[Name(value = "ディレイ", language = Language.Japanese)]
+			[Description(language = Language.Japanese, value = "生成から再生開始までのフレーム数")]
 			[Name(value = "Delay", language = Language.English)]
 			[Description(language = Language.English, value = "Duration in frames between when the instance is spawned, and when the sound plays")]
-            public Value.IntWithRandom Delay
-            {
-                get;
-                private set;
-            }
+			public Value.IntWithRandom Delay
+			{
+				get;
+				private set;
+			}
 
-            internal SoundParamater()
+			internal SoundParamater()
 			{
 				Wave = new Value.PathForSound(Resources.GetString("SoundFilter"), true, "");
-                Volume = new Value.FloatWithRandom(1.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.1f);
-                Pitch = new Value.FloatWithRandom(0.0f, 2.0f, -2.0f, DrawnAs.CenterAndAmplitude, 0.1f);
-                PanType = new Value.Enum<ParamaterPanType>(ParamaterPanType.Sound2D);
-                Pan = new Value.FloatWithRandom(0.0f, 1.0f, -1.0f, DrawnAs.CenterAndAmplitude, 0.1f);
-                Distance = new Value.Float(10.0f);
-                Delay = new Value.IntWithRandom(0, int.MaxValue, 0);
+				Volume = new Value.FloatWithRandom(1.0f, 1.0f, 0.0f, DrawnAs.CenterAndAmplitude, 0.1f);
+				Pitch = new Value.FloatWithRandom(0.0f, 2.0f, -2.0f, DrawnAs.CenterAndAmplitude, 0.1f);
+				PanType = new Value.Enum<ParamaterPanType>(ParamaterPanType.Sound2D);
+				Pan = new Value.FloatWithRandom(0.0f, 1.0f, -1.0f, DrawnAs.CenterAndAmplitude, 0.1f);
+				Distance = new Value.Float(10.0f);
+				Delay = new Value.IntWithRandom(0, int.MaxValue, 0);
 			}
-        }
+		}
 
-        public enum ParamaterPanType : int
-        {
-            [Name(value = "2D", language = Language.Japanese)]
+		public enum ParamaterPanType : int
+		{
+			[Name(value = "2D", language = Language.Japanese)]
 			[Name(value = "2D", language = Language.English)]
-            Sound2D = 0,
-            [Name(value = "3D", language = Language.Japanese)]
+			Sound2D = 0,
+			[Name(value = "3D", language = Language.Japanese)]
 			[Name(value = "3D", language = Language.English)]
-            Sound3D = 1,
-        }
+			Sound3D = 1,
+		}
 
-        public enum ParamaterType : int
-        {
-            [Name(value = "無し", language = Language.Japanese)]
+		public enum ParamaterType : int
+		{
+			[Name(value = "無し", language = Language.Japanese)]
 			[Name(value = "Disabled", language = Language.English)]
-            None = 0,
-            [Name(value = "有り", language = Language.Japanese)]
+			None = 0,
+			[Name(value = "有り", language = Language.Japanese)]
 			[Name(value = "Enabled", language = Language.English)]
-            Use = 1,
-        }
+			Use = 1,
+		}
 	}
 }
 
@@ -13624,7 +13626,7 @@ namespace EffekseerTool.Data.Value
 					_value = new_value;
 
 					if (OnChanged != null)
-					{ 
+					{
 						OnChanged(this, new ChangedValueEventArgs(new_value, ChangedValueType.Execute));
 					}
 				},
@@ -13699,11 +13701,14 @@ namespace EffekseerTool.Data.Value
 
 		public bool IsValueChangedFromDefault
 		{
-			get { return 
-					R.IsValueChangedFromDefault || 
-					G.IsValueChangedFromDefault || 
-					B.IsValueChangedFromDefault || 
-					A.IsValueChangedFromDefault; }
+			get
+			{
+				return
+				  R.IsValueChangedFromDefault ||
+				  G.IsValueChangedFromDefault ||
+				  B.IsValueChangedFromDefault ||
+				  A.IsValueChangedFromDefault;
+			}
 		}
 
 		internal ColorSpace DefaultColorSpace { get; private set; }
@@ -13842,7 +13847,7 @@ namespace EffekseerTool.Data.Value
 
 		public static implicit operator byte[](Color value)
 		{
-			if(value.ColorSpace == ColorSpace.RGBA)
+			if (value.ColorSpace == ColorSpace.RGBA)
 			{
 				byte[] values = new byte[sizeof(byte) * 4] { (byte)value.R, (byte)value.G, (byte)value.B, (byte)value.A };
 				return values;
@@ -13908,7 +13913,7 @@ namespace EffekseerTool.Data.Value
 			get;
 			set;
 		}
-		
+
 		private ColorSpace _colorSpace;
 		public ColorSpace ColorSpace
 		{
@@ -13920,13 +13925,16 @@ namespace EffekseerTool.Data.Value
 
 		public bool IsValueChangedFromDefault
 		{
-			get { return 
-					R.IsValueChangedFromDefault ||
-					G.IsValueChangedFromDefault || 
-					B.IsValueChangedFromDefault || 
-					A.IsValueChangedFromDefault || 
-					DrawnAs != DefaultDrawnAs || 
-					ColorSpace != DefaultColorSpace; }
+			get
+			{
+				return
+				  R.IsValueChangedFromDefault ||
+				  G.IsValueChangedFromDefault ||
+				  B.IsValueChangedFromDefault ||
+				  A.IsValueChangedFromDefault ||
+				  DrawnAs != DefaultDrawnAs ||
+				  ColorSpace != DefaultColorSpace;
+			}
 		}
 
 		public ColorWithRandom Link
@@ -13945,7 +13953,7 @@ namespace EffekseerTool.Data.Value
 		{
 			ColorSpace oldval = ColorSpace;
 			ColorSpace newval = colorSpace;
-			
+
 			if (oldval == newval) return;
 
 			int old_min_r = R.GetMin();
@@ -14163,7 +14171,7 @@ namespace EffekseerTool.Data.Value
 
 			SetColorSpace(colorSpace, true, false);
 			CallChangedColorSpace(true, ChangedValueType.Execute);
-			
+
 			if (link && Link != null)
 			{
 				Link.ChangeColorSpace(colorSpace, false);
@@ -14416,22 +14424,22 @@ namespace EffekseerTool.Data.Value
 
 	public class FCurve<T> : IFCurve where T : struct, IComparable<T>, IEquatable<T>
 	{
-        float ToFloat(T v)
-        {
-            var o = (object)v;
+		float ToFloat(T v)
+		{
+			var o = (object)v;
 
-            if (o is float) return (float)o;
+			if (o is float) return (float)o;
 
-            if (v is int)
-            {
-                var b = (int)o;
-                return (float)b;
-            }
+			if (v is int)
+			{
+				var b = (int)o;
+				return (float)b;
+			}
 
-            throw new NotImplementedException();
-        }
+			throw new NotImplementedException();
+		}
 
-        public event ChangedValueEventHandler OnChanged;
+		public event ChangedValueEventHandler OnChanged;
 
 		List<FCurveKey<T>> keys = new List<FCurveKey<T>>();
 
@@ -14516,9 +14524,9 @@ namespace EffekseerTool.Data.Value
 
 			var old_value = keys;
 			var new_value = new List<FCurveKey<T>>();
-			new_value.AddRange(keys.Concat( new[] {key}));
+			new_value.AddRange(keys.Concat(new[] { key }));
 			SortKeys(new_value);
-			
+
 			var cmd = new Command.DelegateCommand(
 				() =>
 				{
@@ -14646,7 +14654,7 @@ namespace EffekseerTool.Data.Value
 						data.Add(BitConverter.GetBytes(v));
 					}
 				}
-				
+
 			}
 			else
 			{
@@ -14673,14 +14681,14 @@ namespace EffekseerTool.Data.Value
 			var end = EndType.Value;
 
 			int lInd = 0;
-			int rInd = (int)keys.Count- 1;
+			int rInd = (int)keys.Count - 1;
 
 			if (keys.Count == 0)
-            {
-                return ToFloat(DefaultValue);
-            }
+			{
+				return ToFloat(DefaultValue);
+			}
 
-            int length = keys[rInd].Frame - keys[lInd].Frame;
+			int length = keys[rInd].Frame - keys[lInd].Frame;
 
 			if (keys[rInd].Frame <= frame)
 			{
@@ -14931,7 +14939,7 @@ namespace EffekseerTool.Data.Value
 			var c2_ = 3.0f * (k1X - 2.0f * k1rhX + k2lhX);
 			var c1_ = 3.0f * (k1rhX - k1X);
 			var c0_ = k1X - frame;
-			
+
 			if (c3_ != 0.0)
 			{
 				var c2 = c2_ / c3_;
@@ -14939,7 +14947,7 @@ namespace EffekseerTool.Data.Value
 				var c0 = c0_ / c3_;
 
 				var p = c1 / 3.0f - c2 * c2 / (3.0f * 3.0f);
-				var q = (2.0f * c2 * c2 * c2 / (3.0f*3.0f*3.0f) - c2 / 3.0f * c1 + c0) / 2.0f;
+				var q = (2.0f * c2 * c2 * c2 / (3.0f * 3.0f * 3.0f) - c2 / 3.0f * c1 + c0) / 2.0f;
 				var p3q2 = q * q + p * p * p;
 
 				if (p3q2 > 0.0)
@@ -15097,22 +15105,22 @@ namespace EffekseerTool.Data.Value
 		float _right_x_temp = 0;
 		float _right_y_temp = 0;
 
-        float ToFloat(T v)
-        {
-            var o = (object)v;
+		float ToFloat(T v)
+		{
+			var o = (object)v;
 
-            if (o is float) return (float)o;
+			if (o is float) return (float)o;
 
-            if (v is int)
-            {
-                var b = (int)o;
-                return (float)b;
-            }
+			if (v is int)
+			{
+				var b = (int)o;
+				return (float)b;
+			}
 
-            throw new NotImplementedException();
-        }
+			throw new NotImplementedException();
+		}
 
-        public event Action<FCurveKey<T>> OnChangedKey;
+		public event Action<FCurveKey<T>> OnChangedKey;
 
 		public int Frame
 		{
@@ -15134,8 +15142,8 @@ namespace EffekseerTool.Data.Value
 		{
 			get
 			{
-                return ToFloat(_value_temp);
-            }
+				return ToFloat(_value_temp);
+			}
 		}
 
 		public float LeftX
@@ -15190,9 +15198,9 @@ namespace EffekseerTool.Data.Value
 		{
 			get
 			{
-                return ToFloat(_value);
+				return ToFloat(_value);
 
-            }
+			}
 		}
 
 		public float LeftXPrevious
@@ -15229,13 +15237,13 @@ namespace EffekseerTool.Data.Value
 
 		public void Commit(bool isCombined = false)
 		{
-			if (_frame == _frame_temp && 
+			if (_frame == _frame_temp &&
 				_value.Equals(_value_temp) &&
 				_left_x.Equals(_left_x_temp) &&
 				_left_y.Equals(_left_y_temp) &&
 				_right_x.Equals(_right_x_temp) &&
 				_right_y.Equals(_right_y_temp)) return;
-		
+
 			var old_frame = _frame;
 			var new_frame = _frame_temp;
 
@@ -15262,7 +15270,7 @@ namespace EffekseerTool.Data.Value
 					_left_y = new_left_y;
 					_right_x = new_right_x;
 					_right_y = new_right_y;
-					
+
 					_frame_temp = new_frame;
 					_value_temp = new_value;
 
@@ -15270,7 +15278,7 @@ namespace EffekseerTool.Data.Value
 					_left_y_temp = new_left_y;
 					_right_x_temp = new_right_x;
 					_right_y_temp = new_right_y;
-					
+
 
 					if (OnChanged != null)
 					{
@@ -15359,7 +15367,7 @@ namespace EffekseerTool.Data.Value
 
 			var valNow = ToFloat(_value_temp);
 			if (valNow == value) return;
-			
+
 			var dif = value - valNow;
 			_value_temp = (T)((object)value);
 
@@ -15391,7 +15399,7 @@ namespace EffekseerTool.Data.Value
 			var dyL = _left_y_temp - ToFloat(_value_temp);
 
 			if (dxR != 0)
-			{ 
+			{
 				var h = dyR / dxR;
 				_left_y_temp = _valueF + dxL * h;
 			}
@@ -15399,7 +15407,7 @@ namespace EffekseerTool.Data.Value
 			{
 				_left_x_temp = _frame_temp;
 			}
-			
+
 			if (OnChangedKey != null)
 			{
 				OnChangedKey(this);
@@ -15610,27 +15618,27 @@ namespace EffekseerTool.Data.Value
 
 namespace EffekseerTool.Data.Value
 {
-    public class FCurveScalar
-    {
-        public Value.Enum<FCurveTimelineMode> Timeline = new Enum<FCurveTimelineMode>();
-        public FCurve<float> S { get; private set; }
+	public class FCurveScalar
+	{
+		public Value.Enum<FCurveTimelineMode> Timeline = new Enum<FCurveTimelineMode>();
+		public FCurve<float> S { get; private set; }
 
-        public FCurveScalar(float MinValue = float.MinValue, float MaxValue = float.MaxValue)
-        {
-            Timeline = new Enum<FCurveTimelineMode>(FCurveTimelineMode.Percent);
-            S = new FCurve<float>(0);
-            S.DefaultValueRangeMin = MinValue;
-            S.DefaultValueRangeMax = MaxValue;
-        }
+		public FCurveScalar(float MinValue = float.MinValue, float MaxValue = float.MaxValue)
+		{
+			Timeline = new Enum<FCurveTimelineMode>(FCurveTimelineMode.Percent);
+			S = new FCurve<float>(0);
+			S.DefaultValueRangeMin = MinValue;
+			S.DefaultValueRangeMax = MaxValue;
+		}
 
-        public byte[] GetBytes(float mul = 1.0f)
-        {
-            List<byte[]> data = new List<byte[]>();
-            data.Add(BitConverter.GetBytes((int)Timeline.Value));
-            data.Add(S.GetBytes(mul));
-            return data.SelectMany(_ => _).ToArray();
-        }
-    }
+		public byte[] GetBytes(float mul = 1.0f)
+		{
+			List<byte[]> data = new List<byte[]>();
+			data.Add(BitConverter.GetBytes((int)Timeline.Value));
+			data.Add(S.GetBytes(mul));
+			return data.SelectMany(_ => _).ToArray();
+		}
+	}
 }
 
 namespace EffekseerTool.Data.Value
@@ -15695,7 +15703,7 @@ namespace EffekseerTool.Data.Value
 		float _value = 0;
 		float _max = float.MaxValue;
 		float _min = float.MinValue;
-		
+
 		public float Value
 		{
 			get
@@ -15850,10 +15858,10 @@ namespace EffekseerTool.Data.Value
 		float _value_center = 0;
 		float _value_max = 0;
 		float _value_min = 0;
-		
+
 		float _max = float.MaxValue;
 		float _min = float.MinValue;
-		
+
 		public float Center
 		{
 			get
@@ -16006,7 +16014,7 @@ namespace EffekseerTool.Data.Value
 			float old_center = _value_center;
 			float new_center = value;
 			float old_max = _value_max;
-			float new_max = Math.Min(value + a, _max );
+			float new_max = Math.Min(value + a, _max);
 			float old_min = _value_min;
 			float new_min = Math.Max(value - a, _min);
 
@@ -16195,7 +16203,7 @@ namespace EffekseerTool.Data.Value
 		int _value = 0;
 		int _max = int.MaxValue;
 		int _min = int.MinValue;
-		
+
 		public int Min
 		{
 			get
@@ -16224,7 +16232,7 @@ namespace EffekseerTool.Data.Value
 				SetValue(value);
 			}
 		}
-		
+
 		/// <summary>
 		/// 変更単位量
 		/// </summary>
@@ -16253,7 +16261,7 @@ namespace EffekseerTool.Data.Value
 			get { return Value != DefaultValue; }
 		}
 
-		internal Int(int value = 0, int max = int.MaxValue, int min = int.MinValue, int step = 1 )
+		internal Int(int value = 0, int max = int.MaxValue, int min = int.MinValue, int step = 1)
 		{
 			_max = max;
 			_min = min;
@@ -16384,10 +16392,10 @@ namespace EffekseerTool.Data.Value
 		int _value_center = 0;
 		int _value_max = 0;
 		int _value_min = 0;
-		
+
 		int _max = int.MaxValue;
 		int _min = int.MinValue;
-		
+
 		public int Center
 		{
 			get
@@ -16539,7 +16547,7 @@ namespace EffekseerTool.Data.Value
 			int old_center = _value_center;
 			int new_center = value;
 			int old_max = _value_max;
-			int new_max = Math.Min(value + a, _max );
+			int new_max = Math.Min(value + a, _max);
 			int old_min = _value_min;
 			int new_min = Math.Max(value - a, _min);
 
@@ -16836,7 +16844,7 @@ namespace EffekseerTool.Data.Value
 			}
 			catch (Exception e)
 			{
-				throw new Exception(e.ToString() + " Core.FullPath = " + Core.FullPath );
+				throw new Exception(e.ToString() + " Core.FullPath = " + Core.FullPath);
 			}
 		}
 
@@ -17198,22 +17206,22 @@ namespace EffekseerTool.Data.Value
 			Y = new FloatWithRandom(y, y_max, y_min, drawnas, y_step);
 			DrawnAs = drawnas;
 			DefaultDrawnAs = DrawnAs;
-        }
+		}
 
-        public byte[] GetBytes(float mul = 1.0f)
-        {
-            byte[] values = new byte[sizeof(float) * 4];
-            BitConverter.GetBytes(X.Max * mul).CopyTo(values, sizeof(float) * 0);
-            BitConverter.GetBytes(Y.Max * mul).CopyTo(values, sizeof(float) * 1);
-            BitConverter.GetBytes(X.Min * mul).CopyTo(values, sizeof(float) * 2);
-            BitConverter.GetBytes(Y.Min * mul).CopyTo(values, sizeof(float) * 3);
-            return values;
-        }
+		public byte[] GetBytes(float mul = 1.0f)
+		{
+			byte[] values = new byte[sizeof(float) * 4];
+			BitConverter.GetBytes(X.Max * mul).CopyTo(values, sizeof(float) * 0);
+			BitConverter.GetBytes(Y.Max * mul).CopyTo(values, sizeof(float) * 1);
+			BitConverter.GetBytes(X.Min * mul).CopyTo(values, sizeof(float) * 2);
+			BitConverter.GetBytes(Y.Min * mul).CopyTo(values, sizeof(float) * 3);
+			return values;
+		}
 
-        public static explicit operator byte[](Vector2DWithRandom value)
-        {
-            return value.GetBytes();
-        }
+		public static explicit operator byte[](Vector2DWithRandom value)
+		{
+			return value.GetBytes();
+		}
 	}
 }
 
@@ -17350,7 +17358,7 @@ namespace EffekseerTool.Data.Value
 			get;
 			private set;
 		}
-		
+
 		public DynamicEquationReference DynamicEquationMin
 		{
 			get;
@@ -17395,7 +17403,7 @@ namespace EffekseerTool.Data.Value
 			DefaultDrawnAs = DrawnAs;
 		}
 
-		public byte[] GetBytes( float mul = 1.0f)
+		public byte[] GetBytes(float mul = 1.0f)
 		{
 			byte[] values = new byte[sizeof(float) * 6];
 			BitConverter.GetBytes(X.Max * mul).CopyTo(values, sizeof(float) * 0);
@@ -17509,7 +17517,7 @@ namespace EffekseerTool.Data.Value
 			W.ChangeDefaultValue(w);
 		}
 
-		public static explicit operator byte[] (Vector4D value)
+		public static explicit operator byte[](Vector4D value)
 		{
 			byte[] values = new byte[sizeof(float) * 4];
 			byte[] x = BitConverter.GetBytes(value.X.GetValue());
@@ -17615,7 +17623,7 @@ namespace EffekseerTool.Utl
 		{
 			int length = 0;
 
-			if(bufLenSize == 4)
+			if (bufLenSize == 4)
 			{
 				int length4 = 0;
 				Get(ref length4);
@@ -17779,7 +17787,7 @@ namespace EffekseerTool.Utl
 
 			var platformCount = BitConverter.ToInt32(buf, 16);
 
-			for(int i = 0; i < platformCount; i++)
+			for (int i = 0; i < platformCount; i++)
 			{
 				if (br.Read(buf, 0, 4) != 4)
 				{
@@ -17829,7 +17837,7 @@ namespace EffekseerTool.Utl
 
 			byte[] file = null;
 
-			if(Core.OnFileLoaded != null)
+			if (Core.OnFileLoaded != null)
 			{
 				file = Core.OnFileLoaded(path);
 				if (file == null) return false;
@@ -17857,7 +17865,7 @@ namespace EffekseerTool.Utl
 				return false;
 			}
 
-			if(buf[0] != 'E' ||
+			if (buf[0] != 'E' ||
 				buf[1] != 'F' ||
 				buf[2] != 'K' ||
 				buf[3] != 'M')
@@ -18103,7 +18111,7 @@ namespace EffekseerTool.Utl
 						reader.Get(ref CustomData[j].DefaultValues[3]);
 					}
 				}
-				
+
 				if (buf[0] == 'G' &&
 				buf[1] == 'E' &&
 				buf[2] == 'N' &&
@@ -18181,12 +18189,12 @@ namespace EffekseerTool.Utl
 		/// <param name="a2">終点の角度(度)</param>
 		/// <returns></returns>
 		public static float[] Easing(float a1, float a2)
-		{ 
-			float g1 = (float)Math.Tan( ((float)a1 + 45.0) / 180.0 * Math.PI );
-			float g2 = (float)Math.Tan( ((float)a2 + 45.0) / 180.0 * Math.PI );
+		{
+			float g1 = (float)Math.Tan(((float)a1 + 45.0) / 180.0 * Math.PI);
+			float g2 = (float)Math.Tan(((float)a2 + 45.0) / 180.0 * Math.PI);
 
 			float c = g1;
-			float a = g2 - g1 - ( 1.0f - c ) * 2.0f;
+			float a = g2 - g1 - (1.0f - c) * 2.0f;
 			float b = (g2 - g1 - (a * 3.0f)) / 2.0f;
 
 			return new float[3] { a, b, c };
@@ -18260,8 +18268,8 @@ namespace EffekseerTool.Utl
 			if (br.Read(buf, 0, 8) != 8)
 			{
 				fs.Dispose();
-                br.Close();
-                return false;
+				br.Close();
+				return false;
 			}
 
 			var version = BitConverter.ToInt32(buf, 0);
@@ -18270,11 +18278,11 @@ namespace EffekseerTool.Utl
 			{
 				Scale = BitConverter.ToSingle(buf, 4);
 				fs.Dispose();
-                br.Close();
-                return false;
+				br.Close();
+				return false;
 			}
 
-			if(version == 3)
+			if (version == 3)
 			{
 				fs.Seek(-4, System.IO.SeekOrigin.End);
 
@@ -18285,8 +18293,8 @@ namespace EffekseerTool.Utl
 				else
 				{
 					fs.Dispose();
-                    br.Close();
-                    return false;
+					br.Close();
+					return false;
 				}
 			}
 
@@ -18294,14 +18302,14 @@ namespace EffekseerTool.Utl
 			{
 				Scale = BitConverter.ToSingle(buf, 4);
 				fs.Dispose();
-                br.Close();
-                return true;
+				br.Close();
+				return true;
 			}
 
 			fs.Dispose();
-            br.Close();
+			br.Close();
 
-            return true;
+			return true;
 		}
 	}
 }
@@ -18315,7 +18323,7 @@ namespace EffekseerTool.Utl
 	{
 		public Data.NodeBase Node { get; private set; }
 
-		public Tuple35<string,object>[] Parameters { get; private set; }
+		public Tuple35<string, object>[] Parameters { get; private set; }
 
 		public ParameterTreeNode[] Children { get; private set; }
 
@@ -18442,17 +18450,17 @@ namespace EffekseerTool.Utl
 		public int Height { get; private set; }
 
 		public TextureInformation()
-		{ 
-		
+		{
+
 		}
 
 		public bool Load(string path)
-		{ 
+		{
 
 			System.IO.FileStream fs = null;
-            if (!System.IO.File.Exists(path)) return false;
+			if (!System.IO.File.Exists(path)) return false;
 
-            try
+			try
 			{
 				fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
 			}
@@ -18486,8 +18494,8 @@ namespace EffekseerTool.Utl
 				if (br.Read(buf, 0, 25) != 25)
 				{
 					fs.Dispose();
-                    br.Close();
-                    return false;
+					br.Close();
+					return false;
 				}
 
 				var width = new byte[] { buf[11], buf[10], buf[9], buf[8] };
@@ -18501,8 +18509,8 @@ namespace EffekseerTool.Utl
 				if (br.Read(buf, 0, 25) != 25)
 				{
 					fs.Dispose();
-                    br.Close();
-                    return false;
+					br.Close();
+					return false;
 				}
 
 				Width = BitConverter.ToInt32(buf, 8);
@@ -18511,13 +18519,13 @@ namespace EffekseerTool.Utl
 			else
 			{
 				fs.Dispose();
-                br.Close();
-                return false;
+				br.Close();
+				return false;
 			}
 
 			fs.Dispose();
-            br.Close();
-            return true;
+			br.Close();
+			return true;
 		}
 	}
 }
@@ -18785,7 +18793,7 @@ namespace EffekseerTool.Utils
 				return csv[i] == '"';
 			};
 
-			Func<int, bool> isNextDQ = (int i) => 
+			Func<int, bool> isNextDQ = (int i) =>
 			{
 				if (i >= csv.Length - 1) return false;
 				return csv[i + 1] == '"';
@@ -18800,7 +18808,7 @@ namespace EffekseerTool.Utils
 			{
 				if (isCurrentDQ(i))
 				{
-					if(isStarting)
+					if (isStarting)
 					{
 						inDQ = true;
 					}
@@ -18873,7 +18881,7 @@ namespace EffekseerTool.Utils
 				}
 			}
 
-			if(sb.Length > 0 || rows.Count > 0)
+			if (sb.Length > 0 || rows.Count > 0)
 			{
 				rows.Add(sb.ToString());
 				columns.Add(rows);
@@ -18904,7 +18912,7 @@ namespace EffekseerTool.Utils
 					}
 				}
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Console.WriteLine(e.ToString());
 			}
@@ -18963,7 +18971,7 @@ namespace EffekseerTool.Utils
 	internal class ResourceCache
 	{
 		Dictionary<string, Utl.MaterialInformation> materials = new Dictionary<string, Utl.MaterialInformation>();
-	
+
 		public Utl.MaterialInformation LoadMaterialInformation(string path)
 		{
 			path = path.Replace('\\', '/');
@@ -18972,7 +18980,7 @@ namespace EffekseerTool.Utils
 
 			var info = new Utl.MaterialInformation();
 
-			if(info.Load(path))
+			if (info.Load(path))
 			{
 				materials.Add(path, info);
 			}
@@ -19439,7 +19447,7 @@ namespace EffekseerTool.IO
 			chunk.AddChunk("BIN_", binaryDataLatest);
 
 			// fallback
-			if(Binary.ExporterVersion.Latest > Binary.ExporterVersion.Ver1500)
+			if (Binary.ExporterVersion.Latest > Binary.ExporterVersion.Ver1500)
 			{
 				var binaryExporterFallback = new Binary.Exporter();
 				var binaryDataFallback = binaryExporterFallback.Export(1, Binary.ExporterVersion.Ver1500);
@@ -19454,21 +19462,21 @@ namespace EffekseerTool.IO
 			{
 				System.IO.File.WriteAllBytes(path, allData);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				string messeage = "";
 				if (Core.Language == Language.English)
 				{
 					messeage = "Failed to save a file " + path + "\nThis error is \n";
 				}
-				else	
+				else
 				{
 					messeage = "保存に失敗しました。 " + path + "\nエラーは \n";
 				}
 
 				messeage += e.ToString();
 
-				if(Core.OnOutputMessage != null)
+				if (Core.OnOutputMessage != null)
 				{
 					Core.OnOutputMessage(messeage);
 				}
@@ -19570,8 +19578,8 @@ namespace EffekseerTool.InternalScript
 		{
 			CompileResult compileResult = new CompileResult();
 			runningPhase = RunningPhaseType.Global;
-			
-			if(string.IsNullOrEmpty(code))
+
+			if (string.IsNullOrEmpty(code))
 			{
 				return compileResult;
 			}
@@ -19589,9 +19597,9 @@ namespace EffekseerTool.InternalScript
 
 				var ssaGenerator = new SSAGenerator();
 				ssaGenerator.Eval(sentense);
-				var outputAttribute =ssaGenerator.RootTable.Tables["@O"].Value;
+				var outputAttribute = ssaGenerator.RootTable.Tables["@O"].Value;
 				var outputValues = new SSAGenerator.Value[4];
-				if(outputAttribute is SSAGenerator.Value)
+				if (outputAttribute is SSAGenerator.Value)
 				{
 					outputValues[0] = outputAttribute as SSAGenerator.Value;
 					outputValues[1] = outputAttribute as SSAGenerator.Value;
@@ -19611,9 +19619,9 @@ namespace EffekseerTool.InternalScript
 				var registerOffset = 0;
 				var validNodeCount = 0;
 
-				foreach(var node in nodes)
+				foreach (var node in nodes)
 				{
-					if(node is SSAGenerator.NodePredefined)
+					if (node is SSAGenerator.NodePredefined)
 					{
 						var node_ = node as SSAGenerator.NodePredefined;
 						foreach (var v in node.Outputs)
@@ -19623,7 +19631,7 @@ namespace EffekseerTool.InternalScript
 					}
 					else
 					{
-						foreach(var v in node.Outputs)
+						foreach (var v in node.Outputs)
 						{
 							v.RegisterIndex = registerOffset;
 							registerOffset += 1;
@@ -19637,7 +19645,7 @@ namespace EffekseerTool.InternalScript
 
 				foreach (var node in nodes)
 				{
-					if(node is SSAGenerator.NodeConstantNumber)
+					if (node is SSAGenerator.NodeConstantNumber)
 					{
 						var node_ = node as SSAGenerator.NodeConstantNumber;
 
@@ -19666,7 +19674,7 @@ namespace EffekseerTool.InternalScript
 					{
 						var node_ = node as SSAGenerator.NodeOperator;
 
-						if(node_.Type == OperatorType.Rand)
+						if (node_.Type == OperatorType.Rand)
 						{
 							runningPhase = RunningPhaseType.Local;
 						}
@@ -19712,7 +19720,7 @@ namespace EffekseerTool.InternalScript
 
 		string GetOutputName(Expression expr)
 		{
-			if(expr is LabelExpression)
+			if (expr is LabelExpression)
 			{
 				var e = expr as LabelExpression;
 				return e.Value;
@@ -19806,7 +19814,7 @@ namespace EffekseerTool.InternalScript
 		}
 	}
 
-	public class InvalidOperationException :CompileException
+	public class InvalidOperationException : CompileException
 	{
 		public InvalidOperationException(int line)
 			: base("", line)
@@ -19923,21 +19931,21 @@ namespace EffekseerTool.InternalScript
 
 			// check special case
 			// ..
-			if(code.Contains(".."))
+			if (code.Contains(".."))
 			{
 				throw new InvalidTokenException(".", code.IndexOf(".."));
 			}
 
 			int index = 0;
-		
+
 			while (index < code.Length)
 			{
 				var c = code[index];
 				var type = GetElemenetType(c);
 
-				if(type == ElementType.Connect)
+				if (type == ElementType.Connect)
 				{
-					if(index + 1 < code.Length && GetElemenetType(code[index]) == ElementType.NewLine)
+					if (index + 1 < code.Length && GetElemenetType(code[index]) == ElementType.NewLine)
 					{
 						index += 2;
 					}
@@ -19946,7 +19954,7 @@ namespace EffekseerTool.InternalScript
 						index += 1;
 					}
 				}
-				else if(type == ElementType.NewLine)
+				else if (type == ElementType.NewLine)
 				{
 					var token = new Token();
 					token.Type = TokenType.NewLine;
@@ -19969,7 +19977,7 @@ namespace EffekseerTool.InternalScript
 					var token = ParseDigit(code, ref index);
 					tokens.Add(token);
 				}
-				else if(type == ElementType.LeftParentheses)
+				else if (type == ElementType.LeftParentheses)
 				{
 					var token = new Token();
 					token.Type = TokenType.LeftParentheses;
@@ -20011,7 +20019,7 @@ namespace EffekseerTool.InternalScript
 				}
 				else
 				{
-					if(type == ElementType.Space)
+					if (type == ElementType.Space)
 					{
 						index++;
 					}
@@ -20060,7 +20068,7 @@ namespace EffekseerTool.InternalScript
 			token.Line = index;
 
 			string str = "";
-			
+
 			while (index < code.Length)
 			{
 				var c = code[index];
@@ -20128,7 +20136,7 @@ namespace EffekseerTool.InternalScript
 
 				if (type == ElementType.Dot)
 				{
-					if(hasDot)
+					if (hasDot)
 					{
 						throw new InvalidTokenException(".", index);
 					}
@@ -20138,7 +20146,7 @@ namespace EffekseerTool.InternalScript
 				str += c;
 				index++;
 			}
-			
+
 			try
 			{
 				token.Value = float.Parse(str);
@@ -20279,7 +20287,7 @@ namespace EffekseerTool.InternalScript
 			{
 				var empty = Peek();
 				if (empty == null) break;
-				if(empty.Type == TokenType.NewLine)
+				if (empty.Type == TokenType.NewLine)
 				{
 					Next();
 					continue;
@@ -20291,7 +20299,7 @@ namespace EffekseerTool.InternalScript
 
 				if (token != null)
 				{
-					if(token.Type == TokenType.Equal)
+					if (token.Type == TokenType.Equal)
 					{
 						Next();
 						var rhs = Expr();
@@ -20318,7 +20326,7 @@ namespace EffekseerTool.InternalScript
 		Expression Expr()
 		{
 			var lhs = Term();
-			
+
 			while (true)
 			{
 				var token = Peek();
@@ -20382,7 +20390,7 @@ namespace EffekseerTool.InternalScript
 		Expression Term()
 		{
 			var lhs = Group();
-			
+
 			while (true)
 			{
 				var token = Peek();
@@ -20448,7 +20456,7 @@ namespace EffekseerTool.InternalScript
 			var token = Peek();
 			Expression value = null;
 
-			if(token != null)
+			if (token != null)
 			{
 				if (token.Type == TokenType.LeftParentheses)
 				{
@@ -20505,18 +20513,18 @@ namespace EffekseerTool.InternalScript
 				throw new InvalidEOFException(tokens.LastOrDefault().Line);
 			}
 
-			while(true)
+			while (true)
 			{
 				var dotToken = Peek();
 
 				if (dotToken != null && dotToken.Type == TokenType.Dot)
 				{
 					var next = Next();
-					if(next == null)
+					if (next == null)
 					{
 						throw new InvalidEOFException(tokens.LastOrDefault().Line);
 					}
-					else if(next.Type != TokenType.Label)
+					else if (next.Type != TokenType.Label)
 					{
 						throw new InvalidTokenException(token.ToString(), token.Line);
 					}
@@ -20546,7 +20554,7 @@ namespace EffekseerTool.InternalScript
 			{
 				var next = Next();
 
-				if(next == null || next.Type != TokenType.LeftParentheses)
+				if (next == null || next.Type != TokenType.LeftParentheses)
 				{
 					var ret = new LabelExpression((string)token.Value);
 					ret.Line = token.Line;
@@ -20574,10 +20582,10 @@ namespace EffekseerTool.InternalScript
 
 			if (token != null)
 			{
-				while(true)
+				while (true)
 				{
 					var next = Next();
-					if(next.Type == TokenType.RightParentheses)
+					if (next.Type == TokenType.RightParentheses)
 					{
 						// empty arguments
 						Next();
@@ -20612,7 +20620,7 @@ namespace EffekseerTool.InternalScript
 
 		Token Peek()
 		{
-			if(tokens.Count() > index)
+			if (tokens.Count() > index)
 			{
 				return tokens[index];
 			}
@@ -20654,7 +20662,7 @@ namespace EffekseerTool.InternalScript
 			public OperatorType Type;
 		}
 
-		public class NodePredefined :Node
+		public class NodePredefined : Node
 		{
 			public string Value = string.Empty;
 
@@ -20803,7 +20811,7 @@ namespace EffekseerTool.InternalScript
 			if (expr.Value == "rand")
 			{
 				node.Type = OperatorType.Rand;
-				
+
 				if (expr.Args.Count() == 0)
 				{
 					node.Type = OperatorType.Rand;
@@ -20819,7 +20827,7 @@ namespace EffekseerTool.InternalScript
 			}
 
 			// input
-			for(int i = 0; i < expr.Args.Length; i++)
+			for (int i = 0; i < expr.Args.Length; i++)
 			{
 				var input = Eval(expr.Args[i], null);
 				if (input is Attribute)
@@ -21132,7 +21140,7 @@ namespace EffekseerTool.InternalScript
 				}
 			};
 
-			foreach(var value in values)
+			foreach (var value in values)
 			{
 				collectValues(value);
 			}
@@ -21145,9 +21153,9 @@ namespace EffekseerTool.InternalScript
 				var usedForInput = enabledNodes.SelectMany(_ => _.Inputs).ToArray();
 				var restValues = enabledValues.Where(_ => !usedForInput.Contains(_)).ToArray();
 
-				foreach(var value in restValues)
+				foreach (var value in restValues)
 				{
-					if(value.Generator != null)
+					if (value.Generator != null)
 					{
 						nodes.Add(value.Generator);
 					}
@@ -21201,14 +21209,14 @@ namespace EffekseerTool.InternalScript
 
 		public bool Validate(CompileResult result, Type type)
 		{
-			if(type == null)
+			if (type == null)
 			{
 				if (result.Error != null) throw result.Error;
 			}
 			else
 			{
 				if (result.Error == null) throw new Exception();
-				if(result.Error.GetType() != type) throw result.Error;
+				if (result.Error.GetType() != type) throw result.Error;
 			}
 			return true;
 		}
