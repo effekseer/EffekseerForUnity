@@ -35,7 +35,7 @@ namespace Effekseer.Editor
 
 		void InitSystem()
 		{
-			if (EffekseerEditor.instance.inEditor) {
+			if (EffekseerEditor.instance.inEditor && emitter.effectAsset != null) {
 				EffekseerEditor.instance.InitSystem();
 				EffekseerSystem.Instance.LoadEffect(emitter.effectAsset);
 				lastTime = EditorApplication.timeSinceStartup;
