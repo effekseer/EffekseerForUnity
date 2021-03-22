@@ -126,36 +126,17 @@ EffekseerRenderer::RendererRef GraphicsGL::CreateRenderer(int squareMaxCount, bo
 	return renderer;
 }
 
-void GraphicsGL::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture)
-{
-	((EffekseerRendererGL::Renderer*)renderer)->SetBackground((GLuint)(uintptr_t)backgroundTexture);
-}
-
-void GraphicsGL::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
-										   const Effekseer::Matrix44& projectionMatrix,
-										   void* depthTexture)
-{
-	if (depthTexture == nullptr)
-	{
-		renderer->SetDepth(nullptr, EffekseerRenderer::DepthReconstructionParameter{});
-		return;
-	}
-
-	EffekseerRenderer::DepthReconstructionParameter param;
-	param.DepthBufferScale = 1.0f;
-	param.DepthBufferOffset = 0.0f;
-	param.ProjectionMatrix33 = projectionMatrix.Values[2][2];
-	param.ProjectionMatrix43 = projectionMatrix.Values[2][3];
-	param.ProjectionMatrix34 = projectionMatrix.Values[3][2];
-	param.ProjectionMatrix44 = projectionMatrix.Values[3][3];
-
-	auto texture = EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)depthTexture, false, []() -> void {});
-	renderer->SetDepth(texture, param);
-}
-
 void GraphicsGL::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 {
-	renderSettings[renderId].externalTextures[static_cast<int>(type)] = texture;
+	if (texture != nullptr)
+	{
+		renderSettings[renderId].externalTextures[static_cast<int>(type)] =
+			EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)texture, false, []() -> void {});
+	}
+	else
+	{
+		renderSettings[renderId].externalTextures[static_cast<int>(type)].Reset();
+	}
 }
 
 Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)

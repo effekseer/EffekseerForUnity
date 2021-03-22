@@ -126,55 +126,34 @@ EffekseerRenderer::RendererRef GraphicsDX11::CreateRenderer(int squareMaxCount, 
 	return renderer;
 }
 
-void GraphicsDX11::SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture)
-{
-	((EffekseerRendererDX11::Renderer*)renderer)->SetBackground((ID3D11ShaderResourceView*)backgroundTexture);
-}
-
-void GraphicsDX11::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
-											 const Effekseer::Matrix44& projectionMatrix,
-											 void* depthTexture)
-{
-	if (depthTexture == nullptr)
-	{
-		renderer->SetDepth(nullptr, EffekseerRenderer::DepthReconstructionParameter{});
-		return;
-	}
-
-	EffekseerRenderer::DepthReconstructionParameter param;
-	param.DepthBufferScale = 1.0f;
-	param.DepthBufferOffset = 0.0f;
-	param.ProjectionMatrix33 = projectionMatrix.Values[2][2];
-	param.ProjectionMatrix43 = projectionMatrix.Values[2][3];
-	param.ProjectionMatrix34 = projectionMatrix.Values[3][2];
-	param.ProjectionMatrix44 = projectionMatrix.Values[3][3];
-
-	auto srv = static_cast<ID3D11ShaderResourceView*>(depthTexture);
-
-	auto texture = EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
-	renderer->SetDepth(texture, param);
-}
-
 void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 {
-	HRESULT hr;
+	auto original = renderSettings[renderId].externalTextures[static_cast<int>(type)];
+
+	const auto textureProp = EffekseerRendererDX11::GetTextureProperty(original);
 
 	// create ID3D11ShaderResourceView because a texture type is ID3D11Texture2D from Unity on DX11
 	ID3D11Texture2D* textureDX11 = (ID3D11Texture2D*)texture;
-	ID3D11ShaderResourceView* srv = (ID3D11ShaderResourceView*)renderSettings[renderId].externalTextures[static_cast<int>(type)];
+	ID3D11ShaderResourceView* srv = textureProp.ShaderResourceViewPtr;
 
-	if (srv != nullptr)
+	HRESULT hr;
+
+	if (original != nullptr)
 	{
 		ID3D11Resource* res = nullptr;
 		srv->GetResource(&res);
 		if (res != texture)
 		{
 			// if texture is not same, delete it
-			srv->Release();
-			srv = nullptr;
-			renderSettings[renderId].externalTextures[static_cast<int>(type)] = nullptr;
+			renderSettings[renderId].externalTextures[static_cast<int>(type)].Reset();
+			ES_SAFE_RELEASE(res);
 		}
-		ES_SAFE_RELEASE(res);
+		else
+		{
+			// not changed
+			ES_SAFE_RELEASE(res);
+			return;
+		}
 	}
 
 	if (srv == nullptr && texture != nullptr)
@@ -206,7 +185,9 @@ void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, vo
 		hr = d3d11Device->CreateShaderResourceView(textureDX11, &desc, &srv);
 		if (SUCCEEDED(hr))
 		{
-			renderSettings[renderId].externalTextures[static_cast<int>(type)] = srv;
+			renderSettings[renderId].externalTextures[static_cast<int>(type)] =
+				EffekseerRendererDX11::CreateTexture(graphicsDevice_, srv, nullptr, nullptr);
+			ES_SAFE_RELEASE(srv);
 		}
 	}
 }

@@ -45,11 +45,12 @@ const int MAX_RENDER_PATH = 128;
 
 struct RenderSettings
 {
+	int32_t id = 0;
 	int32_t cameraCullingMask = 1;
 	Effekseer::Matrix44 cameraMatrix;
 	Effekseer::Matrix44 projectionMatrix;
 	bool renderIntoTexture = false;
-	std::array<void*, static_cast<int>(ExternalTextureType::Max)> externalTextures;
+	std::array<Effekseer::Backend::TextureRef, static_cast<int>(ExternalTextureType::Max)> externalTextures;
 
 	bool stereoEnabled = false;
 	int stereoRenderCount = 1;
@@ -58,6 +59,11 @@ struct RenderSettings
 	Effekseer::Matrix44 leftProjectionMatrix;
 	Effekseer::Matrix44 rightCameraMatrix;
 	Effekseer::Matrix44 rightProjectionMatrix;
+
+	Effekseer::Backend::TextureFormatType renderTargetType = Effekseer::Backend::TextureFormatType::R8G8B8A8_UNORM;
+	Effekseer::Backend::TextureFormatType depthTargetType = Effekseer::Backend::TextureFormatType::D32S8;
+	int32_t screenWidth = 0;
+	int32_t screenHeight = 0;
 
 	RenderSettings() { externalTextures.fill(nullptr); }
 };

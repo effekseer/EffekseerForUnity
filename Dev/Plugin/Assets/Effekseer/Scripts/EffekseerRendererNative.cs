@@ -415,6 +415,8 @@ namespace Effekseer.Internal
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, stereoRenderingType);
 			}
 
+			var screenSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
+
 			path.LifeTime = 60;
 			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
 
@@ -467,6 +469,9 @@ namespace Effekseer.Internal
 			{
 				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, IntPtr.Zero);
 			}
+
+			// TODO : specify correct texture formats
+			Plugin.EffekseerSetRenderTargetProperty(path.renderId, TextureFormatType.R8G8B8A8_UNORM, TextureFormatType.D32S8, screenSize.x, screenSize.y);
 
 			SpecifyRenderingMatrix(camera, path);
 		}

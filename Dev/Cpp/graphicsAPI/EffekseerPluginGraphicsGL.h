@@ -37,12 +37,6 @@ public:
 
 	EffekseerRenderer::RendererRef CreateRenderer(int squareMaxCount, bool reversedDepth) override;
 
-	void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) override;
-
-	void SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
-								   const Effekseer::Matrix44& projectionMatrix,
-								   void* depthTexture) override;
-
 	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
 
 	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
