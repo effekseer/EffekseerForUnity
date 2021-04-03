@@ -1,6 +1,8 @@
 ﻿
 #pragma once
 
+#include "EffekseerPluginGraphicsLLGI.h"
+
 #include <EffekseerRendererDX12/EffekseerRendererDX12.h>
 
 #include "../unity/IUnityGraphicsD3D12.h"
@@ -10,29 +12,20 @@
 namespace EffekseerPlugin
 {
 
-class RenderPassDX12 : public RenderPass
+class RenderPassDX12 : public RenderPassLLGI
 {
 	IUnityInterfaces* unityInterface_ = nullptr;
 	EffekseerRenderer::RendererRef renderer_;
-	Effekseer::RefPtr<EffekseerRenderer::CommandList> commandList_ = nullptr;
-	Effekseer::RefPtr<EffekseerRenderer::SingleFrameMemoryPool> memoryPool_ = nullptr;
 
 public:
-	bool
-	Initialize(IUnityInterfaces* unityInterface, EffekseerRenderer::RendererRef renderer, Effekseer::Backend::GraphicsDeviceRef device);
-
 	virtual ~RenderPassDX12() override = default;
 
 	void Begin(RenderSettings& setting, RenderPass* backRenderPass) override;
 
 	void End(RenderSettings& setting) override;
-
-	void Execute(RenderSettings& setting) override;
-
-	Effekseer::RefPtr<EffekseerRenderer::CommandList> GetCommandList() { return commandList_; }
 };
 
-class GraphicsDX12 : public Graphics
+class GraphicsDX12 : public GraphicsLLGI
 {
 private:
 	ID3D12Device* device_ = nullptr;
@@ -56,19 +49,7 @@ public:
 
 	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
 
-	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
-
-	Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
-
-	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
-
-	void ShiftViewportForStereoSinglePass(bool isShift) override;
-
 	RenderPass* CreateRenderPass() override;
-
-	void SetRenderPath(EffekseerRenderer::Renderer* renderer, RenderPass* renderPath) override;
-
-	void WaitFinish() override;
 };
 
 } // namespace EffekseerPlugin

@@ -8,6 +8,8 @@ project(EffekseerUnity  LANGUAGES C CXX)
 
 include(ExternalProject)
 
+option(BUILD_DX12 "Build DirectX12" OFF)
+
 # Flags
 if (WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -61,12 +63,20 @@ set(effekseer_gl_src
 )
 
 if(WIN32)
-
-    add_library(EffekseerUnity SHARED
+    set(srcs
+        windows/EffekseerUnity.def
+        graphicsAPI/EffekseerPluginGraphicsLLGI.h
+        graphicsAPI/EffekseerPluginGraphicsLLGI.cpp
         ${effekseer_src}
         ${effekseer_dx11_src}
-        ${effekseer_gl_src}
-        windows/EffekseerUnity.def
+        ${effekseer_gl_src})
+
+    if(BUILD_DX12)
+        list(APPEND srcs ${effekseer_dx12_src})
+    endif()
+
+    add_library(EffekseerUnity SHARED
+        ${srcs}
     )
 
     target_link_libraries(EffekseerUnity PRIVATE
@@ -80,26 +90,11 @@ if(WIN32)
 
     add_dependencies(EffekseerUnity ExternalProject_effekseer)
 
-    add_library(EffekseerUnityDX12 SHARED
-        ${effekseer_src}
-        ${effekseer_gl_src}
-        ${effekseer_dx11_src}
-        ${effekseer_dx12_src}
-        windows/EffekseerUnity.def
-    )
-
-    target_link_libraries(EffekseerUnityDX12 PRIVATE
-        Effekseer
-        EffekseerRendererGL
-        EffekseerRendererDX11
-        EffekseerRendererDX12
-        LLGI)
-
-    target_compile_definitions(EffekseerUnityDX12 PRIVATE __EFFEKSEER_FROM_MAIN_CMAKE__)
-    target_compile_definitions(EffekseerUnityDX12 PRIVATE _DX12)
-    target_include_directories(EffekseerUnityDX12 PRIVATE ${EFK_INCLUDES})
-    target_link_directories(EffekseerUnityDX12 PRIVATE ${EFK_LIBRARY_DIRECTORIES})
-
-    add_dependencies(EffekseerUnity ExternalProject_effekseer)
+    if(BUILD_DX12)
+        target_link_libraries(EffekseerUnity PRIVATE
+            EffekseerRendererDX12
+            LLGI)
+        target_compile_definitions(EffekseerUnity PRIVATE _DX12)
+    endif()
 endif()
 
