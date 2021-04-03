@@ -512,6 +512,12 @@ namespace Effekseer
 				Plugin.EffekseerUnloadResources(pair.Value);
 			}
 			nativeEffects.Clear();
+#else
+			foreach (var pair in nativeEffects)
+			{
+				Plugin.EffekseerUnloadResources(pair.Value);
+			}
+			nativeEffects.Clear();
 #endif
 			renderer.CleanUp();
 			renderer.SetVisible(false);
