@@ -65,14 +65,15 @@ set(effekseer_gl_src
 if(WIN32)
     set(srcs
         windows/EffekseerUnity.def
-        graphicsAPI/EffekseerPluginGraphicsLLGI.h
-        graphicsAPI/EffekseerPluginGraphicsLLGI.cpp
         ${effekseer_src}
         ${effekseer_dx11_src}
         ${effekseer_gl_src})
 
     if(BUILD_DX12)
-        list(APPEND srcs ${effekseer_dx12_src})
+        list(APPEND srcs 
+        graphicsAPI/EffekseerPluginGraphicsLLGI.h
+        graphicsAPI/EffekseerPluginGraphicsLLGI.cpp
+        ${effekseer_dx12_src})
     endif()
 
     add_library(EffekseerUnity SHARED
