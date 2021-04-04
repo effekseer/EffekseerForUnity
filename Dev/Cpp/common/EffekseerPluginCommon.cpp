@@ -538,6 +538,21 @@ extern "C"
 		}
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetRenderTargetProperty(int renderId,
+																					 Effekseer::Backend::TextureFormatType renderTarget,
+																					 Effekseer::Backend::TextureFormatType depthTarget,
+																					 int width,
+																					 int height)
+	{
+		if (renderId >= 0 && renderId < MAX_RENDER_PATH)
+		{
+			renderSettings[renderId].renderTargetType = renderTarget;
+			renderSettings[renderId].depthTargetType = depthTarget;
+			renderSettings[renderId].screenWidth = width;
+			renderSettings[renderId].screenHeight = height;
+		}
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetTextureLoaderEvent(
 		TextureLoaderLoad load,
 		TextureLoaderUnload unload)

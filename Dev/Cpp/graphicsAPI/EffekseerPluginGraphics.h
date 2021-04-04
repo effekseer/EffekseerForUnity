@@ -27,9 +27,9 @@ public:
 	virtual ~RenderPass() = default;
 
 	//! if this renderpass is front, back render pass is sent as an argument
-	virtual void Begin(RenderPass* backRenderPass) {}
-	virtual void End() {}
-	virtual void Execute() {}
+	virtual void Begin(RenderSettings& setting, RenderPass* backRenderPass) {}
+	virtual void End(RenderSettings& setting) {}
+	virtual void Execute(RenderSettings& setting) {}
 };
 
 class Graphics
@@ -51,9 +51,11 @@ public:
 
 	virtual Effekseer::RefPtr<EffekseerRenderer::Renderer> CreateRenderer(int squareMaxCount, bool reversedDepth) = 0;
 
-	virtual void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, void* backgroundTexture) = 0;
+	void SetBackGroundTextureToRenderer(EffekseerRenderer::Renderer* renderer, Effekseer::Backend::TextureRef backgroundTexture);
 
-	virtual void SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer, const Effekseer::Matrix44& projectionMatrix, void* depthTexture) {}
+	void SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
+								   const Effekseer::Matrix44& projectionMatrix,
+								   Effekseer::Backend::TextureRef depthTexture);
 
 	virtual void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) = 0;
 
@@ -64,7 +66,7 @@ public:
 	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
 
 	virtual Effekseer::ProceduralModelGeneratorRef Create(ProceduralModelGeneratorGenerate generate,
-														 ProceduralModelGeneratorUngenerate ungenerate)
+														  ProceduralModelGeneratorUngenerate ungenerate)
 	{
 		return nullptr;
 	}

@@ -22,6 +22,46 @@ namespace Effekseer
 		{
 			return time * 60.0f;
 		}
+
+		public static TextureFormatType ConvertFormat(RenderTextureFormat format)
+		{
+			if (format == RenderTextureFormat.ARGB32)
+			{
+				return TextureFormatType.R8G8B8A8_UNORM;
+			}
+			else if (format == RenderTextureFormat.ARGBHalf)
+			{
+				return TextureFormatType.R16G16B16A16_FLOAT;
+			}
+			else if (format == RenderTextureFormat.ARGBFloat)
+			{
+				return TextureFormatType.R32G32B32A32_FLOAT;
+			}
+
+			return TextureFormatType.Unknown;
+		}
+	}
+
+	public enum TextureFormatType : int
+	{
+		R8G8B8A8_UNORM,
+		B8G8R8A8_UNORM,
+		R8_UNORM,
+		R16G16_FLOAT,
+		R16G16B16A16_FLOAT,
+		R32G32B32A32_FLOAT,
+		BC1,
+		BC2,
+		BC3,
+		R8G8B8A8_UNORM_SRGB,
+		B8G8R8A8_UNORM_SRGB,
+		BC1_SRGB,
+		BC2_SRGB,
+		BC3_SRGB,
+		D32,
+		D24S8,
+		D32S8,
+		Unknown,
 	}
 
 	enum ExternalTextureType : int
@@ -94,6 +134,13 @@ namespace Effekseer
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetRenderingCameraCullingMask(int renderId, int cullingMask);
+
+		[DllImport(pluginName)]
+		public static extern void EffekseerSetRenderTargetProperty(int renderId,
+																				   TextureFormatType renderTarget,
+																				   TextureFormatType depthTarget,
+																				   int width,
+																				   int height);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetIsTextureFlipped(int isFlipped);
