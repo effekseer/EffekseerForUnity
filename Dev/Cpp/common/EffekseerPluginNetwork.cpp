@@ -49,7 +49,7 @@ namespace EffekseerPlugin
 	{
 		if (server != nullptr && g_EffekseerManager != nullptr)
 		{
-			server->Update(nullptr, 0, Effekseer::ReloadingThreadType::Render);
+			server->Update(&g_EffekseerManager, 1, Effekseer::ReloadingThreadType::Render);
 		}
 	}
 
