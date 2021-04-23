@@ -80,12 +80,12 @@
 
 		#endif
 
-	    struct vs_input
-	    {
-    		uint id : SV_VertexID;
-    		uint inst : SV_InstanceID;
+		struct vs_input
+		{
+			uint id : SV_VertexID;
+			uint inst : SV_InstanceID;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
-	    };
+		};
 
 		struct ps_input
 		{
