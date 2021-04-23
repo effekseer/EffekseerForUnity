@@ -45,6 +45,13 @@
 
 		float distortionIntensity;
 
+	    struct vs_input
+	    {
+    		uint id : SV_VertexID;
+    		uint inst : SV_InstanceID;
+			UNITY_VERTEX_INPUT_INSTANCE_ID
+	    };
+
 		struct ps_input
 		{
 			float4 pos : SV_POSITION;
@@ -53,14 +60,19 @@
 			float4 posU : NORMAL2;      // if this name is POS2, something is wrong with Metal API
 			float2 uv : TEXCOORD0;
 			float4 color : COLOR0;
+			UNITY_VERTEX_OUTPUT_STEREO
 		};
 
-		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+		ps_input vert(vs_input i)
 		{
 			ps_input o;
 
-			int qind = (id) / 6;
-			int vind = (id) % 6;
+			UNITY_SETUP_INSTANCE_ID(i);
+			UNITY_INITIALIZE_OUTPUT(ps_input, o);
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+			int qind = (i.id) / 6;
+			int vind = (i.id) % 6;
 
 			int v_offset[6];
 			v_offset[0] = 2;

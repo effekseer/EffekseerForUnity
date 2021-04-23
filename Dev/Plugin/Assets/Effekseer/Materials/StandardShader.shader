@@ -43,9 +43,10 @@
     struct vs_input
     {
     	uint id : SV_VertexID;
-        UNITY_VERTEX_INPUT_INSTANCE_ID
+    	uint inst : SV_InstanceID;
+		UNITY_VERTEX_INPUT_INSTANCE_ID
     };
-	
+
 	struct ps_input
 	{
 		float4 pos : SV_POSITION;
@@ -54,16 +55,16 @@
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
 
-	ps_input vert(vs_input input)
+	ps_input vert(vs_input i)
 	{
 		ps_input o;
 
-		UNITY_SETUP_INSTANCE_ID(input);
+		UNITY_SETUP_INSTANCE_ID(i);
 		UNITY_INITIALIZE_OUTPUT(ps_input, o);
 		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-		int qind = (input.id) / 6;
-		int vind = (input.id) % 6;
+		int qind = (i.id) / 6;
+		int vind = (i.id) % 6;
 
 		int v_offset[6];
 		v_offset[0] = 2;
