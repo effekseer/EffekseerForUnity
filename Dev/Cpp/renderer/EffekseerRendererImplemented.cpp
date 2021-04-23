@@ -274,7 +274,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			collector_.Textures[collector_.BackgroundIndex] = m_renderer->GetBackground();
 		}
 
-		int32_t textureCount = collector_.TextureCount;
+		const int32_t textureCount = collector_.TextureCount;
 		std::array<Effekseer::Backend::TextureRef, ::Effekseer::TextureSlotMax> textures = collector_.Textures;
 
 		::Effekseer::Backend::TextureRef depthTexture = nullptr;
@@ -296,8 +296,8 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 		for (int32_t i = 0; i < textureCount; i++)
 		{
-			state.TextureFilterTypes[i] = parameter.BasicParameterPtr->TextureFilters[i];
-			state.TextureWrapTypes[i] = parameter.BasicParameterPtr->TextureWraps[i];
+			state.TextureFilterTypes[i] = collector_.TextureFilterTypes[i];
+			state.TextureWrapTypes[i] = collector_.TextureWrapTypes[i];
 		}
 
 		if (textureCount > 0)
