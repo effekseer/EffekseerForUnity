@@ -646,7 +646,7 @@ namespace Effekseer.Internal
 			public ComputeBufferCollection()
 			{
 				data = new byte[VertexMaxSize];
-				Get(defaultStride);
+				Get(defaultStride, true);
 			}
 
 			public byte[] GetCPUData()
@@ -656,7 +656,7 @@ namespace Effekseer.Internal
 
 			public void CopyCPUToGPU(int stride, int offset, int size)
 			{
-				var cb = Get(stride);
+				var cb = Get(stride, true);
 				cb.SetData(data, offset, offset, size);
 			}
 
@@ -664,10 +664,15 @@ namespace Effekseer.Internal
 			{
 				return computeBuffers.ContainsKey(stride);
 			}
-			public ComputeBuffer Get(int stride)
+			public ComputeBuffer Get(int stride, bool rewuireToAllocate)
 			{
 				if (!HasBuffer(stride))
 				{
+					if(!rewuireToAllocate)
+					{
+						return null;
+					}
+
 					var count = VertexMaxSize / stride;
 					if (count * stride != VertexMaxSize) count++;
 					computeBuffers.Add(stride, new ComputeBuffer(count, stride));
@@ -787,8 +792,7 @@ namespace Effekseer.Internal
 				isDistortionEnabled = enableDistortion;
 				isDepthEnabled = enableDepth;
 
-				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
-
+				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDepthEnabled, camera, renderTargetProperty);
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
 				// Create a command buffer that is effekseer renderer
@@ -1359,8 +1363,13 @@ namespace Effekseer.Internal
 			prop.SetFloat("buf_offset", parameter.VertexBufferOffset / parameter.VertexBufferStride);
 
 			Debug.Assert(computeBuffer.HasBuffer(parameter.VertexBufferStride));
-			var vertexBuffer = computeBuffer.Get(parameter.VertexBufferStride);
-			Debug.Assert(vertexBuffer != null && vertexBuffer.IsValid());
+			var vertexBuffer = computeBuffer.Get(parameter.VertexBufferStride,false);
+			if (vertexBuffer == null)
+			{
+				Debug.LogWarning("Invalid allocation");
+				return;
+			}
+			Debug.Assert(vertexBuffer.IsValid());
 
 			prop.SetBuffer("buf_vertex", vertexBuffer);
 
@@ -1373,7 +1382,15 @@ namespace Effekseer.Internal
 
 			if (isAdvanced)
 			{
-				prop.SetBuffer("buf_ad", computeBuffer.Get(sizeof(Effekseer.Plugin.AdvancedVertexParameter)));
+				var bufAd = computeBuffer.Get(sizeof(Effekseer.Plugin.AdvancedVertexParameter), false);
+				if(bufAd == null)
+				{
+					Debug.LogWarning("Invalid allocation");
+					return;
+				}
+				Debug.Assert(bufAd.IsValid());
+
+				prop.SetBuffer("buf_ad", bufAd);
 				prop.SetFloat("buf_ad_offset", parameter.AdvancedDataOffset / sizeof(Effekseer.Plugin.AdvancedVertexParameter));
 
 				ApplyAdvancedParameter(parameter, prop);

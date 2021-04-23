@@ -34,6 +34,34 @@ namespace Effekseer.Internal
 				}
 			}
 		}
+
+		public static void SetupBackgroundBuffer(ref BackgroundRenderTexture renderTexture, bool enableDistortion, Camera camera, RenderTargetProperty renderTargetProperty)
+		{
+			if (renderTexture != null)
+			{
+				renderTexture.Release();
+				renderTexture = null;
+			}
+
+			if (enableDistortion)
+			{
+				var targetSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
+
+#if UNITY_IOS || UNITY_ANDROID
+					RenderTextureFormat format = RenderTextureFormat.ARGB32;
+#else
+				RenderTextureFormat format = (camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+#endif
+				renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
+
+				// HACK for ZenPhone
+				if (renderTexture == null || !renderTexture.Create())
+				{
+					renderTexture = null;
+				}
+			}
+		}
+
 	}
 
 	public class RenderTargetProperty
@@ -398,4 +426,28 @@ namespace Effekseer.Internal
 			}
 		}
 	}
+
+	/*
+	class RenderPathProperty
+	{
+		bool isDistortionEnabled = false;
+
+		bool isDepthEnabled = false;
+
+		/// <summary>
+		/// Distortion is disabled forcely because of VR
+		/// </summary>
+		bool isDistortionMakeDisabledForcely = false;
+
+		public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty)
+		{
+			isDistortionEnabled = enableDistortion;
+			isDepthEnabled = enableDepth;
+
+			SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
+
+			RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
+		}
+	}
+	*/
 }

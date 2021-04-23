@@ -78,8 +78,7 @@ namespace Effekseer.Internal
 					this.isDistortionMakeDisabledForcely = true;
 				}
 
-				SetupBackgroundBuffer(this.isDistortionEnabled, renderTargetProperty);
-
+				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDepthEnabled, camera, renderTargetProperty);
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
 				if (!isCommandBufferFromExternal)
@@ -91,33 +90,6 @@ namespace Effekseer.Internal
 				if (!isCommandBufferFromExternal)
 				{
 					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
-				}
-			}
-
-			private void SetupBackgroundBuffer(bool enableDistortion, RenderTargetProperty renderTargetProperty)
-			{
-				if (this.renderTexture != null)
-				{
-					this.renderTexture.Release();
-					this.renderTexture = null;
-				}
-
-				if (enableDistortion)
-				{
-					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
-
-#if UNITY_IOS || UNITY_ANDROID
-					RenderTextureFormat format = RenderTextureFormat.ARGB32;
-#else
-					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#endif
-					this.renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
-
-					// HACK for ZenPhone
-					if (this.renderTexture == null || !this.renderTexture.Create())
-					{
-						this.renderTexture = null;
-					}
 				}
 			}
 
