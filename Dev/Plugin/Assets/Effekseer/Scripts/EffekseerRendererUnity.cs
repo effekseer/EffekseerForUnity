@@ -1071,7 +1071,7 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
 
