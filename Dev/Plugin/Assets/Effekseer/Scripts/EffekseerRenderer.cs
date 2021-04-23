@@ -130,31 +130,20 @@ namespace Effekseer.Internal
 			else if (isRequiredToCopyBackground)
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
-
-				// restore
-				if (depthTargetIdentifier.HasValue)
-				{
-					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
-				}
-				else
-				{
-					cb.SetRenderTarget(colorTargetIdentifier);
-				}
-				//cb.CopyTexture(colorTargetIdentifier, new RenderTargetIdentifier(backgroundRenderTexture.renderTexture));
 			}
 			else
 			{
 				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+			}
 
-				// restore
-				if (depthTargetIdentifier.HasValue)
-				{
-					cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
-				}
-				else
-				{
-					cb.SetRenderTarget(colorTargetIdentifier);
-				}
+			// restore
+			if (depthTargetIdentifier.HasValue)
+			{
+				cb.SetRenderTarget(colorTargetIdentifier, depthTargetIdentifier.Value);
+			}
+			else
+			{
+				cb.SetRenderTarget(colorTargetIdentifier);
 			}
 		}
 
