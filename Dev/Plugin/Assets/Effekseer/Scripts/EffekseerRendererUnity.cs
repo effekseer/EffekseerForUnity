@@ -789,7 +789,7 @@ namespace Effekseer.Internal
 
 				SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
 
-				RendererUtils.SetupDepthBuffer(ref depthTexture, isDistortionEnabled, camera, renderTargetProperty);
+				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
 				// Create a command buffer that is effekseer renderer
 				if (!isCommandBufferFromExternal)
@@ -841,6 +841,12 @@ namespace Effekseer.Internal
 					this.renderTexture = null;
 				}
 
+				if (this.depthTexture != null)
+				{
+					this.depthTexture.Release();
+					this.depthTexture = null;
+				}
+
 				if (this.modelBuffers != null)
 				{
 					this.modelBuffers.Release();
@@ -861,22 +867,30 @@ namespace Effekseer.Internal
 			public bool IsValid(RenderTargetProperty renderTargetProperty)
 			{
 				if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
-
-				if (this.isDepthEnabled != EffekseerRendererUtils.IsDepthEnabled)
+				if (this.isDepthEnabled != EffekseerRendererUtils.IsDepthEnabled) return false;
+				
+				if (depthTexture != null)
 				{
 					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
 
-					return targetSize.x == this.depthTexture.width &&
-						targetSize.y == this.depthTexture.height;
+					if (targetSize.x != this.depthTexture.width ||
+						targetSize.y != this.depthTexture.height)
+					{
+						return false;
+					}
 				}
 
 				if (this.renderTexture != null)
 				{
 					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
 
-					return targetSize.x == this.renderTexture.width &&
-						targetSize.y == this.renderTexture.height;
+					if (targetSize.x != this.renderTexture.width ||
+						targetSize.y != this.renderTexture.height)
+					{
+						return false;
+					}
 				}
+
 				return true;
 			}
 
