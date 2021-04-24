@@ -381,17 +381,6 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	}
 }
 
-/*
-int32_t RendererImplemented::AddVertexBuffer(const void* data, int32_t size)
-{
-	auto ret = static_cast<int32_t>(exportedVertexBuffer.size());
-
-	exportedVertexBuffer.resize(exportedVertexBuffer.size() + size);
-	memcpy(exportedVertexBuffer.data() + ret, data, size);
-	return ret;
-}
-*/
-
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
 	auto ret = static_cast<int32_t>(exportedInfoBuffer.size());
@@ -400,13 +389,6 @@ int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 	memcpy(exportedInfoBuffer.data() + ret, data, size);
 	return ret;
 }
-
-/*
-void RendererImplemented::AlignVertexBuffer(int32_t alignment)
-{
-	exportedVertexBuffer.resize(GetAlignedOffset(static_cast<int32_t>(exportedVertexBuffer.size()), alignment));
-}
-*/
 
 Effekseer::RefPtr<RendererImplemented> RendererImplemented::Create() { return Effekseer::MakeRefPtr<RendererImplemented>(); }
 
@@ -448,7 +430,7 @@ void RendererImplemented::SetRestorationOfStatesFlag(bool flag) {}
 
 int32_t RendererImplemented::StrideBuffer::PushBuffer(const void* data, int32_t size)
 {
-	size_t offset = Buffer.size();
+	const auto offset = Buffer.size();
 	Buffer.resize(offset + size);
 	memcpy(Buffer.data() + offset, data, size);
 	return offset;
@@ -623,12 +605,12 @@ void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp,
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
 	UnityRenderParameter rp;
+	rp.RenderMode = 0;
 	rp.MaterialType = m_currentShader->GetType();
 	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
 	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
-	rp.RenderMode = 0;
 	rp.ModelPtr = nullptr;
 
 	for (size_t i = 0; i < textures_.size(); i++)
@@ -637,6 +619,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
 		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
 	}
+
+	rp.TextureCount = static_cast<int32_t>(textures_.size());
 
 	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
@@ -716,7 +700,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			unity_v.Normal = UnpackVector3DF(v.Normal);
 
 			strideBuffer->PushBuffer(&unity_v, sizeof(UnityDynamicVertex));
-			// AddVertexBuffer(&unity_v, sizeof(UnityDynamicVertex));
 
 			if (nativeMaterial->GetCustomData1Count() > 0)
 			{
@@ -725,7 +708,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
 
 				strideBuffer->PushBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
-				// AddVertexBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
 			}
 
 			if (nativeMaterial->GetCustomData2Count() > 0)
@@ -734,7 +716,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				auto c = (float*)(&custom2[vi]);
 				memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
 				strideBuffer->PushBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
-				// AddVertexBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
 			}
 		}
 
@@ -756,9 +737,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
 		int32_t startOffset = strideBuffer->GetOffset();
 
-		// AlignVertexBuffer(rp.VertexBufferStride);
-		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
-
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
 			auto vs = (DynamicVertex*)m_vertexBuffer->GetResource();
@@ -777,8 +755,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
 			}
 
-			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
 			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -805,8 +781,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 	{
 		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
-		// AlignVertexBuffer(rp.VertexBufferStride);
-		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
 		int32_t startOffset = strideBuffer->GetOffset();
 
@@ -830,8 +804,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
 			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
-			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -854,8 +826,6 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
 	{
 		rp.VertexBufferStride = sizeof(UnityVertex);
-		// AlignVertexBuffer(rp.VertexBufferStride);
-		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
 		int32_t startOffset = strideBuffer->GetOffset();
 
@@ -864,7 +834,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			auto vs = (Vertex*)m_vertexBuffer->GetResource();
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
-				auto& v = vs[vi];
+				const auto& v = vs[vi];
 				AddVertexBufferAsVertex(v, *strideBuffer);
 			}
 		}
@@ -873,17 +843,15 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			auto vs = (EffekseerRenderer::AdvancedSimpleVertex*)m_vertexBuffer->GetResource();
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
-				auto& v = vs[vi];
+				const auto& v = vs[vi];
 				AddVertexBufferAsVertex(v, *strideBuffer);
 			}
 
 			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
 			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
-			// AlignVertexBuffer(sizeof(AdvancedVertexParameter));
-			// rp.AdvancedBufferOffset = static_cast<int32_t>(exportedVertexBuffer.size());
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
-				auto& v = vs[vi];
+				const auto& v = vs[vi];
 				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
 			}
 		}
@@ -919,6 +887,19 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	UnityRenderParameter rp;
 	rp.RenderMode = 1;
 	rp.MaterialType = m_currentShader->GetType();
+	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
+	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
+	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
+	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
+
+	for (size_t i = 0; i < textures_.size(); i++)
+	{
+		rp.TexturePtrs[i] = textures_[i];
+		rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
+		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
+	}
+
+	rp.TextureCount = static_cast<int32_t>(textures_.size());
 
 	auto model_ = (Model*)model.Get();
 
@@ -933,13 +914,6 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 
 	if (model == nullptr)
 		return;
-
-	for (size_t i = 0; i < textures_.size(); i++)
-	{
-		rp.TexturePtrs[i] = textures_[i];
-		rp.TextureFilterTypes[i] = (int)GetRenderState()->GetActiveState().TextureFilterTypes[i];
-		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
-	}
 
 	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
@@ -985,11 +959,6 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 
 	rp.CustomData1BufferOffset = 0;
 	rp.CustomData2BufferOffset = 0;
-
-	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
-	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
-	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
-	rp.Culling = (int)GetRenderState()->GetActiveState().CullingType;
 
 	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
 
@@ -1134,10 +1103,12 @@ int32_t RendererImplemented::GetStrideBufferCount() const { return static_cast<i
 
 StrideBufferParameter RendererImplemented::GetStrideBufferParameter(int32_t index) const
 {
+	const auto& sb = strideBuffers_[index];
+
 	StrideBufferParameter param;
-	param.Ptr = strideBuffers_[index]->Buffer.data();
-	param.Size = static_cast<int32_t>(strideBuffers_[index]->Buffer.size());
-	param.Stride = strideBuffers_[index]->Stride;
+	param.Ptr = sb->Buffer.data();
+	param.Size = static_cast<int32_t>(sb->Buffer.size());
+	param.Stride = sb->Stride;
 	return param;
 }
 
