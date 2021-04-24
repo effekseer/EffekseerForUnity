@@ -1190,6 +1190,11 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
+			// disable async compile
+#if UNITY_EDITOR
+			UnityEditor.ShaderUtil.SetAsyncCompilation(path.commandBuffer, false);
+#endif
+
 			// copy back
 			if (EffekseerRendererUtils.IsDistortionEnabled)
 			{
@@ -1294,6 +1299,10 @@ namespace Effekseer.Internal
 			}
 
 			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture, path.depthTexture);
+
+#if UNITY_EDITOR
+			UnityEditor.ShaderUtil.RestoreAsyncCompilation(path.commandBuffer);
+#endif
 		}
 
 		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType type)
@@ -1782,7 +1791,6 @@ namespace Effekseer.Internal
 				parameter.FlipbookParams.DivideX,
 				parameter.FlipbookParams.DivideY));
 
-			// TODO : Check UV inversed
 			prop.SetVector("fUVDistortionParameter", new Vector4(parameter.UVDistortionIntensity, parameter.BlendUVDistortionIntensity, 1.0f, 0.0f));
 			prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));
 			prop.SetVector("fFalloffParameter", new Vector4(parameter.EnableFalloff, parameter.FalloffParam.ColorBlendType, parameter.FalloffParam.Pow, 0.0f));
