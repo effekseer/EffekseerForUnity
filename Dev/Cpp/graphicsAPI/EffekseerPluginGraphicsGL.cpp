@@ -128,14 +128,29 @@ EffekseerRenderer::RendererRef GraphicsGL::CreateRenderer(int squareMaxCount, bo
 
 void GraphicsGL::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
 {
+	auto& externalTexture = renderSettings[renderId].externalTextures[static_cast<int>(type)];
+
+	// not changed
+	if (externalTexture.OriginalPtr == texture)
+	{
+		return;
+	}
+
+	if (texture == nullptr)
+	{
+		externalTexture.Reset();
+		return;
+	}
+
 	if (texture != nullptr)
 	{
-		renderSettings[renderId].externalTextures[static_cast<int>(type)] =
+		externalTexture.Texture =
 			EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)texture, false, []() -> void {});
+		externalTexture.OriginalPtr = texture;
 	}
 	else
 	{
-		renderSettings[renderId].externalTextures[static_cast<int>(type)].Reset();
+		externalTexture.Reset();
 	}
 }
 

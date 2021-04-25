@@ -15,6 +15,24 @@
 namespace EffekseerPlugin
 {
 
+class TextureConverterDX12 : public TextureConverter
+{
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
+
+public:
+	TextureConverterDX12(Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
+		: graphicsDevice_(graphicsDevice)
+	{
+	}
+
+	Effekseer::Backend::TextureRef Convert(void* texture) override
+	{
+		ID3D12Resource* resource = reinterpret_cast<ID3D12Resource*>(texture);
+		return EffekseerRendererDX12::CreateTexture(graphicsDevice_, resource);
+	}
+};
+
+
 void RenderPassDX12::Begin(RenderSettings& setting, RenderPass* backRenderPass)
 {
 	if (memoryPool_ != nullptr)
@@ -95,6 +113,8 @@ bool GraphicsDX12::Initialize(IUnityInterfaces* unityInterface)
 
 	graphicsDevice_ = EffekseerRendererDX12::CreateGraphicsDevice(device_, commandQueue_, swapCount);
 
+	textureConverter_ = std::make_shared<TextureConverterDX12>(graphicsDevice_);
+
 	ES_SAFE_ADDREF(device_);
 	ES_SAFE_ADDREF(commandQueue_);
 
@@ -118,22 +138,8 @@ EffekseerRenderer::RendererRef GraphicsDX12::CreateRenderer(int squareMaxCount, 
 	DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
 	renderer_ = EffekseerRendererDX12::Create(
-		graphicsDevice_, renderTargetFormats.data(), renderTargetFormats.size(), depthFormat, reversedDepth, squareMaxCount);
+		graphicsDevice_, renderTargetFormats.data(), static_cast<int>(renderTargetFormats.size()), depthFormat, reversedDepth, squareMaxCount);
 	return renderer_;
-}
-
-void GraphicsDX12::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
-{
-	if (texture != nullptr)
-	{
-		ID3D12Resource* resource = reinterpret_cast<ID3D12Resource*>(texture);
-		auto backend = EffekseerRendererDX12::CreateTexture(graphicsDevice_, resource);
-		renderSettings[renderId].externalTextures[static_cast<int>(type)] = backend;
-	}
-	else
-	{
-		renderSettings[renderId].externalTextures[static_cast<int>(type)] = nullptr;
-	}
 }
 
 RenderPass* GraphicsDX12::CreateRenderPass()

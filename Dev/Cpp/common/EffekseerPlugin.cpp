@@ -189,7 +189,7 @@ void TermRenderer()
 	{
 		for (size_t j = 0; j < renderSettings[i].externalTextures.size(); j++)
 		{
-			renderSettings[i].externalTextures[j] = nullptr;
+			renderSettings[i].externalTextures[j].Reset();
 		}
 	}
 #endif
@@ -432,8 +432,8 @@ extern "C"
 		if (g_graphics != nullptr)
 		{
 			g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(),
-													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
-			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)]);
+													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
+			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
 		}
 
 		// render
@@ -681,8 +681,8 @@ extern "C"
 		if (g_graphics != nullptr)
 		{
 			g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(),
-													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)]);
-			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)]);
+													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
+			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
 		}
 
 		std::shared_ptr<RenderPass> renderPath = nullptr;

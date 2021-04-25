@@ -41,6 +41,9 @@ private:
 	Effekseer::RefPtr<EffekseerRenderer::Renderer> renderer_ = nullptr;
 	IUnityInterfaces* unityInterface_ = nullptr;
 
+protected:
+	std::shared_ptr<TextureConverter> textureConverter_;
+
 public:
 	GraphicsLLGI() = default;
 
@@ -55,6 +58,8 @@ public:
 	Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
 
 	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
+
+	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 

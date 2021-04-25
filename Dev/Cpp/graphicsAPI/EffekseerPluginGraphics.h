@@ -32,6 +32,12 @@ public:
 	virtual void Execute(RenderSettings& setting) {}
 };
 
+class TextureConverter
+{
+public:
+	virtual Effekseer::Backend::TextureRef Convert(void* texture) { return nullptr; }
+};
+
 class Graphics
 {
 public:

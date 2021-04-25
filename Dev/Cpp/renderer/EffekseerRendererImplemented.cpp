@@ -433,7 +433,7 @@ int32_t RendererImplemented::StrideBuffer::PushBuffer(const void* data, int32_t 
 	const auto offset = Buffer.size();
 	Buffer.resize(offset + size);
 	memcpy(Buffer.data() + offset, data, size);
-	return offset;
+	return static_cast<int32_t>(offset);
 }
 
 void RendererImplemented::ClearStrideBuffers()
@@ -450,7 +450,7 @@ std::shared_ptr<RendererImplemented::StrideBuffer> RendererImplemented::GetStrid
 	{
 		auto buffer = std::make_shared<StrideBuffer>();
 		buffer->Stride = stride;
-		strideToIndex_[stride] = strideBuffers_.size();
+		strideToIndex_[stride] = static_cast<int32_t>(strideBuffers_.size());
 		strideBuffers_.emplace_back(buffer);
 		return buffer;
 	}
@@ -564,17 +564,17 @@ template <typename T, typename U> void CopyBuffer(const T& dstUnityVertex, const
 
 void StorePixelConstantBuffer(UnityRenderParameter& rp, EffekseerRenderer::PixelConstantBuffer* constantBuffer, int32_t divX, int32_t divY)
 {
-	rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
-	rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
+	rp.FlipbookParams.Enable = static_cast<int32_t>(constantBuffer->FlipbookParam.EnableInterpolation);
+	rp.FlipbookParams.LoopType = static_cast<int32_t>(constantBuffer->FlipbookParam.InterpolationType);
 	rp.FlipbookParams.DivideX = divX;
 	rp.FlipbookParams.DivideY = divY;
 	rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
-	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
+	rp.TextureBlendType = static_cast<int32_t>(constantBuffer->BlendTextureParam.BlendType);
 	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
-	rp.EnableFalloff = constantBuffer->FalloffParam.Enable;
+	rp.EnableFalloff = static_cast<int32_t>(constantBuffer->FalloffParam.Enable);
 	rp.FalloffParam.BeginColor = constantBuffer->FalloffParam.BeginColor;
 	rp.FalloffParam.EndColor = constantBuffer->FalloffParam.EndColor;
-	rp.FalloffParam.ColorBlendType = constantBuffer->FalloffParam.ColorBlendType;
+	rp.FalloffParam.ColorBlendType = static_cast<int32_t>(constantBuffer->FalloffParam.ColorBlendType);
 	rp.FalloffParam.Pow = constantBuffer->FalloffParam.Pow;
 	rp.EmissiveScaling = constantBuffer->EmmisiveParam.EmissiveScaling;
 	rp.EdgeParams.Threshold = constantBuffer->EdgeParam.Threshold;
@@ -590,12 +590,12 @@ void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp,
 										int32_t divX,
 										int32_t divY)
 {
-	rp.FlipbookParams.Enable = constantBuffer->FlipbookParam.EnableInterpolation;
-	rp.FlipbookParams.LoopType = constantBuffer->FlipbookParam.InterpolationType;
+	rp.FlipbookParams.Enable = static_cast<int32_t>(constantBuffer->FlipbookParam.EnableInterpolation);
+	rp.FlipbookParams.LoopType = static_cast<int32_t>(constantBuffer->FlipbookParam.InterpolationType);
 	rp.FlipbookParams.DivideX = divX;
 	rp.FlipbookParams.DivideY = divY;
 	rp.UVDistortionIntensity = constantBuffer->UVDistortionParam.Intensity;
-	rp.TextureBlendType = constantBuffer->BlendTextureParam.BlendType;
+	rp.TextureBlendType = static_cast<int32_t>(constantBuffer->BlendTextureParam.BlendType);
 	rp.BlendUVDistortionIntensity = constantBuffer->UVDistortionParam.BlendIntensity;
 	rp.SoftParticleParam = constantBuffer->SoftParticleParam.softParticleParams;
 	rp.ReconstrcutionParam1 = constantBuffer->SoftParticleParam.reconstructionParam1;
@@ -770,7 +770,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
 
 		StoreDistortionPixelConstantBuffer(
-			rp, constantBuffer, vConstantBuffer->flipbookParameter.divideX, vConstantBuffer->flipbookParameter.divideY);
+			rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideX),  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideY));
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -815,7 +815,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(m_currentShader->GetVertexConstantBuffer());
 		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
 		StorePixelConstantBuffer(
-			rp, constantBuffer, vConstantBuffer->flipbookParameter.divideX, vConstantBuffer->flipbookParameter.divideY);
+			rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideX),  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideY));
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -860,7 +860,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 			static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(m_currentShader->GetVertexConstantBuffer());
 		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
 		StorePixelConstantBuffer(
-			rp, constantBuffer, vConstantBuffer->flipbookParameter.divideX, vConstantBuffer->flipbookParameter.divideY);
+			rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideX),  static_cast<int32_t>(vConstantBuffer->flipbookParameter.divideY));
 
 		rp.VertexBufferOffset = startOffset;
 		rp.MaterialPtr = nullptr;
@@ -929,7 +929,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 			const auto vConstantBuffer =
 				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(m_currentShader->GetVertexConstantBuffer());
 			StorePixelConstantBuffer(
-				rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter.DivideX, vConstantBuffer->ModelFlipbookParameter.DivideY);
+				rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideX),  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideY));
 		}
 		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
 				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
@@ -941,7 +941,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 			const auto vConstantBuffer =
 				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(m_currentShader->GetVertexConstantBuffer());
 			StoreDistortionPixelConstantBuffer(
-				rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter.DivideX, vConstantBuffer->ModelFlipbookParameter.DivideY);
+				rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideX),  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideY));
 		}
 		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
 				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
@@ -951,7 +951,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
 
 			StorePixelConstantBuffer(
-				rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter.DivideX, vConstantBuffer->ModelFlipbookParameter.DivideY);
+				rp, constantBuffer,  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideX),  static_cast<int32_t>(vConstantBuffer->ModelFlipbookParameter.DivideY));
 		}
 	}
 

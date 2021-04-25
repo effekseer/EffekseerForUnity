@@ -47,8 +47,6 @@ public:
 
 	EffekseerRenderer::RendererRef CreateRenderer(int squareMaxCount, bool reversedDepth) override;
 
-	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
-
 	RenderPass* CreateRenderPass() override;
 };
 

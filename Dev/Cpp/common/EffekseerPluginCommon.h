@@ -43,6 +43,18 @@ enum class StereoRenderingType : int
 
 const int MAX_RENDER_PATH = 128;
 
+struct ExternalTextureProperty
+{
+	Effekseer::Backend::TextureRef Texture;
+	void* OriginalPtr = nullptr;
+
+	void Reset()
+	{
+		Texture.Reset();
+		OriginalPtr = nullptr;
+	}
+};
+
 struct RenderSettings
 {
 	int32_t id = 0;
@@ -50,11 +62,11 @@ struct RenderSettings
 	Effekseer::Matrix44 cameraMatrix;
 	Effekseer::Matrix44 projectionMatrix;
 	bool renderIntoTexture = false;
-	std::array<Effekseer::Backend::TextureRef, static_cast<int>(ExternalTextureType::Max)> externalTextures;
+	std::array<ExternalTextureProperty, static_cast<int>(ExternalTextureType::Max)> externalTextures;
 
 	bool stereoEnabled = false;
 	int stereoRenderCount = 1;
-	StereoRenderingType stereoRenderingType;
+	StereoRenderingType stereoRenderingType = StereoRenderingType::MultiPass;
 	Effekseer::Matrix44 leftCameraMatrix;
 	Effekseer::Matrix44 leftProjectionMatrix;
 	Effekseer::Matrix44 rightCameraMatrix;
@@ -65,8 +77,15 @@ struct RenderSettings
 	int32_t screenWidth = 0;
 	int32_t screenHeight = 0;
 
-	RenderSettings() { externalTextures.fill(nullptr); }
+	RenderSettings()
+	{
+		for (auto& t : externalTextures)
+		{
+			t.Reset();
+		}
+	}
 };
+
 extern RenderSettings renderSettings[MAX_RENDER_PATH];
 
 void Array2Matrix(Effekseer::Matrix44& matrix, float matrixArray[]);
@@ -74,9 +93,9 @@ void Array2Matrix(Effekseer::Matrix44& matrix, float matrixArray[]);
 void CalculateCameraDirectionAndPosition(const Effekseer::Matrix44& matrix, Effekseer::Vector3D& direction, Effekseer::Vector3D& position);
 
 using ProceduralModelGeneratorGenerate = void*(UNITY_INTERFACE_API*)(Effekseer::Model::Vertex* vertecies,
-																	int verteciesCount,
-																	Effekseer::Model::Face* faces,
-																	int facesCount);
+																	 int verteciesCount,
+																	 Effekseer::Model::Face* faces,
+																	 int facesCount);
 using ProceduralModelGeneratorUngenerate = void(UNITY_INTERFACE_API*)(void* modelPointer);
 
 } // namespace EffekseerPlugin

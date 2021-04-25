@@ -1,7 +1,7 @@
 
+#include "EffekseerPluginGraphicsLLGI.h"
 #include "../unity/IUnityGraphics.h"
 #include "../unity/IUnityInterface.h"
-#include "EffekseerPluginGraphicsLLGI.h"
 #include <algorithm>
 #include <assert.h>
 
@@ -26,10 +26,14 @@ class TextureLoaderLLGI : public TextureLoader
 {
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
+	std::shared_ptr<TextureConverter> textureConverter_;
 
 public:
-	TextureLoaderLLGI(TextureLoaderLoad load, TextureLoaderUnload unload, Effekseer::Backend::GraphicsDeviceRef graphicsDevice)
-		: TextureLoader(load, unload), graphicsDevice_(graphicsDevice)
+	TextureLoaderLLGI(TextureLoaderLoad load,
+					  TextureLoaderUnload unload,
+					  Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
+					  std::shared_ptr<TextureConverter> textureConverter)
+		: TextureLoader(load, unload), graphicsDevice_(graphicsDevice), textureConverter_(textureConverter)
 	{
 	}
 
@@ -46,8 +50,7 @@ public:
 		}
 
 		// Convert
-		ID3D12Resource* resource = reinterpret_cast<ID3D12Resource*>(texturePtr);
-		auto backend = EffekseerRendererDX12::CreateTexture(graphicsDevice_, resource);
+		auto backend = textureConverter_->Convert(texturePtr);
 
 		auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 		textureDataPtr->SetBackend(backend);
@@ -80,7 +83,7 @@ void GraphicsLLGI::Shutdown(IUnityInterfaces* unityInterface)
 
 Effekseer::TextureLoaderRef GraphicsLLGI::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderLLGI>(load, unload, graphicsDevice_);
+	return Effekseer::MakeRefPtr<TextureLoaderLLGI>(load, unload, graphicsDevice_, textureConverter_);
 }
 
 Effekseer::ModelLoaderRef GraphicsLLGI::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
@@ -104,6 +107,34 @@ Effekseer::MaterialLoaderRef GraphicsLLGI::Create(MaterialLoaderLoad load, Mater
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);
 	return loader;
+}
+
+void GraphicsLLGI::SetExternalTexture(int renderId, ExternalTextureType type, void* texture)
+{
+	auto& externalTexture = renderSettings[renderId].externalTextures[static_cast<int>(type)];
+
+	// not changed
+	if (externalTexture.OriginalPtr == texture)
+	{
+		return;
+	}
+
+	if (texture == nullptr)
+	{
+		externalTexture.Reset();
+		return;
+	}
+
+	auto textureEfk = textureConverter_->Convert(texture);
+	if (textureEfk != nullptr)
+	{
+		externalTexture.Texture = textureEfk;
+		externalTexture.OriginalPtr = texture;
+	}
+	else
+	{
+		externalTexture.Reset();
+	}
 }
 
 void GraphicsLLGI::ShiftViewportForStereoSinglePass(bool isShift) {}

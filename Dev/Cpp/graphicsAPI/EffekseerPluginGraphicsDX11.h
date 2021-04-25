@@ -19,6 +19,7 @@ private:
 	ID3D11DeviceContext* d3d11Context = nullptr;
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
 	Effekseer::RefPtr<EffekseerRenderer::Renderer> renderer_ = nullptr;
+	std::shared_ptr<TextureConverter> converter_;
 
 public:
 	GraphicsDX11();
