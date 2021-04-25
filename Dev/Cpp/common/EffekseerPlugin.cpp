@@ -331,6 +331,8 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRender(int renderId)
 	{
+printf("EffekseerRender\n");
+
 		if (!g_isRunning)
 		{
 			if (g_EffekseerRenderer != nullptr)
@@ -486,6 +488,8 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderFront(int renderId)
 	{
+printf("EffekseerRenderFront\n");
+
 		if (g_EffekseerManager == nullptr)
 			return;
 		if (g_EffekseerRenderer == nullptr)
@@ -566,6 +570,7 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderBack(int renderId)
 	{
+printf("EffekseerRenderBack\n");
 		if (!g_isRunning)
 		{
 			if (g_EffekseerRenderer != nullptr)
