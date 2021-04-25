@@ -30,10 +30,7 @@ class GraphicsDX12 : public GraphicsLLGI
 private:
 	ID3D12Device* device_ = nullptr;
 	ID3D12CommandQueue* commandQueue_ = nullptr;
-	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
-	Effekseer::RefPtr<EffekseerRenderer::Renderer> renderer_ = nullptr;
-	IUnityInterfaces* unityInterface_ = nullptr;
-
+	
 public:
 	GraphicsDX12();
 

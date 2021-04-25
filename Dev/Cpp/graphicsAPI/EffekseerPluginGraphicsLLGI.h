@@ -36,12 +36,10 @@ public:
 
 class GraphicsLLGI : public Graphics
 {
-private:
+protected:
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
 	Effekseer::RefPtr<EffekseerRenderer::Renderer> renderer_ = nullptr;
 	IUnityInterfaces* unityInterface_ = nullptr;
-
-protected:
 	std::shared_ptr<TextureConverter> textureConverter_;
 
 public:
