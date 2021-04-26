@@ -51,7 +51,7 @@ public:
 	}
 	~ProceduralModelGenerator() override = default;
 
-	Effekseer::ModelRef Generate(const Effekseer::ProceduralModelParameter* parameter) override;
+	Effekseer::ModelRef Generate(const Effekseer::ProceduralModelParameter& parameter) override;
 
 	void Ungenerate(Effekseer::ModelRef model) override;
 };

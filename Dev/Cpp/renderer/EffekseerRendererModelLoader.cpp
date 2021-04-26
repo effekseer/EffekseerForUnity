@@ -56,7 +56,7 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 	unload(source->GetPath().c_str(), model->InternalPtr);
 }
 
-Effekseer::ModelRef ProceduralModelGenerator::Generate(const Effekseer::ProceduralModelParameter* parameter)
+Effekseer::ModelRef ProceduralModelGenerator::Generate(const Effekseer::ProceduralModelParameter& parameter)
 {
 	auto original = Effekseer::ProceduralModelGenerator::Generate(parameter);
 
