@@ -86,7 +86,7 @@ jobs:
           cd ./Dev/Cpp/webgl
           mkdir build138
           cd build138
-          emcmake cmake ..
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
