@@ -6,8 +6,8 @@ namespace EffekseerRendererUnity
 Effekseer::TextureRef TextureLoader::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
 	// Load with unity
-	int32_t width, height, format;
-	void* texturePtr = load((const char16_t*)path, &width, &height, &format);
+	int32_t width, height, format, miplevel;
+	void* texturePtr = load((const char16_t*)path, &width, &height, &format, &miplevel);
 	if (texturePtr == nullptr)
 	{
 		return nullptr;

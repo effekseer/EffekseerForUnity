@@ -263,7 +263,7 @@ namespace Effekseer
 		public static extern void EffekseerSetTextureLoaderEvent(
 			EffekseerTextureLoaderLoad load,
 			EffekseerTextureLoaderUnload unload);
-		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path, out int width, out int height, out int format);
+		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path, out int width, out int height, out int format, out int mipmapCount);
 		public delegate void EffekseerTextureLoaderUnload(IntPtr path, IntPtr nativePtr);
 
 		[DllImport(pluginName)]
