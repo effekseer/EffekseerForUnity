@@ -610,7 +610,7 @@ namespace Effekseer
 		}
 
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerTextureLoaderLoad))]
-		private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format)
+		private static IntPtr TextureLoaderLoad(IntPtr path, out int width, out int height, out int format, out int mipmapCount)
 		{
 			var pathstr = Marshal.PtrToStringUni(path);
 			var asset = Instance.effectAssetInLoading;
@@ -627,6 +627,7 @@ namespace Effekseer
 					case TextureFormat.DXT5: format = 2; break;
 					default: format = 0; break;
 				}
+				mipmapCount = texture.mipmapCount;
 
 				if (Instance.RendererType == EffekseerRendererType.Unity)
 				{
@@ -643,6 +644,7 @@ namespace Effekseer
 			width = 0;
 			height = 0;
 			format = 0;
+			mipmapCount = 0;
 			return IntPtr.Zero;
 		}
 

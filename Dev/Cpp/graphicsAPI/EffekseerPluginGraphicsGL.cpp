@@ -47,23 +47,14 @@ TextureLoaderGL::~TextureLoaderGL() {}
 Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
 	// Load with unity
-	int32_t width, height, format;
-	int64_t textureID = reinterpret_cast<int64_t>(load((const char16_t*)path, &width, &height, &format));
+	int32_t width, height, format, miplevel;
+	int64_t textureID = reinterpret_cast<int64_t>(load((const char16_t*)path, &width, &height, &format, &miplevel));
 	if (textureID == 0)
 	{
 		return nullptr;
 	}
 
-#if !defined(_WIN32)
-	if (gfxRenderer != kUnityGfxRendererOpenGLES20 || (IsPowerOfTwo(width) && IsPowerOfTwo(height)))
-	{
-		glBindTexture(GL_TEXTURE_2D, (GLuint)textureID);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-#endif
-
-	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, true, [] {});
+	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, miplevel > 1, [] {});
 	auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 	textureDataPtr->SetBackend(backend);
 	textureData2NativePtr[textureDataPtr] = (void*)textureID;
