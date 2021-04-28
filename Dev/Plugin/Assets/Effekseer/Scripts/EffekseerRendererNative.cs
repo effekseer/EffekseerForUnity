@@ -78,7 +78,7 @@ namespace Effekseer.Internal
 					this.isDistortionMakeDisabledForcely = true;
 				}
 
-				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDepthEnabled, camera, renderTargetProperty);
+				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDistortionEnabled, camera, renderTargetProperty);
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
 				if (!isCommandBufferFromExternal)
