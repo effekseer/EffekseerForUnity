@@ -89,6 +89,10 @@ namespace Effekseer.Internal
 
 			materials.Add(id, material);
 
+#if UNITY_EDITOR
+			UnityEditor.ShaderUtil.CompilePass(material, 0, true);
+#endif
+
 			return material;
 		}
 	}
@@ -760,39 +764,12 @@ namespace Effekseer.Internal
 				customDataBuffers = new CustomDataBufferCollection();
 			}
 
-			private void SetupBackgroundBuffer(bool enableDistortion, RenderTargetProperty renderTargetProperty)
-			{
-				if (this.renderTexture != null)
-				{
-					this.renderTexture.Release();
-					this.renderTexture = null;
-				}
-
-				if (enableDistortion)
-				{
-					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
-
-#if UNITY_IOS || UNITY_ANDROID
-					RenderTextureFormat format = RenderTextureFormat.ARGB32;
-#else
-					RenderTextureFormat format = (this.camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#endif
-					this.renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
-
-					// HACK for ZenPhone
-					if (this.renderTexture == null || !this.renderTexture.Create())
-					{
-						this.renderTexture = null;
-					}
-				}
-			}
-
 			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty)
 			{
 				isDistortionEnabled = enableDistortion;
 				isDepthEnabled = enableDepth;
 
-				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDepthEnabled, camera, renderTargetProperty);
+				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDistortionEnabled, camera, renderTargetProperty);
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
 				// Create a command buffer that is effekseer renderer
@@ -1190,11 +1167,6 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
-			// disable async compile
-#if UNITY_EDITOR
-			UnityEditor.ShaderUtil.SetAsyncCompilation(path.commandBuffer, false);
-#endif
-
 			// copy back
 			if (EffekseerRendererUtils.IsDistortionEnabled)
 			{
@@ -1300,9 +1272,7 @@ namespace Effekseer.Internal
 
 			RenderInternal(path.commandBuffer, path.computeBufferFront, path.materiaProps, path.modelBuffers, path.customDataBuffers, path.renderTexture, path.depthTexture);
 
-#if UNITY_EDITOR
-			UnityEditor.ShaderUtil.RestoreAsyncCompilation(path.commandBuffer);
-#endif
+
 		}
 
 		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType type)
