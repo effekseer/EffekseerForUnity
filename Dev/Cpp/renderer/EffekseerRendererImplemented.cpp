@@ -28,24 +28,6 @@ extern "C"
 		return static_cast<int32_t>(renderer->GetRenderParameters().size());
 	}
 
-	/*
-	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderVertexBuffer()
-	{
-		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
-			return nullptr;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
-		return renderer->GetRenderVertexBuffer().data();
-	}
-
-	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderVertexBufferCount()
-	{
-		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
-			return 0;
-		auto renderer = (EffekseerRendererUnity::RendererImplemented*)EffekseerPlugin::g_EffekseerRenderer.Get();
-		return static_cast<int32_t>(renderer->GetRenderVertexBuffer().size());
-	}
-	*/
-
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityRenderInfoBuffer()
 	{
 		if (EffekseerPlugin::g_EffekseerRenderer == nullptr)
@@ -422,7 +404,8 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 	GetImpl()->isSoftParticleEnabled = true;
-	// exportedVertexBuffer.reserve(sizeof(UnityVertex) * 2000);
+	GetImpl()->isDepthReversed = true;
+
 	return true;
 }
 
@@ -520,13 +503,6 @@ void RendererImplemented::ResetRenderState() {}
 ::EffekseerRenderer::DistortingCallback* RendererImplemented::GetDistortingCallback() { return nullptr; }
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
-
-void RendererImplemented::SetBackground(void* image)
-{
-	auto backend = backgroundData_->GetBackend();
-	backend.DownCast<Texture>()->UserData = image;
-	EffekseerRenderer::Renderer::SetBackground(backend);
-}
 
 VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }
 

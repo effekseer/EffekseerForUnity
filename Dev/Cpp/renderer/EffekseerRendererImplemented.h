@@ -391,8 +391,6 @@ public:
 	*/
 	void SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) override;
 
-	void SetBackground(void* image);
-
 	VertexBuffer* GetVertexBuffer();
 
 	IndexBuffer* GetIndexBuffer();
