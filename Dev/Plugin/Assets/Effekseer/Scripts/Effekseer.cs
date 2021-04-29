@@ -502,6 +502,7 @@ namespace Effekseer
 			public Matrix4x4 Matrix;
 			public Color VColor;
 			public Vector4 UV;
+			public int Time;
 		};
 
 		/// <summary>
@@ -518,7 +519,6 @@ namespace Effekseer
 			public float FlipbookIndexAndNextRate;
 			public float AlphaThreshold;
 			public float ViewOffsetDistance;
-			public int Time;
 		};
 
 		[DllImport(pluginName)]
