@@ -3,7 +3,7 @@ robocopy ..\Dev\Plugin\Assets\Effekseer\Materials BasicTests\Assets\Effekseer\Ma
 robocopy ..\Dev\Plugin\Assets\Effekseer\Plugins BasicTests\Assets\Effekseer\Plugins /s
 robocopy ..\Dev\Plugin\Assets\Effekseer\Resources BasicTests\Assets\Effekseer\Resources /s
 robocopy ..\Dev\Plugin\Assets\Effekseer\Scripts BasicTests\Assets\Effekseer\Scripts /s
-robocopy ..\Dev\Plugin\Assets\Effekseer\ScriptsExternal BasicTests\Assets\Effekseer\ScriptsExternal /s
+robocopy ..\Dev\Plugin\Assets\Effekseer\External BasicTests\Assets\Effekseer\External /s
 
 pause
  

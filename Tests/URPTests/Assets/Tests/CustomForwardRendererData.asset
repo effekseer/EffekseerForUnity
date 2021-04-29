@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: CustomForwardRendererData
   m_EditorClassIdentifier: 
   m_RendererFeatures:
-  - {fileID: 1915396613695893210}
+  - {fileID: 4284913841835288870}
+  m_RendererFeatureMap: 2629bfcb6f12773b
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   shaders:
     blitPS: {fileID: 4800000, guid: c17132b1f77d20942aa75f8429c0f8bc, type: 3}
@@ -45,6 +46,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 609203944dc73f040bfb93958a6005b8, type: 3}
+  m_Script: {fileID: 0}
   m_Name: NewEffekseerURPRenderPassFeature
   m_EditorClassIdentifier: 
+--- !u!114 &4284913841835288870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a67bf8a30b9b6d49a3b2fa63d95e9b0, type: 3}
+  m_Name: NewEffekseerURPRenderPassFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
