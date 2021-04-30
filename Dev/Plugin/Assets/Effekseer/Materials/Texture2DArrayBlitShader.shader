@@ -45,12 +45,6 @@
             fixed4 frag(v2f i) : SV_Target
             {
                 fixed4 col = UNITY_SAMPLE_TEX2DARRAY(_BackgroundTex, float3(i.uv, 0));
-                //color.a = 1.0;
-                //color.w = 1.0;
-                //col.xy = i.uv;
-                //col.z = 0.0;
-                //col.w = 1.0;
-           // col.x = 1.0;
                 return col;
             }
             ENDCG

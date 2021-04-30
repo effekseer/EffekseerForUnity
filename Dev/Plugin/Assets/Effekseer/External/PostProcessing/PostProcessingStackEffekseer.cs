@@ -65,7 +65,8 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 		prop.colorTargetDescriptor = new RenderTextureDescriptor(context.width, context.height, context.sourceFormat);
 		prop.colorTargetIdentifier = context.destination;
 		prop.depthTargetIdentifier = depthIdentifer;
-
+		prop.renderFeature = Effekseer.Internal.RenderFeature.PostProcess;
+		prop.canGrabDepth = true;
 		context.command.SetRenderTarget(context.destination, depthIdentifer);
 
 		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, prop, context.command);

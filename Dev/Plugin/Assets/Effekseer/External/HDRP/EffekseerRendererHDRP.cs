@@ -31,6 +31,8 @@ namespace Effekseer
 			prop.colorTargetIdentifier = new RenderTargetIdentifier(colorBuffer);
 			prop.depthTargetIdentifier = new RenderTargetIdentifier(depthBuffer);
 			prop.colorTargetRenderTexture = (UnityEngine.RenderTexture)colorBuffer;
+			prop.depthTargetRenderTexture = depthBuffer;
+			prop.renderFeature = Effekseer.Internal.RenderFeature.HDRP;
 
 			// TODO : It needs to support VR and override
 			prop.Viewport = hdCamera.camera.pixelRect;

@@ -13,7 +13,7 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
+            #pragma multi_compile _ _AS_COLOR_
             #include "UnityCG.cginc"
 
             struct appdata
@@ -38,10 +38,13 @@
                 return o;
             }
 
-            fixed frag (v2f i) : SV_Depth
+#if _AS_COLOR_
+            half frag (v2f i) : SV_Target
+#else
+            fixed frag(v2f i) : SV_Depth
+#endif
             {
-                fixed4 col = tex2D(_CameraDepthTexture, i.uv);
-                return col.r;
+                return tex2D(_CameraDepthTexture, i.uv).r;
             }
             ENDCG
         }

@@ -1139,6 +1139,12 @@ namespace Effekseer.Internal
 				path.AssignExternalCommandBuffer(targetCommandBuffer);
 			}
 
+			// not assigned
+			if (path.commandBuffer == null)
+			{
+				return;
+			}
+
 			// assign a dinsotrion texture
 			if (path.renderTexture != null)
 			{

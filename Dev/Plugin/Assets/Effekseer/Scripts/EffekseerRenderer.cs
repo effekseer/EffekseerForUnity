@@ -20,11 +20,6 @@ namespace Effekseer.Internal
 			{
 				var targetSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
 
-#if UNITY_IOS || UNITY_ANDROID
-					RenderTextureFormat format = RenderTextureFormat.ARGB32;
-#else
-				RenderTextureFormat format = (camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-#endif
 				depthRenderTexure = new DepthRenderTexture(targetSize.x, targetSize.y, renderTargetProperty);
 
 				// HACK for some smart phone
@@ -64,12 +59,21 @@ namespace Effekseer.Internal
 
 	}
 
+	public enum RenderFeature
+	{
+		HDRP,
+		URP,
+		PostProcess,
+	}
+
 	public class RenderTargetProperty
 	{
+		public RenderFeature renderFeature = RenderFeature.PostProcess;
+
 		/// <summary>
 		/// Ring buffer (it should be better implement)
 		/// </summary>
-		const int MaterialRingCount = 6;
+		const int MaterialRingCount = 12;
 
 		public int? colorBufferID = null;
 		public RenderTargetIdentifier colorTargetIdentifier;
@@ -78,8 +82,8 @@ namespace Effekseer.Internal
 		public Rect Viewport;
 		public bool isRequiredToChangeViewport = false;
 		public RenderTexture colorTargetRenderTexture = null;
-
-
+		public RenderTexture depthTargetRenderTexture = null;
+		public bool canGrabDepth = false;
 
 		public bool isRequiredToCopyBackground = false;
 
@@ -96,7 +100,7 @@ namespace Effekseer.Internal
 
 		internal void ApplyToCommandBuffer(CommandBuffer cb, DepthRenderTexture depthRenderTexture)
 		{
-			if (depthRenderTexture != null && depthTargetIdentifier.HasValue)
+			if (depthRenderTexture != null)
 			{
 #if UNITY_EDITOR
 				if (grabDepthMat == null)
@@ -108,9 +112,41 @@ namespace Effekseer.Internal
 				if (grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
 				{
 					grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
+					grabDepthMat.EnableKeyword("_AS_COLOR_");
 				}
 
-				cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+				if (renderFeature == RenderFeature.PostProcess)
+				{
+					cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+				}
+				else if (renderFeature == RenderFeature.URP)
+				{
+					if (canGrabDepth)
+					{
+						cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+					}
+					else
+					{
+						cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
+					}
+				}
+				else if (renderFeature == RenderFeature.HDRP)
+				{
+					var m = AllocateBlitArrayMaterial();
+					m.SetTexture("_BackgroundTex", depthTargetRenderTexture);
+					m.SetVector("textureArea", new Vector4(
+						Viewport.width / depthTargetRenderTexture.width,
+						Viewport.height / depthTargetRenderTexture.height,
+						Viewport.x / depthTargetRenderTexture.width,
+						Viewport.y / depthTargetRenderTexture.height));
+					cb.SetRenderTarget(depthRenderTexture.renderTexture);
+					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
+					cb.Blit(null, depthRenderTexture.renderTexture, m);
+				}
+				else
+				{
+					throw new Exception();
+				}
 
 				// restore
 				if (depthTargetIdentifier.HasValue)
@@ -358,14 +394,10 @@ namespace Effekseer.Internal
 		}
 	}
 
-
-
 	internal class DepthRenderTexture
 	{
 		internal RenderTexture renderTexture;
 		public IntPtr ptr = IntPtr.Zero;
-
-		Material grabDepthMat;
 
 		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty)
 		{
@@ -375,9 +407,9 @@ namespace Effekseer.Internal
 				height = renderTargetProperty.colorTargetDescriptor.height;
 			}
 
-			var depthDescriptor = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
+			RenderTextureDescriptor desc = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
 
-			renderTexture = new RenderTexture(depthDescriptor);
+			renderTexture = new RenderTexture(desc);
 
 			if (renderTexture != null)
 			{
@@ -426,28 +458,4 @@ namespace Effekseer.Internal
 			}
 		}
 	}
-
-	/*
-	class RenderPathProperty
-	{
-		bool isDistortionEnabled = false;
-
-		bool isDepthEnabled = false;
-
-		/// <summary>
-		/// Distortion is disabled forcely because of VR
-		/// </summary>
-		bool isDistortionMakeDisabledForcely = false;
-
-		public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty)
-		{
-			isDistortionEnabled = enableDistortion;
-			isDepthEnabled = enableDepth;
-
-			SetupBackgroundBuffer(isDistortionEnabled, renderTargetProperty);
-
-			RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
-		}
-	}
-	*/
 }

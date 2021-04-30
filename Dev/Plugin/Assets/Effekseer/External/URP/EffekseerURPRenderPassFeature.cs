@@ -34,6 +34,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			if (Effekseer.EffekseerSystem.Instance == null) return;
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 			prop.isRequiredToCopyBackground = true;
+			prop.renderFeature = Effekseer.Internal.RenderFeature.URP;
+			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
 			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
