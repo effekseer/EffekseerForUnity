@@ -127,6 +127,7 @@ namespace Effekseer.Internal
 					}
 					else
 					{
+						cb.SetRenderTarget(depthRenderTexture.renderTexture);
 						cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
 					}
 				}
