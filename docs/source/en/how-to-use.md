@@ -89,13 +89,6 @@ Suitable for simple use, such as hit effects and explosion effects.
 
 Effekseer supports Universal RenderPipeline.
 
-URPs are added differently for each version.
-For older URPs, read the LWRP instructions.
-
-Please remove comment out from *ScriptsExternal/EffekseerURPRenderPassFeature.cs* in the case of LWRP because URP is not contained in Unity with default settings at first.
-
-![](../img/URP/Code.png)
-
 Look at Graphics Settings to see which ScriptableRenderPipelineSettings you are currently using.
 
 If it already exists, select it.
@@ -121,9 +114,6 @@ Add *EffekseerRenderPassFeature* to *Render Features* of *ForwardRenderer Asset*
 ## High Definition Render Pipeline
 
 Effekseer supports High Definition Render Pipeline.
-Please remove comment out from *ScriptsExternal/EffekseerRendererHDRP.cs* because URP(LWRP) is not contained in Unity with default settings at first.
-
-![](../img/HDRP/Code.png)
 
 You add *CustomPassVolume* Component to a camera.
 
@@ -164,39 +154,9 @@ You can change the drawing order from CustomEffectSorting because effects are dr
 
 ![](../img/PostProcessingStack/pps_sorting.png)
 
-## Light Weight(Universal) Render Pipeline
-
-Effekseer supports Universal(LightWeight)RenderPipeline.
-Please remove comment out from *ScriptsExternal/EffekseerURPRenderPassFeature.cs* in the case of URP, *ScriptsExternal/EffekseerRendererLWRP.cs* in the case of LWRP because URP(LWRP) is not contained in Unity with default settings at first.
-
-![](../img/LWRP_Code.png)
-
-*Custom Forward Render* is used to show effects of Effekseer.
-
-*URP* Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Universal Render Pipeline -> Forward Render*.
-
-*LWRP* Create *Forward Render Asset* from *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render*.
-
-![](../img/LWRP_ForwardRenderer1.png)
-
-![](../img/LWRP_ForwardRenderer2.png)
-
-Change *Renderer Type* into *Custom* in *Pipeline Asset* which is used to render. Specify created *Forward Render Asset* to *Data*.
-
-![](../img/LWRP_Custom1.png)
-
-![](../img/LWRP_Custom2.png)
-
-Add EffekseerRenderer to *Render Features* in created *Forward Render Asset*.
-
-![](../img/LWRP_RenderFeatures1.png)
-
-![](../img/LWRP_RenderFeatures2.png)
-
-
 ## Mobile environment
 
-Disabling distortion from EffekseerSettings speeds up.
+Disabling distortion and depth from EffekseerSettings speeds up.
 
 ## Network
 You can edit the playing effect in Unity via the network from the outside when application is running.

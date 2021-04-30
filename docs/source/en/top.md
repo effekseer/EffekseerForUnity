@@ -13,7 +13,7 @@ Because Effekseer's playback program is written in C ++, it is handled as a nati
 ## Environment
 
 ### Unity version
-Unity 2017 or later.  (Part 2018, 2019 or later)
+Unity 2019.4 or later
 
 ### Supported Platform
 

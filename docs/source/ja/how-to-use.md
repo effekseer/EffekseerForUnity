@@ -94,13 +94,6 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 Effekseer は Universal Render Pipeline に対応しています。
 
-URPはバージョンごとに追加方法が異なります。
-古いURPの場合、LWRPの説明を読んでください。
-
-URPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerURPRenderPassFeature.cs* からコメントアウトを外してください。
-
-![](../img/URP/Code.png)
-
 現在使用しているScriptableRenderPipelineSettingsを確認するためにGraphics Settingsを見ます。
 
 既に存在していたらそれを選択します。
@@ -126,9 +119,6 @@ Pipelineで使用されているForwardRendererを選択します。
 ## High Definition Render Pipeline
 
 Effekseer は High Definition Render Pipeline に対応しています。
-HDRPはUnityでは標準に含まれていないため、*ScriptsExternal/EffekseerRendererHDRP.cs* からコメントアウトを外してください。
-
-![](../img/HDRP/Code.png)
 
 カメラに *CustomPassVolume* コンポーネントを追加します。
 
@@ -169,38 +159,9 @@ Post-Process Volumeにeffectを追加します。BeforeStackとAfterStackがあ�
 
 ![](../img/PostProcessingStack/pps_sorting.png)
 
-## Light Weight(Universal) Render Pipeline
-
-Effekseer は Universal(Light Weight) Render Pipeline に対応しています。.
-URP(LWRP)はUnityでは標準に含まれていないため、URPの場合、*ScriptsExternal/EffekseerURPRenderPassFeature.cs*  LWRPの場合、*ScriptsExternal/EffekseerRendererLWRP.cs* からコメントアウトを外してください。
-
-![](../img/LWRP_Code.png)
-
-Effekseerのエフェクトを表示するために *Custom Forward Render* を使用します。
-
-*URP*  *Assets -> Create -> Rendering -> Universal Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
-
-*LWRP*  *Assets -> Create -> Rendering -> Lightweight Render Pipeline -> Forward Render* から *Forward Render Asset* を作成します。
-
-![](../img/LWRP_ForwardRenderer1.png)
-
-![](../img/LWRP_ForwardRenderer2.png)
-
-現在使用している *Pipeline Asset* の *Renderer Type* を *Custom* に変更します。 *Data* に先ほど作成した *Forward Render Asset* を設定します。
-
-![](../img/LWRP_Custom1.png)
-
-![](../img/LWRP_Custom2.png)
-
-先ほど作成した *Forward Render Asset* の *Render Features* に *EffekseerRenderer* を追加します。
-
-![](../img/LWRP_RenderFeatures1.png)
-
-![](../img/LWRP_RenderFeatures2.png)
-
 ## モバイル環境
 
-EffekseerSettingsから歪みを無効化すると高速化します。
+EffekseerSettingsから歪みや深度を無効化すると高速化します。
 
 ## ネットワーク機能
 
