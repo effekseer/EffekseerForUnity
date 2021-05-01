@@ -94,6 +94,8 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 Effekseer は Universal Render Pipeline に対応しています。
 
+* 1.5からアップグレードする場合、ScriptExternalディレクトリを削除してください。
+
 現在使用しているScriptableRenderPipelineSettingsを確認するためにGraphics Settingsを見ます。
 
 既に存在していたらそれを選択します。
@@ -120,6 +122,8 @@ Pipelineで使用されているForwardRendererを選択します。
 
 Effekseer は High Definition Render Pipeline に対応しています。
 
+* 1.5からアップグレードする場合、ScriptExternalディレクトリを削除してください。
+
 カメラに *CustomPassVolume* コンポーネントを追加します。
 
 ![](../img/HDRP/CustomPassVolume.png)
@@ -137,6 +141,8 @@ Effekseer は High Definition Render Pipeline に対応しています。
 ## PostProcessingStack (1.53以降)
 
 EffekseerはPostProcessingStackのポストプロセスとしても描画できます。
+
+* 1.5からアップグレードする場合、ScriptExternalディレクトリを削除してください。
 
 PostProcessingをインストールし、Post-Process VolumeとPost-Process Layerを設定します。
 

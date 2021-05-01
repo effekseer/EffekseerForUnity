@@ -89,6 +89,8 @@ Suitable for simple use, such as hit effects and explosion effects.
 
 Effekseer supports Universal RenderPipeline.
 
+* Please remove ScriptExternal Directory if you update from from 1.5
+
 Look at Graphics Settings to see which ScriptableRenderPipelineSettings you are currently using.
 
 If it already exists, select it.
@@ -115,6 +117,8 @@ Add *EffekseerRenderPassFeature* to *Render Features* of *ForwardRenderer Asset*
 
 Effekseer supports High Definition Render Pipeline.
 
+* Please remove ScriptExternal Directory if you update from from 1.5
+
 You add *CustomPassVolume* Component to a camera.
 
 ![](../img/HDRP/CustomPassVolume.png)
@@ -132,6 +136,8 @@ You change *Injection Point* into *Before Post Process*.
 ## PostProcessingStack (1.53 or later)
 
 Effekseer can be drawn as a PostProcessingStack post-process.
+
+* Please remove ScriptExternal Directory if you update from from 1.5
 
 Install PostProcessing and set the Post-Process Volume and Post-Process Layer.
 
