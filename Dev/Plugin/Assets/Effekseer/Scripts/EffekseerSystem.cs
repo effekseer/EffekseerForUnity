@@ -537,6 +537,11 @@ namespace Effekseer
 		{
 			Plugin.EffekseerUpdateTime(deltaTime);
 		}
+
+		public void ResetRestTime()
+		{
+			restFrames = 0;
+		}
 #endif
 
 		float restFrames = 0;

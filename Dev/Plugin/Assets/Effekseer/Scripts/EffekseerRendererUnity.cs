@@ -981,6 +981,10 @@ namespace Effekseer.Internal
 
 		public int layer { get; set; }
 
+#if UNITY_EDITOR
+		public bool disableCullingMask { get; set; } = false;
+#endif
+
 		public void SetVisible(bool visible)
 		{
 			if (visible)
@@ -1039,6 +1043,13 @@ namespace Effekseer.Internal
 #endif
 			// check a culling mask
 			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
+
+#if UNITY_EDITOR
+			if (disableCullingMask)
+			{
+				mask = camera.cullingMask;
+			}
+#endif
 
 			// don't need to update because doesn't exists and need not to render
 			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))

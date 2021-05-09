@@ -11,6 +11,15 @@ namespace Effekseer.Editor
 	public class EffekseerEmitterEditor : UnityEditor.Editor
 	{
 		private EffekseerEmitter emitter;
+		EffekseerEffectAsset loadedEffect;
+
+		/// <summary>
+		/// Play an effect with delay because an effect is not shown while initializing a system 
+		/// </summary>
+		float? delayPlay;
+
+		float requiredDelayTime = 0.5f;
+
 		private double lastTime;
 		private bool systemInitialized;
 		private bool loop;
@@ -33,6 +42,25 @@ namespace Effekseer.Editor
 #endif
 		}
 
+		void ReloadEffectIfRequired()
+		{
+			if (loadedEffect != emitter.effectAsset)
+			{
+				EffekseerSystem.Instance.LoadEffect(emitter.effectAsset);
+				loadedEffect = emitter.effectAsset;
+				requiredDelayTime = 0.2f;
+			}
+			else
+			{
+				requiredDelayTime = 0.1f;
+			}
+		}
+
+		void PlayEffect()
+		{
+			ReloadEffectIfRequired();
+			emitter.Play();
+		}
 		void InitSystem()
 		{
 			if (EffekseerEditor.instance.inEditor && emitter.effectAsset != null)
@@ -52,6 +80,7 @@ namespace Effekseer.Editor
 				EditorApplication.update -= Update;
 				emitter.StopImmediate();
 				EffekseerEditor.instance.TermSystem();
+				loadedEffect = null;
 			}
 			systemInitialized = false;
 		}
@@ -67,9 +96,12 @@ namespace Effekseer.Editor
 			{
 				RepaintEffect();
 			}
-			else if (loop)
+
+			if ((loop && !emitter.exists) || delayPlay.HasValue && delayPlay.Value < 0.0f)
 			{
-				emitter.Play();
+				EffekseerSystem.Instance.ResetRestTime();
+				PlayEffect();
+				delayPlay = null;
 			}
 
 			foreach (var handle in emitter.handles)
@@ -84,6 +116,11 @@ namespace Effekseer.Editor
 			}
 
 			emitter.UpdateSelf();
+
+			if (delayPlay.HasValue)
+			{
+				delayPlay = delayPlay.Value - deltaTime;
+			}
 		}
 
 		void RepaintEffect()
@@ -140,6 +177,8 @@ namespace Effekseer.Editor
 				if (systemInitialized == false)
 				{
 					InitSystem();
+					loadedEffect = null;
+					Effekseer.EffekseerSystem.Instance.renderer.disableCullingMask = true;
 				}
 
 				// avoid a bug playing effect sometimes causes craches after window size is changed.
@@ -147,9 +186,8 @@ namespace Effekseer.Editor
 				Effekseer.EffekseerSystem.Instance.renderer.CleanUp();
 
 				// Load an effect actually
-				EffekseerSystem.Instance.LoadEffect(emitter.effectAsset);
-
-				emitter.Play();
+				ReloadEffectIfRequired();
+				delayPlay = requiredDelayTime;
 			}
 			if (GUILayout.Button("Stop"))
 			{

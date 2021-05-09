@@ -247,6 +247,9 @@ namespace Effekseer.Internal
 	{
 		int layer { get; set; }
 
+#if UNITY_EDITOR
+		bool disableCullingMask { get; set; }
+#endif
 		void SetVisible(bool visible);
 
 		void CleanUp();
