@@ -248,6 +248,7 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F3$", "float3");
 			baseCode = baseCode.Replace("$F4$", "float4");
 			baseCode = baseCode.Replace("$TIME$", "_Time.y");
+			baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
 			baseCode = baseCode.Replace("$UV$", "uv");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
