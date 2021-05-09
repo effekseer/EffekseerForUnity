@@ -218,19 +218,26 @@ namespace Effekseer
 
 		public static EffekseerSettings AssignAssets()
 		{
-			const string assetDir = "Assets/Effekseer";
-			const string materialDir = assetDir + "/Materials";
-			const string resourcesDir = assetDir + "/Resources";
-			const string assetPath = resourcesDir + "/EffekseerSettings.asset";
-
-			if (!AssetDatabase.IsValidFolder(resourcesDir))
-			{
-				AssetDatabase.CreateFolder(assetDir, "Resources");
-			}
-			var asset = AssetDatabase.LoadAssetAtPath<EffekseerSettings>(assetPath);
+			var asset = Resources.Load<EffekseerSettings>("EffekseerSettings");
 
 			if (asset == null)
 			{
+				const string baseDir = "Assets";
+				const string assetDir = baseDir + "/Effekseer";
+				const string materialDir = assetDir + "/Materials";
+				const string resourcesDir = assetDir + "/Resources";
+				const string assetPath = resourcesDir + "/EffekseerSettings.asset";
+
+				if (!AssetDatabase.IsValidFolder(baseDir))
+				{
+					AssetDatabase.CreateFolder(baseDir, "Effekseer");
+				}
+
+				if (!AssetDatabase.IsValidFolder(resourcesDir))
+				{
+					AssetDatabase.CreateFolder(assetDir, "Resources");
+				}
+
 				asset = CreateInstance<EffekseerSettings>();
 				asset.texture2DArrayBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DArrayBlitShader.shader");
 				asset.texture2DBlitMaterial = AssetDatabase.LoadAssetAtPath<Shader>(materialDir + "/Texture2DBlitShader.shader");
@@ -243,6 +250,9 @@ namespace Effekseer
 			}
 			else
 			{
+				string assetDir = EffekseerEffectAsset.NormalizeAssetPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(asset)), ".."));
+				string materialDir = assetDir + "/Materials";
+
 				bool dirtied = false;
 				if (asset.fakeMaterial == null)
 				{
