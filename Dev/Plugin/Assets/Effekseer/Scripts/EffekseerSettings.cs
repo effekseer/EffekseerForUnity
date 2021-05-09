@@ -198,7 +198,7 @@ namespace Effekseer
 				instance = Resources.Load<EffekseerSettings>("EffekseerSettings");
 				if (instance == null)
 				{
-					instance = new EffekseerSettings();
+					instance = CreateInstance<EffekseerSettings>();
 				}
 				return instance;
 			}
@@ -228,7 +228,7 @@ namespace Effekseer
 				const string resourcesDir = assetDir + "/Resources";
 				const string assetPath = resourcesDir + "/EffekseerSettings.asset";
 
-				if (!AssetDatabase.IsValidFolder(baseDir))
+				if (!AssetDatabase.IsValidFolder(assetDir))
 				{
 					AssetDatabase.CreateFolder(baseDir, "Effekseer");
 				}
