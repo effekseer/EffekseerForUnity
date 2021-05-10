@@ -1,11 +1,12 @@
+#include <UnityInstancing.cginc>
 
 struct VS_Input
 {
 	uint id : SV_VertexID;
 	uint inst : SV_InstanceID;
+
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
-
 
 #if defined(ENABLE_DISTORTION)
 
@@ -17,8 +18,8 @@ struct VS_Output
 	float4 ProjTangent : TEXCOORD2;
 	float4 PosP : TEXCOORD3;
 	linear centroid float4 Color : COLOR0;
-	UNITY_VERTEX_OUTPUT_STEREO
 	
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #else
@@ -36,6 +37,7 @@ struct VS_Output
 #endif
 
 	float4 PosP : TEXCOORD4;
+	
 	UNITY_VERTEX_OUTPUT_STEREO
 };
 
