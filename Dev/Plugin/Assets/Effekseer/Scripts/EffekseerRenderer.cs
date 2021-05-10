@@ -347,13 +347,14 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				RenderTextureDescriptor desc = XRSettings.enabled ? XRSettings.eyeTextureDesc : new RenderTextureDescriptor();
-
-				desc.width = width;
-				desc.height = height;
-				desc.depthBufferBits = 0;
-				desc.colorFormat = format;
-				renderTexture = new RenderTexture(desc);
+				if(XRSettings.enabled)
+				{
+					renderTexture = new RenderTexture(XRSettings.eyeTextureDesc);
+				}
+				else
+				{
+					renderTexture = new RenderTexture(width, height, 0, format);
+				}
 			}
 
 			if (renderTexture != null)
