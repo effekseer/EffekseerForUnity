@@ -1,9 +1,10 @@
+#include <HLSLSupport.cginc>
+#include <UnityInstancing.cginc>
 
 Texture2D _colorTex : register(t0);
 SamplerState sampler_colorTex : register(s0);
 
-Texture2D _backTex : register(t1);
-SamplerState sampler_backTex : register(s1);
+UNITY_DECLARE_SCREENSPACE_TEXTURE(_backTex);
 
 Texture2D _alphaTex : register(t2);
 SamplerState sampler_alphaTex : register(s2);
@@ -55,6 +56,8 @@ struct PS_Input
 
 	// BlendUV, FlipbookNextIndexUV
 	float4 Blend_FBNextIndex_UV : TEXCOORD6;
+
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #include "EffekseerShaderAdCommonPS.cginc"
@@ -63,6 +66,8 @@ struct PS_Input
 float4 frag(const PS_Input Input)
 	: SV_Target
 {
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(Input);
+
 	AdvancedParameter advancedParam = DisolveAdvancedParameter(Input);
 
 	float2 UVOffset = UVDistortionOffset(_uvDistortionTex, sampler_uvDistortionTex, advancedParam.UVDistortionUV, fUVDistortionParameter.zw);
@@ -112,7 +117,7 @@ float4 frag(const PS_Input Input)
 	uv.y = 1.0 - uv.y;
 #endif
 
-	float3 color = _backTex.Sample(sampler_backTex, uv);
+	float3 color = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_backTex, uv);
 	Output.xyz = color;
 
 #ifndef DISABLED_SOFT_PARTICLE
