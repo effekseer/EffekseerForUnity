@@ -1,8 +1,9 @@
+#include <HLSLSupport.cginc>
+#include <UnityInstancing.cginc>
 Texture2D _colorTex : register(t0);
 SamplerState sampler_colorTex : register(s0);
 
-Texture2D _backTex : register(t1);
-SamplerState sampler_backTex : register(s1);
+UNITY_DECLARE_SCREENSPACE_TEXTURE(_backTex);
 
 #ifndef DISABLED_SOFT_PARTICLE
 Texture2D _depthTex : register(t2);
@@ -31,6 +32,7 @@ struct PS_Input
 	float4 ProjTangent : TEXCOORD2;
 	float4 PosP : TEXCOORD3;
 	linear centroid float4 Color : COLOR0;
+	UNITY_VERTEX_OUTPUT_STEREO 
 };
 
 #include "EffekseerShaderSoftParticlePS.cginc"
@@ -38,6 +40,8 @@ struct PS_Input
 float4 frag(const PS_Input Input)
 	: SV_Target
 {
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(Input);
+	
 	float4 Output = _colorTex.Sample(sampler_colorTex, Input.UV);
 	Output.a = Output.a * Input.Color.a;
 
@@ -59,7 +63,7 @@ float4 frag(const PS_Input Input)
 	uv.y = 1.0 - uv.y;
 #endif
 
-	float3 color = _backTex.Sample(sampler_backTex, uv);
+	float3 color = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_backTex, uv);
 	Output.xyz = color;
 
 #ifndef DISABLED_SOFT_PARTICLE

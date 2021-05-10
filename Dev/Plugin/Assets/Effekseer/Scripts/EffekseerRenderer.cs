@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using System.Runtime.InteropServices;
+using UnityEngine.XR;
 
 namespace Effekseer.Internal
 {
@@ -347,7 +347,13 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				renderTexture = new RenderTexture(width, height, 0, format);
+				RenderTextureDescriptor desc = XRSettings.enabled ? XRSettings.eyeTextureDesc : new RenderTextureDescriptor();
+
+				desc.width = width;
+				desc.height = height;
+				desc.depthBufferBits = 0;
+				desc.colorFormat = format;
+				renderTexture = new RenderTexture(desc);
 			}
 
 			if (renderTexture != null)

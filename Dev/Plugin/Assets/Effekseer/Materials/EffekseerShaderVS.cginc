@@ -1,3 +1,12 @@
+#include <UnityInstancing.cginc>
+
+struct VS_Input
+{
+	uint id : SV_VertexID;
+	uint inst : SV_InstanceID;
+
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 #if defined(ENABLE_DISTORTION)
 
@@ -9,6 +18,8 @@ struct VS_Output
 	float4 ProjTangent : TEXCOORD2;
 	float4 PosP : TEXCOORD3;
 	linear centroid float4 Color : COLOR0;
+	
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #else
@@ -26,6 +37,8 @@ struct VS_Output
 #endif
 
 	float4 PosP : TEXCOORD4;
+	
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #endif
@@ -64,20 +77,24 @@ StructuredBuffer<int> buf_vertex_offsets;
 StructuredBuffer<int> buf_index_offsets;
 
 
-VS_Output vert(uint v_id : SV_VertexID, uint inst : SV_InstanceID)
+VS_Output vert(VS_Input i)
 {
-	float4x4 mModel = buf_model_parameter[inst].Mat;
-	float4 fUV = buf_model_parameter[inst].UV;
-	float4 fModelColor = buf_model_parameter[inst].VColor;
-	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
-	float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
+	VS_Output Output;
+	UNITY_SETUP_INSTANCE_ID(i);
+	UNITY_INITIALIZE_OUTPUT(VS_Output, Output);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(Output);
+	
+	float4x4 mModel = buf_model_parameter[i.inst].Mat;
+	float4 fUV = buf_model_parameter[i.inst].UV;
+	float4 fModelColor = buf_model_parameter[i.inst].VColor;
+	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[i.inst].Time];
+	float buf_index_offset = buf_index_offsets[buf_model_parameter[i.inst].Time];
 
-	ModelVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+	ModelVertex Input = buf_vertex[buf_index[i.id + buf_index_offset] + buf_vertex_offset];
 
 	float4x4 mCameraProj = UNITY_MATRIX_VP;
 	float4 uv = fUV;
 
-	VS_Output Output = (VS_Output)0;
 	float4 localPos = { Input.Pos.x, Input.Pos.y, Input.Pos.z, 1.0 };
 
 	float4 worldPos = mul(mModel, localPos);
@@ -156,10 +173,15 @@ float buf_offset;
 
 
 
-VS_Output vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+VS_Output vert(VS_Input i)
 {
-	int qind = (id) / 6;
-	int vind = (id) % 6;
+	VS_Output Output;
+	UNITY_SETUP_INSTANCE_ID(i);
+	UNITY_INITIALIZE_OUTPUT(VS_Output, Output);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(Output);
+	
+	int qind = (i.id) / 6;
+	int vind = (i.id) % 6;
 
 	int v_offset[6];
 	v_offset[0] = 2;
@@ -177,7 +199,6 @@ VS_Output vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 
 
 	float4x4 mCameraProj = UNITY_MATRIX_VP;
-	VS_Output Output = (VS_Output)0;
 
 #if defined(ENABLE_LIGHTING) || defined(ENABLE_DISTORTION)
 	float4 worldNormal = float4(Input.Normal.xyz, 0.0);

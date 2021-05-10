@@ -1199,7 +1199,7 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
 
@@ -1217,7 +1217,7 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
 
@@ -1248,7 +1248,7 @@ namespace Effekseer.Internal
 				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
 					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
+					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value, 0, CubemapFace.Unknown, -1);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1267,7 +1267,7 @@ namespace Effekseer.Internal
 				else
 				{
 					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
 

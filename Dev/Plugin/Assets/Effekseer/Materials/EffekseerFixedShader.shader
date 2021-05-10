@@ -31,6 +31,8 @@
 			#pragma multi_compile _ _MODEL_
 			#pragma multi_compile _ _ADVANCED_
 			#pragma multi_compile _ ENABLE_LIGHTING ENABLE_DISTORTION
+			#pragma multi_compile_instancing
+			
 #if _ADVANCED_
 
 			#include "EffekseerShaderAdVS.cginc"
