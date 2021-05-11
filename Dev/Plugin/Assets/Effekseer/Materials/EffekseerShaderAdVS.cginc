@@ -1,11 +1,17 @@
 #include <UnityInstancing.cginc>
 
+#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
+#define VERTEX_INPUT_INSTANCE_ID UNITY_VERTEX_INPUT_INSTANCE_ID
+#define GET_INSTANCE_ID(input) unity_InstanceID
+#else
+#define VERTEX_INPUT_INSTANCE_ID uint inst : SV_InstanceID;
+#define GET_INSTANCE_ID(input) input.inst
+#endif
+
 struct VS_Input
 {
 	uint id : SV_VertexID;
-	uint inst : SV_InstanceID;
-
-	UNITY_VERTEX_INPUT_INSTANCE_ID
+	VERTEX_INPUT_INSTANCE_ID
 };
 
 #if defined(ENABLE_DISTORTION)
@@ -264,20 +270,22 @@ VS_Output vert(VS_Input i)
 	UNITY_INITIALIZE_OUTPUT(VS_Output, Output);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(Output);
 
-	float4x4 mModel = buf_model_parameter[i.inst].Mat;
-	float4 fUV = buf_model_parameter[i.inst].UV;
-	float4 fModelColor = buf_model_parameter[i.inst].VColor;
+	uint inst_ind = GET_INSTANCE_ID(i);
 
-	float4 fAlphaUV = buf_model_parameter2[i.inst].AlphaUV;
-	float4 fUVDistortionUV = buf_model_parameter2[i.inst].DistortionUV;
-	float4 fBlendUV = buf_model_parameter2[i.inst].BlendUV;
-	float4 fBlendAlphaUV = buf_model_parameter2[i.inst].BlendAlphaUV;
-	float4 fBlendUVDistortionUV = buf_model_parameter2[i.inst].BlendDistortionUV;
-	float fFlipbookIndexAndNextRate = buf_model_parameter2[i.inst].FlipbookIndexAndNextRate;
-	float fAlphaThreshold = buf_model_parameter2[i.inst].AlphaThreshold;
+	float4x4 mModel = buf_model_parameter[inst_ind].Mat;
+	float4 fUV = buf_model_parameter[inst_ind].UV;
+	float4 fModelColor = buf_model_parameter[inst_ind].VColor;
 
-	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[i.inst].Time];
-	float buf_index_offset = buf_index_offsets[buf_model_parameter[i.inst].Time];
+	float4 fAlphaUV = buf_model_parameter2[inst_ind].AlphaUV;
+	float4 fUVDistortionUV = buf_model_parameter2[inst_ind].DistortionUV;
+	float4 fBlendUV = buf_model_parameter2[inst_ind].BlendUV;
+	float4 fBlendAlphaUV = buf_model_parameter2[inst_ind].BlendAlphaUV;
+	float4 fBlendUVDistortionUV = buf_model_parameter2[inst_ind].BlendDistortionUV;
+	float fFlipbookIndexAndNextRate = buf_model_parameter2[inst_ind].FlipbookIndexAndNextRate;
+	float fAlphaThreshold = buf_model_parameter2[inst_ind].AlphaThreshold;
+
+	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst_ind].Time];
+	float buf_index_offset = buf_index_offsets[buf_model_parameter[inst_ind].Time];
 
 	ModelVertex Input = buf_vertex[buf_index[i.id + buf_index_offset] + buf_vertex_offset];
 
