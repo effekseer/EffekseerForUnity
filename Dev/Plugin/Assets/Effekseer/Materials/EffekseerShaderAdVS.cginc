@@ -209,22 +209,6 @@ float4 fFlipbookParameter; // x:enable, y:loopType, z:divideX, w:divideY
 float4 mUVInversed;
 //};
 
-struct VS_Input
-{
-	float3 Pos : POSITION0;
-	float3 Normal : NORMAL0;
-	float3 Binormal : NORMAL1;
-	float3 Tangent : NORMAL2;
-	float2 UV : TEXCOORD0;
-	float4 Color : NORMAL3;
-
-#if defined(ENABLE_DIVISOR)
-	float Index : BLENDINDICES0;
-#elif !defined(DISABLE_INSTANCE)
-	uint Index : SV_InstanceID;
-#endif
-};
-
 StructuredBuffer<ModelVertex> buf_vertex;
 StructuredBuffer<int> buf_index;
 
@@ -295,7 +279,7 @@ VS_Output vert(VS_Input i)
 	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[i.inst].Time];
 	float buf_index_offset = buf_index_offsets[buf_model_parameter[i.inst].Time];
 
-	ModelVertex Input = buf_vertex[buf_index[v_id + buf_index_offset] + buf_vertex_offset];
+	ModelVertex Input = buf_vertex[buf_index[i.id + buf_index_offset] + buf_vertex_offset];
 
 	float4x4 mCameraProj = UNITY_MATRIX_VP;
 
