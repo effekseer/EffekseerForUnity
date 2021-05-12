@@ -8,4 +8,4 @@ call emcmake cmake -G "MinGW Makefiles"
 rem build
 mingw32-make
 
-copy libEffekseerUnity.bc ..\..\Plugin\Assets\Effekseer\Plugins\WebGL\1.38.11-64bit\
+copy libEffekseerUnity.bc ..\..\Plugin\Assets\Effekseer\Plugins\WebGL\
