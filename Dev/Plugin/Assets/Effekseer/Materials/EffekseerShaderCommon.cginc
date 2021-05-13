@@ -29,8 +29,8 @@ struct ModelVertex
 struct ModelParameter1
 {
 	float4x4 Mat;
-	float4 VColor;
 	float4 UV;
+	float4 VColor;
 	int Time;
 };
 

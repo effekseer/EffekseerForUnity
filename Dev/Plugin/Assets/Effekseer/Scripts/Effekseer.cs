@@ -500,8 +500,8 @@ namespace Effekseer
 		public struct UnityRenderModelParameter1
 		{
 			public Matrix4x4 Matrix;
-			public Color VColor;
 			public Vector4 UV;
+			public Color VColor;
 			public int Time;
 		};
 

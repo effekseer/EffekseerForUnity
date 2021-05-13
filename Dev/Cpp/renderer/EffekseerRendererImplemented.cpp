@@ -63,8 +63,8 @@ namespace EffekseerRendererUnity
 struct UnityModelParameter1
 {
 	Effekseer::Matrix44 Matrix;
-	float VColor[4];
 	Effekseer::RectF UV;
+	float VColor[4];
 	int32_t Time;
 };
 
