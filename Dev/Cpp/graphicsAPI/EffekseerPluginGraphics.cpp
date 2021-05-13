@@ -77,7 +77,7 @@ Graphics* Graphics::Create(UnityGfxRenderer renderer, bool isUnityRenderer, bool
 	}
 #endif
 
-#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
+#if defined(_WIN32) || defined(__ANDROID__) || defined(EMSCRIPTEN)
 	if (renderer == UnityGfxRenderer::kUnityGfxRendererOpenGLCore || renderer == UnityGfxRenderer::kUnityGfxRendererOpenGL ||
 		renderer == UnityGfxRenderer::kUnityGfxRendererOpenGLES20 || renderer == UnityGfxRenderer::kUnityGfxRendererOpenGLES30)
 	{
