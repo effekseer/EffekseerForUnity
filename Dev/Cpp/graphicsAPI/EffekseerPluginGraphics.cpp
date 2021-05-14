@@ -1,6 +1,10 @@
-﻿#include "EffekseerPluginGraphics.h"
+#include "EffekseerPluginGraphics.h"
 
 #include "EffekseerPluginGraphicsUnity.h"
+
+#ifdef __APPLE__
+#import <TargetConditionals.h>
+#endif
 
 #ifdef _WIN32
 #include "EffekseerPluginGraphicsDX11.h"
