@@ -342,6 +342,16 @@ namespace Effekseer
 			}
 			else
 			{
+#if UNITY_IOS
+				switch (SystemInfo.graphicsDeviceType)
+				{
+					case GraphicsDeviceType.OpenGLES2:
+					case GraphicsDeviceType.OpenGLES3:
+						Debug.LogError("OpenGL is not suppoedted on Mac and iOS.");
+						break;
+				}
+#endif
+
 				// Check whether this api is supported
 				switch (SystemInfo.graphicsDeviceType)
 				{
@@ -983,6 +993,6 @@ namespace Effekseer
 			}
 		}
 
-		#endregion
+#endregion
 	}
 }
