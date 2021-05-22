@@ -99,3 +99,27 @@ if(WIN32)
     endif()
 endif()
 
+if(APPLE)
+    set(srcs
+        ${effekseer_src}
+        ${effekseer_gl_src})
+
+    if(IOS)
+        add_library(EffekseerUnity STATIC
+            ${srcs}
+        )
+    else()
+        add_library(EffekseerUnity MODULE
+            ${srcs}
+        )
+        set_target_properties(EffekseerUnity PROPERTIES BUNDLE TRUE)
+    endif()
+
+    target_link_libraries(EffekseerUnity PRIVATE
+        Effekseer
+        EffekseerRendererGL)
+
+    set_property(TARGET EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
+
+wndif()
+
