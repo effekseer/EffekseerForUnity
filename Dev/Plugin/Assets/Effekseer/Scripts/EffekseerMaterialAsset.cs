@@ -548,8 +548,9 @@ Cull[_Cull]
 			float2 zs = float2(backgroundZ * rescale.x + rescale.y, meshZ);
 
 			float2 depth = (zs * params.w - params.y) / (params.x - zs* params.z);
-
-			return min(max((depth.y - depth.x) / distance, 0.0), 1.0);
+			float dir = sign(depth.x);
+			depth *= dir;
+			return min(max((depth.x - depth.y) / distance, 0.0), 1.0);
 		}
 
 
