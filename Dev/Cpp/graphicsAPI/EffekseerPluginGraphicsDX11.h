@@ -36,11 +36,11 @@ public:
 
 	void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) override;
 
-	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) override;
+	Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload, GetUnityIDFromPath getUnityId) override;
 
-	Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) override;
+	Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId) override;
 
-	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) override;
+	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };

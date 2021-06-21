@@ -19,18 +19,16 @@
 namespace EffekseerPlugin
 {
 	using ModelLoaderLoad = void* (UNITY_INTERFACE_API*)(const char16_t* path, void* data, int dataSize, int& requiredDataSize);
-	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(const char16_t* path, void* modelPointer);
+	using ModelLoaderUnload = void (UNITY_INTERFACE_API*)(int id, void* modelPointer);
 
 	class ModelLoader : public Effekseer::ModelLoader
 	{
 		ModelLoaderLoad load;
 		ModelLoaderUnload unload;
-		
-		struct ModelResource {
-			int referenceCount = 1;
-			Effekseer::ModelRef internalData;
-		};
-		std::map<std::u16string, ModelResource> resources;
+		GetUnityIDFromPath getUnityId_;
+
+		IDtoResourceTable<Effekseer::ModelRef> id2Obj_;
+
 		MemoryFile memoryFile;
 
 		Effekseer::RefPtr<Effekseer::ModelLoader> internalLoader;
@@ -38,11 +36,11 @@ namespace EffekseerPlugin
 	public:
 		static Effekseer::RefPtr<Effekseer::ModelLoader> Create(
 			ModelLoaderLoad load,
-			ModelLoaderUnload unload);
+			ModelLoaderUnload unload, GetUnityIDFromPath getUnityId);
 
 		ModelLoader(
 			ModelLoaderLoad load,
-			ModelLoaderUnload unload );
+			ModelLoaderUnload unload, GetUnityIDFromPath getUnityId);
 		
 		virtual ~ModelLoader() = default;
 		virtual Effekseer::ModelRef Load(const char16_t* path) override;

@@ -34,8 +34,14 @@ protected:
 
 public:
 	static Effekseer::RefPtr<Effekseer::TextureLoader> Create(EffekseerPlugin::TextureLoaderLoad load,
-															  EffekseerPlugin::TextureLoaderUnload unload);
-	TextureLoader(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload) : load(load), unload(unload) {}
+															  EffekseerPlugin::TextureLoaderUnload unload,
+															  EffekseerPlugin::GetUnityIDFromPath getUnityId);
+	TextureLoader(EffekseerPlugin::TextureLoaderLoad load,
+				  EffekseerPlugin::TextureLoaderUnload unload,
+				  EffekseerPlugin::GetUnityIDFromPath getUnityId)
+		: load(load), unload(unload)
+	{
+	}
 	~TextureLoader() override = default;
 	Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
 	void Unload(Effekseer::TextureRef source) override;

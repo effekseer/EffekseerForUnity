@@ -259,36 +259,42 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetDynamicInput(int handle, int index, float value);
 
+		public delegate int EffekseerGetUnityIdFromPath(IntPtr path);
+
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetTextureLoaderEvent(
 			EffekseerTextureLoaderLoad load,
-			EffekseerTextureLoaderUnload unload);
+			EffekseerTextureLoaderUnload unload,
+			EffekseerGetUnityIdFromPath getUnityId);
 		public delegate IntPtr EffekseerTextureLoaderLoad(IntPtr path, out int width, out int height, out int format, out int mipmapCount);
-		public delegate void EffekseerTextureLoaderUnload(IntPtr path, IntPtr nativePtr);
+		public delegate void EffekseerTextureLoaderUnload(int id, IntPtr nativePtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetModelLoaderEvent(
 			EffekseerModelLoaderLoad load,
-			EffekseerModelLoaderUnload unload);
+			EffekseerModelLoaderUnload unload,
+			EffekseerGetUnityIdFromPath getUnityId);
 		public delegate IntPtr EffekseerModelLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize);
-		public delegate void EffekseerModelLoaderUnload(IntPtr path, IntPtr modelPtr);
+		public delegate void EffekseerModelLoaderUnload(int id, IntPtr modelPtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetMaterialLoaderEvent(
 			EffekseerMaterialLoaderLoad load,
-			EffekseerMaterialLoaderUnload unload);
+			EffekseerMaterialLoaderUnload unload,
+			EffekseerGetUnityIdFromPath getUnityId);
 		public delegate IntPtr EffekseerMaterialLoaderLoad(IntPtr path,
 			IntPtr materialBuffer, int materialBufferSize, ref int requiredMaterialBufferSize,
 			IntPtr cachedMaterialBuffer, int cachedMaterialBufferSize, ref int requiredCachedMaterialBufferSize);
-		public delegate void EffekseerMaterialLoaderUnload(IntPtr path, IntPtr modelPtr);
+		public delegate void EffekseerMaterialLoaderUnload(int id, IntPtr modelPtr);
 
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetCurveLoaderEvent(
 			EffekseerCurveLoaderLoad load,
-			EffekseerCurveLoaderUnload unload);
+			EffekseerCurveLoaderUnload unload,
+			EffekseerGetUnityIdFromPath getUnityId);
 		public delegate IntPtr EffekseerCurveLoaderLoad(IntPtr path, IntPtr buffer, int bufferSize, ref int requiredBufferSize);
-		public delegate void EffekseerCurveLoaderUnload(IntPtr path, IntPtr curvePtr);
+		public delegate void EffekseerCurveLoaderUnload(int id, IntPtr curvePtr);
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct ModelVertex
@@ -323,9 +329,10 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundLoaderEvent(
 			EffekseerSoundLoaderLoad load,
-			EffekseerSoundLoaderUnload unload);
+			EffekseerSoundLoaderUnload unload,
+			EffekseerGetUnityIdFromPath getUnityId);
 		public delegate IntPtr EffekseerSoundLoaderLoad(IntPtr path);
-		public delegate void EffekseerSoundLoaderUnload(IntPtr path);
+		public delegate void EffekseerSoundLoaderUnload(IntPtr nativePtr);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetSoundPlayerEvent(

@@ -65,11 +65,14 @@ public:
 
 	virtual void SetExternalTexture(int renderId, ExternalTextureType type, void* texture) = 0;
 
-	virtual Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload) = 0;
+	virtual Effekseer::TextureLoaderRef Create(TextureLoaderLoad load, TextureLoaderUnload unload, GetUnityIDFromPath getUnityId) = 0;
 
-	virtual Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload) = 0;
+	virtual Effekseer::ModelLoaderRef Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId) = 0;
 
-	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload) { return nullptr; }
+	virtual Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
+	{
+		return nullptr;
+	}
 
 	virtual Effekseer::ProceduralModelGeneratorRef Create(ProceduralModelGeneratorGenerate generate,
 														  ProceduralModelGeneratorUngenerate ungenerate)

@@ -110,7 +110,7 @@ void MaterialLoader::Unload(Effekseer::MaterialRef data)
 	ES_SAFE_DELETE(srs);
 	ES_SAFE_DELETE(srm);
 
-	unload_(data->GetPath().c_str(), ptr);
+	unload_(0, ptr);
 }
 
 } // namespace EffekseerRendererUnity

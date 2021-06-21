@@ -749,6 +749,7 @@ extern "C"
 		g_rendererType = (RendererType)rendererType;
 
 		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
+		g_EffekseerManager->GetSetting()->SetIsFileCacheEnabled(false);
 
 #ifndef __EMSCRIPTEN__
 		if (threadCount >= 2)
@@ -840,17 +841,18 @@ extern "C"
 namespace EffekseerPlugin
 {
 
-Effekseer::RefPtr<Effekseer::TextureLoader> TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::RefPtr<Effekseer::TextureLoader>
+TextureLoader::Create(TextureLoaderLoad load, TextureLoaderUnload unload, EffekseerPlugin::GetUnityIDFromPath getUnityId)
 {
 	if (g_graphics != nullptr)
-		return g_graphics->Create(load, unload);
+		return g_graphics->Create(load, unload, getUnityId);
 	return {};
 }
 
-Effekseer::RefPtr<Effekseer::ModelLoader> ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::RefPtr<Effekseer::ModelLoader> ModelLoader::Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
 	if (g_graphics != nullptr)
-		return g_graphics->Create(load, unload);
+		return g_graphics->Create(load, unload, getUnityId);
 	return {};
 }
 

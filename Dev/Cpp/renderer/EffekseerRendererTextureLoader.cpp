@@ -30,7 +30,7 @@ void TextureLoader::Unload(Effekseer::TextureRef source)
 	}
 
 	// Unload from unity
-	unload(source->GetPath().c_str(), textureData2NativePtr[source]);
+	unload(0, textureData2NativePtr[source]);
 	textureData2NativePtr.erase(source);
 }
 } // namespace EffekseerRendererUnity

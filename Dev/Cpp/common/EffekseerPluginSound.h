@@ -20,7 +20,7 @@ using SoundTag = Effekseer::SoundTag;
 using SoundHandle = Effekseer::SoundHandle;
 
 using SoundLoaderLoad = uintptr_t(UNITY_INTERFACE_API*)(const char16_t* path);
-using SoundLoaderUnload = void(UNITY_INTERFACE_API*)(const char16_t* path);
+using SoundLoaderUnload = void(UNITY_INTERFACE_API*)(const uintptr_t nativePtr);
 
 class SoundData : public Effekseer::SoundData
 {
@@ -36,17 +36,13 @@ class SoundLoader : public Effekseer::SoundLoader
 {
 	SoundLoaderLoad load;
 	SoundLoaderUnload unload;
+	GetUnityIDFromPath getUnityId_;
 
-	struct SoundResource
-	{
-		int referenceCount = 1;
-		Effekseer::SoundDataRef soundID = 0;
-	};
-	std::map<std::u16string, SoundResource> resources;
+	IDtoResourceTable<Effekseer::SoundDataRef> id2Obj_;
 
 public:
-	static Effekseer::SoundLoaderRef Create(SoundLoaderLoad load, SoundLoaderUnload unload);
-	SoundLoader(SoundLoaderLoad load, SoundLoaderUnload unload) : load(load), unload(unload) {}
+	static Effekseer::SoundLoaderRef Create(SoundLoaderLoad load, SoundLoaderUnload unload, GetUnityIDFromPath getUnityId);
+	SoundLoader(SoundLoaderLoad load, SoundLoaderUnload unload, GetUnityIDFromPath getUnityId) : load(load), unload(unload), getUnityId_(getUnityId) {}
 	virtual ~SoundLoader() override = default;
 	virtual Effekseer::SoundDataRef Load(const EFK_CHAR* path) override;
 	virtual void Unload(Effekseer::SoundDataRef source) override;

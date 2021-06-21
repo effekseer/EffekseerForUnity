@@ -3,13 +3,23 @@
 
 namespace EffekseerPlugin
 {
-CurveLoader::CurveLoader(CurveLoaderLoad load, CurveLoaderUnload unload) : load_(load), unload_(unload), memoryFile_(1 * 1024 * 1024)
+CurveLoader::CurveLoader(CurveLoaderLoad load, CurveLoaderUnload unload, GetUnityIDFromPath getUnityId)
+	: load_(load), unload_(unload), getUnityId_(getUnityId), memoryFile_(1 * 1024 * 1024)
 {
 	internalLoader_ = Effekseer::MakeRefPtr<Effekseer::CurveLoader>(&memoryFile_);
 }
 
 Effekseer::CurveRef CurveLoader::Load(const EFK_CHAR* path)
 {
+	auto id = getUnityId_(path);
+
+	Effekseer::CurveRef generated;
+
+	if (id2Obj_.TryLoad(id, generated))
+	{
+		return generated;
+	}
+
 	// Load with unity
 	int requiredDataSize = 0;
 	auto CurvePtr = load_((const char16_t*)path, &memoryFile_.LoadedBuffer[0], (int)memoryFile_.LoadedBuffer.size(), requiredDataSize);
@@ -36,8 +46,20 @@ Effekseer::CurveRef CurveLoader::Load(const EFK_CHAR* path)
 	}
 
 	memoryFile_.LoadedSize = (size_t)requiredDataSize;
-	return internalLoader_->Load(path);
+	auto data = internalLoader_->Load(path);
+
+	id2Obj_.Register(id, data, CurvePtr);
+
+	return data;
 }
 
-void CurveLoader::Unload(Effekseer::CurveRef source) {}
+void CurveLoader::Unload(Effekseer::CurveRef source)
+{
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Obj_.Unload(source, id, nativePtr))
+	{
+		unload_(id, nativePtr);
+	}
+}
 } // namespace EffekseerPlugin

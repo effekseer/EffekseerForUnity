@@ -53,7 +53,7 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 
 	// find a model
 	auto model = source.DownCast<Model>().Get();
-	unload(source->GetPath().c_str(), model->InternalPtr);
+	unload(0, model->InternalPtr);
 }
 
 Effekseer::ModelRef ProceduralModelGenerator::Generate(const Effekseer::ProceduralModelParameter& parameter)

@@ -16,12 +16,13 @@ namespace EffekseerPlugin
 class TextureLoaderGL : public TextureLoader
 {
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
-	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
+	IDtoResourceTable<Effekseer::TextureRef> id2Texture_;
 	UnityGfxRenderer gfxRenderer;
 
 public:
 	TextureLoaderGL(TextureLoaderLoad load,
 					TextureLoaderUnload unload,
+					GetUnityIDFromPath getUnityId,
 					Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
 					UnityGfxRenderer renderer);
 
@@ -36,9 +37,10 @@ bool IsPowerOfTwo(uint32_t x) { return (x & (x - 1)) == 0; }
 
 TextureLoaderGL::TextureLoaderGL(TextureLoaderLoad load,
 								 TextureLoaderUnload unload,
+								 GetUnityIDFromPath getUnityId,
 								 Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
 								 UnityGfxRenderer renderer)
-	: TextureLoader(load, unload), graphicsDevice_(graphicsDevice), gfxRenderer(renderer)
+	: TextureLoader(load, unload, getUnityId), graphicsDevice_(graphicsDevice), gfxRenderer(renderer)
 {
 }
 
@@ -46,9 +48,19 @@ TextureLoaderGL::~TextureLoaderGL() {}
 
 Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 {
+	auto id = getUnityId_(path);
+
+	Effekseer::TextureRef generated;
+
+	if (id2Texture_.TryLoad(id, generated))
+	{
+		return generated;
+	}
+
 	// Load with unity
 	int32_t width, height, format, miplevel;
-	int64_t textureID = reinterpret_cast<int64_t>(load((const char16_t*)path, &width, &height, &format, &miplevel));
+	auto texturePtr = load((const char16_t*)path, &width, &height, &format, &miplevel);
+	int64_t textureID = reinterpret_cast<int64_t>(texturePtr);
 	if (textureID == 0)
 	{
 		return nullptr;
@@ -57,7 +69,9 @@ Effekseer::TextureRef TextureLoaderGL::Load(const EFK_CHAR* path, Effekseer::Tex
 	auto backend = EffekseerRendererGL::CreateTexture(graphicsDevice_, textureID, miplevel > 1, [] {});
 	auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 	textureDataPtr->SetBackend(backend);
-	textureData2NativePtr[textureDataPtr] = (void*)textureID;
+
+	id2Texture_.Register(id, textureDataPtr, texturePtr);
+
 	return textureDataPtr;
 }
 
@@ -68,8 +82,12 @@ void TextureLoaderGL::Unload(Effekseer::TextureRef source)
 		return;
 	}
 
-	unload(source->GetPath().c_str(), textureData2NativePtr[source]);
-	textureData2NativePtr.erase(source);
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Texture_.Unload(source, id, nativePtr))
+	{
+		unload(id, nativePtr);
+	}
 }
 
 GraphicsGL::GraphicsGL(UnityGfxRenderer renderer) : gfxRenderer(renderer) { MaterialEvent::Initialize(); }
@@ -135,8 +153,7 @@ void GraphicsGL::SetExternalTexture(int renderId, ExternalTextureType type, void
 
 	if (texture != nullptr)
 	{
-		externalTexture.Texture =
-			EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)texture, false, []() -> void {});
+		externalTexture.Texture = EffekseerRendererGL::CreateTexture(graphicsDevice_, (GLuint)(uintptr_t)texture, false, []() -> void {});
 		externalTexture.OriginalPtr = texture;
 	}
 	else
@@ -145,23 +162,23 @@ void GraphicsGL::SetExternalTexture(int renderId, ExternalTextureType type, void
 	}
 }
 
-Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsGL::Create(TextureLoaderLoad load, TextureLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, graphicsDevice_, gfxRenderer);
+	return Effekseer::MakeRefPtr<TextureLoaderGL>(load, unload, getUnityId, graphicsDevice_, gfxRenderer);
 }
 
-Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload, getUnityId);
 
 	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
 
-Effekseer::MaterialLoaderRef GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsGL::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload, getUnityId);
 	auto internalLoader = ::EffekseerRendererGL::CreateMaterialLoader(graphicsDevice_);
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

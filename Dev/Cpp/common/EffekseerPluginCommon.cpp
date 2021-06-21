@@ -555,7 +555,8 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetTextureLoaderEvent(
 		TextureLoaderLoad load,
-		TextureLoaderUnload unload)
+		TextureLoaderUnload unload,
+		GetUnityIDFromPath getUnityId)
 	{
 		if (g_EffekseerManager == nullptr)
 		{
@@ -567,12 +568,12 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetTextureLoader(g_graphics->Create(load, unload));
+		g_EffekseerManager->SetTextureLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetModelLoaderEvent(
-		ModelLoaderLoad load,
-		ModelLoaderUnload unload)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetModelLoaderEvent(ModelLoaderLoad load,
+																				 ModelLoaderUnload unload,
+																				 GetUnityIDFromPath getUnityId)
 	{
 		if (g_EffekseerManager == nullptr)
 		{
@@ -584,10 +585,12 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetModelLoader(g_graphics->Create(load, unload));
+		g_EffekseerManager->SetModelLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetMaterialLoaderEvent(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetMaterialLoaderEvent(MaterialLoaderLoad load,
+																					MaterialLoaderUnload unload,
+																					GetUnityIDFromPath getUnityId)
 	{
 		if (g_EffekseerManager == nullptr)
 		{
@@ -599,7 +602,7 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload));
+		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProceduralModelGeneratorEvent(ProceduralModelGeneratorGenerate load,
@@ -622,15 +625,15 @@ extern "C"
 		}
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundLoaderEvent(
-		SoundLoaderLoad load,
-		SoundLoaderUnload unload)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundLoaderEvent(SoundLoaderLoad load,
+																				 SoundLoaderUnload unload,
+																				 GetUnityIDFromPath getUnityId)
 	{
 		if (g_EffekseerManager == NULL) {
 			return;
 		}
 
-		g_EffekseerManager->SetSoundLoader(EffekseerPlugin::SoundLoader::Create(load, unload));
+		g_EffekseerManager->SetSoundLoader(EffekseerPlugin::SoundLoader::Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundPlayerEvent(
@@ -651,13 +654,15 @@ extern "C"
 		}
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetCurveLoaderEvent(CurveLoaderLoad load, ModelLoaderUnload unload)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetCurveLoaderEvent(CurveLoaderLoad load,
+																				 CurveLoaderUnload unload,
+																				 GetUnityIDFromPath getUnityId)
 	{
 		if (g_EffekseerManager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload));
+		g_EffekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload, getUnityId));
 	}
 }
