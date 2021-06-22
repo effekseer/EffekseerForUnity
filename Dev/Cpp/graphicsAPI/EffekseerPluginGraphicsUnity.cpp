@@ -67,12 +67,12 @@ Effekseer::TextureLoaderRef GraphicsUnity::Create(TextureLoaderLoad load, Textur
 
 Effekseer::ModelLoaderRef GraphicsUnity::Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ModelLoader>(load, unload);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::ModelLoader>(load, unload, getUnityId);
 }
 
 Effekseer::MaterialLoaderRef GraphicsUnity::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	return Effekseer::MakeRefPtr<EffekseerRendererUnity::MaterialLoader>(load, unload);
+	return Effekseer::MakeRefPtr<EffekseerRendererUnity::MaterialLoader>(load, unload, getUnityId);
 }
 
 Effekseer::ProceduralModelGeneratorRef GraphicsUnity::Create(ProceduralModelGeneratorGenerate generate,

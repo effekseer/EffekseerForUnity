@@ -5,13 +5,25 @@
 
 namespace EffekseerRendererUnity
 {
-ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin::ModelLoaderUnload unload) : load(load), unload(unload)
+ModelLoader::ModelLoader(EffekseerPlugin::ModelLoaderLoad load,
+						 EffekseerPlugin::ModelLoaderUnload unload,
+						 EffekseerPlugin::GetUnityIDFromPath getUnityId)
+	: load(load), unload(unload), getUnityId_(getUnityId)
 {
 	internalBuffer.resize(1024 * 1024);
 }
 
 Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 {
+	auto id = getUnityId_(path);
+
+	Effekseer::ModelRef generated;
+
+	if (id2Obj_.TryLoad(id, generated))
+	{
+		return generated;
+	}
+
 	// Load with unity
 	int requiredDataSize = 0;
 	void* modelPtr = nullptr;
@@ -41,6 +53,9 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 
 	auto model = Effekseer::MakeRefPtr<Model>(internalBuffer.data(), static_cast<int32_t>(internalBuffer.size()));
 	model->InternalPtr = modelPtr;
+
+	id2Obj_.Register(id, model, modelPtr);
+
 	return model;
 }
 
@@ -51,9 +66,14 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 		return;
 	}
 
-	// find a model
-	auto model = source.DownCast<Model>().Get();
-	unload(0, model->InternalPtr);
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Obj_.Unload(source, id, nativePtr))
+	{
+		// find a model
+		auto model = source.DownCast<Model>().Get();
+		unload(0, model->InternalPtr);
+	}
 }
 
 Effekseer::ModelRef ProceduralModelGenerator::Generate(const Effekseer::ProceduralModelParameter& parameter)

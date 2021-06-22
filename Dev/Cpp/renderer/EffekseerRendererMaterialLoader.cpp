@@ -6,8 +6,10 @@
 namespace EffekseerRendererUnity
 {
 
-MaterialLoader::MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load, EffekseerPlugin::MaterialLoaderUnload unload)
-	: load_(load), unload_(unload), memoryFile_(1 * 1024 * 1024), memoryFileForCache_(1 * 1024 * 1024)
+MaterialLoader::MaterialLoader(EffekseerPlugin::MaterialLoaderLoad load,
+							   EffekseerPlugin::MaterialLoaderUnload unload,
+							   EffekseerPlugin::GetUnityIDFromPath getUnityId)
+	: load_(load), unload_(unload), getUnityId_(getUnityId), memoryFile_(1 * 1024 * 1024), memoryFileForCache_(1 * 1024 * 1024)
 {
 }
 
@@ -15,6 +17,15 @@ MaterialLoader::~MaterialLoader() {}
 
 Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
+	auto id = getUnityId_(path);
+
+	Effekseer::MaterialRef generated;
+
+	if (id2Obj_.TryLoad(id, generated))
+	{
+		return generated;
+	}
+
 	// Load with unity
 	int requiredDataSize = 0;
 	int requiredCachedDataSize = 0;
@@ -82,6 +93,8 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 			materialData->RefractionModelUserPtr = new Shader(materialPtr, material, true, true);
 		}
 
+		id2Obj_.Register(id, internalData, materialPtr);
+
 		return internalData;
 	}
 
@@ -94,23 +107,28 @@ void MaterialLoader::Unload(Effekseer::MaterialRef data)
 		return;
 	}
 
-	auto ss = static_cast<Shader*>(data->UserPtr);
-	auto sm = static_cast<Shader*>(data->ModelUserPtr);
-	auto srs = static_cast<Shader*>(data->RefractionUserPtr);
-	auto srm = static_cast<Shader*>(data->RefractionModelUserPtr);
-
-	void* ptr = nullptr;
-	if (ss != nullptr)
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Obj_.Unload(data, id, nativePtr))
 	{
-		ptr = ss->GetUnityMaterial();
+		auto ss = static_cast<Shader*>(data->UserPtr);
+		auto sm = static_cast<Shader*>(data->ModelUserPtr);
+		auto srs = static_cast<Shader*>(data->RefractionUserPtr);
+		auto srm = static_cast<Shader*>(data->RefractionModelUserPtr);
+
+		void* ptr = nullptr;
+		if (ss != nullptr)
+		{
+			ptr = ss->GetUnityMaterial();
+		}
+
+		ES_SAFE_DELETE(ss);
+		ES_SAFE_DELETE(sm);
+		ES_SAFE_DELETE(srs);
+		ES_SAFE_DELETE(srm);
+
+		unload_(id, ptr);
 	}
-
-	ES_SAFE_DELETE(ss);
-	ES_SAFE_DELETE(sm);
-	ES_SAFE_DELETE(srs);
-	ES_SAFE_DELETE(srm);
-
-	unload_(0, ptr);
 }
 
 } // namespace EffekseerRendererUnity
