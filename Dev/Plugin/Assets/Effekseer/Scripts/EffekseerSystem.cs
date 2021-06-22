@@ -630,6 +630,11 @@ namespace Effekseer
 			return cachedMaterials.GetResource(key);
 		}
 
+		internal static IntPtr GetCachedSound(IntPtr key)
+		{
+			return cachedSounds.GetResource(key);
+		}
+
 		private static Texture2D GetTextureFromPath(string path)
 		{
 			var asset = Instance.effectAssetInLoading;

@@ -180,7 +180,7 @@ namespace Effekseer.Internal
 			{
 				return;
 			}
-			var resource = EffekseerSoundResource.FromIntPtr(data);
+			var resource = EffekseerSoundResource.FromIntPtr(EffekseerSystem.GetCachedSound(data));
 			if (resource == null)
 			{
 				return;
