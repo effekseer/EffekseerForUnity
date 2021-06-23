@@ -10,29 +10,12 @@ using UnityEditor;
 namespace Effekseer.Internal
 {
 	[Serializable]
-	public class EffekseerSoundResource : IDisposable
+	public class EffekseerSoundResource
 	{
 		[SerializeField]
 		public string path;
 		[SerializeField]
 		public AudioClip clip;
-
-		private GCHandle gch;
-
-		public EffekseerSoundResource()
-		{
-			this.gch = GCHandle.Alloc(this);
-		}
-
-		public void Dispose()
-		{
-			this.gch.Free();
-		}
-
-		public IntPtr ToIntPtr()
-		{
-			return GCHandle.ToIntPtr(this.gch);
-		}
 
 		public static EffekseerSoundResource FromIntPtr(IntPtr ptr)
 		{
@@ -197,7 +180,7 @@ namespace Effekseer.Internal
 			{
 				return;
 			}
-			var resource = EffekseerSoundResource.FromIntPtr(data);
+			var resource = EffekseerSoundResource.FromIntPtr(EffekseerSystem.GetCachedSound(data));
 			if (resource == null)
 			{
 				return;

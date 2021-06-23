@@ -30,12 +30,21 @@ class TextureLoader : public Effekseer::TextureLoader
 protected:
 	EffekseerPlugin::TextureLoaderLoad load;
 	EffekseerPlugin::TextureLoaderUnload unload;
+	EffekseerPlugin::GetUnityIDFromPath getUnityId_;
+
 	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
+	EffekseerPlugin::IDtoResourceTable<Effekseer::TextureRef> id2Texture_;
 
 public:
 	static Effekseer::RefPtr<Effekseer::TextureLoader> Create(EffekseerPlugin::TextureLoaderLoad load,
-															  EffekseerPlugin::TextureLoaderUnload unload);
-	TextureLoader(EffekseerPlugin::TextureLoaderLoad load, EffekseerPlugin::TextureLoaderUnload unload) : load(load), unload(unload) {}
+															  EffekseerPlugin::TextureLoaderUnload unload,
+															  EffekseerPlugin::GetUnityIDFromPath getUnityId);
+	TextureLoader(EffekseerPlugin::TextureLoaderLoad load,
+				  EffekseerPlugin::TextureLoaderUnload unload,
+				  EffekseerPlugin::GetUnityIDFromPath getUnityId)
+		: load(load), unload(unload), getUnityId_(getUnityId)
+	{
+	}
 	~TextureLoader() override = default;
 	Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType) override;
 	void Unload(Effekseer::TextureRef source) override;

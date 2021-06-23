@@ -18,6 +18,56 @@
 namespace EffekseerPlugin
 {
 
+using GetUnityIDFromPath = int(UNITY_INTERFACE_API*)(const char16_t* path);
+
+template <typename T> class IDtoResourceTable
+{
+	struct Resource
+	{
+		int referenceCount;
+		T resource;
+		void* nativePtr;
+	};
+	std::map<int, Resource> resources_;
+
+public:
+	bool TryLoad(int id, T& value)
+	{
+		auto it = resources_.find(id);
+		if (it != resources_.end())
+		{
+			it->second.referenceCount++;
+			value = it->second.resource;
+			return true;
+		}
+
+		return false;
+	}
+
+	void Register(int id, T value, void* nativePtr) { resources_.insert(std::make_pair(id, Resource{1, value, nativePtr})); }
+
+	bool Unload(T value, int& id, void*& nativePtr)
+	{
+		auto it = std::find_if(
+			resources_.begin(), resources_.end(), [value](const std::pair<int, Resource>& pair) { return pair.second.resource == value; });
+		if (it == resources_.end())
+		{
+			return false;
+		}
+
+		it->second.referenceCount--;
+		if (it->second.referenceCount <= 0)
+		{
+			id = it->first;
+			nativePtr = it->second.nativePtr;
+			resources_.erase(it);
+			return true;
+		}
+
+		return false;
+	}
+};
+
 enum class ExternalTextureType : int
 {
 	Background,

@@ -24,16 +24,17 @@ bool RenderPassLLGI::Initialize(IUnityInterfaces* unityInterface,
 
 class TextureLoaderLLGI : public TextureLoader
 {
-	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
+	IDtoResourceTable<Effekseer::TextureRef> id2Texture_;
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
 	std::shared_ptr<TextureConverter> textureConverter_;
 
 public:
 	TextureLoaderLLGI(TextureLoaderLoad load,
 					  TextureLoaderUnload unload,
+					  GetUnityIDFromPath getUnityId,
 					  Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
 					  std::shared_ptr<TextureConverter> textureConverter)
-		: TextureLoader(load, unload), graphicsDevice_(graphicsDevice), textureConverter_(textureConverter)
+		: TextureLoader(load, unload, getUnityId), graphicsDevice_(graphicsDevice), textureConverter_(textureConverter)
 	{
 	}
 
@@ -41,6 +42,15 @@ public:
 
 	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
+		auto id = getUnityId_(path);
+
+		Effekseer::TextureRef generated;
+
+		if (id2Texture_.TryLoad(id, generated))
+		{
+			return generated;
+		}
+
 		// Load from unity
 		int32_t width, height, format, miplevel;
 		void* texturePtr = load((const char16_t*)path, &width, &height, &format, &miplevel);
@@ -55,7 +65,7 @@ public:
 		auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 		textureDataPtr->SetBackend(backend);
 
-		textureData2NativePtr[textureDataPtr] = texturePtr;
+		id2Texture_.Register(id, textureDataPtr, texturePtr);
 
 		return textureDataPtr;
 	}
@@ -67,8 +77,12 @@ public:
 			return;
 		}
 
-		unload(source->GetPath().c_str(), textureData2NativePtr[source]);
-		textureData2NativePtr.erase(source);
+		int32_t id{};
+		void* nativePtr{};
+		if (id2Texture_.Unload(source, id, nativePtr))
+		{
+			unload(id, nativePtr);
+		}
 	}
 };
 
@@ -81,28 +95,28 @@ void GraphicsLLGI::Shutdown(IUnityInterfaces* unityInterface)
 	renderer_ = nullptr;
 }
 
-Effekseer::TextureLoaderRef GraphicsLLGI::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsLLGI::Create(TextureLoaderLoad load, TextureLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderLLGI>(load, unload, graphicsDevice_, textureConverter_);
+	return Effekseer::MakeRefPtr<TextureLoaderLLGI>(load, unload, getUnityId, graphicsDevice_, textureConverter_);
 }
 
-Effekseer::ModelLoaderRef GraphicsLLGI::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsLLGI::Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload, getUnityId);
 	auto internalLoader = EffekseerRenderer::CreateModelLoader(renderer_->GetGraphicsDevice(), loader->GetFileInterface());
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
 
-Effekseer::MaterialLoaderRef GraphicsLLGI::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsLLGI::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload, getUnityId);
 	auto internalLoader = renderer_->CreateMaterialLoader();
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

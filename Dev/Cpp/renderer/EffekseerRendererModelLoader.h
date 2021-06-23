@@ -24,11 +24,15 @@ class ModelLoader : public Effekseer::ModelLoader
 {
 	EffekseerPlugin::ModelLoaderLoad load;
 	EffekseerPlugin::ModelLoaderUnload unload;
+	EffekseerPlugin::GetUnityIDFromPath getUnityId_;
 
 	std::vector<uint8_t> internalBuffer;
+	EffekseerPlugin::IDtoResourceTable<Effekseer::ModelRef> id2Obj_;
 
 public:
-	ModelLoader(EffekseerPlugin::ModelLoaderLoad load, EffekseerPlugin::ModelLoaderUnload unload);
+	ModelLoader(EffekseerPlugin::ModelLoaderLoad load,
+				EffekseerPlugin::ModelLoaderUnload unload,
+				EffekseerPlugin::GetUnityIDFromPath getUnityId);
 
 	virtual ~ModelLoader() = default;
 	virtual Effekseer::ModelRef Load(const EFK_CHAR* path);
