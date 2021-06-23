@@ -71,7 +71,7 @@ public:
 
 class TextureLoaderDX11 : public TextureLoader
 {
-	std::map<Effekseer::TextureRef, void*> textureData2NativePtr;
+	IDtoResourceTable<Effekseer::TextureRef> id2Texture_;
 
 	ID3D11Device* d3d11Device_ = nullptr;
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_;
@@ -80,10 +80,11 @@ class TextureLoaderDX11 : public TextureLoader
 public:
 	TextureLoaderDX11(TextureLoaderLoad load,
 					  TextureLoaderUnload unload,
+					  GetUnityIDFromPath getUnityId,
 					  ID3D11Device* d3d11Device,
 					  Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
 					  std::shared_ptr<TextureConverter> converter)
-		: TextureLoader(load, unload), d3d11Device_(d3d11Device), graphicsDevice_(graphicsDevice), converter_(converter)
+		: TextureLoader(load, unload, getUnityId), d3d11Device_(d3d11Device), graphicsDevice_(graphicsDevice), converter_(converter)
 	{
 	}
 
@@ -91,6 +92,15 @@ public:
 
 	virtual Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
 	{
+		auto id = getUnityId_(path);
+
+		Effekseer::TextureRef generated;
+
+		if(id2Texture_.TryLoad(id, generated))
+		{
+			return generated;
+		}
+
 		// Load from unity
 		int32_t width, height, format, miplevel;
 		void* texturePtr = load((const char16_t*)path, &width, &height, &format, &miplevel);
@@ -104,7 +114,7 @@ public:
 		auto textureDataPtr = Effekseer::MakeRefPtr<Effekseer::Texture>();
 		textureDataPtr->SetBackend(backend);
 
-		textureData2NativePtr[textureDataPtr] = texturePtr;
+		id2Texture_.Register(id, textureDataPtr, texturePtr);
 
 		return textureDataPtr;
 	}
@@ -116,8 +126,12 @@ public:
 			return;
 		}
 
-		unload(source->GetPath().c_str(), textureData2NativePtr[source]);
-		textureData2NativePtr.erase(source);
+		int32_t id{};
+		void* nativePtr{};
+		if (id2Texture_.Unload(source, id, nativePtr))
+		{
+			unload(id, nativePtr);
+		}
 	}
 };
 
@@ -191,28 +205,28 @@ void GraphicsDX11::SetExternalTexture(int renderId, ExternalTextureType type, vo
 	}
 }
 
-Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload)
+Effekseer::TextureLoaderRef GraphicsDX11::Create(TextureLoaderLoad load, TextureLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
-	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, d3d11Device, graphicsDevice_, converter_);
+	return Effekseer::MakeRefPtr<TextureLoaderDX11>(load, unload, getUnityId, d3d11Device, graphicsDevice_, converter_);
 }
 
-Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload)
+Effekseer::ModelLoaderRef GraphicsDX11::Create(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload, getUnityId);
 	auto internalLoader = EffekseerRenderer::CreateModelLoader(renderer_->GetGraphicsDevice(), loader->GetFileInterface());
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }
 
-Effekseer::MaterialLoaderRef GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload)
+Effekseer::MaterialLoaderRef GraphicsDX11::Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
 {
 	if (renderer_ == nullptr)
 		return nullptr;
 
-	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload);
+	auto loader = Effekseer::MakeRefPtr<MaterialLoader>(load, unload, getUnityId);
 	auto internalLoader = renderer_->CreateMaterialLoader();
 	auto holder = std::make_shared<MaterialLoaderHolder>(internalLoader);
 	loader->SetInternalLoader(holder);

@@ -26,7 +26,7 @@ using MaterialLoaderLoad = void*(UNITY_INTERFACE_API*)(const char16_t* path,
 													   int cachedMaterialBufferSize,
 													   int& requiredCachedMaterialBufferSize);
 
-using MaterialLoaderUnload = void(UNITY_INTERFACE_API*)(const char16_t* path, void* materialPointer);
+using MaterialLoaderUnload = void(UNITY_INTERFACE_API*)(int id, void* materialPointer);
 
 class LazyMaterial;
 
@@ -87,19 +87,15 @@ class MaterialLoader : public Effekseer::MaterialLoader
 {
 	MaterialLoaderLoad load_ = nullptr;
 	MaterialLoaderUnload unload_ = nullptr;
+	GetUnityIDFromPath getUnityId_ = nullptr;
 
-	struct MaterialResource
-	{
-		int referenceCount = 1;
-		Effekseer::RefPtr<LazyMaterial> internalData;
-	};
-	std::map<std::u16string, MaterialResource> resources;
 	MemoryFile memoryFile_;
 	MemoryFile memoryFileForCache_;
 	std::shared_ptr<MaterialLoaderHolder> internalLoader_;
+	IDtoResourceTable<Effekseer::RefPtr<LazyMaterial>> id2Obj_;
 
 public:
-	MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unload);
+	MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId);
 
 	virtual ~MaterialLoader() = default;
 	Effekseer::MaterialRef Load(const EFK_CHAR* path) override;

@@ -3,20 +3,23 @@
 
 namespace EffekseerPlugin
 {
-ModelLoader::ModelLoader(ModelLoaderLoad load, ModelLoaderUnload unload) : load(load), unload(unload), memoryFile(1 * 1024 * 1024) {}
+ModelLoader::ModelLoader(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
+	: load(load), unload(unload), getUnityId_(getUnityId), memoryFile(1 * 1024 * 1024)
+{
+}
 
 Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 {
-	// リソーステーブルを検索して存在したらそれを使う
-	auto it = resources.find((const char16_t*)path);
-	if (it != resources.end())
+	auto id = getUnityId_(path);
+
+	Effekseer::ModelRef generated;
+
+	if (id2Obj_.TryLoad(id, generated))
 	{
-		it->second.referenceCount++;
-		return it->second.internalData;
+		return generated;
 	}
 
 	// Load with unity
-	ModelResource res;
 	int requiredDataSize = 0;
 	auto modelPtr = load((const char16_t*)path, &memoryFile.LoadedBuffer[0], (int)memoryFile.LoadedBuffer.size(), requiredDataSize);
 
@@ -41,12 +44,12 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 		}
 	}
 
-	// 内部ローダに渡してロード処理する
 	memoryFile.LoadedSize = (size_t)requiredDataSize;
-	res.internalData = internalLoader->Load(path);
+	auto modelDataPtr = internalLoader->Load(path);
 
-	resources.insert(std::make_pair((const char16_t*)path, res));
-	return res.internalData;
+	id2Obj_.Register(id, modelDataPtr, modelPtr);
+
+	return modelDataPtr;
 }
 
 void ModelLoader::Unload(Effekseer::ModelRef source)
@@ -56,22 +59,11 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 		return;
 	}
 
-	// アンロードするモデルを検索
-	auto it = std::find_if(resources.begin(), resources.end(), [source](const std::pair<std::u16string, ModelResource>& pair) {
-		return pair.second.internalData == source;
-	});
-	if (it == resources.end())
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Obj_.Unload(source, id, nativePtr))
 	{
-		return;
-	}
-
-	// 参照カウンタが0になったら実際にアンロード
-	it->second.referenceCount--;
-	if (it->second.referenceCount <= 0)
-	{
-		internalLoader->Unload(it->second.internalData);
-		unload(it->first.c_str(), nullptr);
-		resources.erase(it);
+		unload(id, nativePtr);
 	}
 }
 } // namespace EffekseerPlugin

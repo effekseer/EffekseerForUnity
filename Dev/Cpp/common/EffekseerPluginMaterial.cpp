@@ -125,13 +125,22 @@ void MaterialEvent::Execute()
 	commands_.clear();
 }
 
-MaterialLoader::MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unload)
-	: load_(load), unload_(unload), memoryFile_(1 * 1024 * 1024), memoryFileForCache_(1 * 1024 * 1024)
+MaterialLoader::MaterialLoader(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId)
+	: load_(load), unload_(unload), getUnityId_(getUnityId), memoryFile_(1 * 1024 * 1024), memoryFileForCache_(1 * 1024 * 1024)
 {
 }
 
 Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 {
+	auto id = getUnityId_(path);
+
+	Effekseer::RefPtr<LazyMaterial> generated;
+
+	if (id2Obj_.TryLoad(id, generated))
+	{
+		return generated;
+	}
+
 	// Load with unity
 	int requiredDataSize = 0;
 	int requiredCachedDataSize = 0;
@@ -204,6 +213,8 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 			data->Load();
 		}
 
+		id2Obj_.Register(id, data, materialPtr);
+
 		return internalData;
 	}
 
@@ -216,17 +227,23 @@ void MaterialLoader::Unload(Effekseer::MaterialRef data)
 		return;
 	}
 
-	auto eventInstance = MaterialEvent::GetInstance();
-
-	if (eventInstance != nullptr)
+	auto ldata = data.DownCast<LazyMaterial>();
+	int32_t id{};
+	void* nativePtr{};
+	if (id2Obj_.Unload(ldata, id, nativePtr))
 	{
-		eventInstance->UnloadAndDelete(data.DownCast<LazyMaterial>());
-	}
-	else
-	{
-		data.DownCast<LazyMaterial>()->Unload();
-	}
+		auto eventInstance = MaterialEvent::GetInstance();
 
-	unload_(data->GetPath().c_str(), nullptr);
+		if (eventInstance != nullptr)
+		{
+			eventInstance->UnloadAndDelete(data.DownCast<LazyMaterial>());
+		}
+		else
+		{
+			data.DownCast<LazyMaterial>()->Unload();
+		}
+
+		unload_(id, nullptr);
+	}
 }
 } // namespace EffekseerPlugin

@@ -18,18 +18,22 @@
 namespace EffekseerPlugin
 {
 using CurveLoaderLoad = void*(UNITY_INTERFACE_API*)(const char16_t* path, void* data, int dataSize, int& requiredDataSize);
-using CurveLoaderUnload = void(UNITY_INTERFACE_API*)(const char16_t* path, void* CurvePointer);
+using CurveLoaderUnload = void(UNITY_INTERFACE_API*)(int id, void* CurvePointer);
 
 class CurveLoader : public Effekseer::CurveLoader
 {
 	CurveLoaderLoad load_;
 	CurveLoaderUnload unload_;
+	GetUnityIDFromPath getUnityId_;
+
 	MemoryFile memoryFile_;
 
 	Effekseer::RefPtr<Effekseer::CurveLoader> internalLoader_;
 
+	IDtoResourceTable<Effekseer::CurveRef> id2Obj_;
+
 public:
-	CurveLoader(CurveLoaderLoad load, CurveLoaderUnload unload);
+	CurveLoader(CurveLoaderLoad load, CurveLoaderUnload unload, GetUnityIDFromPath getUnityId);
 
 	virtual ~CurveLoader() = default;
 	virtual Effekseer::CurveRef Load(const char16_t* path) override;
