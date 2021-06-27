@@ -4,6 +4,10 @@ if (WIN32)
     cmake_policy(SET CMP0091 NEW)
 endif()
 
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+endif()
+
 project(EffekseerUnity  LANGUAGES C CXX)
 
 include(ExternalProject)
@@ -101,10 +105,12 @@ endif()
 
 if(APPLE)
     set(srcs
-        ${effekseer_src}
-        ${effekseer_gl_src})
+        ${effekseer_src})
 
     if(IOS)
+        list(APPEND srcs 
+            ${effekseer_gl_src})
+
         add_library(EffekseerUnity STATIC
             ${srcs}
         )
@@ -116,8 +122,12 @@ if(APPLE)
     endif()
 
     target_link_libraries(EffekseerUnity PRIVATE
-        Effekseer
+        Effekseer)
+
+    if(NOT IOS)
+    target_link_libraries(EffekseerUnity PRIVATE
         EffekseerRendererGL)
+    endif()
 
     set_property(TARGET EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
 
