@@ -24,14 +24,18 @@
 #import <TargetConditionals.h>
 #endif
 
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRenderer.Renderer.h>
+#else
+
 // OpenGL
 #if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
-#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
-#include <EffekseerRendererGL/EffekseerRendererGL.h>
-#else
 #include "EffekseerRendererGL.h"
 #endif
+
 #endif
+
+
 
 // DirectX
 #ifdef _WIN32

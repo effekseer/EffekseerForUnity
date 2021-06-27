@@ -14,11 +14,51 @@ project(EffekseerUnity  LANGUAGES C CXX)
 include(ExternalProject)
 
 option(BUILD_DX12 "Build DirectX12" OFF)
+option(BUILD_FOR_IOS "Build for ios" OFF)
+option(BUILD_FOR_IOS_SIM "Build for ios simulator" OFF)
 
 # Flags
 if (WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
+
+if(APPLE AND BUILD_FOR_IOS)
+
+ExternalProject_Add(
+    ExternalProject_effekseer
+    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../../../Effekseer
+    PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
+    INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
+    CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
+                    -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=false
+                    -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
+                    -DBUILD_VIEWER:BOOL=OFF
+                    -DBUILD_EXAMPLES:BOOL=OFF
+                    -DBUILD_UNITYPLUGIN:BOOL=ON
+                    -DUSE_OPENGLES3=ON
+                    -DCMAKE_SYSTEM_NAME=iOS
+                    -DCMAKE_OSX_SYSROOT=iphoneos
+    )
+
+elseif(APPLE AND BUILD_FOR_IOS_SIM)
+
+ExternalProject_Add(
+ExternalProject_effekseer
+SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../../../Effekseer
+PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
+INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
+CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
+                -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=false
+                -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
+                -DBUILD_VIEWER:BOOL=OFF
+                -DBUILD_EXAMPLES:BOOL=OFF
+                -DBUILD_UNITYPLUGIN:BOOL=ON
+                -DUSE_OPENGLES3=ON
+                -DCMAKE_SYSTEM_NAME=iOS
+                -DCMAKE_OSX_SYSROOT=iphonesimulator
+)
+
+else()
 
 ExternalProject_Add(
     ExternalProject_effekseer
@@ -32,6 +72,8 @@ ExternalProject_Add(
                     -DBUILD_EXAMPLES:BOOL=OFF
                     -DBUILD_UNITYPLUGIN:BOOL=ON
     )
+
+endif()
     
 list(APPEND EFK_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/include/)
 list(APPEND EFK_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/include/Effekseer)
@@ -102,7 +144,7 @@ if(APPLE)
     set(srcs
         ${effekseer_src})
 
-    if(IOS)
+    if(BUILD_FOR_IOS OR BUILD_FOR_IOS_SIM)
         add_library(EffekseerUnity STATIC
             ${srcs}
         )
@@ -118,7 +160,7 @@ if(APPLE)
     target_link_libraries(EffekseerUnity PRIVATE
         Effekseer)
 
-    if(NOT IOS)
+    if(NOT BUILD_FOR_IOS AND NOT BUILD_FOR_IOS_SIM)
         find_package(OpenGL REQUIRED)
         target_link_libraries(EffekseerUnity PRIVATE
             EffekseerRendererGL
