@@ -103,13 +103,12 @@ if(APPLE)
         ${effekseer_src})
 
     if(IOS)
-        list(APPEND srcs 
-            ${effekseer_gl_src})
-
         add_library(EffekseerUnity STATIC
             ${srcs}
         )
     else()
+        list(APPEND srcs 
+            ${effekseer_gl_src})
         add_library(EffekseerUnity MODULE
             ${srcs}
         )
