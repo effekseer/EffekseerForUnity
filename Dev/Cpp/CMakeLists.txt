@@ -119,8 +119,10 @@ if(APPLE)
         Effekseer)
 
     if(NOT IOS)
-    target_link_libraries(EffekseerUnity PRIVATE
-        EffekseerRendererGL)
+        find_package(OpenGL REQUIRED)
+        target_link_libraries(EffekseerUnity PRIVATE
+            EffekseerRendererGL
+            ${OPENGL_LIBRARIES})
     endif()
 
     set_target_properties(EffekseerUnity PROPERTIES XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
