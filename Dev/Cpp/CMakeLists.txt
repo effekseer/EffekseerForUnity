@@ -129,7 +129,7 @@ if(APPLE)
         EffekseerRendererGL)
     endif()
 
-    set_property(TARGET EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
+    set_target_properties(EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
 
 endif()
 
