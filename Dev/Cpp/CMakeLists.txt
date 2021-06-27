@@ -1,10 +1,11 @@
-﻿cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18)
 
 if (WIN32)
     cmake_policy(SET CMP0091 NEW)
 endif()
 
 if(APPLE)
+    cmake_policy(SET CMP0114 NEW)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
 endif()
 
@@ -89,12 +90,6 @@ if(WIN32)
         EffekseerRendererGL
         EffekseerRendererDX11)
 
-    target_compile_definitions(EffekseerUnity PRIVATE __EFFEKSEER_FROM_MAIN_CMAKE__)
-    target_include_directories(EffekseerUnity PRIVATE ${EFK_INCLUDES})
-    target_link_directories(EffekseerUnity PRIVATE ${EFK_LIBRARY_DIRECTORIES})
-
-    add_dependencies(EffekseerUnity ExternalProject_effekseer)
-
     if(BUILD_DX12)
         target_link_libraries(EffekseerUnity PRIVATE
             EffekseerRendererDX12
@@ -129,7 +124,14 @@ if(APPLE)
         EffekseerRendererGL)
     endif()
 
-    set_target_properties(EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
+    set_target_properties(EffekseerUnity PROPERTIES XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
 
 endif()
+
+target_compile_definitions(EffekseerUnity PRIVATE __EFFEKSEER_FROM_MAIN_CMAKE__)
+target_include_directories(EffekseerUnity PRIVATE ${EFK_INCLUDES})
+target_link_directories(EffekseerUnity PRIVATE ${EFK_LIBRARY_DIRECTORIES})
+target_compile_features(EffekseerUnity PUBLIC cxx_std_14)
+add_dependencies(EffekseerUnity ExternalProject_effekseer)
+
 
