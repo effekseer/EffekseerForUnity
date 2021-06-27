@@ -131,5 +131,5 @@ if(APPLE)
 
     set_property(TARGET EffekseerUnity XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
 
-wndif()
+endif()
 
