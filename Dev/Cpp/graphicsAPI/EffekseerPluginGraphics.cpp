@@ -36,6 +36,8 @@
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #include <EffekseerRenderer.Renderer.h>
+#else
+#include <EffekseerRenderer.Renderer.h>
 #endif
 
 namespace EffekseerPlugin
