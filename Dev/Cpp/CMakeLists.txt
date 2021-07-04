@@ -6,7 +6,11 @@ endif()
 
 if(APPLE)
     cmake_policy(SET CMP0114 NEW)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+    if(BUILD_FOR_IOS OR BUILD_FOR_IOS_SIM)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.0)
+    else()
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+    endif()
 endif()
 
 project(EffekseerUnity  LANGUAGES C CXX)
