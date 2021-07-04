@@ -34,7 +34,7 @@ ExternalProject_Add(
                     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
                     -DBUILD_VIEWER:BOOL=OFF
                     -DBUILD_EXAMPLES:BOOL=OFF
-                    -DBUILD_UNITYPLUGIN:BOOL=ON
+                    -DBUILD_UNITYPLUGIN_FOR_IOS:BOOL=ON
                     -DUSE_OPENGLES3=ON
                     -DCMAKE_SYSTEM_NAME=iOS
                     -DCMAKE_OSX_SYSROOT=iphoneos
@@ -52,7 +52,7 @@ CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effek
                 -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
                 -DBUILD_VIEWER:BOOL=OFF
                 -DBUILD_EXAMPLES:BOOL=OFF
-                -DBUILD_UNITYPLUGIN:BOOL=ON
+                -DBUILD_UNITYPLUGIN_FOR_IOS:BOOL=ON
                 -DUSE_OPENGLES3=ON
                 -DCMAKE_SYSTEM_NAME=iOS
                 -DCMAKE_OSX_SYSROOT=iphonesimulator
