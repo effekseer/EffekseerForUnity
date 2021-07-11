@@ -61,9 +61,7 @@ Execute ``` Dev/Cpp/webgl/Build.bat ```
 
 #### Windows
 
-Uses Visual Studio 2017 or later, to open and build the following solution file.
-
-- Dev/Cpp/windows/EffekseerUnity.sln
+Install cmake and call ``` Dev/Cpp/windows/Build.bat ```
 
 #### macOS
 
