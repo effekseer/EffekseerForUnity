@@ -482,9 +482,7 @@ int32_t RendererImplemented::GetSquareMaxCount() const { return m_squareMaxCount
 
 ::Effekseer::RingRendererRef RendererImplemented::CreateRingRenderer()
 {
-	auto ret = Effekseer::MakeRefPtr<::EffekseerRenderer::RingRendererBase<RendererImplemented, false>>(this);
-	ret->SetFasterSngleRingModeEnabled(false);
-	return ret;
+	return Effekseer::MakeRefPtr<::EffekseerRenderer::RingRendererBase<RendererImplemented, false>>(this);
 }
 
 ::Effekseer::ModelRendererRef RendererImplemented::CreateModelRenderer() { return ModelRenderer::Create(this); }
