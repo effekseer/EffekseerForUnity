@@ -1,4 +1,4 @@
-﻿
+
 #include <assert.h>
 #include <mutex>
 #include <unordered_map>
@@ -25,12 +25,18 @@
 #endif
 
 // OpenGL
-#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
+#if defined(_WIN32) || defined(__ANDROID__) || defined(EMSCRIPTEN) || (defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
+
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
 #else
 #include "EffekseerRendererGL.h"
 #endif
+
+#else
+
+#include <EffekseerRenderer.Renderer.h>
+
 #endif
 
 // DirectX
