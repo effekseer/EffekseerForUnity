@@ -30,7 +30,7 @@ if(APPLE AND BUILD_FOR_IOS)
 
 ExternalProject_Add(
     ExternalProject_effekseer
-    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../../../Effekseer
+    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
     PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
     INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
     CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
@@ -48,7 +48,7 @@ elseif(APPLE AND BUILD_FOR_IOS_SIM)
 
 ExternalProject_Add(
 ExternalProject_effekseer
-SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../../../Effekseer
+SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
 PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
 INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
 CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
@@ -66,7 +66,7 @@ else()
 
 ExternalProject_Add(
     ExternalProject_effekseer
-    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../../../Effekseer
+    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
     PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
     INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
     CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer

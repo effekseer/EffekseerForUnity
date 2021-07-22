@@ -9,9 +9,9 @@ LOCAL_CFLAGS    := -O2 -D__EFFEKSEER_RENDERER_GLES3__ -D__EFFEKSEER_RENDERER_INT
 LOCAL_LDLIBS    := -landroid -lEGL -lGLESv3
 
 LOCAL_C_INCLUDES += \
-	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer \
-	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon \
-	$(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL
+	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/Effekseer \
+	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon \
+	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL
 
 LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginCommon.cpp \
@@ -34,7 +34,7 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/Effekseer/Effekseer
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
@@ -94,11 +94,11 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
 	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/OpenGL/EffekseerMaterialCompilerGL.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererCommon
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/TextureLoader.cpp \
 	$(LIB_SRC_PATH)/ModelLoader.cpp \
@@ -117,7 +117,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
