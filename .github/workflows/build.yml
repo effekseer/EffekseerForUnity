@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sh scripts/clone_dependencies.sh
-      - run: cd  ./Dev/Cpp/macosx/ && ./Build.sh
+      - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
       - name: Upload ios
         uses: actions/upload-artifact@v1
         with:
