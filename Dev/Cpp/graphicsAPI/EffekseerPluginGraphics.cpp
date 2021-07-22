@@ -30,8 +30,14 @@
 #include "../XBoxOneDX12/EffekseerPluginGraphicsXBoxOneDX12.h"
 #endif
 
-#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(EMSCRIPTEN)
+#if defined(_WIN32) || defined(__ANDROID__) || defined(EMSCRIPTEN) || (defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
 #include "EffekseerPluginGraphicsGL.h"
+#endif
+
+#ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
+#include <EffekseerRenderer.Renderer.h>
+#else
+#include <EffekseerRenderer.Renderer.h>
 #endif
 
 namespace EffekseerPlugin
