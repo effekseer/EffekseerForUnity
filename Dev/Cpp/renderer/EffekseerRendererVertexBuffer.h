@@ -15,7 +15,6 @@ class VertexBuffer : public EffekseerRenderer::VertexBufferBase
 {
 private:
 	uint32_t m_vertexRingStart;
-	uint32_t m_vertexRingOffset;
 	bool m_ringBufferLock = false;
 
 public:
