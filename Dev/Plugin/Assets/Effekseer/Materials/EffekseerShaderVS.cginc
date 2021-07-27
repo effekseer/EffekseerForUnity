@@ -79,9 +79,13 @@ StructuredBuffer<int> buf_index;
 
 StructuredBuffer<ModelParameter1> buf_model_parameter;
 StructuredBuffer<ModelParameter2> buf_model_parameter2;
+
+#if defined(SHADER_API_GLES3)
+// GLES3 supports only 4 buffers
+#else
 StructuredBuffer<int> buf_vertex_offsets;
 StructuredBuffer<int> buf_index_offsets;
-
+#endif
 
 VS_Output vert(VS_Input i)
 {
@@ -95,8 +99,14 @@ VS_Output vert(VS_Input i)
 	float4x4 mModel = buf_model_parameter[inst_ind].Mat;
 	float4 fUV = buf_model_parameter[inst_ind].UV;
 	float4 fModelColor = buf_model_parameter[inst_ind].VColor;
-	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst_ind].Time];
-	float buf_index_offset = buf_index_offsets[buf_model_parameter[inst_ind].Time];
+
+#if defined(SHADER_API_GLES3)
+	int buf_vertex_offset = 0;
+	int buf_index_offset = 0;
+#else
+	int buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst_ind].Time];
+	int buf_index_offset = buf_index_offsets[buf_model_parameter[inst_ind].Time];
+#endif
 
 	ModelVertex Input = buf_vertex[buf_index[i.id + buf_index_offset] + buf_vertex_offset];
 

@@ -319,7 +319,7 @@ namespace Effekseer
 #endif
 
 					if ((SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
-						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3) && maxComputeBufferInputsVertex == 0
+						SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3) && maxComputeBufferInputsVertex < 4
 
 					)
 					{

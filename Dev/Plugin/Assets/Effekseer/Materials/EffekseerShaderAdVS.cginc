@@ -220,8 +220,13 @@ StructuredBuffer<int> buf_index;
 
 StructuredBuffer<ModelParameter1> buf_model_parameter;
 StructuredBuffer<ModelParameter2> buf_model_parameter2;
+
+#if defined(SHADER_API_GLES3)
+// GLES3 supports only 4 buffers
+#else
 StructuredBuffer<int> buf_vertex_offsets;
 StructuredBuffer<int> buf_index_offsets;
+#endif
 
 void CalculateAndStoreAdvancedParameter(in float2 uv, in float2 uv1, in float4 alphaUV, in float4 uvDistortionUV, in float4 blendUV, in float4 blendAlphaUV, in float4 blendUVDistortionUV, in float flipbookIndexAndNextRate, in float modelAlphaThreshold, inout VS_Output vsoutput)
 {
@@ -284,8 +289,13 @@ VS_Output vert(VS_Input i)
 	float fFlipbookIndexAndNextRate = buf_model_parameter2[inst_ind].FlipbookIndexAndNextRate;
 	float fAlphaThreshold = buf_model_parameter2[inst_ind].AlphaThreshold;
 
-	float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst_ind].Time];
-	float buf_index_offset = buf_index_offsets[buf_model_parameter[inst_ind].Time];
+#if defined(SHADER_API_GLES3)
+	int buf_vertex_offset = 0;
+	int buf_index_offset = 0;
+#else
+	int buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst_ind].Time];
+	int buf_index_offset = buf_index_offsets[buf_model_parameter[inst_ind].Time];
+#endif
 
 	ModelVertex Input = buf_vertex[buf_index[i.id + buf_index_offset] + buf_vertex_offset];
 
