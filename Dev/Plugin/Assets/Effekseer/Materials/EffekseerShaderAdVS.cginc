@@ -113,7 +113,7 @@ float2 GetFlipbookUVForIndex(float2 OriginUV, float Index, float DivideX, float 
 	return (OriginUV * FlipbookOneSize) + (DivideIndex * FlipbookOneSize);
 }
 
-void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 flipbookParameter, float flipbookIndex, float2 uv)
+void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 flipbookParameter, float flipbookIndex, float2 uv, float2 uvInversed)
 {
 	if (flipbookParameter.x > 0)
 	{
@@ -159,8 +159,11 @@ void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 f
 			}
 		}
 
-		float2 OriginUV = GetFlipbookOriginUV(uv, Index, flipbookParameter.z, flipbookParameter.w);
+		float2 notInversedUV = uv;
+		notInversedUV.y = uvInversed.x + uvInversed.y * notInversedUV.y;
+		float2 OriginUV = GetFlipbookOriginUV(notInversedUV, Index, flipbookParameter.z, flipbookParameter.w);
 		flipbookUV = GetFlipbookUVForIndex(OriginUV, NextIndex, flipbookParameter.z, flipbookParameter.w);
+		flipbookUV.y = uvInversed.x + uvInversed.y * flipbookUV.y;
 	}
 }
 
@@ -253,7 +256,7 @@ void CalculateAndStoreAdvancedParameter(in float2 uv, in float2 uv1, in float4 a
 	// flipbook interpolation
 	float flipbookRate = 0.0f;
 	float2 flipbookNextIndexUV = 0.0f;
-	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, flipbookIndexAndNextRate, uv1);
+	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, flipbookIndexAndNextRate, uv1, mUVInversed);
 
 	vsoutput.Blend_FBNextIndex_UV.zw = flipbookNextIndexUV;
 	vsoutput.UV_Others.z = flipbookRate;
@@ -449,7 +452,7 @@ void CalculateAndStoreAdvancedParameter(in VS_Input_Internal vsinput, inout VS_O
 	// flipbook interpolation
 	float flipbookRate = 0.0f;
 	float2 flipbookNextIndexUV = 0.0f;
-	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, vsinput.FlipbookIndex, vsoutput.UV_Others.xy);
+	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, vsinput.FlipbookIndex, vsoutput.UV_Others.xy, mUVInversed);
 
 	vsoutput.Blend_FBNextIndex_UV.zw = flipbookNextIndexUV;
 	vsoutput.UV_Others.z = flipbookRate;
