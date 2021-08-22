@@ -64,6 +64,14 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 	if (id2Obj_.Unload(source, id, nativePtr))
 	{
 		unload(id, nativePtr);
+
+		// delay unload
+		auto instance = RenderThreadEvent::GetInstance();
+		if (instance != nullptr)
+		{
+			source->AddRef();
+			instance->AddEvent([source]() { source->Release(); });
+		}
 	}
 }
 } // namespace EffekseerPlugin
