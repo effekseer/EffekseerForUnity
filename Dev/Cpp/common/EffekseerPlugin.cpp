@@ -374,6 +374,14 @@ extern "C"
 			}
 		}
 
+		{
+			auto instance = RenderThreadEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
+
 		// assign flipped
 		if (g_isTextureFlipped)
 		{
@@ -609,6 +617,14 @@ extern "C"
 			}
 		}
 
+		{
+			auto instance = RenderThreadEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
+
 		// assign flipped
 		if (g_isTextureFlipped)
 		{
@@ -775,6 +791,8 @@ extern "C"
 
 		g_time = 0.0f;
 
+		RenderThreadEvent::Initialize();
+
 		assert(g_graphics == nullptr);
 		if (g_rendererType == RendererType::Native)
 		{
@@ -819,6 +837,8 @@ extern "C"
 			g_graphics->Shutdown(g_UnityInterfaces);
 			ES_SAFE_DELETE(g_graphics);
 		}
+
+		RenderThreadEvent::Terminate();
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetExternalTexture(int renderId, ExternalTextureType type, void* texture)

@@ -665,4 +665,32 @@ extern "C"
 
 		g_EffekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload, getUnityId));
 	}
+
+
+	std::shared_ptr<RenderThreadEvent> RenderThreadEvent::instance_;
+
+	RenderThreadEvent::~RenderThreadEvent() { Execute(); }
+
+	void RenderThreadEvent::Initialize() { instance_ = std::make_shared<RenderThreadEvent>(); }
+
+	void RenderThreadEvent::Terminate() { instance_ = nullptr; }
+
+	std::shared_ptr<RenderThreadEvent> RenderThreadEvent::GetInstance() { return instance_; }
+
+	void RenderThreadEvent::AddEvent(const std::function<void()>& e)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		events_.emplace_back(e);
+	}
+
+	void RenderThreadEvent::Execute()
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+
+		for (const auto& e : events_)
+		{
+			e();
+		}
+		events_.clear();
+	}
 }
