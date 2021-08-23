@@ -70,7 +70,10 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 		if (instance != nullptr)
 		{
 			source->AddRef();
-			instance->AddEvent([source]() { source->Release(); });
+			instance->AddEvent([source]() {
+				// a resource must be unload in a rendering thread
+				source->Release();
+			});
 		}
 	}
 }
