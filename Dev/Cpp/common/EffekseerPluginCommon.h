@@ -148,6 +148,28 @@ using ProceduralModelGeneratorGenerate = void*(UNITY_INTERFACE_API*)(Effekseer::
 																	 int facesCount);
 using ProceduralModelGeneratorUngenerate = void(UNITY_INTERFACE_API*)(void* modelPointer);
 
+class RenderThreadEvent
+{
+private:
+	std::mutex mtx_;
+	std::vector<std::function<void()>> events_;
+	static std::shared_ptr<RenderThreadEvent> instance_;
+
+public:
+	
+	~RenderThreadEvent();
+
+	static void Initialize();
+
+	static void Terminate();
+
+	static std::shared_ptr<RenderThreadEvent> GetInstance();
+
+	void AddEvent(const std::function<void()>& e);
+
+	void Execute();
+};
+
 } // namespace EffekseerPlugin
 
 #endif
