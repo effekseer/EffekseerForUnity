@@ -53,7 +53,14 @@ namespace EffekseerPlugin
 			internalLoader = loader;
 		}
 	};
-	
+
+	class ProceduralModelGenerator : public Effekseer::ProceduralModelGenerator
+	{
+		public:
+		ProceduralModelGenerator() = default;
+		~ProceduralModelGenerator() override = default;
+		void Ungenerate(Effekseer::ModelRef model) override;
+	};
 }
 
 #endif

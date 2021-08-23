@@ -75,10 +75,7 @@ public:
 	}
 
 	virtual Effekseer::ProceduralModelGeneratorRef Create(ProceduralModelGeneratorGenerate generate,
-														  ProceduralModelGeneratorUngenerate ungenerate)
-	{
-		return nullptr;
-	}
+														  ProceduralModelGeneratorUngenerate ungenerate);
 
 	virtual void ShiftViewportForStereoSinglePass(bool isShift) = 0;
 

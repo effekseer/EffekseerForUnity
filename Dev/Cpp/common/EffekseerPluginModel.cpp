@@ -77,4 +77,24 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 		}
 	}
 }
+
+void ProceduralModelGenerator::Ungenerate(Effekseer::ModelRef model)
+{
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	// delay unload
+	auto instance = RenderThreadEvent::GetInstance();
+	if (instance != nullptr)
+	{
+		model->AddRef();
+		instance->AddEvent([model]() {
+			// a resource must be unload in a rendering thread
+			model->Release();
+		});
+	}
+}
+
 } // namespace EffekseerPlugin

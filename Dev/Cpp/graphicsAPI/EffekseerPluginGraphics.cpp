@@ -129,4 +129,10 @@ void Graphics::SetDepthTextureToRenderer(EffekseerRenderer::Renderer* renderer,
 	renderer->SetDepth(depthTexture, param);
 }
 
+Effekseer::ProceduralModelGeneratorRef Graphics::Create(ProceduralModelGeneratorGenerate generate,
+														ProceduralModelGeneratorUngenerate ungenerate)
+{
+	return Effekseer::MakeRefPtr<ProceduralModelGenerator>();
+}
+
 } // namespace EffekseerPlugin
