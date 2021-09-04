@@ -16,6 +16,8 @@ endif()
 project(EffekseerUnity  LANGUAGES C CXX)
 
 include(ExternalProject)
+include(cmake/FilterFolder.cmake)
+include(cmake/ClangFormat.cmake)
 
 option(BUILD_DX12 "Build DirectX12" OFF)
 option(BUILD_FOR_IOS "Build for ios" OFF)
@@ -181,4 +183,4 @@ target_link_directories(EffekseerUnity PRIVATE ${EFK_LIBRARY_DIRECTORIES})
 target_compile_features(EffekseerUnity PUBLIC cxx_std_14)
 add_dependencies(EffekseerUnity ExternalProject_effekseer)
 
-
+FilterFolder("${srcs}")
