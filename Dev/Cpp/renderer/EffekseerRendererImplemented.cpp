@@ -211,7 +211,9 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		auto isBackgroundRequired = collector_.IsBackgroundRequiredOnFirstPass && stageInd == 0;
 
 		if (isBackgroundRequired && m_renderer->GetBackground() == 0)
-			return;
+		{
+			continue;
+		}
 
 		Shader* shader = nullptr;
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
