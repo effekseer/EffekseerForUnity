@@ -8,25 +8,13 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 {
 	class EffekseerRenderPassURP : UnityEngine.Rendering.Universal.ScriptableRenderPass
 	{
-		RenderTargetIdentifier cameraColorTarget;
-		RenderTargetIdentifier cameraDepthTarget;
-
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 
-		public EffekseerRenderPassURP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
+		public EffekseerRenderPassURP()
 		{
-			// HACK
-			bool isValidDepth = !cameraDepthTarget.ToString().Contains("-1");
-
-			this.cameraColorTarget = cameraColorTarget;
-			prop.colorTargetIdentifier = cameraColorTarget;
 			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
-
-			if(isValidDepth)
-			{
-				this.cameraDepthTarget = cameraDepthTarget;
-				prop.depthTargetIdentifier = cameraDepthTarget;
-			}
+			prop.colorTargetIdentifier = colorAttachment;
+			prop.depthTargetIdentifier = depthAttachment;
 		}
 
 		public override void Execute(ScriptableRenderContext context, ref UnityEngine.Rendering.Universal.RenderingData renderingData)
@@ -55,7 +43,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 
 	public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
 	{
-		m_ScriptablePass = new EffekseerRenderPassURP(renderer.cameraColorTarget, renderer.cameraDepth);
+		m_ScriptablePass = new EffekseerRenderPassURP();
 		m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
 		renderer.EnqueuePass(m_ScriptablePass);
 
