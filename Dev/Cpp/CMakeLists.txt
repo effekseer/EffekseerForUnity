@@ -1,90 +1,10 @@
 cmake_minimum_required(VERSION 3.18)
 
-if (WIN32)
-    cmake_policy(SET CMP0091 NEW)
-endif()
-
-if(APPLE)
-    cmake_policy(SET CMP0114 NEW)
-    if(BUILD_FOR_IOS OR BUILD_FOR_IOS_SIM)
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.0)
-    else()
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-    endif()
-endif()
-
 project(EffekseerUnity  LANGUAGES C CXX)
 
 include(ExternalProject)
 include(cmake/FilterFolder.cmake)
 include(cmake/ClangFormat.cmake)
-
-option(BUILD_DX12 "Build DirectX12" OFF)
-option(BUILD_FOR_IOS "Build for ios" OFF)
-option(BUILD_FOR_IOS_SIM "Build for ios simulator" OFF)
-
-# Flags
-if (WIN32)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
-if(APPLE AND BUILD_FOR_IOS)
-
-ExternalProject_Add(
-    ExternalProject_effekseer
-    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
-    PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
-    INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-    CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-                    -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=false
-                    -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
-                    -DBUILD_VIEWER:BOOL=OFF
-                    -DBUILD_EXAMPLES:BOOL=OFF
-                    -DBUILD_UNITYPLUGIN_FOR_IOS:BOOL=ON
-                    -DUSE_OPENGLES3=ON
-                    -DCMAKE_SYSTEM_NAME=iOS
-                    -DCMAKE_OSX_SYSROOT=iphoneos
-    )
-
-elseif(APPLE AND BUILD_FOR_IOS_SIM)
-
-ExternalProject_Add(
-ExternalProject_effekseer
-SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
-PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
-INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-                -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=false
-                -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
-                -DBUILD_VIEWER:BOOL=OFF
-                -DBUILD_EXAMPLES:BOOL=OFF
-                -DBUILD_UNITYPLUGIN_FOR_IOS:BOOL=ON
-                -DUSE_OPENGLES3=ON
-                -DCMAKE_SYSTEM_NAME=iOS
-                -DCMAKE_OSX_SYSROOT=iphonesimulator
-)
-
-else()
-
-ExternalProject_Add(
-    ExternalProject_effekseer
-    SOURCE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/../Effekseer
-    PREFIX          ${CMAKE_CURRENT_BINARY_DIR}/Build/Effekseer
-    INSTALL_DIR     ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-    CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer
-                    -DEFK_USE_MSVC_RUNTIME_LIBRARY_DLL=false
-                    -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
-                    -DBUILD_VIEWER:BOOL=OFF
-                    -DBUILD_EXAMPLES:BOOL=OFF
-                    -DBUILD_UNITYPLUGIN:BOOL=ON
-    )
-
-endif()
-    
-list(APPEND EFK_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/include/)
-list(APPEND EFK_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/include/Effekseer)
-list(APPEND EFK_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/include/EffekseerRendererCommon)
-list(APPEND EFK_LIBRARY_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR}/Install/Effekseer/lib)
 
 file(GLOB effekseer_src
     common/*.cpp
@@ -174,13 +94,29 @@ if(APPLE)
     endif()
 
     set_target_properties(EffekseerUnity PROPERTIES XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES)
-
+    target_compile_options(EffekseerUnity PUBLIC -fembed-bitcode)
 endif()
+
+list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/)
+list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/Effekseer/)
+list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/EffekseerRendererCommon/)
 
 target_compile_definitions(EffekseerUnity PRIVATE __EFFEKSEER_FROM_MAIN_CMAKE__)
 target_include_directories(EffekseerUnity PRIVATE ${EFK_INCLUDES})
 target_link_directories(EffekseerUnity PRIVATE ${EFK_LIBRARY_DIRECTORIES})
 target_compile_features(EffekseerUnity PUBLIC cxx_std_14)
-add_dependencies(EffekseerUnity ExternalProject_effekseer)
 
 FilterFolder("${srcs}")
+
+install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-export
+    INCLUDES DESTINATION include
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
+
+install(
+    EXPORT ${PROJECT_NAME}-export
+    FILE ${PROJECT_NAME}-config.cmake
+    DESTINATION lib/cmake
+    EXPORT_LINK_INTERFACE_LIBRARIES)
