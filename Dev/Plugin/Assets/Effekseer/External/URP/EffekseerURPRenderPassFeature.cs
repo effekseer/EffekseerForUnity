@@ -11,6 +11,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
 		RenderTargetIdentifier cameraColorTarget;
 		RenderTargetIdentifier cameraDepthTarget;
+#else
+		ScriptableRenderer renderer;
 #endif
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 
@@ -31,16 +33,20 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 		}
 #else
-		public EffekseerRenderPassURP()
+		public EffekseerRenderPassURP(ScriptableRenderer renderer)
 		{
-			prop.colorTargetIdentifier = colorAttachment;
-            prop.depthTargetIdentifier = depthAttachment;
+			this.renderer = renderer;
+			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
 		}
 #endif
 
 		public override void Execute(ScriptableRenderContext context, ref UnityEngine.Rendering.Universal.RenderingData renderingData)
 		{
 			if (Effekseer.EffekseerSystem.Instance == null) return;
+#if EFFEKSEER_URP_DEPTHTARGET_FIX
+			prop.colorTargetIdentifier = this.renderer.cameraColorTarget;
+			prop.depthTargetIdentifier = this.renderer.cameraDepthTarget;
+#endif
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 			prop.isRequiredToCopyBackground = true;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.URP;
@@ -69,7 +75,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
 		renderer.EnqueuePass(m_ScriptablePass);
 #else
-		m_ScriptablePass = new EffekseerRenderPassURP();
+		m_ScriptablePass = new EffekseerRenderPassURP(renderer);
 		m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
 		renderer.EnqueuePass(m_ScriptablePass);
 #endif
