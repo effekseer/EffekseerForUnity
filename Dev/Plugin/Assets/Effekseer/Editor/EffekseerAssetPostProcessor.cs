@@ -91,6 +91,7 @@ namespace Effekseer.Editor
 						var tp = new EffekseerMaterialAsset.TextureProperty();
 						tp.Name = t.Name;
 						tp.UniformName = t.UniformName;
+						tp.Type = (EffekseerMaterialAsset.TextureType)EffekseerTool.Utl.TextureType.Color;
 						importingAsset.Textures.Add(tp);
 					}
 
