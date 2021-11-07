@@ -105,13 +105,13 @@ namespace Effekseer.Internal
 #if UNITY_EDITOR
 				if (grabDepthMat == null)
 				{
-					Effekseer.EffekseerSettings.AssignAssets();
+					EffekseerDependentAssets.AssignAssets();
 				}
 #endif
 
-				if (grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
+				if (grabDepthMat == null && EffekseerDependentAssets.Instance.grabDepthShader != null)
 				{
-					grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
+					grabDepthMat = new Material(EffekseerDependentAssets.Instance.grabDepthShader);
 					grabDepthMat.EnableKeyword("_AS_COLOR_");
 				}
 
@@ -218,7 +218,7 @@ namespace Effekseer.Internal
 			{
 				for (int i = 0; i < MaterialRingCount; i++)
 				{
-					blitArrayMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DArrayBlitMaterial));
+					blitArrayMaterials.Add(new Material(EffekseerDependentAssets.Instance.texture2DArrayBlitMaterial));
 				}
 			}
 
@@ -233,7 +233,7 @@ namespace Effekseer.Internal
 			{
 				for (int i = 0; i < MaterialRingCount; i++)
 				{
-					blitMaterials.Add(new Material(Effekseer.EffekseerSettings.Instance.texture2DBlitMaterial));
+					blitMaterials.Add(new Material(EffekseerDependentAssets.Instance.texture2DBlitMaterial));
 				}
 			}
 
@@ -347,7 +347,7 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				if(XRSettings.enabled)
+				if (XRSettings.enabled)
 				{
 					renderTexture = new RenderTexture(XRSettings.eyeTextureDesc);
 				}

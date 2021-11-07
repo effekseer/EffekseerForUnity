@@ -40,19 +40,19 @@ namespace Effekseer.Internal
 				this.cameraEvent = cameraEvent;
 				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
 
-				var fakeShader = EffekseerSettings.Instance.fakeMaterial;
+				var fakeShader = EffekseerDependentAssets.Instance.fakeMaterial;
 #if UNITY_EDITOR
 				if (fakeShader == null)
 				{
-					EffekseerSettings.AssignAssets();
+					EffekseerDependentAssets.AssignAssets();
 				}
-				fakeShader = EffekseerSettings.Instance.fakeMaterial;
+				fakeShader = EffekseerDependentAssets.Instance.fakeMaterial;
 #endif
 
 #if UNITY_EDITOR || UNITY_PS4
 				if (fakeShader != null)
 				{
-					fakeMaterial = new Material(EffekseerSettings.Instance.fakeMaterial);
+					fakeMaterial = new Material(EffekseerDependentAssets.Instance.fakeMaterial);
 				}
 #endif
 			}
