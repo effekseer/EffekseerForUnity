@@ -192,14 +192,20 @@ namespace Effekseer
 
 		static EffekseerSettings LoadAsset()
 		{
+#if UNITY_EDITOR
 			var asset = PlayerSettings.GetPreloadedAssets().OfType<EffekseerSettings>().FirstOrDefault();
 
 			if (asset != null)
 			{
 				return asset;
 			}
-
+#endif
 			return Resources.Load<EffekseerSettings>("EffekseerSettings");
+		}
+
+		void OnEnable()
+		{
+			instance = this;
 		}
 
 #if UNITY_EDITOR
