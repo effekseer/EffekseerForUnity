@@ -51,8 +51,18 @@ namespace Effekseer
 	public class EffekseerMaterialAsset : ScriptableObject
 	{
 		[System.Serializable]
+		public enum TextureType
+		{
+			Color,
+			Value,
+		}
+
+		[System.Serializable]
 		public class TextureProperty
 		{
+			[SerializeField]
+			public TextureType Type = TextureType.Color;
+
 			[SerializeField]
 			public string Name;
 
@@ -258,21 +268,28 @@ namespace Effekseer
 				var keyP = "$TEX_P" + i + "$";
 				var keyS = "$TEX_S" + i + "$";
 
+				var replacedP = string.Empty;
+				var replacedS = string.Empty;
 
 				if (stage == 0)
 				{
-					baseCode = baseCode.Replace(
-									   keyP,
-									   "tex2Dlod(" + importingAsset.Textures[i].Name + ",float4(GetUV(");
-					baseCode = baseCode.Replace(keyS, "),0,0))");
+					replacedP = "tex2Dlod(" + importingAsset.Textures[i].Name + ",float4(GetUV(";
+					replacedS = "),0,0))";
 				}
 				else
 				{
-					baseCode = baseCode.Replace(
-									   keyP,
-									   "tex2D(" + importingAsset.Textures[i].Name + ",GetUV(");
-					baseCode = baseCode.Replace(keyS, "))");
+					replacedP = "tex2D(" + importingAsset.Textures[i].Name + ",GetUV(";
+					replacedS = "))";
 				}
+
+				if(importingAsset.Textures[i].Type == TextureType.Color)
+				{
+					replacedP = "ConvertFromSRGBTexture(" + replacedP;
+					replacedS = replacedS + ")";
+				}
+
+				baseCode = baseCode.Replace(keyP, replacedP);
+				baseCode = baseCode.Replace(keyS, replacedS);
 
 			}
 
@@ -431,6 +448,62 @@ Cull[_Cull]
 	Pass {
 
 		CGPROGRAM
+
+		@define FLT_EPSILON 1.192092896e-07f
+		
+		float convertColorSpace;
+
+		float3 PositivePow(float3 base, float3 power)
+		{
+			return pow(max(abs(base), float3(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
+		}
+		
+		// based on http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html?m=1
+		half3 SRGBToLinear(half3 c)
+		{
+			return c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878);
+		}
+		
+		half4 SRGBToLinear(half4 c)
+		{
+			return half4(SRGBToLinear(c.rgb), c.a);
+		}
+		
+		half3 LinearToSRGB(half3 c)
+		{
+			return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
+		}
+		
+		half4 LinearToSRGB(half4 c)
+		{
+			return half4(LinearToSRGB(c.rgb), c.a);
+		}
+		
+		half4 ConvertFromSRGBTexture(half4 c)
+		{
+		@if defined(UNITY_COLORSPACE_GAMMA)
+			return c;
+		@else
+			if (convertColorSpace == 0.0f)
+			{
+				return c;
+			}
+			return LinearToSRGB(c);
+		@endif
+		}
+		
+		half4 ConvertToScreen(half4 c)
+		{
+		@if defined(UNITY_COLORSPACE_GAMMA)
+			return c;
+		@else
+			if (convertColorSpace == 0.0f)
+			{
+				return c;
+			}
+			return SRGBToLinear(c);
+		@endif
+		}
 
 		@define MOD fmod
 		@define FRAC frac
@@ -782,7 +855,7 @@ Cull[_Cull]
 			if(opacityMask <= 0.0f) discard;
 			if(opacity <= 0.0) discard;
 		
-			return Output;
+			return ConvertToScreen(Output);
 			@endif
 		}
 

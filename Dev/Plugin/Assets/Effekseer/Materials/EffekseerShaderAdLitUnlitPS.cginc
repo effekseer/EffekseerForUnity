@@ -107,6 +107,7 @@ struct PS_Input
 
 #include "EffekseerShaderAdCommonPS.cginc"
 #include "EffekseerShaderSoftParticlePS.cginc"
+#include "EffekseerShader_Linear_sRGB.cginc"
 
 float4 frag(const PS_Input Input)
 	: SV_Target
@@ -118,7 +119,7 @@ float4 frag(const PS_Input Input)
 	float2 UVOffset = UVDistortionOffset(_uvDistortionTex, sampler_uvDistortionTex, advancedParam.UVDistortionUV, fUVDistortionParameter.zw);
 	UVOffset *= fUVDistortionParameter.x;
 
-	float4 Output = _colorTex.Sample(sampler_colorTex, Input.UV_Others.xy + UVOffset) * Input.Color;
+	float4 Output = ConvertFromSRGBTexture(_colorTex.Sample(sampler_colorTex, Input.UV_Others.xy + UVOffset)) * Input.Color;
 
 #if ENABLE_LIGHTING
 	half3 texNormal = (_normalTex.Sample(sampler_normalTex, Input.UV_Others.xy + UVOffset).xyz - 0.5) * 2.0;
@@ -138,7 +139,7 @@ float4 frag(const PS_Input Input)
 	float2 BlendUVOffset = UVDistortionOffset(_blendUVDistortionTex, sampler_blendUVDistortionTex, advancedParam.BlendUVDistortionUV, fUVDistortionParameter.zw);
 	BlendUVOffset *= fUVDistortionParameter.y;
 
-	float4 BlendTextureColor = _blendTex.Sample(sampler_blendTex, advancedParam.BlendUV + BlendUVOffset);
+	float4 BlendTextureColor = ConvertFromSRGBTexture(_blendTex.Sample(sampler_blendTex, advancedParam.BlendUV + BlendUVOffset));
 	float4 BlendAlphaTextureColor = _blendAlphaTex.Sample(sampler_blendAlphaTex, advancedParam.BlendAlphaUV + BlendUVOffset);
 	BlendTextureColor.a *= BlendAlphaTextureColor.r * BlendAlphaTextureColor.a;
 
@@ -211,5 +212,5 @@ float4 frag(const PS_Input Input)
 		Output.rgb,
 		ceil((Output.a - advancedParam.AlphaThreshold) - fEdgeParameter.x));
 
-	return Output;
+	return ConvertToScreen(Output);
 }

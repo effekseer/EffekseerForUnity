@@ -1391,6 +1391,9 @@ namespace Effekseer.Internal
 
 				ApplyAdvancedParameter(parameter, prop);
 			}
+
+			ApplyColorSpace(prop);
+
 			prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
 
 			ApplyReconstructionParameter(parameter, prop);
@@ -1535,6 +1538,9 @@ namespace Effekseer.Internal
 				{
 					ApplyAdvancedParameter(parameter, prop);
 				}
+
+				ApplyColorSpace(prop);
+
 				prop.SetVector("fEmissiveScaling", new Vector4(parameter.EmissiveScaling, 0.0f, 0.0f, 0.0f));
 
 				ApplyReconstructionParameter(parameter, prop);
@@ -1785,6 +1791,11 @@ namespace Effekseer.Internal
 			prop.SetVector("fFalloffEndColor", parameter.FalloffParam.EndColor);
 			prop.SetVector("fEdgeColor", parameter.EdgeParams.Color);
 			prop.SetVector("fEdgeParameter", new Vector4(parameter.EdgeParams.Threshold, parameter.EdgeParams.ColorScaling, 0.0f, 0.0f));
+		}
+
+		void ApplyColorSpace(MaterialPropertyBlock prop)
+		{
+			prop.SetFloat("convertColorSpace", EffekseerSettings.Instance.MaintainGammaColorInLinearSpace ? 1.0f : 0.0f);
 		}
 
 		void ApplyReconstructionParameter(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop)
