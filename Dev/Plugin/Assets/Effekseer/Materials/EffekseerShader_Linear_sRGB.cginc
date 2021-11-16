@@ -1,5 +1,7 @@
 #define FLT_EPSILON 1.192092896e-07f
 
+float convertColorSpace;
+
 float3 PositivePow(float3 base, float3 power)
 {
 	return pow(max(abs(base), float3(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
@@ -31,6 +33,11 @@ half4 ConvertFromSRGBTexture(half4 c)
 #if defined(UNITY_COLORSPACE_GAMMA)
 	return c;
 #else
+	if (convertColorSpace == 0.0f)
+	{
+		return c;
+	}
+
 	return LinearToSRGB(c);
 #endif
 }
@@ -40,6 +47,11 @@ half4 ConvertToScreen(half4 c)
 #if defined(UNITY_COLORSPACE_GAMMA)
 	return c;
 #else
+	if (convertColorSpace == 0.0f)
+	{
+		return c;
+	}
+
 	return SRGBToLinear(c);
 #endif
 }

@@ -35,6 +35,14 @@ namespace Effekseer
 		[SerializeField]
 		public bool renderAsPostProcessingStack = false;
 
+		/// <summary xml:lang="en">
+		/// Whether to maintain gamma color in linear space. (The flag is available in Unity Renderer)
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// リニアスペースでガンマカラーを維持するかどうか (UnityRendererのみ有効)
+		/// </summary>
+		public bool MaintainGammaColorInLinearSpace = true;
+
 		/// <summary>
 		/// 
 		/// </summary>

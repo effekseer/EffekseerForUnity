@@ -451,6 +451,8 @@ Cull[_Cull]
 
 		@define FLT_EPSILON 1.192092896e-07f
 		
+		float convertColorSpace;
+
 		float3 PositivePow(float3 base, float3 power)
 		{
 			return pow(max(abs(base), float3(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
@@ -482,6 +484,10 @@ Cull[_Cull]
 		@if defined(UNITY_COLORSPACE_GAMMA)
 			return c;
 		@else
+			if (convertColorSpace == 0.0f)
+			{
+				return c;
+			}
 			return LinearToSRGB(c);
 		@endif
 		}
@@ -491,6 +497,10 @@ Cull[_Cull]
 		@if defined(UNITY_COLORSPACE_GAMMA)
 			return c;
 		@else
+			if (convertColorSpace == 0.0f)
+			{
+				return c;
+			}
 			return SRGBToLinear(c);
 		@endif
 		}
