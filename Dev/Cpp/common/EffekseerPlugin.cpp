@@ -97,6 +97,7 @@ bool g_reversedDepth = false;
 bool g_isTextureFlipped = false;
 bool g_isBackgroundTextureFlipped = false;
 bool g_isRightHandedCoordinate = false;
+bool g_maintainGammaColor = false;
 
 IUnityInterfaces* g_UnityInterfaces = NULL;
 IUnityGraphics* g_UnityGraphics = NULL;
@@ -186,6 +187,8 @@ void InitRenderer()
 	g_EffekseerRenderer->SetLightColor(Effekseer::Color(255, 255, 255, 255));
 	g_EffekseerRenderer->SetLightDirection(Effekseer::Vector3D(1, 1, -1));
 	g_EffekseerRenderer->SetLightAmbientColor(Effekseer::Color(40, 40, 40, 255));
+
+	g_EffekseerRenderer->SetMaintainGammaColorInLinearColorSpace(g_maintainGammaColor);
 }
 
 void TermRenderer()
@@ -445,9 +448,11 @@ extern "C"
 		// Specify textures
 		if (g_graphics != nullptr)
 		{
-			g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(),
-													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
-			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
+			g_graphics->SetBackGroundTextureToRenderer(
+				g_EffekseerRenderer.Get(), settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
+			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(),
+												  projectionMatrix,
+												  settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
 		}
 
 		// render
@@ -702,9 +707,11 @@ extern "C"
 		// Specify textures
 		if (g_graphics != nullptr)
 		{
-			g_graphics->SetBackGroundTextureToRenderer(g_EffekseerRenderer.Get(),
-													   settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
-			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(), projectionMatrix, settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
+			g_graphics->SetBackGroundTextureToRenderer(
+				g_EffekseerRenderer.Get(), settings.externalTextures[static_cast<int>(ExternalTextureType::Background)].Texture);
+			g_graphics->SetDepthTextureToRenderer(g_EffekseerRenderer.Get(),
+												  projectionMatrix,
+												  settings.externalTextures[static_cast<int>(ExternalTextureType::Depth)].Texture);
 		}
 
 		std::shared_ptr<RenderPass> renderPath = nullptr;
@@ -761,12 +768,18 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetRenderBackFunc(int renderId) { return EffekseerRenderBack; }
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API
-	EffekseerInit(int maxInstances, int maxSquares, int reversedDepth, int isRightHandedCoordinate, int threadCount, int rendererType)
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerInit(int maxInstances,
+																  int maxSquares,
+																  int reversedDepth,
+																  int maintainGammaColor,
+																  int isRightHandedCoordinate,
+																  int threadCount,
+																  int rendererType)
 	{
 		g_maxInstances = maxInstances;
 		g_maxSquares = maxSquares;
 		g_reversedDepth = reversedDepth != 0;
+		g_maintainGammaColor = maintainGammaColor != 0;
 		g_isRightHandedCoordinate = isRightHandedCoordinate != 0;
 		g_rendererType = (RendererType)rendererType;
 
