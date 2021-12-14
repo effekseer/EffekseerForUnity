@@ -57,3 +57,5 @@ struct SpriteAdvancedParameter
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 };
+
+float convertColorSpace;

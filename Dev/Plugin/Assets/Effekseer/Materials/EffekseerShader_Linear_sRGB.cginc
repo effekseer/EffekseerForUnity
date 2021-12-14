@@ -1,6 +1,7 @@
-#define FLT_EPSILON 1.192092896e-07f
+#ifndef LINEAR_SRGB_FX
+#define LINEAR_SRGB_FX
 
-float convertColorSpace;
+#define FLT_EPSILON 1.192092896e-07f
 
 float3 PositivePow(float3 base, float3 power)
 {
@@ -28,12 +29,12 @@ half4 LinearToSRGB(half4 c)
 	return half4(LinearToSRGB(c.rgb), c.a);
 }
 
-half4 ConvertFromSRGBTexture(half4 c)
+half4 ConvertFromSRGBTexture(half4 c, bool isValid)
 {
 #if defined(UNITY_COLORSPACE_GAMMA)
 	return c;
 #else
-	if (convertColorSpace == 0.0f)
+	if (!isValid)
 	{
 		return c;
 	}
@@ -42,12 +43,12 @@ half4 ConvertFromSRGBTexture(half4 c)
 #endif
 }
 
-half4 ConvertToScreen(half4 c)
+half4 ConvertToScreen(half4 c, bool isValid)
 {
 #if defined(UNITY_COLORSPACE_GAMMA)
 	return c;
 #else
-	if (convertColorSpace == 0.0f)
+	if (!isValid)
 	{
 		return c;
 	}
@@ -55,3 +56,5 @@ half4 ConvertToScreen(half4 c)
 	return SRGBToLinear(c);
 #endif
 }
+
+#endif
