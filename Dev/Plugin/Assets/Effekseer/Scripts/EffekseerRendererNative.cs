@@ -104,6 +104,51 @@ namespace Effekseer.Internal
 					return;
 				}
 
+				Action copyBackground = () => {
+					if (this.renderTexture != null)
+					{
+						// Add a blit command that copy to the distortion texture
+						// this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+						// this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+
+						if (renderTargetProperty != null)
+						{
+							if (renderTargetProperty.colorBufferID.HasValue)
+							{
+								cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
+								cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
+
+								if (renderTargetProperty.Viewport.width > 0)
+								{
+									cmbBuf.SetViewport(renderTargetProperty.Viewport);
+								}
+							}
+							else
+							{
+								renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture);
+
+								if (renderTargetProperty.Viewport.width > 0)
+								{
+									cmbBuf.SetViewport(renderTargetProperty.Viewport);
+								}
+							}
+						}
+						else
+						{
+							cmbBuf.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+							cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+
+							// to reset shader settings. SetRenderTarget is not applied until drawing
+							if (fakeMaterial != null)
+							{
+								cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
+							}
+						}
+					}
+				};
+
+				copyBackground();
+
 				if (this.depthTexture != null)
 				{
 					if (renderTargetProperty != null)
@@ -130,46 +175,7 @@ namespace Effekseer.Internal
 
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
-				if (this.renderTexture != null)
-				{
-					// Add a blit command that copy to the distortion texture
-					// this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
-					// this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-					if (renderTargetProperty != null)
-					{
-						if (renderTargetProperty.colorBufferID.HasValue)
-						{
-							cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
-							cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
-
-							if (renderTargetProperty.Viewport.width > 0)
-							{
-								cmbBuf.SetViewport(renderTargetProperty.Viewport);
-							}
-						}
-						else
-						{
-							renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture);
-
-							if (renderTargetProperty.Viewport.width > 0)
-							{
-								cmbBuf.SetViewport(renderTargetProperty.Viewport);
-							}
-						}
-					}
-					else
-					{
-						cmbBuf.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
-						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-						// to reset shader settings. SetRenderTarget is not applied until drawing
-						if (fakeMaterial != null)
-						{
-							cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
-						}
-					}
-				}
+				copyBackground();
 
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 			}
