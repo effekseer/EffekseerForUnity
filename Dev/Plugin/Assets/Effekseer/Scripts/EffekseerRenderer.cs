@@ -353,7 +353,14 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					renderTexture = new RenderTexture(width, height, 0, format);
+					if(QualitySettings.activeColorSpace == ColorSpace.Linear)
+					{
+						renderTexture = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear);
+					}
+					else
+					{
+						renderTexture = new RenderTexture(width, height, 0, format);
+					}
 				}
 			}
 
