@@ -216,7 +216,9 @@ namespace Effekseer.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Speed", GUILayout.Width(50));
-			emitter.speed = GUILayout.HorizontalSlider(emitter.speed, 0.0f, 2.0f);
+			emitter.speed = GUILayout.HorizontalSlider(emitter.speed, 0.0f, 2.0f, GUILayout.Width(50));
+			emitter.speed = EditorGUILayout.FloatField(emitter.speed, GUILayout.Width(50));
+			emitter.speed = Mathf.Clamp(emitter.speed, 0, 2);
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
