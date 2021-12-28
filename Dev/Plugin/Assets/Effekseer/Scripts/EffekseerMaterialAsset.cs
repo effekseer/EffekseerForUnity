@@ -459,27 +459,27 @@ Cull[_Cull]
 		}
 		
 		// based on http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html?m=1
-		half3 SRGBToLinear(half3 c)
+		float3 SRGBToLinear(float3 c)
 		{
 			return min(c, c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878));
 		}
 		
-		half4 SRGBToLinear(half4 c)
+		float4 SRGBToLinear(float4 c)
 		{
-			return half4(SRGBToLinear(c.rgb), c.a);
+			return float4(SRGBToLinear(c.rgb), c.a);
 		}
 		
-		half3 LinearToSRGB(half3 c)
+		float3 LinearToSRGB(float3 c)
 		{
 			return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
 		}
 		
-		half4 LinearToSRGB(half4 c)
+		float4 LinearToSRGB(float4 c)
 		{
-			return half4(LinearToSRGB(c.rgb), c.a);
+			return float4(LinearToSRGB(c.rgb), c.a);
 		}
 		
-		half4 ConvertFromSRGBTexture(half4 c)
+		float4 ConvertFromSRGBTexture(float4 c)
 		{
 		@if defined(UNITY_COLORSPACE_GAMMA)
 			return c;
@@ -492,7 +492,7 @@ Cull[_Cull]
 		@endif
 		}
 		
-		half4 ConvertToScreen(half4 c)
+		float4 ConvertToScreen(float4 c)
 		{
 		@if defined(UNITY_COLORSPACE_GAMMA)
 			return c;
