@@ -80,7 +80,7 @@ float4 frag(const PS_Input Input)
 	ApplyFlipbook(Output, _colorTex, sampler_colorTex, fFlipbookParameter, Input.Color, advancedParam.FlipbookNextIndexUV + UVOffset, advancedParam.FlipbookRate, false);
 
 	// apply alpha texture
-	float4 AlphaTexColor = ConvertFromSRGBTexture(_alphaTex.Sample(sampler_alphaTex, advancedParam.AlphaUV + UVOffset));
+	float4 AlphaTexColor = _alphaTex.Sample(sampler_alphaTex, advancedParam.AlphaUV + UVOffset);
 	Output.a *= AlphaTexColor.r * AlphaTexColor.a;
 
 	// blend texture uv offset
