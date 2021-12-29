@@ -90,6 +90,16 @@ PlayEffect()で再生した場合は自動で位置回転は変わりません�
 
 ヒットエフェクトや爆発エフェクトなど、シンプルに使いたいときに適しています。
 
+## 設定ファイル
+
+設定ファイルを作成すると、Effekseerの詳細な挙動を設定できます。
+
+Assets -> Create -> Effekseer -> Effekseer Settings を選択します。
+
+メニューからEffekseer Settingsを作成した場合、preload assetsに自動的に登録されます。
+
+もしEffekseer Settingsが読み込まれない場合、Project Settings -> preload assets にEffekseer Settingsが含まれているか確認してください。
+
 ## Universal Render Pipeline
 
 Effekseer は Universal Render Pipeline に対応しています。
