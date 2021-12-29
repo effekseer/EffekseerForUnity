@@ -19,7 +19,7 @@ Unity 2019 or later
 
 EffekseerForUnity has two renderers. First renderer is drawn with Compute Shader(UnityRenderer). Second renderer is drawn with native API(NativeRenderer). 
 UnityRenderer runs on everywhere where compute shader is enabled. On the other hand, NativeRenderer runs on limited platforms. But NativeRenderer is drawn with multithread.
-You can select renderer from ``` Edit -> ProjectSettings -> Effekseer ```.
+You can select a renderer from a setting file with creating the setting file.
 If unsupported renderer is selected, renderer is changed automatically.
 
 <table>

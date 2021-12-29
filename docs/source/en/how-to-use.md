@@ -87,13 +87,13 @@ Suitable for simple use, such as hit effects and explosion effects.
 
 ## Settings
 
-設定ファイルを作成すると、Effekseerの詳細な挙動を設定できます。
+Once you have created a setting file, you can configure the detailed behavior of Effekseer.
 
-Assets -> Create -> Effekseer -> Effekseer Settings を選択します。
+Select Assets -> Create -> Effekseer -> Effekseer Settings.
 
-メニューからEffekseer Settingsを作成した場合、preload assetsに自動的に登録されます。
+If you create Effekseer Settings from the menu, it will be automatically registered in preload assets.
 
-もしEffekseer Settingsが読み込まれない場合、Project Settings -> preload assets にEffekseer Settingsが含まれているか確認してください。
+If Effekseer Settings does not load, make sure that Project Settings -> preload assets contains Effekseer Settings.
 
 ## Universal Render Pipeline
 
