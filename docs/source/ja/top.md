@@ -19,8 +19,8 @@ Unity 2019 以降
 
 EffekseerForUnityには2種類のレンダラーがあります。1つ目はComputeShaderで描画するUnityRendererです。2つ目はネイティブのAPIで描画するNativeRendererです。
 UnityRendererはComputeShaderが有効な全ての環境で動きます。一方、NativeRendererは限られたプラットフォームでしか動きません。しかし、マルチスレッドで描画することができます。
-レンダラーは ``` Edit -> ProjectSettings -> Effekseer ``` から選択できます.
-もし、サポートされていないレンダラらーが選択されていた場合、自動的にレンダラーが変更されます。
+レンダラーは 設定ファイルを作成し、設定ファイルから選択できます.
+もし、サポートされていないレンダラーが選択されていた場合、自動的にレンダラーが変更されます。
 
 <table>
 <thead>

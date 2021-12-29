@@ -85,6 +85,16 @@ If you want to move it you need to set it manually.
 
 Suitable for simple use, such as hit effects and explosion effects.
 
+## Settings
+
+設定ファイルを作成すると、Effekseerの詳細な挙動を設定できます。
+
+Assets -> Create -> Effekseer -> Effekseer Settings を選択します。
+
+メニューからEffekseer Settingsを作成した場合、preload assetsに自動的に登録されます。
+
+もしEffekseer Settingsが読み込まれない場合、Project Settings -> preload assets にEffekseer Settingsが含まれているか確認してください。
+
 ## Universal Render Pipeline
 
 Effekseer supports Universal RenderPipeline.
