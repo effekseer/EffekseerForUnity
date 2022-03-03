@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace Effekseer
 {
-	class EffekseerDependentAssets : ScriptableObject
+	public class EffekseerDependentAssets : ScriptableObject
 	{
 		public Shader texture2DArrayBlitMaterial = null;
 

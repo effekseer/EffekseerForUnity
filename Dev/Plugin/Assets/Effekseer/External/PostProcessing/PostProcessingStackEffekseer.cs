@@ -39,13 +39,13 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 #if UNITY_EDITOR
 		if (grabDepthMat == null)
 		{
-			Effekseer.EffekseerSettings.AssignAssets();
+			Effekseer.EffekseerDependentAssets.AssignAssets();
 		}
 #endif
 
-		if(grabDepthMat == null && Effekseer.EffekseerSettings.Instance.grabDepthShader != null)
+		if(grabDepthMat == null && Effekseer.EffekseerDependentAssets.Instance.grabDepthShader != null)
 		{
-			grabDepthMat = new Material(Effekseer.EffekseerSettings.Instance.grabDepthShader);
+			grabDepthMat = new Material(Effekseer.EffekseerDependentAssets.Instance.grabDepthShader);
 		}
 
 		if (Effekseer.EffekseerSystem.Instance == null || grabDepthMat == null)
