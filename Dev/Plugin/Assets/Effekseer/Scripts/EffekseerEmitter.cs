@@ -315,6 +315,21 @@ namespace Effekseer
 		}
 
 		/// <summary xml:lang="en">
+		/// Send a trigger signal
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// トリガーの信号を送信する。
+		/// </summary>
+		/// <param name="index"></param>
+		public void SendTrigger(int index)
+		{
+			foreach (var handle in handles)
+			{
+				Plugin.EffekseerSendTrigger(handle.m_handle, index);
+			}
+		}
+
+		/// <summary xml:lang="en">
 		/// Pausing the effect
 		/// <para>true:  It will update on Update()</para>
 		/// <para>false: It will not update on Update()</para>

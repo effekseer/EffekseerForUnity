@@ -52,6 +52,7 @@ EXPORTS
   EffekseerSetTimeScaleByGroup
   EffekseerGetInstanceCount
   EffekseerGetRestInstancesCount
+  EffekseerSendTrigger
   EffekseerGetDynamicInput
   EffekseerSetDynamicInput
   EffekseerSetTextureLoaderEvent

@@ -222,6 +222,27 @@ namespace Effekseer.Editor
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
+			GUILayout.Label("Trigger", GUILayout.Width(50));
+			if (GUILayout.Button("0"))
+			{
+				emitter.SendTrigger(0);
+			}
+			if (GUILayout.Button("1"))
+			{
+				emitter.SendTrigger(1);
+			}
+			if (GUILayout.Button("2"))
+			{
+				emitter.SendTrigger(2);
+			}
+			if (GUILayout.Button("3"))
+			{
+				emitter.SendTrigger(3);
+			}
+			GUILayout.EndHorizontal();
+
+
+			GUILayout.BeginHorizontal();
 			GUILayout.Label("Instance", GUILayout.Width(80));
 			GUILayout.Label(emitter.instanceCount.ToString());
 			GUILayout.EndHorizontal();

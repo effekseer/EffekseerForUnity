@@ -466,6 +466,16 @@ extern "C"
 		return g_EffekseerManager->GetRestInstancesCount();
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSendTrigger(int handle, int32_t index)
+	{
+		if (g_EffekseerManager == nullptr)
+		{
+			return;
+		}
+
+		g_EffekseerManager->SendTrigger(handle, index);
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightDirection(float x, float y, float z)
 	{
 		g_lightDirection.X = x;

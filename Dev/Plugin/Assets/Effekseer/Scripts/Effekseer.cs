@@ -254,6 +254,9 @@ namespace Effekseer
 		public static extern int EffekseerGetRestInstancesCount();
 
 		[DllImport(pluginName)]
+		public static extern void EffekseerSendTrigger(int handle, int index);
+
+		[DllImport(pluginName)]
 		public static extern float EffekseerGetDynamicInput(int handle, int index);
 
 		[DllImport(pluginName)]
