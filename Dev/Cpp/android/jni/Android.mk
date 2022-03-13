@@ -69,13 +69,6 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.Grid.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.Layer.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.Matrix44.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.ObjectInternal.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.ReferenceObject.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.Vector3DF.cpp \
-	$(LIB_SRC_PATH)/Culling/Culling3D.WorldInternal.cpp \
 	$(LIB_SRC_PATH)/ForceField/ForceFields.cpp \
 	$(LIB_SRC_PATH)/IO/Effekseer.EfkEfcFactory.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
