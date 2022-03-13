@@ -171,7 +171,7 @@ Effekseer::ModelLoaderRef GraphicsGL::Create(ModelLoaderLoad load, ModelLoaderUn
 {
 	auto loader = Effekseer::MakeRefPtr<ModelLoader>(load, unload, getUnityId);
 
-	auto internalLoader = EffekseerRendererGL::CreateModelLoader(loader->GetFileInterface());
+	auto internalLoader = EffekseerRenderer::CreateModelLoader(graphicsDevice_, loader->GetFileInterface());
 	loader->SetInternalLoader(internalLoader);
 	return loader;
 }

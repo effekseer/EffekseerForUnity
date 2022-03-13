@@ -20,7 +20,7 @@ namespace EffekseerPlugin
 	{
 	private:
 		static std::shared_ptr<Network> instance;
-		Effekseer::Server* server = nullptr;
+		Effekseer::ServerRef server = nullptr;
 		
 	public:
 		Network();

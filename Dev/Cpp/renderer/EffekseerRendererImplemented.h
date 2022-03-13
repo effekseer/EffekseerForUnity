@@ -364,17 +364,17 @@ public:
 	*/
 	::Effekseer::TrackRendererRef CreateTrackRenderer() override;
 
-	/**
-	@brief	標準のテクスチャ読込クラスを生成する。
-	*/
-	::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	virtual ::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override { return nullptr; }
 
-	/**
-	@brief	標準のモデル読込クラスを生成する。
-	*/
-	::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterface* fileInterface = NULL) override;
+	virtual ::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override
+	{
+		return nullptr;
+	}
 
-	::Effekseer::MaterialLoaderRef CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override { return nullptr; }
+	virtual ::Effekseer::MaterialLoaderRef CreateMaterialLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override
+	{
+		return nullptr;
+	}
 
 	/**
 	@brief	レンダーステートを強制的にリセットする。

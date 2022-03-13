@@ -494,10 +494,6 @@ int32_t RendererImplemented::GetSquareMaxCount() const { return m_squareMaxCount
 	return Effekseer::MakeRefPtr<::EffekseerRenderer::TrackRendererBase<RendererImplemented, false>>(this);
 }
 
-::Effekseer::TextureLoaderRef RendererImplemented::CreateTextureLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
-
-::Effekseer::ModelLoaderRef RendererImplemented::CreateModelLoader(::Effekseer::FileInterface* fileInterface) { return nullptr; }
-
 void RendererImplemented::ResetRenderState() {}
 
 ::EffekseerRenderer::DistortingCallback* RendererImplemented::GetDistortingCallback() { return nullptr; }

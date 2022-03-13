@@ -18,16 +18,19 @@ size_t MemoryFileReader::Read(void* buffer, size_t size)
 
 void MemoryFileReader::Seek(int position) { this->position_ = position; }
 
-int MemoryFileReader::GetPosition() { return position_; }
+int MemoryFileReader::GetPosition() const { return position_; }
 
-size_t MemoryFileReader::GetLength() { return length_; }
+size_t MemoryFileReader::GetLength() const { return length_; }
 
 MemoryFile::MemoryFile(size_t bufferSize) { LoadedBuffer.resize(bufferSize); }
 
 void MemoryFile::Resize(size_t bufferSize) { LoadedBuffer.resize(bufferSize); }
 
-Effekseer::FileReader* MemoryFile::OpenRead(const EFK_CHAR* path) { return new MemoryFileReader(&LoadedBuffer[0], LoadedSize); }
+Effekseer::FileReaderRef MemoryFile::OpenRead(const EFK_CHAR* path)
+{
+	return Effekseer::MakeRefPtr<MemoryFileReader>(&LoadedBuffer[0], LoadedSize);
+}
 
-Effekseer::FileWriter* MemoryFile::OpenWrite(const EFK_CHAR* path) { return nullptr; }
+Effekseer::FileWriterRef MemoryFile::OpenWrite(const EFK_CHAR* path) { return nullptr; }
 
 } // namespace EffekseerPlugin

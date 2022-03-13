@@ -29,7 +29,7 @@ namespace EffekseerPlugin
 
 		if (!server->Start(port))
 		{
-			ES_SAFE_DELETE(server);
+			server.Reset();
 			return false;
 		}
 
@@ -41,7 +41,7 @@ namespace EffekseerPlugin
 		if (server != nullptr)
 		{
 			server->Stop();
-			ES_SAFE_DELETE(server);
+			server.Reset();
 		}
 	}
 

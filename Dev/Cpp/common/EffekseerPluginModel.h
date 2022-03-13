@@ -29,7 +29,7 @@ namespace EffekseerPlugin
 
 		IDtoResourceTable<Effekseer::ModelRef> id2Obj_;
 
-		MemoryFile memoryFile;
+		Effekseer::RefPtr<MemoryFile> memoryFile;
 
 		Effekseer::RefPtr<Effekseer::ModelLoader> internalLoader;
 		
@@ -46,8 +46,8 @@ namespace EffekseerPlugin
 		virtual Effekseer::ModelRef Load(const char16_t* path) override;
 		virtual void Unload(Effekseer::ModelRef source) override;
 
-		Effekseer::FileInterface* GetFileInterface() {
-			return &memoryFile;
+		Effekseer::FileInterfaceRef GetFileInterface() {
+			return memoryFile;
 		}
 		void SetInternalLoader(Effekseer::RefPtr<Effekseer::ModelLoader> loader) {
 			internalLoader = loader;

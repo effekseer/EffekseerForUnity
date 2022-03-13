@@ -4,8 +4,9 @@
 namespace EffekseerPlugin
 {
 ModelLoader::ModelLoader(ModelLoaderLoad load, ModelLoaderUnload unload, GetUnityIDFromPath getUnityId)
-	: load(load), unload(unload), getUnityId_(getUnityId), memoryFile(1 * 1024 * 1024)
+	: load(load), unload(unload), getUnityId_(getUnityId)
 {
+	memoryFile = Effekseer::MakeRefPtr<MemoryFile>(1 * 1024 * 1024);
 }
 
 Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
@@ -21,7 +22,7 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 
 	// Load with unity
 	int requiredDataSize = 0;
-	auto modelPtr = load((const char16_t*)path, &memoryFile.LoadedBuffer[0], (int)memoryFile.LoadedBuffer.size(), requiredDataSize);
+	auto modelPtr = load((const char16_t*)path, memoryFile->LoadedBuffer.data(), (int)memoryFile->LoadedBuffer.size(), requiredDataSize);
 
 	if (requiredDataSize == 0)
 	{
@@ -32,10 +33,10 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 	if (modelPtr == nullptr)
 	{
 		// Lack of memory
-		memoryFile.Resize(requiredDataSize);
+		memoryFile->Resize(requiredDataSize);
 
 		// Load with unity
-		modelPtr = load((const char16_t*)path, &memoryFile.LoadedBuffer[0], (int)memoryFile.LoadedBuffer.size(), requiredDataSize);
+		modelPtr = load((const char16_t*)path, memoryFile->LoadedBuffer.data(), (int)memoryFile->LoadedBuffer.size(), requiredDataSize);
 
 		if (modelPtr == nullptr)
 		{
@@ -44,7 +45,7 @@ Effekseer::ModelRef ModelLoader::Load(const EFK_CHAR* path)
 		}
 	}
 
-	memoryFile.LoadedSize = (size_t)requiredDataSize;
+	memoryFile->LoadedSize = (size_t)requiredDataSize;
 	auto modelDataPtr = internalLoader->Load(path);
 
 	id2Obj_.Register(id, modelDataPtr, modelPtr);

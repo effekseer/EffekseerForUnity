@@ -26,7 +26,7 @@ class CurveLoader : public Effekseer::CurveLoader
 	CurveLoaderUnload unload_;
 	GetUnityIDFromPath getUnityId_;
 
-	MemoryFile memoryFile_;
+	Effekseer::RefPtr<MemoryFile> memoryFile_;
 
 	Effekseer::RefPtr<Effekseer::CurveLoader> internalLoader_;
 
