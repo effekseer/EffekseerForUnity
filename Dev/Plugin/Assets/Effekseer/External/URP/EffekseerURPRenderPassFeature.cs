@@ -51,7 +51,6 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			if (isValidDepth)
 			{
 				prop.depthTargetIdentifier = this.renderer.cameraDepthTarget;
-				Debug.Log("Valid depth");
 			}
 			else
 			{
