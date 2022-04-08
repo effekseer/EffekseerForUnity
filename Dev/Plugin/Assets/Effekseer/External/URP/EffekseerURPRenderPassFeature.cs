@@ -11,13 +11,18 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
 		RenderTargetIdentifier cameraColorTarget;
 		RenderTargetIdentifier cameraDepthTarget;
-#else
-		ScriptableRenderer renderer;
 #endif
+		ScriptableRenderer renderer;
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 
+		public EffekseerRenderPassURP(ScriptableRenderer renderer)
+		{
+			this.renderer = renderer;
+			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
+		}
+
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
-		public EffekseerRenderPassURP(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
+		public void Setup(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
 		{
 			// HACK
 			bool isValidDepth = !cameraDepthTarget.ToString().Contains("-1");
@@ -31,12 +36,6 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				this.cameraDepthTarget = cameraDepthTarget;
 				prop.depthTargetIdentifier = cameraDepthTarget;
 			}
-		}
-#else
-		public EffekseerRenderPassURP(ScriptableRenderer renderer)
-		{
-			this.renderer = renderer;
-			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
 		}
 #endif
 
@@ -81,12 +80,17 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 	public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
 	{
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
-		m_ScriptablePass = new EffekseerRenderPassURP(renderer.cameraColorTarget, renderer.cameraDepth);
-		m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
+		if (m_ScriptablePass == null)
+		{
+			m_ScriptablePass = new EffekseerRenderPassURP(renderer);
+		}
+		else
+		{
+			m_ScriptablePass.Setup(renderer.cameraColorTarget, renderer.cameraDepth);
+		}
 		renderer.EnqueuePass(m_ScriptablePass);
 #else
-		m_ScriptablePass = new EffekseerRenderPassURP(renderer);
-		m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
+		m_ScriptablePass = m_ScriptablePass ?? new EffekseerRenderPassURP(renderer);
 		renderer.EnqueuePass(m_ScriptablePass);
 #endif
 	}
