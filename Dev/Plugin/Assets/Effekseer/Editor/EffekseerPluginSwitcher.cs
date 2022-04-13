@@ -1,5 +1,4 @@
-﻿/*
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 
 using UnityEngine;
 using UnityEditor;
@@ -11,10 +10,10 @@ public class EffekseerPluginSwitcher
 {
 	static readonly string tempFilePath = "Temp/EffekseerPluginSwitcher";
 
-#if UNITY_2019_1_OR_NEWER
-	static readonly string bcPath = "WebGL/1.38.11-64bit/libEffekseerUnity.bc";
+#if UNITY_2021_2_OR_NEWER
+	static readonly string bcPath = "WebGL/2.0.19-64bit/libEffekseerUnity.bc";
 #else
-    static readonly string bcPath = "WebGL/libEffekseerUnity.bc";
+	static readonly string bcPath = "WebGL/libEffekseerUnity.bc";
 #endif
 
 	static EffekseerPluginSwitcher()
@@ -42,4 +41,3 @@ public class EffekseerPluginSwitcher
 }
 
 #endif
-*/
