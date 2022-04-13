@@ -84,10 +84,9 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		{
 			m_ScriptablePass = new EffekseerRenderPassURP(renderer);
 		}
-		else
-		{
-			m_ScriptablePass.Setup(renderer.cameraColorTarget, renderer.cameraDepth);
-		}
+
+		m_ScriptablePass.Setup(renderer.cameraColorTarget, renderer.cameraDepth);
+
 		renderer.EnqueuePass(m_ScriptablePass);
 #else
 		m_ScriptablePass = m_ScriptablePass ?? new EffekseerRenderPassURP(renderer);
