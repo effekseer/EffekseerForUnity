@@ -95,10 +95,47 @@ jobs:
           name: WebGL_1-38
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
+  webgl_2-0-19:
+    name: WebGL Build with emsdk 2.0.19
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache emsdk
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: ./emsdk
+          key: ${{ runner.os }}-emsdk-2_0-19
+
+      - name: install emsdk 2.0.19
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install sdk-2.0.19-64bit
+          cd ..
+
+      - run: sh scripts/clone_dependencies.sh
+      - run: |
+          ./emsdk/emsdk activate sdk-2.0.19-64bit
+          source ./emsdk/emsdk_env.sh
+          cd ./Dev/Cpp/webgl
+          mkdir build2019
+          cd build2019
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          make
+          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
+      - name: Upload math result for webgl
+        uses: actions/upload-artifact@v1
+        with:
+          name: WebGL_2-0-19
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
+
   merge:
     name: merge
     runs-on: ubuntu-latest
-    needs: [android, mac_ios, windows, webgl_1-38]
+    needs: [android, mac_ios, windows, webgl_1-38,webgl_2-0-19]
     steps:
       - uses: actions/checkout@v2
       - name: Download Android
@@ -120,6 +157,11 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: WebGL_1-38
+
+      - name: Download webgl 2.0.19
+        uses: actions/download-artifact@v1
+        with:
+          name: WebGL_2-0-19
       - name: Copy
         run: |
           mv Android/Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
@@ -129,6 +171,7 @@ jobs:
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
           cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
           mv WebGL_1-38/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
+          mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
       - name: Upload math result
