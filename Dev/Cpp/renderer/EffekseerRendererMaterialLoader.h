@@ -12,7 +12,6 @@
 namespace EffekseerRendererUnity
 {
 
-
 class MaterialLoader : public Effekseer::MaterialLoader
 {
 	EffekseerPlugin::MaterialLoaderLoad load_ = nullptr;
@@ -32,6 +31,5 @@ public:
 	Effekseer::MaterialRef Load(const EFK_CHAR* path) override;
 	void Unload(Effekseer::MaterialRef data) override;
 };
-
 
 } // namespace EffekseerRendererUnity

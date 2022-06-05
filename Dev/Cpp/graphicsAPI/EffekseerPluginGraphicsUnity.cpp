@@ -51,7 +51,7 @@ void GraphicsUnity::SetExternalTexture(int renderId, ExternalTextureType type, v
 
 	if (texture != nullptr)
 	{
-		externalTexture.Texture= Effekseer::MakeRefPtr<EffekseerRendererUnity::Texture>(texture);
+		externalTexture.Texture = Effekseer::MakeRefPtr<EffekseerRendererUnity::Texture>(texture);
 		externalTexture.OriginalPtr = texture;
 	}
 	else

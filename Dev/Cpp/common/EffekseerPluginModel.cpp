@@ -71,10 +71,12 @@ void ModelLoader::Unload(Effekseer::ModelRef source)
 		if (instance != nullptr)
 		{
 			source->AddRef();
-			instance->AddEvent([source]() {
-				// a resource must be unload in a rendering thread
-				source->Release();
-			});
+			instance->AddEvent(
+				[source]()
+				{
+					// a resource must be unload in a rendering thread
+					source->Release();
+				});
 		}
 	}
 }
@@ -91,10 +93,12 @@ void ProceduralModelGenerator::Ungenerate(Effekseer::ModelRef model)
 	if (instance != nullptr)
 	{
 		model->AddRef();
-		instance->AddEvent([model]() {
-			// a resource must be unload in a rendering thread
-			model->Release();
-		});
+		instance->AddEvent(
+			[model]()
+			{
+				// a resource must be unload in a rendering thread
+				model->Release();
+			});
 	}
 }
 

@@ -96,7 +96,7 @@ public:
 
 		Effekseer::TextureRef generated;
 
-		if(id2Texture_.TryLoad(id, generated))
+		if (id2Texture_.TryLoad(id, generated))
 		{
 			return generated;
 		}

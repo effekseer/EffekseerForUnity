@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #include <Effekseer/Effekseer.h>
@@ -16,31 +16,31 @@
 
 namespace EffekseerPlugin
 {
-	class Network
-	{
-	private:
-		static std::shared_ptr<Network> instance;
-		Effekseer::ServerRef server = nullptr;
-		
-	public:
-		Network();
-		
-		virtual ~Network();
+class Network
+{
+private:
+	static std::shared_ptr<Network> instance;
+	Effekseer::ServerRef server = nullptr;
 
-		bool Start(uint16_t port);
+public:
+	Network();
 
-		void Stop();
+	virtual ~Network();
 
-		void Update();
+	bool Start(uint16_t port);
 
-		void Register(const char16_t* key, Effekseer::EffectRef effect);
+	void Stop();
 
-		void Unregister(Effekseer::EffectRef effect);
+	void Update();
 
-		bool IsRunning() const;
+	void Register(const char16_t* key, Effekseer::EffectRef effect);
 
-		static std::shared_ptr<Network>& GetInstance();
-	};
-}
+	void Unregister(Effekseer::EffectRef effect);
+
+	bool IsRunning() const;
+
+	static std::shared_ptr<Network>& GetInstance();
+};
+} // namespace EffekseerPlugin
 
 #endif

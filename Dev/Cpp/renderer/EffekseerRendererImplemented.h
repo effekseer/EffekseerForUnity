@@ -364,7 +364,10 @@ public:
 	*/
 	::Effekseer::TrackRendererRef CreateTrackRenderer() override;
 
-	virtual ::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override { return nullptr; }
+	virtual ::Effekseer::TextureLoaderRef CreateTextureLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override
+	{
+		return nullptr;
+	}
 
 	virtual ::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterfaceRef fileInterface = nullptr) override
 	{

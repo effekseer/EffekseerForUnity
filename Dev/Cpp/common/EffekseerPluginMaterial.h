@@ -106,22 +106,22 @@ public:
 class LazyMaterial : public Effekseer::Material
 {
 private:
-    Effekseer::MaterialRef internalData_ = nullptr;
+	Effekseer::MaterialRef internalData_ = nullptr;
 
-    Effekseer::CustomVector<uint8_t> data_;
-    Effekseer::CustomVector<uint8_t> compiledData_;
-    std::shared_ptr<MaterialLoaderHolder> internalLoader_ = nullptr;
+	Effekseer::CustomVector<uint8_t> data_;
+	Effekseer::CustomVector<uint8_t> compiledData_;
+	std::shared_ptr<MaterialLoaderHolder> internalLoader_ = nullptr;
 
 public:
-    LazyMaterial(const std::shared_ptr<MaterialLoaderHolder>& loader,
-                     const Effekseer::CustomVector<uint8_t>& data,
-                     int32_t dataSize,
-                     const Effekseer::CustomVector<uint8_t>& compiledData,
-                     int32_t compiledDataSize);
+	LazyMaterial(const std::shared_ptr<MaterialLoaderHolder>& loader,
+				 const Effekseer::CustomVector<uint8_t>& data,
+				 int32_t dataSize,
+				 const Effekseer::CustomVector<uint8_t>& compiledData,
+				 int32_t compiledDataSize);
 
-    void Load();
+	void Load();
 
-    void Unload();
+	void Unload();
 };
 
 } // namespace EffekseerPlugin

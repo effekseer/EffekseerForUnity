@@ -156,7 +156,6 @@ private:
 	static std::shared_ptr<RenderThreadEvent> instance_;
 
 public:
-	
 	~RenderThreadEvent();
 
 	static void Initialize();

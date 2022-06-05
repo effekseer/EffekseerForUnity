@@ -49,7 +49,7 @@ private:
 
 public:
 	ProceduralModelGenerator(EffekseerPlugin::ProceduralModelGeneratorGenerate generate,
-							EffekseerPlugin::ProceduralModelGeneratorUngenerate ungenerate)
+							 EffekseerPlugin::ProceduralModelGeneratorUngenerate ungenerate)
 		: generate_(generate), ungenerate_(ungenerate)
 	{
 	}

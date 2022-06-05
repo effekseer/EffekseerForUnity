@@ -31,7 +31,7 @@ public:
 	Effekseer::MaterialLoaderRef Create(MaterialLoaderLoad load, MaterialLoaderUnload unload, GetUnityIDFromPath getUnityId) override;
 
 	Effekseer::ProceduralModelGeneratorRef Create(ProceduralModelGeneratorGenerate generate,
-												 ProceduralModelGeneratorUngenerate ungenerate) override;
+												  ProceduralModelGeneratorUngenerate ungenerate) override;
 
 	void ShiftViewportForStereoSinglePass(bool isShift) override;
 };

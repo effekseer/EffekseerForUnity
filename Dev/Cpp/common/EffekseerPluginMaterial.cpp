@@ -6,10 +6,10 @@ namespace EffekseerPlugin
 {
 
 LazyMaterial::LazyMaterial(const std::shared_ptr<MaterialLoaderHolder>& loader,
-								   const Effekseer::CustomVector<uint8_t>& data,
-								   int32_t dataSize,
-								   const Effekseer::CustomVector<uint8_t>& compiledData,
-								   int32_t compiledDataSize)
+						   const Effekseer::CustomVector<uint8_t>& data,
+						   int32_t dataSize,
+						   const Effekseer::CustomVector<uint8_t>& compiledData,
+						   int32_t compiledDataSize)
 	: internalLoader_(loader)
 {
 	if (dataSize > 0)
@@ -196,10 +196,10 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 	if (memoryFileForCache_.LoadedSize > 0 || memoryFile_.LoadedSize > 0)
 	{
 		auto data = Effekseer::MakeRefPtr<LazyMaterial>(internalLoader_,
-															memoryFile_.LoadedBuffer,
-															memoryFile_.LoadedSize,
-															memoryFileForCache_.LoadedBuffer,
-															memoryFileForCache_.LoadedSize);
+														memoryFile_.LoadedBuffer,
+														memoryFile_.LoadedSize,
+														memoryFileForCache_.LoadedBuffer,
+														memoryFileForCache_.LoadedSize);
 		auto internalData = data;
 
 		auto eventInstance = MaterialEvent::GetInstance();

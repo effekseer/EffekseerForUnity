@@ -42,7 +42,10 @@ class SoundLoader : public Effekseer::SoundLoader
 
 public:
 	static Effekseer::SoundLoaderRef Create(SoundLoaderLoad load, SoundLoaderUnload unload, GetUnityIDFromPath getUnityId);
-	SoundLoader(SoundLoaderLoad load, SoundLoaderUnload unload, GetUnityIDFromPath getUnityId) : load(load), unload(unload), getUnityId_(getUnityId) {}
+	SoundLoader(SoundLoaderLoad load, SoundLoaderUnload unload, GetUnityIDFromPath getUnityId)
+		: load(load), unload(unload), getUnityId_(getUnityId)
+	{
+	}
 	virtual ~SoundLoader() override = default;
 	virtual Effekseer::SoundDataRef Load(const EFK_CHAR* path) override;
 	virtual void Unload(Effekseer::SoundDataRef source) override;
