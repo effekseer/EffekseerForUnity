@@ -69,7 +69,7 @@ namespace Effekseer.Editor
 					EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
 					importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
 					importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
-					var info = new EffekseerTool.Utl.MaterialInformation();
+					var info = new Effekseer.Editor.Utils.MaterialInformation();
 					info.Load(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
 
 					importingAsset.CustomData1Count = info.CustomData1Count;
@@ -95,8 +95,67 @@ namespace Effekseer.Editor
 						importingAsset.Textures.Add(tp);
 					}
 
+					// TODO : Refactor
+					foreach (var g in info.FixedGradients)
+					{
+						var gp = new EffekseerMaterialAsset.GradientProperty();
+						gp.Name = g.Name;
+						gp.UniformName = g.UniformName;
+
+						gp.ColorMarkers = new EffekseerMaterialAsset.GradientProperty.ColorMarker[g.Data.ColorMarkers.Length];
+						for (int i = 0; i < g.Data.ColorMarkers.Length; i++)
+						{
+							gp.ColorMarkers[i].ColorR = g.Data.ColorMarkers[i].ColorR;
+							gp.ColorMarkers[i].ColorG = g.Data.ColorMarkers[i].ColorG;
+							gp.ColorMarkers[i].ColorB = g.Data.ColorMarkers[i].ColorB;
+							gp.ColorMarkers[i].Intensity = g.Data.ColorMarkers[i].Intensity;
+							gp.ColorMarkers[i].Position = g.Data.ColorMarkers[i].Position;
+						}
+
+						gp.AlphaMarkers = new EffekseerMaterialAsset.GradientProperty.AlphaMarker[g.Data.AlphaMarkers.Length];
+						for (int i = 0; i < g.Data.AlphaMarkers.Length; i++)
+						{
+							gp.AlphaMarkers[i].Alpha = g.Data.AlphaMarkers[i].Alpha;
+							gp.AlphaMarkers[i].Position = g.Data.AlphaMarkers[i].Position;
+						}
+
+						importingAsset.FixedGradients.Add(gp);
+					}
+
+					foreach (var g in info.Gradients)
+					{
+						var gp = new EffekseerMaterialAsset.GradientProperty();
+						gp.Name = g.Name;
+						gp.UniformName = g.UniformName;
+
+						gp.ColorMarkers = new EffekseerMaterialAsset.GradientProperty.ColorMarker[g.Data.ColorMarkers.Length];
+						for (int i = 0; i < g.Data.ColorMarkers.Length; i++)
+						{
+							gp.ColorMarkers[i].ColorR = g.Data.ColorMarkers[i].ColorR;
+							gp.ColorMarkers[i].ColorG = g.Data.ColorMarkers[i].ColorG;
+							gp.ColorMarkers[i].ColorB = g.Data.ColorMarkers[i].ColorB;
+							gp.ColorMarkers[i].Intensity = g.Data.ColorMarkers[i].Intensity;
+							gp.ColorMarkers[i].Position = g.Data.ColorMarkers[i].Position;
+						}
+
+						gp.AlphaMarkers = new EffekseerMaterialAsset.GradientProperty.AlphaMarker[g.Data.AlphaMarkers.Length];
+						for (int i = 0; i < g.Data.AlphaMarkers.Length; i++)
+						{
+							gp.AlphaMarkers[i].Alpha = g.Data.AlphaMarkers[i].Alpha;
+							gp.AlphaMarkers[i].Position = g.Data.AlphaMarkers[i].Position;
+						}
+
+						importingAsset.Gradients.Add(gp);
+					}
+
 					importingAsset.IsCacheFile = false;
 					importingAsset.Code = info.Code;
+
+					importingAsset.MaterialRequiredFunctionTypes = new EffekseerMaterialAsset.MaterialRequiredFunctionType[info.RequiredFunctionTypes.Length];
+					for (int i = 0; i < importingAsset.MaterialRequiredFunctionTypes.Length; i++)
+					{
+						importingAsset.MaterialRequiredFunctionTypes[i] = (EffekseerMaterialAsset.MaterialRequiredFunctionType)info.RequiredFunctionTypes[i];
+					}
 
 					EffekseerMaterialAsset.CreateAsset(assetPath, importingAsset);
 				}
