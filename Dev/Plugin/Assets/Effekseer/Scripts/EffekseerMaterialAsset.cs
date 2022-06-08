@@ -149,6 +149,9 @@ namespace Effekseer
 		public UniformProperty[] uniforms = new UniformProperty[0];
 
 		[SerializeField]
+		public GradientProperty[] gradients = new GradientProperty[0];
+
+		[SerializeField]
 		public int CustomData1Count = 0;
 
 		[SerializeField]
@@ -227,6 +230,7 @@ namespace Effekseer
 				asset.materialBuffers = importingAsset.Data;
 				asset.uniforms = importingAsset.Uniforms.ToArray();
 				asset.textures = importingAsset.Textures.ToArray();
+				asset.gradients = importingAsset.Gradients.ToArray();
 				asset.CustomData1Count = importingAsset.CustomData1Count;
 				asset.CustomData2Count = importingAsset.CustomData2Count;
 				asset.HasRefraction = importingAsset.HasRefraction;
