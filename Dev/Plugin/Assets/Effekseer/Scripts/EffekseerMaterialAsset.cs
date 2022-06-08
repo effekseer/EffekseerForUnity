@@ -375,22 +375,24 @@ namespace Effekseer
 
 			var code = string.Empty;
 
+			var functions = string.Empty;
+
 			if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Gradient))
 			{
-				code += gradientTemplate;
+				functions += gradientTemplate;
 			}
 			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Noise))
 			{
-				code += noiseTemplate;
+				functions += noiseTemplate;
 			}
 			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Light))
 			{
-				code += lightTemplate;
+				functions += lightTemplate;
 			}
 
 			foreach (var gradient in importingAsset.FixedGradients)
 			{
-				code += GetFixedGradient(gradient.Name, gradient);
+				functions += GetFixedGradient(gradient.Name, gradient);
 			}
 
 			code += shaderTemplate;
@@ -443,7 +445,7 @@ namespace Effekseer
 				}
 			}
 
-
+			code = code.Replace("%FUNCTIONS%", functions);
 			code = code.Replace("%TEX_PROPERTY%", codeProperty);
 			code = code.Replace("%TEX_VARIABLE%", codeVariable);
 			code = code.Replace("%UNIFORMS%", codeUniforms);
@@ -500,7 +502,7 @@ namespace Effekseer
 			string ss = string.Empty;
 
 			ss += "Gradient " + name + "() {" + nl;
-			ss += "Gradient g;" + nl;
+			ss += "Gradient g = (Gradient)0;" + nl;
 			ss += "g.colorCount = " + gradient.ColorMarkers.Count() + ";" + nl;
 			ss += "g.alphaCount = " + gradient.AlphaMarkers.Count() + ";" + nl;
 			ss += "g.reserved1 = 0;" + nl;
@@ -722,6 +724,8 @@ Cull[_Cull]
 
 		@include ""UnityCG.cginc""
 
+		%FUNCTIONS%
+		
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
 		@endif
