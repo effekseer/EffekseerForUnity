@@ -723,8 +723,6 @@ Cull[_Cull]
 		//PRAGMA_LIT_FLAG
 
 		@include ""UnityCG.cginc""
-
-		%FUNCTIONS%
 		
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
@@ -834,6 +832,7 @@ Cull[_Cull]
 			return min(max((depth.x - depth.y) / distance, 0.0), 1.0);
 		}
 
+		%FUNCTIONS%
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
