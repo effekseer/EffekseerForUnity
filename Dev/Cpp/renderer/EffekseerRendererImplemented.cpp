@@ -652,7 +652,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);
+		const auto uniformSize = m_currentShader->GetParameterGenerator()->PixelShaderUniformBufferSize - uniformOffset;
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, uniformSize);
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 		{
@@ -997,7 +998,8 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 
 		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
 		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, m_currentShader->GetMaterial()->GetUniformCount() * sizeof(float) * 4);
+		const auto uniformSize = m_currentShader->GetParameterGenerator()->PixelShaderUniformBufferSize - uniformOffset;
+		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, uniformSize);
 
 		if (nativeMaterial->GetCustomData1Count() > 0)
 		{

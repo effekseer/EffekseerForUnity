@@ -69,6 +69,7 @@ namespace Effekseer
 			[SerializeField]
 			public string UniformName;
 		}
+
 		[System.Serializable]
 		public class UniformProperty
 		{
@@ -82,6 +83,39 @@ namespace Effekseer
 			public int Count;
 		}
 
+		[System.Serializable]
+		public class GradientProperty
+		{
+			public string Name;
+
+			public string UniformName;
+
+			public ColorMarker[] ColorMarkers;
+			public AlphaMarker[] AlphaMarkers;
+
+			public struct ColorMarker
+			{
+				public float Position;
+				public float ColorR;
+				public float ColorG;
+				public float ColorB;
+				public float Intensity;
+			}
+
+			public struct AlphaMarker
+			{
+				public float Position;
+				public float Alpha;
+			}
+		}
+
+		public enum MaterialRequiredFunctionType : int
+		{
+			Gradient = 0,
+			Noise = 1,
+			Light = 2,
+		}
+
 		public class ImportingAsset
 		{
 			public byte[] Data = new byte[0];
@@ -93,7 +127,10 @@ namespace Effekseer
 			public bool HasRefraction = false;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
+			public List<GradientProperty> FixedGradients = new List<GradientProperty>();
+			public List<GradientProperty> Gradients = new List<GradientProperty>();
 			public int ShadingModel = 0;
+			public MaterialRequiredFunctionType[] MaterialRequiredFunctionTypes = new MaterialRequiredFunctionType[0];
 		}
 
 		[SerializeField]
@@ -110,6 +147,9 @@ namespace Effekseer
 
 		[SerializeField]
 		public UniformProperty[] uniforms = new UniformProperty[0];
+
+		[SerializeField]
+		public GradientProperty[] gradients = new GradientProperty[0];
 
 		[SerializeField]
 		public int CustomData1Count = 0;
@@ -190,6 +230,7 @@ namespace Effekseer
 				asset.materialBuffers = importingAsset.Data;
 				asset.uniforms = importingAsset.Uniforms.ToArray();
 				asset.textures = importingAsset.Textures.ToArray();
+				asset.gradients = importingAsset.Gradients.ToArray();
 				asset.CustomData1Count = importingAsset.CustomData1Count;
 				asset.CustomData2Count = importingAsset.CustomData2Count;
 				asset.HasRefraction = importingAsset.HasRefraction;
@@ -259,6 +300,7 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F4$", "float4");
 			baseCode = baseCode.Replace("$TIME$", "_Time.y");
 			baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
+			baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
 			baseCode = baseCode.Replace("$UV$", "uv");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
@@ -282,7 +324,7 @@ namespace Effekseer
 					replacedS = "))";
 				}
 
-				if(importingAsset.Textures[i].Type == TextureType.Color)
+				if (importingAsset.Textures[i].Type == TextureType.Color)
 				{
 					replacedP = "ConvertFromSRGBTexture(" + replacedP;
 					replacedS = replacedS + ")";
@@ -331,7 +373,29 @@ namespace Effekseer
 			var mainVSCode = CreateMainShaderCode(importingAsset, 0);
 			var mainPSCode = CreateMainShaderCode(importingAsset, 1);
 
-			var code = shaderTemplate;
+			var code = string.Empty;
+
+			var functions = string.Empty;
+
+			if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Gradient))
+			{
+				functions += gradientTemplate;
+			}
+			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Noise))
+			{
+				functions += noiseTemplate;
+			}
+			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Light))
+			{
+				functions += lightTemplate;
+			}
+
+			foreach (var gradient in importingAsset.FixedGradients)
+			{
+				functions += GetFixedGradient(gradient.Name, gradient);
+			}
+
+			code += shaderTemplate;
 			code = code.Replace("@", "#");
 
 			string codeProperty = string.Empty;
@@ -349,6 +413,16 @@ namespace Effekseer
 			for (int i = 0; i < importingAsset.Uniforms.Count; i++)
 			{
 				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
+			}
+
+			for (int i = 0; i < importingAsset.Gradients.Count; i++)
+			{
+				var gradient = importingAsset.Gradients[i];
+
+				for (int j = 0; j < 13; j++)
+				{
+					codeUniforms += "float4 " + gradient.UniformName + "_" + j.ToString() + ";" + nl;
+				}
 			}
 
 			// replace for usability
@@ -371,7 +445,7 @@ namespace Effekseer
 				}
 			}
 
-
+			code = code.Replace("%FUNCTIONS%", functions);
 			code = code.Replace("%TEX_PROPERTY%", codeProperty);
 			code = code.Replace("%TEX_VARIABLE%", codeVariable);
 			code = code.Replace("%UNIFORMS%", codeUniforms);
@@ -421,6 +495,138 @@ namespace Effekseer
 			var asset = AssetDatabase.LoadAssetAtPath<Shader>(path);
 			return asset;
 		}
+
+		static string GetFixedGradient(string name, GradientProperty gradient)
+		{
+			var nl = Environment.NewLine;
+			string ss = string.Empty;
+
+			ss += "Gradient " + name + "() {" + nl;
+			ss += "Gradient g = (Gradient)0;" + nl;
+			ss += "g.colorCount = " + gradient.ColorMarkers.Count() + ";" + nl;
+			ss += "g.alphaCount = " + gradient.AlphaMarkers.Count() + ";" + nl;
+			ss += "g.reserved1 = 0;" + nl;
+			ss += "g.reserved2 = 0;" + nl;
+
+			for (int i = 0; i < gradient.ColorMarkers.Length; i++)
+			{
+				ss += "g.colors[" + i + "].x = " + gradient.ColorMarkers[i].ColorR * gradient.ColorMarkers[i].Intensity + ";" + nl;
+				ss += "g.colors[" + i + "].y = " + gradient.ColorMarkers[i].ColorG * gradient.ColorMarkers[i].Intensity + ";" + nl;
+				ss += "g.colors[" + i + "].z = " + gradient.ColorMarkers[i].ColorB * gradient.ColorMarkers[i].Intensity + ";" + nl;
+				ss += "g.colors[" + i + "].w = " + gradient.ColorMarkers[i].Position + ";" + nl;
+			}
+
+			for (int i = 0; i < gradient.AlphaMarkers.Length; i++)
+			{
+				ss += "g.alphas[" + i + "].x = " + gradient.AlphaMarkers[i].Alpha + ";" + nl;
+				ss += "g.alphas[" + i + "].y = " + gradient.AlphaMarkers[i].Position + ";" + nl;
+			}
+
+			ss += "return g; }" + nl;
+
+			return ss;
+		}
+
+		const string gradientTemplate = @"
+
+struct Gradient
+{
+	int colorCount;
+	int alphaCount;
+	int reserved1;
+	int reserved2;
+	float4 colors[8];
+	float2 alphas[8];
+};
+
+float4 SampleGradient(Gradient gradient, float t)
+{
+	float3 color = gradient.colors[0].xyz;
+	for(int i = 1; i < 8; i++)
+	{
+		float a = clamp((t - gradient.colors[i-1].w) / (gradient.colors[i].w - gradient.colors[i-1].w), 0.0, 1.0) * step(float(i), float(gradient.colorCount-1));
+		color = lerp(color, gradient.colors[i].xyz, a);
+	}
+
+	float alpha = gradient.alphas[0].x;
+	for(int i = 1; i < 8; i++)
+	{
+		float a = clamp((t - gradient.alphas[i-1].y) / (gradient.alphas[i].y - gradient.alphas[i-1].y), 0.0, 1.0) * step(float(i), float(gradient.alphaCount-1));
+		alpha = lerp(alpha, gradient.alphas[i].x, a);
+	}
+
+	return float4(color, alpha);
+}
+
+Gradient GradientParameter(float4 param_v, float4 param_c1, float4 param_c2, float4 param_c3, float4 param_c4, float4 param_c5, float4 param_c6, float4 param_c7, float4 param_c8, float4 param_a1, float4 param_a2, float4 param_a3, float4 param_a4)
+{
+	Gradient g;
+	g.colorCount = int(param_v.x);
+	g.alphaCount = int(param_v.y);
+	g.reserved1 = int(param_v.z);
+	g.reserved2 = int(param_v.w);
+	g.colors[0] = param_c1;
+	g.colors[1] = param_c2;
+	g.colors[2] = param_c3;
+	g.colors[3] = param_c4;
+	g.colors[4] = param_c5;
+	g.colors[5] = param_c6;
+	g.colors[6] = param_c7;
+	g.colors[7] = param_c8;
+	g.alphas[0].xy = param_a1.xy;
+	g.alphas[1].xy = param_a1.zw;
+	g.alphas[2].xy = param_a2.xy;
+	g.alphas[3].xy = param_a2.zw;
+	g.alphas[4].xy = param_a3.xy;
+	g.alphas[5].xy = param_a3.zw;
+	g.alphas[6].xy = param_a4.xy;
+	g.alphas[7].xy = param_a4.zw;
+	return g;
+}
+
+";
+
+		const string noiseTemplate = @"
+
+float Rand2(float2 n) { 
+	return FRAC(sin(dot(n, float2(12.9898, 78.233))) * 43758.5453123);
+}
+
+float SimpleNoise_Block(float2 p) {
+	int2 i = (int2)floor(p);
+	float2 f = FRAC(p);
+	f = f * f * (3.0 - 2.0 * f);
+	
+	float x0 = LERP(Rand2(i+int2(0,0)), Rand2(i+int2(1,0)), f.x);
+	float x1 = LERP(Rand2(i+int2(0,1)), Rand2(i+int2(1,1)), f.x);
+	return LERP(x0, x1, f.y);
+}
+
+float SimpleNoise(float2 uv, float scale) {
+	const int loop = 3;
+    float ret = 0.0;
+	for(int i = 0; i < loop; i++) {
+	    float freq = pow(2.0, float(i));
+		float intensity = pow(0.5, float(loop-i));
+	    ret += SimpleNoise_Block(uv * scale / freq) * intensity;
+	}
+
+	return ret;
+}
+
+";
+
+		const string lightTemplate = @"
+float3 GetLightDirection() {
+	return lightDirection.xyz;
+}
+float3 GetLightColor() {
+	return lightColor.xyz;
+}
+float3 GetLightAmbientColor() {
+	return lightAmbientColor.xyz;
+}
+";
 
 		const string shaderTemplate = @"
 
@@ -517,7 +723,7 @@ Cull[_Cull]
 		//PRAGMA_LIT_FLAG
 
 		@include ""UnityCG.cginc""
-
+		
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
 		@endif
@@ -626,6 +832,7 @@ Cull[_Cull]
 			return min(max((depth.x - depth.y) / distance, 0.0), 1.0);
 		}
 
+		%FUNCTIONS%
 
 		ps_input vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 		{
