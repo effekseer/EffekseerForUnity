@@ -81,6 +81,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Noise/CurlNoise.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
 	$(LIB_SRC_PATH)/Parameter/Easing.cpp \
+	$(LIB_SRC_PATH)/Parameter/Rotation.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat43f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat44f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
