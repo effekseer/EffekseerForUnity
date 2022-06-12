@@ -186,7 +186,6 @@ namespace Effekseer
 			{
 				handle.StopRoot();
 			}
-			handles.Clear();
 		}
 
 		/// <summary xml:lang="en">
