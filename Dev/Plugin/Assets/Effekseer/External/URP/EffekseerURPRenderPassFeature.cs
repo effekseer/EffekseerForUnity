@@ -66,7 +66,6 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			if (commandBuffer != null)
 			{
 				context.ExecuteCommandBuffer(commandBuffer);
-				context.Submit();
 			}
 		}
 	}
