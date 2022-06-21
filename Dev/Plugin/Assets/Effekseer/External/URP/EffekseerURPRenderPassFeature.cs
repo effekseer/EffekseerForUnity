@@ -45,8 +45,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if EFFEKSEER_URP_DEPTHTARGET_FIX
 			prop.colorTargetIdentifier = this.renderer.cameraColorTarget;
 
-			bool isValidDepth = !this.renderer.cameraDepthTarget.ToString().Contains("-1");
-
+			var isValidDepth = renderingData.cameraData.cameraType != CameraType.SceneView;
+			
 			if (isValidDepth)
 			{
 				prop.depthTargetIdentifier = this.renderer.cameraDepthTarget;
