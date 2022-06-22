@@ -161,7 +161,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
+		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture, IEffekseerBlitter blitter)
 		{
 			if (isRequiredToChangeViewport)
 			{
@@ -194,11 +194,11 @@ namespace Effekseer.Internal
 			}
 			else if (isRequiredToCopyBackground)
 			{
-				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 			}
 			else
 			{
-				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 			}
 
 			// restore
@@ -256,7 +256,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 
-		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer);
+		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter);
 
 		void OnPostRender(Camera camera);
 	}

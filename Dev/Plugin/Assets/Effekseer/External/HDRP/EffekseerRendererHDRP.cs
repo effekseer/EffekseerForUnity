@@ -1,5 +1,6 @@
 ﻿#if EFFEKSEER_HDRP_SUPPORT
 
+using Effekseer.Internal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -8,6 +9,7 @@ namespace Effekseer
 	class EffekseerRenderPassHDRP : UnityEngine.Rendering.HighDefinition.CustomPass
 	{
 		Effekseer.Internal.RenderTargetProperty prop = new Internal.RenderTargetProperty();
+		private IEffekseerBlitter blitter = new StandardBlitter();
 
 		public EffekseerRenderPassHDRP()
 		{
@@ -40,7 +42,7 @@ namespace Effekseer
 			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(hdCamera.actualWidth, hdCamera.actualHeight, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
-			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd);
+			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd, blitter);
 		}
 
 		protected override void Cleanup()
