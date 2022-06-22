@@ -418,6 +418,7 @@ namespace Effekseer.Internal
 	internal class EffekseerRendererUnity : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
+		private StandardBlitter standardBlitter = new StandardBlitter();
 
 		class MaterialPropCollection
 		{
@@ -1023,11 +1024,11 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, null, null);
+				Render(camera, null, null, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -1189,7 +1190,7 @@ namespace Effekseer.Internal
 			{
 				if (renderTargetProperty != null)
 				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1198,7 +1199,7 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
@@ -1216,7 +1217,7 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					path.commandBuffer.Blit(BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture);
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
@@ -1247,7 +1248,7 @@ namespace Effekseer.Internal
 				// Add a blit command that copy to the distortion texture
 				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
-					path.commandBuffer.Blit(renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
+					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value, 0, CubemapFace.Unknown, -1);
 
 					if (renderTargetProperty.Viewport.width > 0)
@@ -1257,7 +1258,7 @@ namespace Effekseer.Internal
 				}
 				else if (renderTargetProperty != null)
 				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture);
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1266,7 +1267,7 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					path.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
