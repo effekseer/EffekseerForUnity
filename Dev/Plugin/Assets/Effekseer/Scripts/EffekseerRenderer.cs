@@ -98,7 +98,7 @@ namespace Effekseer.Internal
 		{
 		}
 
-		internal void ApplyToCommandBuffer(CommandBuffer cb, DepthRenderTexture depthRenderTexture)
+		internal void ApplyToCommandBuffer(CommandBuffer cb, DepthRenderTexture depthRenderTexture, IEffekseerBlitter blitter)
 		{
 			if (depthRenderTexture != null)
 			{
@@ -117,13 +117,13 @@ namespace Effekseer.Internal
 
 				if (renderFeature == RenderFeature.PostProcess)
 				{
-					cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+					blitter.Blit(cb, BuiltinRenderTextureType.None, depthRenderTexture.renderTexture, grabDepthMat);
 				}
 				else if (renderFeature == RenderFeature.URP)
 				{
 					if (canGrabDepth)
 					{
-						cb.Blit(null, depthRenderTexture.renderTexture, grabDepthMat);
+						blitter.Blit(cb, BuiltinRenderTextureType.None,depthRenderTexture.renderTexture, grabDepthMat);
 					}
 					else
 					{
@@ -161,7 +161,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture)
+		internal void ApplyToCommandBuffer(CommandBuffer cb, BackgroundRenderTexture backgroundRenderTexture, IEffekseerBlitter blitter)
 		{
 			if (isRequiredToChangeViewport)
 			{
@@ -176,7 +176,7 @@ namespace Effekseer.Internal
 						Viewport.y / colorTargetRenderTexture.height));
 					cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
 					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
-					cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+					blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
 				}
 				else
 				{
@@ -189,16 +189,16 @@ namespace Effekseer.Internal
 						Viewport.y / colorTargetRenderTexture.height));
 					cb.SetRenderTarget(backgroundRenderTexture.renderTexture);
 					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
-					cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
+					blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, m);
 				}
 			}
 			else if (isRequiredToCopyBackground)
 			{
-				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 			}
 			else
 			{
-				cb.Blit(colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
 			}
 
 			// restore
@@ -256,7 +256,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 
-		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer);
+		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter);
 
 		void OnPostRender(Camera camera);
 	}
