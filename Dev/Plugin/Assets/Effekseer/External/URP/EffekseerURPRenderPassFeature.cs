@@ -1,8 +1,46 @@
 ﻿#if EFFEKSEER_URP_SUPPORT
 
+using Effekseer.Internal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+
+public class UrpBlitter : IEffekseerBlitter
+{	
+	public static readonly int sourceTex = Shader.PropertyToID("_SourceTex");
+	private Material blitMaterial;
+
+	public UrpBlitter()
+	{
+		this.blitMaterial = CoreUtils.CreateEngineMaterial("Hidden/Universal Render Pipeline/Blit");
+	}
+
+	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest)
+	{
+		CoreUtils.SetRenderTarget(
+			cmd,
+			dest,
+			RenderBufferLoadAction.Load,
+			RenderBufferStoreAction.Store,
+			ClearFlag.None,
+			Color.black);
+		cmd.SetGlobalTexture(sourceTex, source);
+		cmd.DrawProcedural(Matrix4x4.identity, blitMaterial, 0, MeshTopology.Quads, 4);
+	}
+
+	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material)
+	{
+		CoreUtils.SetRenderTarget(
+			cmd,
+			dest,
+			RenderBufferLoadAction.Load,
+			RenderBufferStoreAction.Store,
+			ClearFlag.None,
+			Color.black);
+		cmd.SetGlobalTexture(sourceTex, source);
+		cmd.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Quads, 4);
+	}
+}
 
 public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 {
@@ -14,6 +52,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #endif
 		ScriptableRenderer renderer;
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
+		private IEffekseerBlitter blitter = new UrpBlitter();
 
 		public EffekseerRenderPassURP(ScriptableRenderer renderer)
 		{
@@ -60,7 +99,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.isRequiredToCopyBackground = true;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.URP;
 			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null);
+			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null, blitter);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
 			if (commandBuffer != null)

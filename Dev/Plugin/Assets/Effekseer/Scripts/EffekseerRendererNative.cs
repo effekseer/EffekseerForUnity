@@ -9,6 +9,7 @@ namespace Effekseer.Internal
 	internal class EffekseerRendererNative : IEffekseerRenderer
 	{
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
+		private StandardBlitter standardBlitter = new StandardBlitter();
 
 		private class RenderPath : IDisposable
 		{
@@ -57,7 +58,7 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty
+			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty, IEffekseerBlitter blitter
 				, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
 				this.isDistortionEnabled = enableDistortion;
@@ -83,7 +84,7 @@ namespace Effekseer.Internal
 
 				if (!isCommandBufferFromExternal)
 				{
-					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty);
+					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty, blitter);
 				}
 
 				// register the command to a camera
@@ -96,7 +97,8 @@ namespace Effekseer.Internal
 			private void SetupEffekseerRenderCommandBuffer(
 				CommandBuffer cmbBuf,
 				bool enableDistortion,
-				RenderTargetProperty renderTargetProperty)
+				RenderTargetProperty renderTargetProperty,
+				IEffekseerBlitter blitter)
 			{
 				// add a command to render effects.
 				if (cmbBuf == null)
@@ -115,7 +117,7 @@ namespace Effekseer.Internal
 						{
 							if (renderTargetProperty.colorBufferID.HasValue)
 							{
-								cmbBuf.Blit(renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
+								blitter.Blit(cmbBuf, renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
 								cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
 
 								if (renderTargetProperty.Viewport.width > 0)
@@ -125,7 +127,7 @@ namespace Effekseer.Internal
 							}
 							else
 							{
-								renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture);
+								renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture, blitter);
 
 								if (renderTargetProperty.Viewport.width > 0)
 								{
@@ -135,7 +137,7 @@ namespace Effekseer.Internal
 						}
 						else
 						{
-							cmbBuf.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+							blitter.Blit(cmbBuf, BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
 							cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 							// to reset shader settings. SetRenderTarget is not applied until drawing
@@ -153,7 +155,7 @@ namespace Effekseer.Internal
 				{
 					if (renderTargetProperty != null)
 					{
-						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture);
+						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture, blitter);
 
 						if (renderTargetProperty.Viewport.width > 0)
 						{
@@ -162,7 +164,7 @@ namespace Effekseer.Internal
 					}
 					else
 					{
-						cmbBuf.Blit(BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture);
+						blitter.Blit(cmbBuf, BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture);
 						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 						// to reset shader settings. SetRenderTarget is not applied until drawing
@@ -242,7 +244,7 @@ namespace Effekseer.Internal
 				return true;
 			}
 
-			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer, RenderTargetProperty renderTargetProperty)
+			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer, RenderTargetProperty renderTargetProperty, IEffekseerBlitter blitter)
 			{
 				if (!isCommandBufferFromExternal)
 				{
@@ -250,7 +252,7 @@ namespace Effekseer.Internal
 				}
 
 				this.commandBuffer = commandBuffer;
-				SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty);
+				SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty, blitter);
 			}
 		}
 
@@ -301,11 +303,11 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, null, null);
+				Render(camera, null, null, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -400,7 +402,7 @@ namespace Effekseer.Internal
 
 				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
@@ -409,7 +411,7 @@ namespace Effekseer.Internal
 			{
 				path.Dispose();
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, stereoRenderingType);
+				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
 			}
 
 			var screenSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
@@ -427,7 +429,7 @@ namespace Effekseer.Internal
 
 			if (path.isCommandBufferFromExternal)
 			{
-				path.AssignExternalCommandBuffer(targetCommandBuffer, renderTargetProperty);
+				path.AssignExternalCommandBuffer(targetCommandBuffer, renderTargetProperty, blitter);
 			}
 
 			// if LWRP
