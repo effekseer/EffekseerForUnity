@@ -445,6 +445,10 @@ extern "C"
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
+		Effekseer::Manager::LayerParameter layerParam;
+		layerParam.ViewerPosition = cameraPosition;
+		g_EffekseerManager->SetLayerParameter(0, layerParam);
+
 		// Specify textures
 		if (g_graphics != nullptr)
 		{
@@ -551,6 +555,10 @@ extern "C"
 		::Effekseer::Vector3D cameraPosition;
 		::Effekseer::Vector3D cameraFrontDirection;
 		CalculateCameraDirectionAndPosition(cameraMatrix, cameraFrontDirection, cameraPosition);
+
+		Effekseer::Manager::LayerParameter layerParam;
+		layerParam.ViewerPosition = cameraPosition;
+		g_EffekseerManager->SetLayerParameter(0, layerParam);
 
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 		Effekseer::Manager::DrawParameter drawParameter;
@@ -701,6 +709,10 @@ extern "C"
 		::Effekseer::Vector3D cameraPosition;
 		::Effekseer::Vector3D cameraFrontDirection;
 		CalculateCameraDirectionAndPosition(cameraPositionMatrix, cameraFrontDirection, cameraPosition);
+
+		Effekseer::Manager::LayerParameter layerParam;
+		layerParam.ViewerPosition = cameraPosition;
+		g_EffekseerManager->SetLayerParameter(0, layerParam);
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
