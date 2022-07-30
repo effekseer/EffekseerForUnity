@@ -15,10 +15,12 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 {
 	Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 	Material grabDepthMat = null;
+	private Effekseer.Internal.StandardBlitter standardBlitter = null;
 
 	public override void Init()
 	{
 		base.Init();
+		standardBlitter = new Effekseer.Internal.StandardBlitter();
 	}
 
 	public override void Release()
@@ -69,7 +71,7 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 		prop.canGrabDepth = true;
 		context.command.SetRenderTarget(context.destination, depthIdentifer);
 
-		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, prop, context.command);
+		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, prop, context.command, standardBlitter);
 
 		context.command.ReleaseTemporaryRT(propertyId);
 	}
