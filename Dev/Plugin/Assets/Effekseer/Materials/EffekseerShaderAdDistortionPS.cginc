@@ -77,7 +77,7 @@ float4 frag(const PS_Input Input)
 
 	Output.a = Output.a * Input.Color.a;
 
-	ApplyFlipbook(Output, _colorTex, sampler_colorTex, fFlipbookParameter, Input.Color, advancedParam.FlipbookNextIndexUV + UVOffset, advancedParam.FlipbookRate, false);
+	ApplyFlipbook(Output, _colorTex, sampler_colorTex, flipbookParameter1, Input.Color, advancedParam.FlipbookNextIndexUV + UVOffset, advancedParam.FlipbookRate, false);
 
 	// apply alpha texture
 	float4 AlphaTexColor = _alphaTex.Sample(sampler_alphaTex, advancedParam.AlphaUV + UVOffset);

@@ -13,7 +13,7 @@ SamplerState sampler_depthTex : register(s2);
 float4 g_scale;
 float4 mUVInversedBack;
 
-float4 fFlipbookParameter; // x:enable, y:interpolationType
+float4 flipbookParameter1; // x:enable, y:interpolationType
 
 float4 fUVDistortionParameter; // x:intensity, y:blendIntensity, zw:uvInversed
 

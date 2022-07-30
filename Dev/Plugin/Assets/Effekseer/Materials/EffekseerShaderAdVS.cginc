@@ -78,7 +78,7 @@ float2 GetFlipbookOneSizeUV(float DivideX, float DivideY)
 	return (float2(1.0, 1.0) / float2(DivideX, DivideY));
 }
 
-float2 GetFlipbookOriginUV(float2 FlipbookUV, float FlipbookIndex, float DivideX, float DivideY)
+float2 GetFlipbookOriginUV(float2 FlipbookUV, float FlipbookIndex, float DivideX, float2 flipbookOneSize, float2 flipbookOffset)
 {
 	float2 DivideIndex;
 
@@ -89,16 +89,11 @@ float2 GetFlipbookOriginUV(float2 FlipbookUV, float FlipbookIndex, float DivideX
 #endif
 	DivideIndex.y = int(FlipbookIndex) / int(DivideX);
 
-	float2 FlipbookOneSize = GetFlipbookOneSizeUV(DivideX, DivideY);
-	float2 UVOffset = DivideIndex * FlipbookOneSize;
-
-	float2 OriginUV = FlipbookUV - UVOffset;
-	OriginUV *= float2(DivideX, DivideY);
-
-	return OriginUV;
+	float2 UVOffset = DivideIndex * flipbookOneSize + flipbookOffset;
+	return FlipbookUV - UVOffset;
 }
 
-float2 GetFlipbookUVForIndex(float2 OriginUV, float Index, float DivideX, float DivideY)
+float2 GetFlipbookUVForIndex(float2 OriginUV, float Index, float DivideX, float2 flipbookOneSize, float2 flipbookOffset)
 {
 	float2 DivideIndex;
 #ifdef __OPENGL2__
@@ -108,14 +103,20 @@ float2 GetFlipbookUVForIndex(float2 OriginUV, float Index, float DivideX, float 
 #endif
 	DivideIndex.y = int(Index) / int(DivideX);
 
-	float2 FlipbookOneSize = GetFlipbookOneSizeUV(DivideX, DivideY);
-
-	return (OriginUV * FlipbookOneSize) + (DivideIndex * FlipbookOneSize);
+	return OriginUV + DivideIndex * flipbookOneSize + flipbookOffset;
 }
 
-void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 flipbookParameter, float flipbookIndex, float2 uv, float2 uvInversed)
+void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 flipbookParameter1, float4 flipbookParameter2, float flipbookIndex, float2 uv, float2 uvInversed)
 {
-	if (flipbookParameter.x > 0)
+	const float flipbookEnabled = flipbookParameter1.x;
+	const float flipbookLoopType = flipbookParameter1.y;
+	const float divideX = flipbookParameter1.z;
+	const float divideY = flipbookParameter1.w;
+
+	const float2 flipbookOneSize = flipbookParameter2.xy;
+	const float2 flipbookOffset = flipbookParameter2.zw;
+
+	if (flipbookEnabled > 0)
 	{
 		flipbookRate = frac(flipbookIndex);
 
@@ -124,10 +125,10 @@ void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 f
 
 		float NextIndex = Index + IndexOffset;
 
-		float FlipbookMaxCount = (flipbookParameter.z * flipbookParameter.w);
+		float FlipbookMaxCount = (divideX * divideY);
 
 		// loop none
-		if (flipbookParameter.y == 0)
+		if (flipbookLoopType == 0)
 		{
 			if (NextIndex >= FlipbookMaxCount)
 			{
@@ -136,13 +137,13 @@ void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 f
 			}
 		}
 		// loop
-		else if (flipbookParameter.y == 1)
+		else if (flipbookLoopType == 1)
 		{
 			Index %= FlipbookMaxCount;
 			NextIndex %= FlipbookMaxCount;
 		}
 		// loop reverse
-		else if (flipbookParameter.y == 2)
+		else if (flipbookLoopType == 2)
 		{
 			bool Reverse = floor(Index / FlipbookMaxCount) % 2 == 1;
 			Index %= FlipbookMaxCount;
@@ -161,8 +162,8 @@ void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 f
 
 		float2 notInversedUV = uv;
 		notInversedUV.y = uvInversed.x + uvInversed.y * notInversedUV.y;
-		float2 OriginUV = GetFlipbookOriginUV(notInversedUV, Index, flipbookParameter.z, flipbookParameter.w);
-		flipbookUV = GetFlipbookUVForIndex(OriginUV, NextIndex, flipbookParameter.z, flipbookParameter.w);
+		float2 OriginUV = GetFlipbookOriginUV(notInversedUV, Index, divideX, flipbookOneSize, flipbookOffset);
+		flipbookUV = GetFlipbookUVForIndex(OriginUV, NextIndex, divideX, flipbookOneSize, flipbookOffset);
 		flipbookUV.y = uvInversed.x + uvInversed.y * flipbookUV.y;
 	}
 }
@@ -195,7 +196,8 @@ void ApplyFlipbookVS(inout float flipbookRate, inout float2 flipbookUV, float4 f
 // float4 fBlendUVDistortionUV[__INST__];
 // #endif
 
-float4 fFlipbookParameter; // x:enable, y:loopType, z:divideX, w:divideY
+float4 flipbookParameter1; // x:enable, y:loopType, z:divideX, w:divideY
+float4 flipbookParameter2;
 
 // #ifdef DISABLE_INSTANCE
 // float4 fFlipbookIndexAndNextRate;
@@ -256,7 +258,7 @@ void CalculateAndStoreAdvancedParameter(in float2 uv, in float2 uv1, in float4 a
 	// flipbook interpolation
 	float flipbookRate = 0.0f;
 	float2 flipbookNextIndexUV = 0.0f;
-	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, flipbookIndexAndNextRate, uv1, mUVInversed);
+	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, flipbookParameter1, flipbookParameter2, flipbookIndexAndNextRate, uv1, mUVInversed);
 
 	vsoutput.Blend_FBNextIndex_UV.zw = flipbookNextIndexUV;
 	vsoutput.UV_Others.z = flipbookRate;
@@ -381,7 +383,8 @@ VS_Output vert(VS_Input i)
 //float4x4 mProj;
 float4 mUVInversed;
 
-float4 fFlipbookParameter; // x:enable, y:loopType, z:divideX, w:divideY
+float4 flipbookParameter1; // x:enable, y:loopType, z:divideX, w:divideY
+float4 flipbookParameter2;
 //};
 
 #if defined(ENABLE_LIGHTING) || defined(ENABLE_DISTORTION)
@@ -452,7 +455,7 @@ void CalculateAndStoreAdvancedParameter(in VS_Input_Internal vsinput, inout VS_O
 	// flipbook interpolation
 	float flipbookRate = 0.0f;
 	float2 flipbookNextIndexUV = 0.0f;
-	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, fFlipbookParameter, vsinput.FlipbookIndex, vsoutput.UV_Others.xy, mUVInversed);
+	ApplyFlipbookVS(flipbookRate, flipbookNextIndexUV, flipbookParameter1, flipbookParameter2, vsinput.FlipbookIndex, vsoutput.UV_Others.xy, mUVInversed);
 
 	vsoutput.Blend_FBNextIndex_UV.zw = flipbookNextIndexUV;
 	vsoutput.UV_Others.z = flipbookRate;

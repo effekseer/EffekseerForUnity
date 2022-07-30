@@ -131,7 +131,7 @@ float4 frag(const PS_Input Input)
 			half3x3((half3)Input.WorldT, (half3)Input.WorldB, (half3)Input.WorldN)));
 #endif
 
-	ApplyFlipbook(Output, _colorTex, sampler_colorTex, fFlipbookParameter, Input.Color, advancedParam.FlipbookNextIndexUV + UVOffset, advancedParam.FlipbookRate, convColorSpace);
+	ApplyFlipbook(Output, _colorTex, sampler_colorTex, flipbookParameter1, Input.Color, advancedParam.FlipbookNextIndexUV + UVOffset, advancedParam.FlipbookRate, convColorSpace);
 
 	// apply alpha texture
 	float4 AlphaTexColor = ConvertFromSRGBTexture(_alphaTex.Sample(sampler_alphaTex, advancedParam.AlphaUV + UVOffset), convColorSpace);

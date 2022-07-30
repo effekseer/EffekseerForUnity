@@ -1791,11 +1791,17 @@ namespace Effekseer.Internal
 
 		void ApplyAdvancedParameter(in Plugin.UnityRenderParameter parameter, MaterialPropertyBlock prop)
 		{
-			prop.SetVector("fFlipbookParameter", new Vector4(
+			prop.SetVector("flipbookParameter1", new Vector4(
 				parameter.FlipbookParams.Enable,
 				parameter.FlipbookParams.LoopType,
 				parameter.FlipbookParams.DivideX,
 				parameter.FlipbookParams.DivideY));
+
+			prop.SetVector("flipbookParameter2", new Vector4(
+				parameter.FlipbookParams.OneSizeX,
+				parameter.FlipbookParams.OneSizeY,
+				parameter.FlipbookParams.OffsetX,
+				parameter.FlipbookParams.OffsetY));
 
 			prop.SetVector("fUVDistortionParameter", new Vector4(parameter.UVDistortionIntensity, parameter.BlendUVDistortionIntensity, 1.0f, 0.0f));
 			prop.SetVector("fBlendTextureParameter", new Vector4(parameter.TextureBlendType, 0.0f, 0.0f, 0.0f));

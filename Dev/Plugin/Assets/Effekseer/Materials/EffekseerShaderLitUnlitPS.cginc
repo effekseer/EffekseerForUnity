@@ -5,7 +5,7 @@ float4 fLightDirection;
 float4 fLightColor;
 float4 fLightAmbient;
 
-float4 fFlipbookParameter; // x:enable, y:interpolationType
+float4 flipbookParameter1; // x:enable, y:interpolationType
 
 float4 fUVDistortionParameter; // x:intensity, y:blendIntensity, zw:uvInversed
 

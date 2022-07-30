@@ -30,6 +30,10 @@ extern "C"
 		int32_t LoopType = 0;
 		int32_t DivideX = 1;
 		int32_t DivideY = 1;
+		float OneSizeX = 0.0f;
+		float OneSizeY = 0.0f;
+		float OffsetX = 0.0f;
+		float OffsetY = 0.0f;
 	};
 
 	struct EdgeParameters
