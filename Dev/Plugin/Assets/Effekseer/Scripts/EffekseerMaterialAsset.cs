@@ -539,20 +539,28 @@ struct Gradient
 	float2 alphas[8];
 };
 
+float LinearStep(float v0, float v1, float x)
+{
+	float t = (x - v0) / (v1 - v0);
+	return clamp(t, 0.0, 1.0);
+}
+
 float4 SampleGradient(Gradient gradient, float t)
 {
 	float3 color = gradient.colors[0].xyz;
 	for(int i = 1; i < 8; i++)
 	{
-		float a = clamp((t - gradient.colors[i-1].w) / (gradient.colors[i].w - gradient.colors[i-1].w), 0.0, 1.0) * step(float(i), float(gradient.colorCount-1));
-		color = lerp(color, gradient.colors[i].xyz, a);
+		float inRange = step(float(i), float(gradient.colorCount-1));
+		float a = LinearStep(gradient.colors[i-1].w, gradient.colors[i].w, t);
+		color = LERP(color, gradient.colors[i].xyz, a * inRange);
 	}
 
 	float alpha = gradient.alphas[0].x;
 	for(int i = 1; i < 8; i++)
 	{
-		float a = clamp((t - gradient.alphas[i-1].y) / (gradient.alphas[i].y - gradient.alphas[i-1].y), 0.0, 1.0) * step(float(i), float(gradient.alphaCount-1));
-		alpha = lerp(alpha, gradient.alphas[i].x, a);
+		float inRange = step(float(i), float(gradient.alphaCount-1));
+		float a = LinearStep(gradient.alphas[i-1].y, gradient.alphas[i].y, t);
+		alpha = LERP(alpha, gradient.alphas[i].x, a * inRange);
 	}
 
 	return float4(color, alpha);
