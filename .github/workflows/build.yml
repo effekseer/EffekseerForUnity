@@ -15,6 +15,7 @@ jobs:
       - name: build script
         run: |
           ls $ANDROID_SDK_ROOT
+          ls $ANDROID_SDK_ROOT/ndk
           cd Dev/Cpp/android
           $ANDROID_SDK_ROOT/ndk-bundle/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
           $ANDROID_SDK_ROOT/ndk-bundle/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
