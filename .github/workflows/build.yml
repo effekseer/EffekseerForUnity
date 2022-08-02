@@ -14,15 +14,16 @@ jobs:
       - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
+          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/23.2.8568313
           cd Dev/Cpp/android
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
+          $NDK_SDK_ROOT/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
+          $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
           cp libs/x86/libEffekseerUnity.so ../../Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_armeabi-v7a.mk
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_armeabi-v7a.mk
+          $NDK_SDK_ROOT/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_armeabi-v7a.mk
+          $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_armeabi-v7a.mk
           cp libs/armeabi-v7a/libEffekseerUnity.so ../../Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build clean  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
-          $ANDROID_SDK_ROOT/ndk-bundle/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
+          $NDK_SDK_ROOT/ndk-build clean  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
+          $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
           cp libs/arm64-v8a/libEffekseerUnity.so ../../Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
       - name: Upload math result for android
         uses: actions/upload-artifact@v1
