@@ -50,21 +50,24 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		RenderTargetIdentifier cameraColorTarget;
 		RenderTargetIdentifier cameraDepthTarget;
 #endif
-		ScriptableRenderer renderer;
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 		private IEffekseerBlitter blitter = new UrpBlitter();
 
 		public EffekseerRenderPassURP(ScriptableRenderer renderer)
 		{
-			this.renderer = renderer;
 			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
+		}
+
+		bool IsValid(RenderTargetIdentifier identifer)
+		{
+			// HACK
+			return !identifer.ToString().Contains("NameID -1");
 		}
 
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
 		public void Setup(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
 		{
-			// HACK
-			bool isValidDepth = !cameraDepthTarget.ToString().Contains("-1");
+			bool isValidDepth = IsValid(cameraDepthTarget);
 
 			this.cameraColorTarget = cameraColorTarget;
 			prop.colorTargetIdentifier = cameraColorTarget;
@@ -82,13 +85,14 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		{
 			if (Effekseer.EffekseerSystem.Instance == null) return;
 #if EFFEKSEER_URP_DEPTHTARGET_FIX
-			prop.colorTargetIdentifier = this.renderer.cameraColorTarget;
+			var renderer = renderingData.cameraData.renderer;
+			prop.colorTargetIdentifier = renderer.cameraColorTarget;
 
-			var isValidDepth = renderingData.cameraData.cameraType != CameraType.SceneView;
+			var isValidDepth = IsValid(renderer.cameraDepthTarget);
 
 			if (isValidDepth)
 			{
-				prop.depthTargetIdentifier = this.renderer.cameraDepthTarget;
+				prop.depthTargetIdentifier = renderer.cameraDepthTarget;
 			}
 			else
 			{
