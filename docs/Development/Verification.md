@@ -12,7 +12,7 @@ Check `Project Settings/OpenXR/Mock Runtime`
 Select camera in scene and select `GameObject/XR/Convert Main Camera To XR Rig` menu item.
 ![image](https://user-images.githubusercontent.com/3889597/182819214-492d48e5-de2b-4074-9075-467835b274c2.png)
 
-and Select `Both Eyes` in game view window header.
+And select `Both Eyes` in game view window header.
 ![image](https://user-images.githubusercontent.com/3889597/182819263-95d011c9-12e6-4e13-b467-0c7a831e5cd2.png)
 
 ## TODO
