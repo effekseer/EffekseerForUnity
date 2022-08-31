@@ -38,7 +38,9 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphics.cpp
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp
-	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/OpenGL/EffekseerMaterialCompilerGL.cpp)
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/OpenGL/EffekseerMaterialCompilerGL.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/GLSLGenerator/ShaderGenerator.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/Common/ShaderGeneratorCommon.cpp)
 
 # INTERNAL_LOADER
 list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRenderer.DXTK.DDSTextureLoader.cpp")
