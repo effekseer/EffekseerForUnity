@@ -108,6 +108,7 @@ float SimpleNoise(float2 uv, float scale) {
 			{
 				var nl = Environment.NewLine;
 				string ss = string.Empty;
+				int keyMax = 8;
 
 				ss += "Gradient " + name + "() {" + nl;
 				ss += "Gradient g = (Gradient)0;" + nl;
@@ -163,7 +164,7 @@ float SimpleNoise(float2 uv, float scale) {
 					}
 				};
 
-				for (int i = 0; i < gradient.ColorMarkers.Length; i++)
+				for (int i = 0; i < keyMax; i++)
 				{
 					var key = getColorKey(gradient, i);
 					ss += "g.colors[" + i + "].x = " + key.ColorR * key.Intensity + ";" + nl;
@@ -172,7 +173,7 @@ float SimpleNoise(float2 uv, float scale) {
 					ss += "g.colors[" + i + "].w = " + key.Position + ";" + nl;
 				}
 
-				for (int i = 0; i < gradient.AlphaMarkers.Length; i++)
+				for (int i = 0; i < keyMax; i++)
 				{
 					var key = getAlphaKey(gradient, i);
 					ss += "g.alphas[" + i + "].x = " + key.Alpha + ";" + nl;
