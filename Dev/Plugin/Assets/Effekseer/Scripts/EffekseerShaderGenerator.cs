@@ -7,7 +7,6 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 using System.Linq;
 using UnityEditor;
-#endif
 
 namespace Effekseer
 {
@@ -112,8 +111,8 @@ float SimpleNoise(float2 uv, float scale) {
 
 				ss += "Gradient " + name + "() {" + nl;
 				ss += "Gradient g = (Gradient)0;" + nl;
-				ss += "g.colorCount = " + gradient.ColorMarkers.Count() + ";" + nl;
-				ss += "g.alphaCount = " + gradient.AlphaMarkers.Count() + ";" + nl;
+				ss += "g.colorCount = " + gradient.ColorMarkers.Length + ";" + nl;
+				ss += "g.alphaCount = " + gradient.AlphaMarkers.Length + ";" + nl;
 				ss += "g.reserved1 = 0;" + nl;
 				ss += "g.reserved2 = 0;" + nl;
 
@@ -187,3 +186,5 @@ float SimpleNoise(float2 uv, float scale) {
 		}
 	}
 }
+
+#endif
