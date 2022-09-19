@@ -1,5 +1,5 @@
 cd ../..
-cmake -B build_macosx -S . -G "Xcode" -D BUILD_EXAMPLES=OFF
+cmake -B build_macosx -S . -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -D BUILD_EXAMPLES=OFF
 cd build_macosx
 cmake --build . --config Release
 cmake --install . --prefix ./Install
