@@ -603,7 +603,7 @@ Cull[_Cull]
 		//PRAGMA_LIT_FLAG
 
 		@include ""UnityCG.cginc""
-		
+
 		@if _MATERIAL_REFRACTION_
 		sampler2D _BackTex;
 		@endif
