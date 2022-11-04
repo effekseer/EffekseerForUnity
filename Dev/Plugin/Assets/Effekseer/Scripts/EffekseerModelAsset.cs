@@ -62,10 +62,30 @@ namespace Effekseer
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
 
-			var asset = CreateInstance<EffekseerModelAsset>();
+			var asset = AssetDatabase.LoadAssetAtPath<EffekseerModelAsset>(assetPath);
+			if (asset != null)
+			{
+			}
+
+			bool isNewAsset = false;
+
+			if (asset == null)
+			{
+				asset = CreateInstance<EffekseerModelAsset>();
+				isNewAsset = true;
+			}
+
 			asset.bytes = data;
 
-			AssetDatabase.CreateAsset(asset, assetPath);
+			if (isNewAsset)
+			{
+				AssetDatabase.CreateAsset(asset, assetPath);
+			}
+			else
+			{
+				EditorUtility.SetDirty(asset);
+			}
+
 			AssetDatabase.Refresh();
 		}
 
