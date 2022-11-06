@@ -36,7 +36,10 @@ LOCAL_SRC_FILES := \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/Effekseer/Effekseer
 LOCAL_SRC_FILES += \
-	$(LIB_SRC_PATH)/Effekseer.Client.cpp \
+	$(LIB_SRC_PATH)/Network/Effekseer.Client.cpp \
+	$(LIB_SRC_PATH)/Network/Effekseer.Server.cpp \
+	$(LIB_SRC_PATH)/Network/Effekseer.Session.cpp \
+	$(LIB_SRC_PATH)/Network/Effekseer.Socket.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
 	$(LIB_SRC_PATH)/Effekseer.CurveLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
@@ -63,9 +66,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.RectF.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Resource.cpp \
 	$(LIB_SRC_PATH)/Effekseer.ResourceManager.cpp \
-	$(LIB_SRC_PATH)/Effekseer.Server.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Setting.cpp \
-	$(LIB_SRC_PATH)/Effekseer.Socket.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
