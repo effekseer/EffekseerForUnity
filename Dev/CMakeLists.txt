@@ -15,6 +15,8 @@ endif()
 
 project(EffekseerUnity  LANGUAGES C CXX)
 
+option(SANITIZE_ENABLED "is sanitizer enabled" OFF)
+
 option(BUILD_DX12 "Build DirectX12" OFF)
 option(BUILD_FOR_IOS "Build for ios" OFF)
 option(BUILD_FOR_IOS_SIM "Build for ios simulator" OFF)
@@ -27,6 +29,16 @@ endif()
 
 set(BUILD_EXAMPLES OFF CACHE INTERNAL "" FORCE)
 set(BUILD_VIEWER OFF CACHE INTERNAL "" FORCE)
+
+if(SANITIZE_ENABLED)
+    set(SANITIZE_ENABLED OFF CACHE INTERNAL "" FORCE)
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
+    else()
+        add_compile_options(-fsanitize=undefined,address)
+        add_link_options(-fsanitize=undefined,address)
+    endif()
+endif()
 
 if(BUILD_FOR_IOS OR BUILD_FOR_IOS_SIM)
     set(USE_OPENGLES3 ON CACHE INTERNAL "" FORCE)
