@@ -1,10 +1,10 @@
 on:
   push:
     branches:
-      - master
+      - 17x
   pull_request:
     branches:
-      - master
+      - 17x
 jobs:
   android:
     name: Build Android
