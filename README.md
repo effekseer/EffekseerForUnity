@@ -8,13 +8,13 @@ Effekseerで作成したエフェクトをUnityで表示することができま
 
 ## MacOS環境について
 
-Be sure to read it before using EffekseerForUnity.
+Be sure to read this document before using EffekseerForUnity.
 
-必ず読んだ後に、EffekseerForUnityを使用してください。
+必ずこのドキュメントを読んだ後に、EffekseerForUnityを使用してください。
 
 - [English](docs/MacOS_En.md)
 
-- [English](docs/MacOS_Ja.md)
+- [日本語](docs/MacOS_Ja.md)
 
 ## UnityPackage
 
