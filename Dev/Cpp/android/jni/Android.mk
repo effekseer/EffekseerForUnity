@@ -11,7 +11,8 @@ LOCAL_LDLIBS    := -landroid -lEGL -lGLESv3
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/Effekseer \
 	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon \
-	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL
+	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL \
+	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/3rdParty/flatbuffers/include
 
 LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPluginCommon.cpp \
