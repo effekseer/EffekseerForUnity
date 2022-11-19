@@ -66,11 +66,6 @@ Execute ``` Dev/Cpp/webgl/Build.bat ```
 
 #### Windows
 
-Install cmake and call ``` Dev/Cpp/windows/Build.bat ```
+Install cmake and call ``` Dev/Cpp/windows/GenerateProjects.bat ```
 
-#### macOS
-
-Uses Xcode, to open the following project file.
-
-- Dev/Cpp/macosx/EffekseerUnity.xcodeproj
 
