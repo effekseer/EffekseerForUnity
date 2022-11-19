@@ -9,6 +9,10 @@ Install Effekseer with PackageManager. This is the easiest way.
 
 https://docs.unity3d.com/2019.4/Documentation/Manual/upm-ui-giturl.html
 
+```
+https://github.com/effekseer/EffekseerForUnity_Release.git?path=Assets/Effekseer
+```
+
 # Share data with your team using git.
 
 Even if you don't use Unity PackageManager, as long as you synchronize your data with other PCs via git, you won't have any problems.

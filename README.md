@@ -6,6 +6,16 @@ You will be able to show the effects that was created with Effekseer.
 Unity向けEffekseer実行プラグインです。  
 Effekseerで作成したエフェクトをUnityで表示することができます。
 
+## MacOS環境について
+
+Be sure to read it before using EffekseerForUnity.
+
+必ず読んだ後に、EffekseerForUnityを使用してください。
+
+- [English](docs/MacOS_En.md)
+
+- [English](docs/MacOS_Ja.md)
+
 ## UnityPackage
 
 If you are compiling on a Mac, we recommend getting Effekseer via PackageManager.
