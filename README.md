@@ -6,13 +6,21 @@ You will be able to show the effects that was created with Effekseer.
 Unity向けEffekseer実行プラグインです。  
 Effekseerで作成したエフェクトをUnityで表示することができます。
 
+## UnityPackage
+
+If you are compiling on a Mac, we recommend getting Effekseer via PackageManager.
+
+もし、Macでコンパイルする場合、PackageManager経由でEffekseerを取得することを勧めます。
+
+```
+https://github.com/effekseer/EffekseerForUnity_Release.git?path=Assets/Effekseer
+```
+
+## Links
+
 - [Official website](http://effekseer.github.io)
 
 - [Effekseer main repository](https://github.com/effekseer/Effekseer)
-
-- [EffekseerForUnity(1.5x)](https://github.com/effekseer/EffekseerForUnity/tree/15x)
-
-- [EffekseerForUnity(Legacy)](https://github.com/effekseer/EffekseerForUnity/tree/legacy)
 
 ## Help
 
@@ -22,13 +30,10 @@ Effekseerで作成したエフェクトをUnityで表示することができま
 
 ### Clone the source code
 
-Needs to clone main repository in the same place of this repository, to develop this plugin.
-
-このプラグインを開発するには、このリポジトリと同じ場所に本体リポジトリもクローンする必要があります。
-
 ```
-git clone https://github.com/effekseer/Effekseer
 git clone https://github.com/effekseer/EffekseerForUnity
+cd EffekseerForUnity
+git submodule update --init
 ```
 
 ### Build binaries
