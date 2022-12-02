@@ -75,7 +75,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
 		public void Setup(RenderTargetIdentifier cameraColorTarget, RenderTargetIdentifier cameraDepthTarget)
 		{
-			bool isValidDepth = IsValid(cameraDepthTarget);
+			bool isValidDepth = IsValidCameraDepthTarget(cameraDepthTarget);
 
 			this.cameraColorTarget = cameraColorTarget;
 			prop.colorTargetIdentifier = cameraColorTarget;
