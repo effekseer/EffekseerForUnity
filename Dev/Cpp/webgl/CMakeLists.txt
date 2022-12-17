@@ -17,6 +17,7 @@ include_directories (${INCLUDE_DIR})
 
 # make OpenGL ES enabled
 add_definitions(-D__EFFEKSEER_RENDERER_GLES2__)
+add_definitions(-D__DISABLED_DEFAULT_TEXTURE_LOADER__)
 
 file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/*.cpp
