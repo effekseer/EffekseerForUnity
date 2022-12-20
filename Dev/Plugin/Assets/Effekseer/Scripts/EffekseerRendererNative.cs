@@ -117,7 +117,7 @@ namespace Effekseer.Internal
 						{
 							if (renderTargetProperty.colorBufferID.HasValue)
 							{
-								blitter.Blit(cmbBuf, renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture);
+								blitter.Blit(cmbBuf, renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture, renderTargetProperty.xrRendering);
 								cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
 
 								if (renderTargetProperty.Viewport.width > 0)
@@ -137,7 +137,10 @@ namespace Effekseer.Internal
 						}
 						else
 						{
-							blitter.Blit(cmbBuf, BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
+							// TODO : Fix
+							bool xrRendering = false;
+
+							blitter.Blit(cmbBuf, BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture, xrRendering);
 							cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 							// to reset shader settings. SetRenderTarget is not applied until drawing
@@ -164,7 +167,10 @@ namespace Effekseer.Internal
 					}
 					else
 					{
-						blitter.Blit(cmbBuf, BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture);
+						// TODO : Fix
+						bool xrRendering = false;
+
+						blitter.Blit(cmbBuf, BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture, xrRendering);
 						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
 						// to reset shader settings. SetRenderTarget is not applied until drawing

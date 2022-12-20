@@ -15,17 +15,24 @@ public class UrpBlitter : IEffekseerBlitter
 		this.blitMaterial = CoreUtils.CreateEngineMaterial("Hidden/Universal Render Pipeline/Blit");
 	}
 
-	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest)
+	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
-		CoreUtils.SetRenderTarget(
-			cmd,
-			dest,
-			RenderBufferLoadAction.Load,
-			RenderBufferStoreAction.Store,
-			ClearFlag.None,
-			Color.black);
-		cmd.SetGlobalTexture(sourceTex, source);
-		cmd.DrawProcedural(Matrix4x4.identity, blitMaterial, 0, MeshTopology.Quads, 4);
+		if(xrRendering)
+		{
+			CoreUtils.SetRenderTarget(
+				cmd,
+				dest,
+				RenderBufferLoadAction.Load,
+				RenderBufferStoreAction.Store,
+				ClearFlag.None,
+				Color.black);
+			cmd.SetGlobalTexture(sourceTex, source);
+			cmd.DrawProcedural(Matrix4x4.identity, blitMaterial, 0, MeshTopology.Quads, 4);
+		}
+		else
+		{
+			cmd.Blit(source, dest);
+		}
 	}
 
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material)
@@ -102,6 +109,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 			prop.isRequiredToCopyBackground = true;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.URP;
+			prop.xrRendering = renderingData.cameraData.xrRendering;
 			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
 			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null, blitter);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
