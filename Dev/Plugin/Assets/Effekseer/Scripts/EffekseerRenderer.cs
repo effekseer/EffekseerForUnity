@@ -94,6 +94,8 @@ namespace Effekseer.Internal
 
 		Material grabDepthMat;
 
+		public bool xrRendering = false;
+
 		public RenderTargetProperty()
 		{
 		}
@@ -194,11 +196,11 @@ namespace Effekseer.Internal
 			}
 			else if (isRequiredToCopyBackground)
 			{
-				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, xrRendering);
 			}
 			else
 			{
-				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture);
+				blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, xrRendering);
 			}
 
 			// restore
@@ -353,7 +355,7 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					if(QualitySettings.activeColorSpace == ColorSpace.Linear)
+					if (QualitySettings.activeColorSpace == ColorSpace.Linear)
 					{
 						renderTexture = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear);
 					}

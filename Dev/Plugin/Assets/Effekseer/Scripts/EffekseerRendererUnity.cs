@@ -1199,7 +1199,10 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+					// TODO : Fix
+					bool xrRendering = false;
+
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
@@ -1217,7 +1220,10 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture);
+					// TODO : Fix
+					bool xrRendering = false;
+
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture, xrRendering);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
@@ -1248,7 +1254,7 @@ namespace Effekseer.Internal
 				// Add a blit command that copy to the distortion texture
 				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
-					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture);
+					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture, renderTargetProperty.xrRendering);
 					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value, 0, CubemapFace.Unknown, -1);
 
 					if (renderTargetProperty.Viewport.width > 0)
@@ -1267,7 +1273,10 @@ namespace Effekseer.Internal
 				}
 				else
 				{
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture);
+					// TODO : Fix
+					bool xrRendering = false;
+
+					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
 					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
 				}
 			}
