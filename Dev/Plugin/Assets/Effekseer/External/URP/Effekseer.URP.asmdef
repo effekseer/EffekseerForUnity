@@ -22,6 +22,11 @@
             "name": "com.unity.render-pipelines.universal",
             "expression": "10.1",
             "define": "EFFEKSEER_URP_DEPTHTARGET_FIX"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "10.10",
+            "define": "EFFEKSEER_URP_XRRENDERING"
         }
     ],
     "noEngineReferences": false
