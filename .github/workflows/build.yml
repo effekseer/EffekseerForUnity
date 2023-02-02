@@ -87,7 +87,7 @@ jobs:
           cd ./Dev/Cpp/webgl
           mkdir build138
           cd build138
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release  -DLLVM_ENABLE_TERMINFO=OFF ..
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
@@ -124,7 +124,7 @@ jobs:
           cd ./Dev/Cpp/webgl
           mkdir build2019
           cd build2019
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_TERMINFO=OFF ..
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
       - name: Upload math result for webgl
