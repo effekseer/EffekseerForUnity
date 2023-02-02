@@ -77,17 +77,17 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
-          ./emsdk install 1.38.33
+          ./emsdk install 1.38.35
           cd ..
 
       - run: sh scripts/clone_dependencies.sh
       - run: |
-          ./emsdk/emsdk activate 1.38.33
+          ./emsdk/emsdk activate 1.38.35
           source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
           mkdir build138
           cd build138
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release  -DLLVM_ENABLE_TERMINFO=OFF ..
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
