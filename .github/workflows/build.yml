@@ -75,9 +75,8 @@ jobs:
       - name: install emsdk 1.38
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
+          git clone https://github.com/emscripten-core/emsdk.git -b 3.1.19 --depth 1
           cd emsdk
-          git checkout refs/tags/3.1.19
           ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
           cd ..
 
