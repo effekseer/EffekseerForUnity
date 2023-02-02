@@ -77,12 +77,12 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
-          ./emsdk install 1.38.35
+          ./emsdk install emscripten-tag-1.38.11-64bit
           cd ..
 
       - run: sh scripts/clone_dependencies.sh
       - run: |
-          ./emsdk/emsdk activate 1.38.35
+          ./emsdk/emsdk activate emscripten-tag-1.38.11-64bit
           source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
           mkdir build138
