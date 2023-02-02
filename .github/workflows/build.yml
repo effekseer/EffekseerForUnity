@@ -77,12 +77,12 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
-          ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
+          ./emsdk install 1.38.33
           cd ..
 
       - run: sh scripts/clone_dependencies.sh
       - run: |
-          ./emsdk/emsdk activate sdk-fastcomp-tag-1.38.11-64bit
+          ./emsdk/emsdk activate 1.38.33
           source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
           mkdir build138
