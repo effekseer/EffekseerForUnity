@@ -56,6 +56,7 @@ namespace Effekseer.Editor.Utils
 		Version16 = 1610,
 		Version17Alpha2 = 1700,
 		Version17Alpha4 = 1703,
+		Version17 = 1710,
 	}
 
 	public enum CompiledMaterialVersion : int
@@ -539,9 +540,9 @@ namespace Effekseer.Editor.Utils
 
 	public class MaterialInformation
 	{
-		const MaterialVersion LatestSupportVersion = MaterialVersion.Version17Alpha4;
+		const MaterialVersion LatestSupportVersion = MaterialVersion.Version17;
 
-		public MaterialVersion Version = MaterialVersion.Version17Alpha4;
+		public MaterialVersion Version = MaterialVersion.Version17;
 
 		public TextureInformation[] Textures = new TextureInformation[0];
 
