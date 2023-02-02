@@ -65,25 +65,29 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '2.7'
+          architecture: 'x64'
+
       - name: Cache emsdk
         id: cache
         uses: actions/cache@v1
         with:
           path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_38-v2
+          key: ${{ runner.os }}-emsdk-1_38-v3
 
       - name: install emsdk 1.38
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git
           cd emsdk
-          ./emsdk install python-2.7.13.1-64bit
           ./emsdk install emscripten-tag-1.38.11-64bit
           cd ..
 
       - run: sh scripts/clone_dependencies.sh
       - run: |
-          ./emsdk/emsdk activate python-2.7.13.1-64bit
           ./emsdk/emsdk activate emscripten-tag-1.38.11-64bit
           source ./emsdk/emsdk_env.sh
           cd ./Dev/Cpp/webgl
