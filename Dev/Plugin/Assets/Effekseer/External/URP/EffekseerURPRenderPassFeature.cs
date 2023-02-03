@@ -118,6 +118,10 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 #endif
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+			
+			// Linear and native renderer makes a result white.
+			prop.colorTargetDescriptor.sRGB = false;
+
 			prop.isRequiredToCopyBackground = true;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.URP;
 #if EFFEKSEER_URP_XRRENDERING
