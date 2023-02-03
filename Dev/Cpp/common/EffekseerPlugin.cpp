@@ -25,7 +25,7 @@
 #endif
 
 // OpenGL
-#if defined(_WIN32) || defined(__ANDROID__) || defined(EMSCRIPTEN) || (defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
+#if defined(_WIN32) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || (defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
@@ -102,7 +102,7 @@ bool g_maintainGammaColor = false;
 IUnityInterfaces* g_UnityInterfaces = NULL;
 IUnityGraphics* g_UnityGraphics = NULL;
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(EMSCRIPTEN) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(_SWITCH)
 // TODO adhoc code
 UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererOpenGLES20;
 #else
@@ -263,7 +263,7 @@ extern "C"
 
 #if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
 		UnityRegisterRenderingPluginV5(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
-#elif defined(EMSCRIPTEN) || defined(_SWITCH)
+#elif defined(__EMSCRIPTEN__) || defined(_SWITCH)
 		UnityRegisterRenderingPlugin(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
 #else
 		printf("Warning : Check preprocesser.\n");
@@ -292,7 +292,7 @@ extern "C"
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(EMSCRIPTEN) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__EMSCRIPTEN__) || defined(_SWITCH)
 	// None
 #else
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
