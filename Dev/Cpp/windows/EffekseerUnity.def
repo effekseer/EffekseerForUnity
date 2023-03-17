@@ -81,3 +81,5 @@ EXPORTS
   EffekseerSetLightColor
   EffekseerSetLightDirection
   EffekseerSetLightAmbientColor
+
+  EffekseerGetUpdateStateFunc
