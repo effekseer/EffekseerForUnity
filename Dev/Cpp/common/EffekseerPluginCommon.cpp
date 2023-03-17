@@ -723,4 +723,514 @@ extern "C"
 		}
 		events_.clear();
 	}
+
+	std::shared_ptr<MultiThreadedEffekseerManager> MultiThreadedEffekseerManager::instance_;
+
+	void MultiThreadedEffekseerManager::PushCommand(const MultiThreadedEffekseerManager::Command& cmd)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		commands_.emplace_back(cmd);
+	}
+
+	MultiThreadedEffekseerManager::MultiThreadedEffekseerManager(int maxInstances) { manager_ = Effekseer::Manager::Create(maxInstances); }
+
+	MultiThreadedEffekseerManager::~MultiThreadedEffekseerManager()
+	{
+		for (const auto& cmd : commands_)
+		{
+			if (cmd.Type == CommandType::Play)
+			{
+				::Effekseer::RefPtr<::Effekseer::Effect>::Unpin(cmd.Play.EffectPtr);
+			}
+		}
+		commands_.clear();
+	}
+
+	void MultiThreadedEffekseerManager::Apply()
+	{
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			threadCommands_ = commands_;
+			commands_.clear();
+		}
+
+		for (const auto& cmd : threadCommands_)
+		{
+			if (cmd.Type == CommandType::Update)
+			{
+				Effekseer::Manager::UpdateParameter param;
+				param.DeltaFrame = cmd.Update.DeltaFrame;
+				param.UpdateInterval = 1.0f;
+				manager_->Update(param);
+			}
+			else if (cmd.Type == CommandType::Play)
+			{
+				auto effect = ::Effekseer::RefPtr<::Effekseer::Effect>::FromPinned(cmd.Play.EffectPtr);
+				auto eid = manager_->Play(effect, cmd.Play.Position[0], cmd.Play.Position[1], cmd.Play.Position[2]);
+				internalHandleToHandleInternal_[cmd.Handle] = eid;
+
+				::Effekseer::RefPtr<::Effekseer::Effect>::Unpin(cmd.Play.EffectPtr);
+			}
+			else if (cmd.Type == CommandType::SetTimeScaleByGroup)
+			{
+				manager_->SetTimeScaleByGroup(cmd.SetTimeScaleByGroup.GroupMask, cmd.SetTimeScaleByGroup.TimeScale);
+			}
+			else if (cmd.Type == CommandType::StopAllEffects)
+			{
+				manager_->StopAllEffects();
+			}
+			else if (cmd.Type == CommandType::SetPausedToAllEffects)
+			{
+				manager_->SetPausedToAllEffects(cmd.BoolValue.Value);
+			}
+			else
+			{
+				auto it = internalHandleToHandleInternal_.find(cmd.Handle);
+				if (it != internalHandleToHandleInternal_.end())
+				{
+					if (cmd.Type == CommandType::UpdateHandle)
+					{
+						manager_->UpdateHandle(it->second, cmd.FloatValue.Value);
+					}
+					else if (cmd.Type == CommandType::UpdateHandleToMoveToFrame)
+					{
+						manager_->UpdateHandleToMoveToFrame(it->second, cmd.FloatValue.Value);
+					}
+					else if (cmd.Type == CommandType::Stop)
+					{
+						manager_->StopEffect(it->second);
+					}
+					else if (cmd.Type == CommandType::StopRoot)
+					{
+						manager_->StopRoot(it->second);
+					}
+					else if (cmd.Type == CommandType::SendTrigger)
+					{
+						manager_->SendTrigger(it->second, cmd.IntValue.Value);
+					}
+					else if (cmd.Type == CommandType::SetVisibility)
+					{
+						manager_->SetShown(it->second, cmd.BoolValue.Value);
+					}
+					else if (cmd.Type == CommandType::SetPause)
+					{
+						manager_->SetPaused(it->second, cmd.BoolValue.Value);
+					}
+					else if (cmd.Type == CommandType::SetSpeed)
+					{
+						manager_->SetSpeed(it->second, cmd.FloatValue.Value);
+					}
+					else if (cmd.Type == CommandType::SetPosition)
+					{
+						manager_->SetLocation(
+							it->second, {cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]});
+					}
+					else if (cmd.Type == CommandType::SetRotation)
+					{
+						manager_->SetRotation(
+							it->second, cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]);
+					}
+					else if (cmd.Type == CommandType::SetScale)
+					{
+						manager_->SetScale(
+							it->second, cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]);
+					}
+					else if (cmd.Type == CommandType::SetTargetLocation)
+					{
+						manager_->SetTargetLocation(
+							it->second, cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]);
+					}
+					else if (cmd.Type == CommandType::SetColor)
+					{
+						manager_->SetAllColor(it->second,
+											  {static_cast<uint8_t>(cmd.IntArrayValue.Values[0]),
+											   static_cast<uint8_t>(cmd.IntArrayValue.Values[1]),
+											   static_cast<uint8_t>(cmd.IntArrayValue.Values[2]),
+											   static_cast<uint8_t>(cmd.IntArrayValue.Values[3])});
+					}
+					else if (cmd.Type == CommandType::SetDynamicInput)
+					{
+						manager_->SetDynamicInput(it->second, cmd.FloatValueIndex.Index, cmd.FloatValueIndex.Value);
+					}
+					else if (cmd.Type == CommandType::SetLayer)
+					{
+						manager_->SetLayer(it->second, cmd.IntValue.Value);
+					}
+					else if (cmd.Type == CommandType::SetGroupMask)
+					{
+						manager_->SetGroupMask(it->second, cmd.Int64Value.Value);
+					}
+				}
+			}
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+
+			restInstanceCount_ = manager_->GetRestInstancesCount();
+			cameraCullingMaskToShowAllEffects_ = manager_->GetCameraCullingMaskToShowAllEffects();
+
+			for (const auto& kv : internalHandleToHandleInternal_)
+			{
+				if (!manager_->Exists(kv.second))
+				{
+					removingIds_.emplace_back(kv.first);
+				}
+
+				internalHandleStates_[kv.first].InstanceCount = manager_->GetInstanceCount(kv.second);
+			}
+
+			for (const auto& id : removingIds_)
+			{
+				internalHandleStates_.erase(id);
+				internalHandleToHandleInternal_.erase(id);
+			}
+
+			removingIds_.clear();
+		}
+	}
+
+	void MultiThreadedEffekseerManager::Update(float deltaFrame)
+	{
+		Command cmd;
+		cmd.Type = CommandType::Update;
+		cmd.Update.DeltaFrame = deltaFrame;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::StopAllEffects()
+	{
+		Command cmd;
+		cmd.Type = CommandType::StopAllEffects;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetPausedToAllEffects(bool paused)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetPausedToAllEffects;
+		cmd.BoolValue.Value = paused;
+		PushCommand(cmd);
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			for (auto& it : internalHandleStates_)
+			{
+				it.second.Paused = paused;
+			}
+		}
+	}
+
+	void MultiThreadedEffekseerManager::UpdateHandle(int handle, float deltaFrame)
+	{
+		Command cmd;
+		cmd.Type = CommandType::UpdateHandle;
+		cmd.FloatValue.Value = deltaFrame;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::UpdateHandleToMoveToFrame(int handle, float frame)
+	{
+		Command cmd;
+		cmd.Type = CommandType::UpdateHandleToMoveToFrame;
+		cmd.FloatValue.Value = frame;
+		PushCommand(cmd);
+	}
+
+	int32_t MultiThreadedEffekseerManager::PlayEffect(void* effectPtr, float x, float y, float z)
+	{
+		if (effectPtr == nullptr)
+		{
+			return -1;
+		}
+
+		auto pinned = Effekseer::EffectRef::FromPinned(effectPtr);
+		auto p = pinned.Pin();
+
+		auto handle = nextInternalHandle_;
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto state = EffectState();
+			state.DynamicInputs = pinned->GetDefaultDynamicInputs();
+			internalHandleStates_[handle] = state;
+		}
+
+		nextInternalHandle_++;
+
+		Command cmd;
+		cmd.Type = CommandType::Play;
+		cmd.Handle = handle;
+		cmd.Play.EffectPtr = p;
+		cmd.Play.Position[0] = x;
+		cmd.Play.Position[1] = y;
+		cmd.Play.Position[2] = z;
+		PushCommand(cmd);
+		return handle;
+	}
+
+	void MultiThreadedEffekseerManager::StopEffect(int32_t handle)
+	{
+		Command cmd;
+		cmd.Type = CommandType::Stop;
+		cmd.Handle = handle;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::StopRootEffect(int32_t handle)
+	{
+		Command cmd;
+		cmd.Type = CommandType::StopRoot;
+		cmd.Handle = handle;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SendTrigger(int32_t handle, int32_t index)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SendTrigger;
+		cmd.Handle = handle;
+		cmd.IntValue.Value = index;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetVisibility(int32_t handle, bool visible)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetVisibility;
+		cmd.Handle = handle;
+		cmd.BoolValue.Value = visible;
+		PushCommand(cmd);
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto it = internalHandleStates_.find(handle);
+			if (it != internalHandleStates_.end())
+			{
+				it->second.Visible = visible;
+			}
+		}
+	}
+
+	void MultiThreadedEffekseerManager::SetPaused(int32_t handle, bool paused)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetPause;
+		cmd.Handle = handle;
+		cmd.BoolValue.Value = paused;
+		PushCommand(cmd);
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto it = internalHandleStates_.find(handle);
+			if (it != internalHandleStates_.end())
+			{
+				it->second.Paused = paused;
+			}
+		}
+	}
+
+	void MultiThreadedEffekseerManager::SetSpeed(int32_t handle, float speed)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetSpeed;
+		cmd.Handle = handle;
+		cmd.FloatValue.Value = speed;
+		PushCommand(cmd);
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto it = internalHandleStates_.find(handle);
+			if (it != internalHandleStates_.end())
+			{
+				it->second.Speed = speed;
+			}
+		}
+	}
+
+	void MultiThreadedEffekseerManager::SetPosition(int32_t handle, float x, float y, float z)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetPosition;
+		cmd.Handle = handle;
+		cmd.FloatArrayValue.Values[0] = x;
+		cmd.FloatArrayValue.Values[1] = y;
+		cmd.FloatArrayValue.Values[2] = z;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetRotation(int32_t handle, float x, float y, float z)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetRotation;
+		cmd.Handle = handle;
+		cmd.FloatArrayValue.Values[0] = x;
+		cmd.FloatArrayValue.Values[1] = y;
+		cmd.FloatArrayValue.Values[2] = z;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetScale(int32_t handle, float x, float y, float z)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetScale;
+		cmd.Handle = handle;
+		cmd.FloatArrayValue.Values[0] = x;
+		cmd.FloatArrayValue.Values[1] = y;
+		cmd.FloatArrayValue.Values[2] = z;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetTargetLocation(int32_t handle, float x, float y, float z)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetTargetLocation;
+		cmd.Handle = handle;
+		cmd.FloatArrayValue.Values[0] = x;
+		cmd.FloatArrayValue.Values[1] = y;
+		cmd.FloatArrayValue.Values[2] = z;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetColor(int32_t handle, int r, int g, int b, int a)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetColor;
+		cmd.Handle = handle;
+		cmd.IntArrayValue.Values[0] = r;
+		cmd.IntArrayValue.Values[1] = g;
+		cmd.IntArrayValue.Values[2] = b;
+		cmd.IntArrayValue.Values[3] = a;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetDynamicInput(int32_t handle, int index, float value)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetDynamicInput;
+		cmd.Handle = handle;
+		cmd.FloatValueIndex.Index = index;
+		cmd.FloatValueIndex.Value = value;
+		PushCommand(cmd);
+
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto it = internalHandleStates_.find(handle);
+			if (it != internalHandleStates_.end())
+			{
+				it->second.DynamicInputs[index] = value;
+			}
+		}
+	}
+
+	void MultiThreadedEffekseerManager::SetLayer(int32_t handle, int32_t layer)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetLayer;
+		cmd.Handle = handle;
+		cmd.IntValue.Value = layer;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetGroupMask(int32_t handle, int64_t groupMask)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetGroupMask;
+		cmd.Handle = handle;
+		cmd.Int64Value.Value = groupMask;
+		PushCommand(cmd);
+	}
+
+	void MultiThreadedEffekseerManager::SetTimeScaleByGroup(int64_t groupMask, float timeScale)
+	{
+		Command cmd;
+		cmd.Type = CommandType::SetTimeScaleByGroup;
+		cmd.SetTimeScaleByGroup.GroupMask = groupMask;
+		cmd.SetTimeScaleByGroup.TimeScale = timeScale;
+		PushCommand(cmd);
+	}
+
+	bool MultiThreadedEffekseerManager::Exists(int32_t handle)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		return internalHandleStates_.find(handle) != internalHandleStates_.end();
+	}
+
+	bool MultiThreadedEffekseerManager::GetVisibility(int32_t handle)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			return it->second.Visible;
+		}
+		return false;
+	}
+
+	bool MultiThreadedEffekseerManager::GetPaused(int32_t handle)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			return it->second.Paused;
+		}
+		return false;
+	}
+
+	float MultiThreadedEffekseerManager::GetSpeed(int32_t handle)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			return it->second.Speed;
+		}
+		return 0.0f;
+	}
+
+	int MultiThreadedEffekseerManager::GetInstanceCount(int32_t handle)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			return it->second.InstanceCount;
+		}
+		return 0;
+	}
+
+	int MultiThreadedEffekseerManager::GetRestInstanceCount()
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		return restInstanceCount_;
+	}
+
+	int MultiThreadedEffekseerManager::GetCameraCullingMaskToShowAllEffects()
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		return cameraCullingMaskToShowAllEffects_;
+	}
+
+	float MultiThreadedEffekseerManager::GetDynamicInput(int32_t handle, int index)
+	{
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			return it->second.DynamicInputs[index];
+		}
+		return 0;
+	}
+
+	Effekseer::ManagerRef& MultiThreadedEffekseerManager::GetManager() { return manager_; }
+
+	void MultiThreadedEffekseerManager::Initialize(int maxInstances)
+	{
+		instance_ = std::make_shared<MultiThreadedEffekseerManager>(maxInstances);
+	}
+
+	void MultiThreadedEffekseerManager::Terminate() { instance_ = nullptr; }
+
+	std::shared_ptr<MultiThreadedEffekseerManager> MultiThreadedEffekseerManager::GetInstance() { return instance_; }
 }

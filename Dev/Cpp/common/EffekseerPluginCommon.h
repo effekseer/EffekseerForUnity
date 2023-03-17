@@ -169,6 +169,163 @@ public:
 	void Execute();
 };
 
+class MultiThreadedEffekseerManager
+{
+	enum class CommandType : int32_t
+	{
+		Update,
+		Play,
+		SetTimeScaleByGroup,
+		StopAllEffects,
+		SetPausedToAllEffects,
+		UpdateHandle,
+		UpdateHandleToMoveToFrame,
+		Stop,
+		StopRoot,
+		SendTrigger,
+		SetVisibility,
+		SetPause,
+		SetSpeed,
+		SetPosition,
+		SetRotation,
+		SetScale,
+		SetTargetLocation,
+		SetColor,
+		SetDynamicInput,
+		SetLayer,
+		SetGroupMask,
+	};
+
+	struct Command
+	{
+		CommandType Type;
+		int Handle;
+
+		union
+		{
+			struct
+			{
+				void* EffectPtr;
+				std::array<float, 3> Position;
+			} Play;
+
+			struct
+			{
+				float DeltaFrame;
+			} Update;
+
+			struct
+			{
+				int Value;
+			} IntValue;
+
+			struct
+			{
+				int64_t Value;
+			} Int64Value;
+
+			struct
+			{
+				float Value;
+			} FloatValue;
+
+			struct
+			{
+				bool Value;
+			} BoolValue;
+
+			struct
+			{
+				float Value;
+				int Index;
+			} FloatValueIndex;
+
+			struct
+			{
+				float Values[3];
+			} FloatArrayValue;
+
+			struct
+			{
+				int Values[4];
+			} IntArrayValue;
+
+			struct
+			{
+				int64_t GroupMask;
+				float TimeScale;
+			} SetTimeScaleByGroup;
+		};
+	};
+
+	struct EffectState
+	{
+		bool Visible = true;
+		bool Paused = false;
+		float Speed = 1.0f;
+		int InstanceCount = 0;
+		std::array<float, 4> DynamicInputs;
+	};
+
+	Effekseer::ManagerRef manager_;
+	std::vector<Command> commands_;
+	std::vector<Command> threadCommands_;
+	std::vector<int32_t> removingIds_;
+	int32_t restInstanceCount_ = 0;
+	int32_t cameraCullingMaskToShowAllEffects_ = 0;
+	int32_t nextInternalHandle_ = 1;
+	std::unordered_map<int32_t, EffectState> internalHandleStates_;
+	std::unordered_map<int32_t, Effekseer::Handle> internalHandleToHandleInternal_;
+	std::mutex mtx_;
+
+	static std::shared_ptr<MultiThreadedEffekseerManager> instance_;
+
+	void PushCommand(const Command& cmd);
+
+public:
+	MultiThreadedEffekseerManager(int maxInstances);
+	~MultiThreadedEffekseerManager();
+	void Apply();
+	void Update(float deltaFrame);
+	void StopAllEffects();
+	void SetPausedToAllEffects(bool paused);
+	void UpdateHandle(int handle, float deltaFrame);
+	void UpdateHandleToMoveToFrame(int handle, float frame);
+	int32_t PlayEffect(void* effectPtr, float x, float y, float z);
+	void StopEffect(int32_t handle);
+	void StopRootEffect(int32_t handle);
+	void SendTrigger(int32_t handle, int32_t index);
+	void SetVisibility(int32_t handle, bool visible);
+	void SetPaused(int32_t handle, bool paused);
+	void SetSpeed(int32_t handle, float speed);
+	void SetPosition(int32_t handle, float x, float y, float z);
+	void SetRotation(int32_t handle, float x, float y, float z);
+	void SetScale(int32_t handle, float x, float y, float z);
+	void SetTargetLocation(int32_t handle, float x, float y, float z);
+	void SetColor(int32_t handle, int r, int g, int b, int a);
+	void SetDynamicInput(int32_t handle, int index, float value);
+	void SetLayer(int32_t handle, int32_t layer);
+	void SetGroupMask(int32_t handle, int64_t groupMask);
+	void SetTimeScaleByGroup(int64_t groupMask, float timeScale);
+
+	bool Exists(int32_t handle);
+	bool GetVisibility(int32_t handle);
+	bool GetPaused(int32_t handle);
+	float GetSpeed(int32_t handle);
+	int GetInstanceCount(int32_t handle);
+	int GetRestInstanceCount();
+	int GetCameraCullingMaskToShowAllEffects();
+	float GetDynamicInput(int32_t handle, int index);
+
+	Effekseer::ManagerRef& GetManager();
+
+	static void Initialize(int maxInstances);
+
+	static void Terminate();
+
+	static std::shared_ptr<MultiThreadedEffekseerManager> GetInstance();
+};
+
 } // namespace EffekseerPlugin
 
 #endif
