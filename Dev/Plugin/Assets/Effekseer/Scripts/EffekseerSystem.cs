@@ -594,6 +594,8 @@ namespace Effekseer
 			restFrames -= updateCount;
 
 			ApplyLightingToNative();
+
+			GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
 		}
 
 		/// <summary>
