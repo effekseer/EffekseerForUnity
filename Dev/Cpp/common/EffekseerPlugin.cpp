@@ -887,6 +887,15 @@ extern "C"
 		g_removingRenderPathes.push_back(renderID);
 		g_removingRenderPathMutex.unlock();
 	}
+
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateState(int renderId) { 
+		printf("TODO");
+	}
+
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetUpdateStateFunc()
+	{
+		return EffekseerUpdateState;
+	}
 }
 
 namespace EffekseerPlugin
