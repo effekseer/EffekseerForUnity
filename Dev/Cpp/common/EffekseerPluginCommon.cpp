@@ -12,7 +12,6 @@ using namespace EffekseerPlugin;
 namespace EffekseerPlugin
 {
 
-extern Effekseer::ManagerRef g_EffekseerManager;
 extern Graphics* g_graphics;
 extern float g_time;
 extern Effekseer::Vector3D g_lightDirection;
@@ -66,26 +65,24 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdate(float deltaFrame)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		Effekseer::Manager::UpdateParameter param;
-		param.DeltaFrame = deltaFrame;
-		param.UpdateInterval = 1.0f;
-
-		g_EffekseerManager->Update(param);
+		manager->Update(deltaFrame);
 	}
 
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API EffekseerLoadEffect(const char16_t* path, float magnification)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
-			return NULL;
+			return nullptr;
 		}
 
-		auto effect = Effect::Create(g_EffekseerManager, path, magnification);
+		auto effect = Effect::Create(manager->GetManager(), path, magnification);
 
 #ifndef _SWITCH
 		if (Network::GetInstance()->IsRunning())
@@ -97,18 +94,18 @@ extern "C"
 		return effect.Pin();
 	}
 
-	// エフェクトのロード（メモリ指定）
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API EffekseerLoadEffectOnMemory(void* data,
 																				 int32_t size,
 																				 const EFK_CHAR* path,
 																				 float magnification)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
-			return NULL;
+			return nullptr;
 		}
 
-		auto effect = Effect::Create(g_EffekseerManager, data, size, magnification);
+		auto effect = Effect::Create(manager->GetManager(), data, size, magnification);
 
 		if (effect != nullptr)
 		{
@@ -125,7 +122,6 @@ extern "C"
 		return effect.Pin();
 	}
 
-	// エフェクトのアンロード
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReleaseEffect(void* effect)
 	{
 		auto pinned = Effekseer::EffectRef::FromPinned(effect);
@@ -143,31 +139,32 @@ extern "C"
 		}
 	}
 
-	// エフェクトのリソースのリロード
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerReloadResources(Effect* effect)
 	{
-		if (g_EffekseerManager != nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager != nullptr)
 		{
-			g_EffekseerManager->LockRendering();
+			manager->GetManager()->LockRendering();
 		}
 
-		if (effect != NULL)
+		if (effect != nullptr)
 		{
 			effect->ReloadResources();
 		}
 
-		if (g_EffekseerManager != nullptr)
+		if (manager != nullptr)
 		{
-			g_EffekseerManager->UnlockRendering();
+			manager->GetManager()->UnlockRendering();
 		}
 	}
 
-	// エフェクトのリソースのリロード
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUnloadResources(Effect* effect)
 	{
-		if (g_EffekseerManager != nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+
+		if (manager != nullptr)
 		{
-			g_EffekseerManager->LockRendering();
+			manager->GetManager()->LockRendering();
 		}
 
 		if (effect != NULL)
@@ -175,9 +172,9 @@ extern "C"
 			effect->UnloadResources();
 		}
 
-		if (g_EffekseerManager != nullptr)
+		if (manager != nullptr)
 		{
-			g_EffekseerManager->UnlockRendering();
+			manager->GetManager()->UnlockRendering();
 		}
 	}
 
@@ -190,308 +187,318 @@ extern "C"
 		return 0.0f;
 	}
 
-	// エフェクト再生
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerPlayEffect(Effect* effect, float x, float y, float z)
 	{
 		auto pinned = Effekseer::EffectRef::FromPinned(effect);
 
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return -1;
 		}
 
-		if (effect != NULL)
+		if (effect != nullptr)
 		{
-			return g_EffekseerManager->Play(pinned, x, y, z);
+			return manager->PlayEffect(effect, x, y, z);
 		}
 		return -1;
 	}
 
-	// フレームの更新(ハンドル単位)
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateHandle(int handle, float deltaFrame)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->BeginUpdate();
-		g_EffekseerManager->UpdateHandle(handle, deltaFrame);
-		g_EffekseerManager->EndUpdate();
+		manager->UpdateHandle(handle, deltaFrame);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateHandleToMoveToFrame(int handle, float frame)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->BeginUpdate();
-		g_EffekseerManager->UpdateHandleToMoveToFrame(handle, frame);
-		g_EffekseerManager->EndUpdate();
+		manager->UpdateHandleToMoveToFrame(handle, frame);
 	}
 
-	// エフェクト停止
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerStopEffect(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->StopEffect(handle);
+		manager->StopEffect(handle);
 	}
 
-	// エフェクトのルートだけを停止
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerStopRoot(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->StopRoot(handle);
+		manager->StopRootEffect(handle);
 	}
 
-	// 全てのエフェクト再生
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerStopAllEffects()
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->StopAllEffects();
+		manager->StopAllEffects();
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetPausedToAllEffects(int paused)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetPausedToAllEffects(paused != 0);
+		manager->SetPausedToAllEffects(paused != 0);
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetCameraCullingMaskToShowAllEffects()
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetCameraCullingMaskToShowAllEffects();
+		return manager->GetCameraCullingMaskToShowAllEffects();
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetShown(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetShown(handle);
+		return manager->GetVisibility(handle);
 	}
 
-	// エフェクト可視設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetShown(int handle, int shown)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetShown(handle, shown != 0);
+		manager->SetVisibility(handle, shown != 0);
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetPaused(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetPaused(handle);
+		return manager->GetPaused(handle);
 	}
 
-	// エフェクト一時停止
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetPaused(int handle, int paused)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetPaused(handle, paused != 0);
+		manager->SetPaused(handle, paused != 0);
 	}
 
 	UNITY_INTERFACE_EXPORT float UNITY_INTERFACE_API EffekseerGetSpeed(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetSpeed(handle);
+		return manager->GetSpeed(handle);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSpeed(int handle, float speed)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetSpeed(handle, speed);
+		manager->SetSpeed(handle, speed);
 	}
 
-	// エフェクト存在状態
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerExists(int handle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
-			return false;
+			return 0;
 		}
 
-		return g_EffekseerManager->Exists(handle);
+		return manager->Exists(handle) ? 1 : 0;
 	}
 
-	// エフェクト位置設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLocation(int handle, float x, float y, float z)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetLocation(handle, x, y, z);
+		manager->SetPosition(handle, x, y, z);
 	}
 
-	// エフェクト回転設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetRotation(int handle, float x, float y, float z, float angle)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		Vector3D axis(x, y, z);
-		g_EffekseerManager->SetRotation(handle, axis, angle);
+		manager->SetRotation(handle, x, y, z, angle);
 	}
 
-	// エフェクト拡縮設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetScale(int handle, float x, float y, float z)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetScale(handle, x, y, z);
+		manager->SetScale(handle, x, y, z);
 	}
 
-	// Specify the color of overall effect.
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetAllColor(int handle, int r, int g, int b, int a)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetAllColor(handle, Effekseer::Color(r, g, b, a));
+		manager->SetColor(handle, r, g, b, a);
 	}
 
-	// エフェクトのターゲット位置設定
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetTargetLocation(int handle, float x, float y, float z)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetTargetLocation(handle, x, y, z);
+		manager->SetTargetLocation(handle, x, y, z);
 	}
 
 	UNITY_INTERFACE_EXPORT float UNITY_INTERFACE_API EffekseerGetDynamicInput(int handle, int index)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0.0f;
 		}
 
-		return g_EffekseerManager->GetDynamicInput(handle, index);
+		return manager->GetDynamicInput(handle, index);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetDynamicInput(int handle, int index, float value)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetDynamicInput(handle, index, value);
+		manager->SetDynamicInput(handle, index, value);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLayer(int handle, int layer)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetLayer(handle, layer);
+		manager->SetLayer(handle, layer);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetGroupMask(int handle, int64_t groupMask)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetGroupMask(handle, groupMask);
+		manager->SetGroupMask(handle, groupMask);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetTimeScaleByGroup(int64_t groupMask, float timeScale)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetTimeScaleByGroup(groupMask, timeScale);
+		manager->SetTimeScaleByGroup(groupMask, timeScale);
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetInstanceCount(int handle)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetInstanceCount(handle);
+		return manager->GetInstanceCount(handle);
 	}
 
 	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerGetRestInstancesCount()
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return 0;
 		}
 
-		return g_EffekseerManager->GetRestInstancesCount();
+		return manager->GetRestInstanceCount();
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSendTrigger(int handle, int32_t index)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SendTrigger(handle, index);
+		manager->SendTrigger(handle, index);
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetLightDirection(float x, float y, float z)
@@ -585,7 +592,8 @@ extern "C"
 																				   TextureLoaderUnload unload,
 																				   GetUnityIDFromPath getUnityId)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
@@ -595,14 +603,15 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetTextureLoader(g_graphics->Create(load, unload, getUnityId));
+		manager->GetManager()->SetTextureLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetModelLoaderEvent(ModelLoaderLoad load,
 																				 ModelLoaderUnload unload,
 																				 GetUnityIDFromPath getUnityId)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
@@ -612,14 +621,15 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetModelLoader(g_graphics->Create(load, unload, getUnityId));
+		manager->GetManager()->SetModelLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetMaterialLoaderEvent(MaterialLoaderLoad load,
 																					MaterialLoaderUnload unload,
 																					GetUnityIDFromPath getUnityId)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
@@ -629,13 +639,14 @@ extern "C"
 			return;
 		}
 
-		g_EffekseerManager->SetMaterialLoader(g_graphics->Create(load, unload, getUnityId));
+		manager->GetManager()->SetMaterialLoader(g_graphics->Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetProceduralModelGeneratorEvent(ProceduralModelGeneratorGenerate load,
 																							  ProceduralModelGeneratorUngenerate unload)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
@@ -648,7 +659,7 @@ extern "C"
 		auto generator = g_graphics->Create(load, unload);
 		if (generator != nullptr)
 		{
-			g_EffekseerManager->GetSetting()->SetProceduralMeshGenerator(generator);
+			manager->GetManager()->GetSetting()->SetProceduralMeshGenerator(generator);
 		}
 	}
 
@@ -656,12 +667,13 @@ extern "C"
 																				 SoundLoaderUnload unload,
 																				 GetUnityIDFromPath getUnityId)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetSoundLoader(EffekseerPlugin::SoundLoader::Create(load, unload, getUnityId));
+		manager->GetManager()->SetSoundLoader(EffekseerPlugin::SoundLoader::Create(load, unload, getUnityId));
 	}
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSetSoundPlayerEvent(SoundPlayerPlay play,
@@ -670,18 +682,19 @@ extern "C"
 																				 SoundPlayerCheckPlayingTag checkPlayingTag,
 																				 SoundPlayerStopAll stopAll)
 	{
-		if (g_EffekseerManager == NULL)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
 		if (play && stopTag && pauseTag && checkPlayingTag && stopAll)
 		{
-			g_EffekseerManager->SetSoundPlayer(EffekseerPlugin::SoundPlayer::Create(play, stopTag, pauseTag, checkPlayingTag, stopAll));
+			manager->GetManager()->SetSoundPlayer(EffekseerPlugin::SoundPlayer::Create(play, stopTag, pauseTag, checkPlayingTag, stopAll));
 		}
 		else
 		{
-			g_EffekseerManager->SetSoundPlayer(nullptr);
+			manager->GetManager()->SetSoundPlayer(nullptr);
 		}
 	}
 
@@ -689,12 +702,13 @@ extern "C"
 																				 CurveLoaderUnload unload,
 																				 GetUnityIDFromPath getUnityId)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
 		{
 			return;
 		}
 
-		g_EffekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload, getUnityId));
+		manager->GetManager()->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerPlugin::CurveLoader>(load, unload, getUnityId));
 	}
 
 	std::shared_ptr<RenderThreadEvent> RenderThreadEvent::instance_;
@@ -725,6 +739,7 @@ extern "C"
 	}
 
 	std::shared_ptr<MultiThreadedEffekseerManager> MultiThreadedEffekseerManager::instance_;
+	std::mutex MultiThreadedEffekseerManager::instance_mtx_;
 
 	void MultiThreadedEffekseerManager::PushCommand(const MultiThreadedEffekseerManager::Command& cmd)
 	{
@@ -790,11 +805,15 @@ extern "C"
 				{
 					if (cmd.Type == CommandType::UpdateHandle)
 					{
+						manager_->BeginUpdate();
 						manager_->UpdateHandle(it->second, cmd.FloatValue.Value);
+						manager_->EndUpdate();
 					}
 					else if (cmd.Type == CommandType::UpdateHandleToMoveToFrame)
 					{
+						manager_->BeginUpdate();
 						manager_->UpdateHandleToMoveToFrame(it->second, cmd.FloatValue.Value);
+						manager_->EndUpdate();
 					}
 					else if (cmd.Type == CommandType::Stop)
 					{
@@ -827,8 +846,8 @@ extern "C"
 					}
 					else if (cmd.Type == CommandType::SetRotation)
 					{
-						manager_->SetRotation(
-							it->second, cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]);
+						Vector3D axis(cmd.FloatArrayValue.Values[0], cmd.FloatArrayValue.Values[1], cmd.FloatArrayValue.Values[2]);
+						manager_->SetRotation(it->second, axis, cmd.FloatArrayValue.Values[3]);
 					}
 					else if (cmd.Type == CommandType::SetScale)
 					{
@@ -1059,7 +1078,7 @@ extern "C"
 		PushCommand(cmd);
 	}
 
-	void MultiThreadedEffekseerManager::SetRotation(int32_t handle, float x, float y, float z)
+	void MultiThreadedEffekseerManager::SetRotation(int32_t handle, float x, float y, float z, float angle)
 	{
 		Command cmd;
 		cmd.Type = CommandType::SetRotation;
@@ -1067,6 +1086,7 @@ extern "C"
 		cmd.FloatArrayValue.Values[0] = x;
 		cmd.FloatArrayValue.Values[1] = y;
 		cmd.FloatArrayValue.Values[2] = z;
+		cmd.FloatArrayValue.Values[3] = angle;
 		PushCommand(cmd);
 	}
 
@@ -1227,10 +1247,19 @@ extern "C"
 
 	void MultiThreadedEffekseerManager::Initialize(int maxInstances)
 	{
+		std::lock_guard<std::mutex> lock(instance_mtx_);
 		instance_ = std::make_shared<MultiThreadedEffekseerManager>(maxInstances);
 	}
 
-	void MultiThreadedEffekseerManager::Terminate() { instance_ = nullptr; }
+	void MultiThreadedEffekseerManager::Terminate()
+	{
+		std::lock_guard<std::mutex> lock(instance_mtx_);
+		instance_ = nullptr;
+	}
 
-	std::shared_ptr<MultiThreadedEffekseerManager> MultiThreadedEffekseerManager::GetInstance() { return instance_; }
+	std::shared_ptr<MultiThreadedEffekseerManager> MultiThreadedEffekseerManager::GetInstance()
+	{
+		std::lock_guard<std::mutex> lock(instance_mtx_);
+		return instance_;
+	}
 }

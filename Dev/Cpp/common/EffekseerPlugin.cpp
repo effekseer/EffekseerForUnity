@@ -25,7 +25,8 @@
 #endif
 
 // OpenGL
-#if defined(_WIN32) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || (defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
+#if defined(_WIN32) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) ||                                                                  \
+	(defined(__APPLE__) && !(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
@@ -102,7 +103,8 @@ bool g_maintainGammaColor = false;
 IUnityInterfaces* g_UnityInterfaces = NULL;
 IUnityGraphics* g_UnityGraphics = NULL;
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) ||            \
+	defined(_SWITCH)
 // TODO adhoc code
 UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererOpenGLES20;
 #else
@@ -111,7 +113,6 @@ UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererNull;
 
 Graphics* g_graphics = nullptr;
 
-Effekseer::ManagerRef g_EffekseerManager = NULL;
 EffekseerRenderer::RendererRef g_EffekseerRenderer = NULL;
 float g_time = 0.0f;
 Effekseer::Vector3D g_lightDirection = Effekseer::Vector3D(1, 1, -1);
@@ -160,8 +161,12 @@ bool IsOpenGLRenderer()
 
 void InitRenderer()
 {
-	if (g_EffekseerManager == nullptr)
+	auto manager = MultiThreadedEffekseerManager::GetInstance();
+
+	if (manager == nullptr)
+	{
 		return;
+	}
 
 	if (g_rendererType == RendererType::Native)
 	{
@@ -177,11 +182,11 @@ void InitRenderer()
 		return;
 	}
 
-	g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
-	g_EffekseerManager->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
-	g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
-	g_EffekseerManager->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
-	g_EffekseerManager->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
+	manager->GetManager()->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
+	manager->GetManager()->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
+	manager->GetManager()->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
+	manager->GetManager()->SetTrackRenderer(g_EffekseerRenderer->CreateTrackRenderer());
+	manager->GetManager()->SetModelRenderer(g_EffekseerRenderer->CreateModelRenderer());
 
 	// light a model
 	g_EffekseerRenderer->SetLightColor(Effekseer::Color(255, 255, 255, 255));
@@ -358,13 +363,20 @@ extern "C"
 			}
 		}
 
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+
+		if (manager == nullptr)
+		{
 			return;
+		}
+
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
 		assert(g_graphics != nullptr);
 		// g_graphics->StartRender(g_EffekseerRenderer);
+
+		manager->Apply();
 
 		TryToRemoveRenderPathes();
 
@@ -447,7 +459,7 @@ extern "C"
 
 		Effekseer::Manager::LayerParameter layerParam;
 		layerParam.ViewerPosition = cameraPosition;
-		g_EffekseerManager->SetLayerParameter(0, layerParam);
+		manager->GetManager()->SetLayerParameter(0, layerParam);
 
 		// Specify textures
 		if (g_graphics != nullptr)
@@ -490,7 +502,7 @@ extern "C"
 		drawParameter.CameraFrontDirection = cameraFrontDirection;
 		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->Draw(drawParameter);
+		manager->GetManager()->Draw(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		if (renderPath != nullptr)
@@ -509,8 +521,13 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRenderFront(int renderId)
 	{
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+
+		if (manager == nullptr)
+		{
 			return;
+		}
+
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
@@ -558,7 +575,7 @@ extern "C"
 
 		Effekseer::Manager::LayerParameter layerParam;
 		layerParam.ViewerPosition = cameraPosition;
-		g_EffekseerManager->SetLayerParameter(0, layerParam);
+		manager->GetManager()->SetLayerParameter(0, layerParam);
 
 		// Need not to assgin matrixes. Because these were assigned in EffekseerRenderBack
 		Effekseer::Manager::DrawParameter drawParameter;
@@ -568,7 +585,7 @@ extern "C"
 		drawParameter.CameraFrontDirection = cameraFrontDirection;
 		g_EffekseerRenderer->SetTime(g_time);
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawFront(drawParameter);
+		manager->GetManager()->DrawFront(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		if (renderPass != nullptr)
@@ -611,13 +628,20 @@ extern "C"
 			}
 		}
 
-		if (g_EffekseerManager == nullptr)
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+
+		if (manager == nullptr)
+		{
 			return;
+		}
+
 		if (g_EffekseerRenderer == nullptr)
 			return;
 
 		assert(g_graphics != nullptr);
 		// g_graphics->StartRender(g_EffekseerRenderer);
+
+		manager->Apply();
 
 		TryToRemoveRenderPathes();
 
@@ -712,7 +736,7 @@ extern "C"
 
 		Effekseer::Manager::LayerParameter layerParam;
 		layerParam.ViewerPosition = cameraPosition;
-		g_EffekseerManager->SetLayerParameter(0, layerParam);
+		manager->GetManager()->SetLayerParameter(0, layerParam);
 
 		g_EffekseerRenderer->SetCameraParameter(cameraFrontDirection, cameraPosition);
 
@@ -760,7 +784,7 @@ extern "C"
 		g_EffekseerRenderer->SetLightAmbientColor(g_lightAmbientColor);
 		g_EffekseerRenderer->SetLightDirection(g_lightDirection);
 		g_EffekseerRenderer->BeginRendering();
-		g_EffekseerManager->DrawBack(drawParameter);
+		manager->GetManager()->DrawBack(drawParameter);
 		g_EffekseerRenderer->EndRendering();
 
 		if (renderPath != nullptr)
@@ -795,23 +819,23 @@ extern "C"
 		g_isRightHandedCoordinate = isRightHandedCoordinate != 0;
 		g_rendererType = (RendererType)rendererType;
 
-		g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
-		g_EffekseerManager->GetSetting()->SetIsFileCacheEnabled(false);
+		MultiThreadedEffekseerManager::Initialize(maxInstances);
+		MultiThreadedEffekseerManager::GetInstance()->GetManager()->GetSetting()->SetIsFileCacheEnabled(false);
 
 #ifndef __EMSCRIPTEN__
 		if (threadCount >= 2)
 		{
-			g_EffekseerManager->LaunchWorkerThreads(threadCount);
+			MultiThreadedEffekseerManager::GetInstance()->GetManager()->LaunchWorkerThreads(threadCount);
 		}
 #endif
 
 		if (g_isRightHandedCoordinate)
 		{
-			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
+			MultiThreadedEffekseerManager::GetInstance()->GetManager()->SetCoordinateSystem(Effekseer::CoordinateSystem::RH);
 		}
 		else
 		{
-			g_EffekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
+			MultiThreadedEffekseerManager::GetInstance()->GetManager()->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
 		}
 
 		g_time = 0.0f;
@@ -844,7 +868,7 @@ extern "C"
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerTerm()
 	{
-		g_EffekseerManager.Reset();
+		MultiThreadedEffekseerManager::Terminate();
 
 		if (IsRequiredToInitOnRenderThread())
 		{
@@ -888,14 +912,18 @@ extern "C"
 		g_removingRenderPathMutex.unlock();
 	}
 
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateState(int renderId) { 
-		printf("TODO");
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateState(int renderId)
+	{
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
+		{
+			return;
+		}
+
+		manager->Apply();
 	}
 
-	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetUpdateStateFunc()
-	{
-		return EffekseerUpdateState;
-	}
+	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetUpdateStateFunc() { return EffekseerUpdateState; }
 }
 
 namespace EffekseerPlugin
