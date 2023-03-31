@@ -242,7 +242,7 @@ class MultiThreadedEffekseerManager
 
 			struct
 			{
-				float Values[3];
+				float Values[4];
 			} FloatArrayValue;
 
 			struct
@@ -279,6 +279,7 @@ class MultiThreadedEffekseerManager
 	std::mutex mtx_;
 
 	static std::shared_ptr<MultiThreadedEffekseerManager> instance_;
+	static std::mutex instance_mtx_;
 
 	void PushCommand(const Command& cmd);
 
@@ -299,7 +300,7 @@ public:
 	void SetPaused(int32_t handle, bool paused);
 	void SetSpeed(int32_t handle, float speed);
 	void SetPosition(int32_t handle, float x, float y, float z);
-	void SetRotation(int32_t handle, float x, float y, float z);
+	void SetRotation(int32_t handle, float x, float y, float z, float angle);
 	void SetScale(int32_t handle, float x, float y, float z);
 	void SetTargetLocation(int32_t handle, float x, float y, float z);
 	void SetColor(int32_t handle, int r, int g, int b, int a);

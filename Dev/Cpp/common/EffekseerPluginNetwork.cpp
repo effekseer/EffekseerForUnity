@@ -1,11 +1,11 @@
 #include "EffekseerPluginNetwork.h"
 
+#include "EffekseerPluginCommon.h"
+
 #ifndef _SWITCH
 
 namespace EffekseerPlugin
 {
-extern Effekseer::ManagerRef g_EffekseerManager;
-
 std::shared_ptr<Network> Network::instance;
 
 Network::Network() {}
@@ -41,9 +41,11 @@ void Network::Stop()
 
 void Network::Update()
 {
-	if (server != nullptr && g_EffekseerManager != nullptr)
+	auto manager = MultiThreadedEffekseerManager::GetInstance();
+	if (server != nullptr && manager != nullptr)
 	{
-		server->Update(&g_EffekseerManager, 1, Effekseer::ReloadingThreadType::Render);
+		auto mgr = manager->GetManager();
+		server->Update(&mgr, 1, Effekseer::ReloadingThreadType::Render);
 	}
 }
 
