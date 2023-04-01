@@ -944,6 +944,7 @@ extern "C"
 	{
 		Command cmd;
 		cmd.Type = CommandType::UpdateHandle;
+		cmd.Handle = handle;
 		cmd.FloatValue.Value = deltaFrame;
 		PushCommand(cmd);
 	}
@@ -952,6 +953,7 @@ extern "C"
 	{
 		Command cmd;
 		cmd.Type = CommandType::UpdateHandleToMoveToFrame;
+		cmd.Handle = handle;
 		cmd.FloatValue.Value = frame;
 		PushCommand(cmd);
 	}
@@ -1015,56 +1017,71 @@ extern "C"
 
 	void MultiThreadedEffekseerManager::SetVisibility(int32_t handle, bool visible)
 	{
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			auto it = internalHandleStates_.find(handle);
+			if (it != internalHandleStates_.end())
+			{
+				if (it->second.Visible = visible)
+				{
+					return;
+				}
+
+				it->second.Visible = visible;
+			}
+		}
+
 		Command cmd;
 		cmd.Type = CommandType::SetVisibility;
 		cmd.Handle = handle;
 		cmd.BoolValue.Value = visible;
 		PushCommand(cmd);
+	}
 
+	void MultiThreadedEffekseerManager::SetPaused(int32_t handle, bool paused)
+	{
 		{
 			std::lock_guard<std::mutex> lock(mtx_);
 			auto it = internalHandleStates_.find(handle);
 			if (it != internalHandleStates_.end())
 			{
-				it->second.Visible = visible;
+				if (it->second.Paused == paused)
+				{
+					return;
+				}
+
+				it->second.Paused = paused;
 			}
 		}
-	}
 
-	void MultiThreadedEffekseerManager::SetPaused(int32_t handle, bool paused)
-	{
 		Command cmd;
 		cmd.Type = CommandType::SetPause;
 		cmd.Handle = handle;
 		cmd.BoolValue.Value = paused;
 		PushCommand(cmd);
+	}
 
+	void MultiThreadedEffekseerManager::SetSpeed(int32_t handle, float speed)
+	{
 		{
 			std::lock_guard<std::mutex> lock(mtx_);
 			auto it = internalHandleStates_.find(handle);
 			if (it != internalHandleStates_.end())
 			{
-				it->second.Paused = paused;
+				if (it->second.Speed == speed)
+				{
+					return;
+				}
+
+				it->second.Speed = speed;
 			}
 		}
-	}
 
-	void MultiThreadedEffekseerManager::SetSpeed(int32_t handle, float speed)
-	{
 		Command cmd;
 		cmd.Type = CommandType::SetSpeed;
 		cmd.Handle = handle;
 		cmd.FloatValue.Value = speed;
 		PushCommand(cmd);
-
-		{
-			std::lock_guard<std::mutex> lock(mtx_);
-			auto it = internalHandleStates_.find(handle);
-			if (it != internalHandleStates_.end())
-			{
-				it->second.Speed = speed;
-			}
-		}
 	}
 
 	void MultiThreadedEffekseerManager::SetPosition(int32_t handle, float x, float y, float z)
