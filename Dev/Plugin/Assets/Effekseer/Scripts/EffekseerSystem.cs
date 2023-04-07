@@ -141,6 +141,7 @@ namespace Effekseer
 		// Loaded native effects
 		//[SerializeField] List<EffekseerEffectAsset> loadedEffects = new List<EffekseerEffectAsset>();
 		private Dictionary<int, IntPtr> nativeEffects = new Dictionary<int, IntPtr>();
+		private Dictionary<int, IntPtr> nativeResourceLoadedEffects = new Dictionary<int, IntPtr>();
 
 #if UNITY_EDITOR
 		// For hot reloading
@@ -209,7 +210,11 @@ namespace Effekseer
 					IntPtr nativeEffect;
 					if (nativeEffects.TryGetValue(id, out nativeEffect))
 					{
-						Plugin.EffekseerReloadResources(nativeEffect);
+						if(!nativeResourceLoadedEffects.ContainsKey(id))
+						{
+							Plugin.EffekseerReloadResources(nativeEffect);
+							nativeResourceLoadedEffects.Add(id, nativeEffect);
+						}
 					}
 					effectAssetInLoading = null;
 				}
@@ -242,6 +247,7 @@ namespace Effekseer
 				var namePtr = Marshal.StringToCoTaskMemUni(effectAsset.name);
 				nativeEffect = Plugin.EffekseerLoadEffectOnMemory(bytes, bytes.Length, namePtr, effectAsset.Scale);
 				nativeEffects.Add(id, nativeEffect);
+				nativeResourceLoadedEffects.Add(id, nativeEffect);
 				//loadedEffects.Add(effectAsset);
 				//effectAsset.GetInstanceID
 				Marshal.FreeCoTaskMem(namePtr);
@@ -249,7 +255,11 @@ namespace Effekseer
 			else
 			{
 				// For reloading
-				Plugin.EffekseerReloadResources(nativeEffect);
+				if (!nativeResourceLoadedEffects.ContainsKey(id))
+				{
+					nativeResourceLoadedEffects.Add(id, nativeEffect);
+					Plugin.EffekseerReloadResources(nativeEffect);
+				}
 			}
 
 			effectAssetInLoading = null;
@@ -263,6 +273,7 @@ namespace Effekseer
 			{
 				Plugin.EffekseerUnloadResources(nativeEffect);
 				Plugin.EffekseerReleaseEffect(nativeEffect);
+				nativeResourceLoadedEffects.Remove(id);
 				nativeEffects.Remove(id);
 				//loadedEffects.Remove(effectAsset);
 			}
@@ -442,6 +453,7 @@ namespace Effekseer
 				}
 			}
 			nativeEffects.Clear();
+			nativeResourceLoadedEffects.Clear();
 
 #if UNITY_EDITOR
 			nativeEffectsKeys.Clear();
@@ -528,16 +540,14 @@ namespace Effekseer
 			{
 				nativeEffectsKeys.Add(pair.Key);
 				nativeEffectsValues.Add(pair.Value.ToString());
-				Plugin.EffekseerUnloadResources(pair.Value);
 			}
-			nativeEffects.Clear();
-#else
-			foreach (var pair in nativeEffects)
+#endif
+			foreach (var pair in nativeResourceLoadedEffects)
 			{
 				Plugin.EffekseerUnloadResources(pair.Value);
 			}
-			nativeEffects.Clear();
-#endif
+			nativeResourceLoadedEffects.Clear();
+
 			renderer.CleanUp();
 			renderer.SetVisible(false);
 			renderer = null;
