@@ -782,7 +782,7 @@ extern "C"
 			{
 				auto effect = ::Effekseer::RefPtr<::Effekseer::Effect>::FromPinned(cmd.Play.EffectPtr);
 				auto eid = manager_->Play(effect, cmd.Play.Position[0], cmd.Play.Position[1], cmd.Play.Position[2]);
-				internalHandleToHandleInternal_[cmd.Handle] = eid;
+				internalHandleToHandle_[cmd.Handle] = eid;
 
 				::Effekseer::RefPtr<::Effekseer::Effect>::Unpin(cmd.Play.EffectPtr);
 			}
@@ -800,8 +800,8 @@ extern "C"
 			}
 			else
 			{
-				auto it = internalHandleToHandleInternal_.find(cmd.Handle);
-				if (it != internalHandleToHandleInternal_.end())
+				auto it = internalHandleToHandle_.find(cmd.Handle);
+				if (it != internalHandleToHandle_.end())
 				{
 					if (cmd.Type == CommandType::UpdateHandle)
 					{
@@ -889,7 +889,7 @@ extern "C"
 			restInstanceCount_ = manager_->GetRestInstancesCount();
 			cameraCullingMaskToShowAllEffects_ = manager_->GetCameraCullingMaskToShowAllEffects();
 
-			for (const auto& kv : internalHandleToHandleInternal_)
+			for (const auto& kv : internalHandleToHandle_)
 			{
 				if (!manager_->Exists(kv.second))
 				{
@@ -902,7 +902,7 @@ extern "C"
 			for (const auto& id : removingIds_)
 			{
 				internalHandleStates_.erase(id);
-				internalHandleToHandleInternal_.erase(id);
+				internalHandleToHandle_.erase(id);
 			}
 
 			removingIds_.clear();
@@ -1022,7 +1022,7 @@ extern "C"
 			auto it = internalHandleStates_.find(handle);
 			if (it != internalHandleStates_.end())
 			{
-				if (it->second.Visible = visible)
+				if (it->second.Visible == visible)
 				{
 					return;
 				}

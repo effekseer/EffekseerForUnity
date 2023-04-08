@@ -275,7 +275,7 @@ class MultiThreadedEffekseerManager
 	int32_t cameraCullingMaskToShowAllEffects_ = 0;
 	int32_t nextInternalHandle_ = 1;
 	std::unordered_map<int32_t, EffectState> internalHandleStates_;
-	std::unordered_map<int32_t, Effekseer::Handle> internalHandleToHandleInternal_;
+	std::unordered_map<int32_t, Effekseer::Handle> internalHandleToHandle_;
 	std::mutex mtx_;
 
 	static std::shared_ptr<MultiThreadedEffekseerManager> instance_;
