@@ -210,7 +210,7 @@ namespace Effekseer
 					IntPtr nativeEffect;
 					if (nativeEffects.TryGetValue(id, out nativeEffect))
 					{
-						if(!nativeResourceLoadedEffects.ContainsKey(id))
+						if (!nativeResourceLoadedEffects.ContainsKey(id))
 						{
 							Plugin.EffekseerReloadResources(nativeEffect);
 							nativeResourceLoadedEffects.Add(id, nativeEffect);
@@ -442,7 +442,10 @@ namespace Effekseer
 
 			StopAllEffects();
 
-			//Debug.Log("EffekseerSystem.TermPlugin");
+#if UNITY_EDITOR
+			RestoreNativeEffects();
+#endif
+
 			foreach (var effectAsset in EffekseerEffectAsset.enabledAssets)
 			{
 				EffekseerEffectAsset target = effectAsset.Value.Target as EffekseerEffectAsset;
@@ -454,11 +457,6 @@ namespace Effekseer
 			}
 			nativeEffects.Clear();
 			nativeResourceLoadedEffects.Clear();
-
-#if UNITY_EDITOR
-			nativeEffectsKeys.Clear();
-			nativeEffectsValues.Clear();
-#endif
 
 			// Finalize Effekseer library
 			Plugin.EffekseerTerm();
@@ -514,13 +512,7 @@ namespace Effekseer
 				);
 
 #if UNITY_EDITOR
-			for (int i = 0; i < nativeEffectsKeys.Count; i++)
-			{
-				IntPtr nativeEffect = new IntPtr((long)ulong.Parse(nativeEffectsValues[i]));
-				nativeEffects.Add(nativeEffectsKeys[i], nativeEffect);
-			}
-			nativeEffectsKeys.Clear();
-			nativeEffectsValues.Clear();
+			RestoreNativeEffects();
 #endif
 
 			ReloadEffects();
@@ -536,11 +528,7 @@ namespace Effekseer
 			enabled = false;
 
 #if UNITY_EDITOR
-			foreach (var pair in nativeEffects)
-			{
-				nativeEffectsKeys.Add(pair.Key);
-				nativeEffectsValues.Add(pair.Value.ToString());
-			}
+			EscapeNativeEffects();
 #endif
 			foreach (var pair in nativeResourceLoadedEffects)
 			{
@@ -562,6 +550,27 @@ namespace Effekseer
 		}
 
 #if UNITY_EDITOR
+		private unsafe void RestoreNativeEffects()
+		{
+			for (int i = 0; i < nativeEffectsKeys.Count; i++)
+			{
+				IntPtr nativeEffect = new IntPtr((long)ulong.Parse(nativeEffectsValues[i]));
+				nativeEffects.Add(nativeEffectsKeys[i], nativeEffect);
+			}
+			nativeEffectsKeys.Clear();
+			nativeEffectsValues.Clear();
+		}
+
+		private void EscapeNativeEffects()
+		{
+			foreach (var pair in nativeEffects)
+			{
+				nativeEffectsKeys.Add(pair.Key);
+				nativeEffectsValues.Add(pair.Value.ToString());
+			}
+			nativeEffects.Clear();
+		}
+
 		public void UpdateTime(float deltaTime)
 		{
 			Plugin.EffekseerUpdateTime(deltaTime);
@@ -1125,6 +1134,6 @@ namespace Effekseer
 			}
 		}
 
-#endregion
+		#endregion
 	}
 }
