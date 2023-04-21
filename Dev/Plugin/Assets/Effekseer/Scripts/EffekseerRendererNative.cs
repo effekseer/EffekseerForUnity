@@ -11,30 +11,11 @@ namespace Effekseer.Internal
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
 		private StandardBlitter standardBlitter = new StandardBlitter();
 
-		private class RenderPath : IDisposable
+		private class RenderPath : RenderPathBase
 		{
-			public Camera camera;
-			public CommandBuffer commandBuffer;
-			public bool isCommandBufferFromExternal = false;
-			public CameraEvent cameraEvent;
-			public int renderId;
-			public BackgroundRenderTexture renderTexture;
-			public DepthRenderTexture depthTexture;
-
-			public int LifeTime = 5;
-
-			bool isDistortionEnabled = false;
-
-			bool isDepthEnabled = false;
-
-			/// <summary>
-			/// Distortion is disabled forcely because of VR
-			/// </summary>
-			bool isDistortionMakeDisabledForcely = false;
-
 			Material fakeMaterial = null;
 
-			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
+			public override void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
@@ -58,12 +39,11 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty,
+			public override void ResetParameters(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty,
 				IEffekseerBlitter blitter, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
 			{
-				this.isDistortionEnabled = enableDistortion;
+				isDistortionEnabled = enableDistortion;
 				isDepthEnabled = enableDepth;
-				isDistortionMakeDisabledForcely = false;
 
 				// Create a command buffer that is effekseer renderer
 				if (!isCommandBufferFromExternal)
@@ -106,7 +86,8 @@ namespace Effekseer.Internal
 					return;
 				}
 
-				Action copyBackground = () => {
+				Action copyBackground = () =>
+				{
 					if (this.renderTexture != null)
 					{
 						// Add a blit command that copy to the distortion texture
@@ -188,66 +169,9 @@ namespace Effekseer.Internal
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
-				if (this.commandBuffer != null && !isCommandBufferFromExternal)
-				{
-					if (this.camera != null)
-					{
-						this.camera.RemoveCommandBuffer(this.cameraEvent, this.commandBuffer);
-					}
-					this.commandBuffer.Dispose();
-					this.commandBuffer = null;
-				}
-
-				if (this.renderTexture != null)
-				{
-					this.renderTexture.Release();
-					this.renderTexture = null;
-				}
-
-				if (depthTexture != null)
-				{
-					depthTexture.Release();
-					depthTexture = null;
-				}
-			}
-
-			public bool IsValid(RenderTargetProperty renderTargetProperty)
-			{
-				if (isDistortionMakeDisabledForcely)
-				{
-
-				}
-				else
-				{
-					if (this.isDistortionEnabled != EffekseerRendererUtils.IsDistortionEnabled) return false;
-					if (this.isDepthEnabled != EffekseerRendererUtils.IsDepthEnabled) return false;
-				}
-
-				if (depthTexture != null)
-				{
-					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
-
-					if(targetSize.x != this.depthTexture.width ||
-						targetSize.y != this.depthTexture.height)
-					{
-						return false;
-					}
-				}
-
-				if (this.renderTexture != null)
-				{
-					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
-
-					if (targetSize.x != this.renderTexture.width ||
-						targetSize.y != this.renderTexture.height)
-					{
-						return false;
-					}
-				}
-
-				return true;
+				base.Dispose();
 			}
 
 			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer, RenderTargetProperty renderTargetProperty, IEffekseerBlitter blitter)
@@ -262,15 +186,12 @@ namespace Effekseer.Internal
 			}
 		}
 
-		// RenderPath per Camera
-		private Dictionary<Camera, RenderPath> renderPaths = new Dictionary<Camera, RenderPath>();
-		int nextRenderID = 0;
+		RenderPathContainer<RenderPath> renderPathContainer = new RenderPathContainer<RenderPath>();
 
 		public int layer { get; set; }
 
-#if UNITY_EDITOR
 		public bool disableCullingMask { get; set; } = false;
-#endif
+
 		public void SetVisible(bool visible)
 		{
 			if (visible)
@@ -287,22 +208,12 @@ namespace Effekseer.Internal
 
 		public void CleanUp()
 		{
-			// dispose all path
-			foreach (var pair in renderPaths)
-			{
-				pair.Value.Dispose();
-				Plugin.EffekseerAddRemovingRenderPath(pair.Value.renderId);
-			}
-			renderPaths.Clear();
+			renderPathContainer.CleanUp();
 		}
 
 		public CommandBuffer GetCameraCommandBuffer(Camera camera)
 		{
-			if (renderPaths.ContainsKey(camera))
-			{
-				return renderPaths[camera].commandBuffer;
-			}
-			return null;
+			return renderPathContainer.GetCameraCommandBuffer(camera);
 		}
 
 		public void Render(Camera camera)
@@ -315,115 +226,13 @@ namespace Effekseer.Internal
 
 		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
 		{
-			var settings = EffekseerSettings.Instance;
-
-#if UNITY_EDITOR
-			if (camera.cameraType == CameraType.SceneView)
+			RenderPath path;
+			int mask;
+			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, renderTargetProperty, targetCommandBuffer, blitter, cameraEvent, out path, out mask);
+			if (path == null)
 			{
-				// check a camera in the scene view
-				if (settings.drawInSceneView == false)
-				{
-					return;
-				}
-			}
-#endif
-
-			// check a culling mask
-			var mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
-
-#if UNITY_EDITOR
-			if (disableCullingMask)
-			{
-				mask = camera.cullingMask;
-			}
-#endif
-
-			// don't need to update because doesn't exists and need not to render
-			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
-			{
-
 				return;
 			}
-
-			// GC renderpaths
-			bool hasDisposed = false;
-			foreach (var path_ in renderPaths)
-			{
-				path_.Value.LifeTime--;
-				if (path_.Value.LifeTime < 0)
-				{
-					path_.Value.Dispose();
-					hasDisposed = true;
-				}
-			}
-
-			// dispose renderpaths
-			if (hasDisposed)
-			{
-				List<Camera> removed = new List<Camera>();
-				foreach (var path_ in renderPaths)
-				{
-					if (path_.Value.LifeTime >= 0) continue;
-
-					removed.Add(path_.Key);
-					Plugin.EffekseerAddRemovingRenderPath(path_.Value.renderId);
-				}
-
-				foreach (var r in removed)
-				{
-					renderPaths.Remove(r);
-				}
-			}
-
-			RenderPath path;
-
-			if (renderPaths.ContainsKey(camera))
-			{
-				path = renderPaths[camera];
-			}
-			else
-			{
-				// render path doesn't exists, create a render path
-				while (true)
-				{
-					bool found = false;
-					foreach (var kv in renderPaths)
-					{
-						if (kv.Value.renderId == nextRenderID)
-						{
-							found = true;
-							break;
-						}
-					}
-
-					if (found)
-					{
-						nextRenderID++;
-					}
-					else
-					{
-						break;
-					}
-				}
-
-				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
-				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
-				renderPaths.Add(camera, path);
-				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
-			}
-
-			if (!path.IsValid(renderTargetProperty))
-			{
-				path.Dispose();
-				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
-				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
-			}
-
-			var screenSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
-
-			path.LifeTime = 60;
-			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
 
 			// effects shown don't exists
 			if ((camera.cullingMask & mask) == 0)
@@ -476,6 +285,7 @@ namespace Effekseer.Internal
 			}
 
 			// TODO : specify correct texture formats
+			var screenSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
 			Plugin.EffekseerSetRenderTargetProperty(path.renderId, TextureFormatType.R8G8B8A8_UNORM, TextureFormatType.D32S8, screenSize.x, screenSize.y);
 
 			SpecifyRenderingMatrix(camera, path);
@@ -509,12 +319,7 @@ namespace Effekseer.Internal
 
 		public void OnPostRender(Camera camera)
 		{
-			if (renderPaths.ContainsKey(camera))
-			{
-				RenderPath path = renderPaths[camera];
-				Plugin.EffekseerSetRenderSettings(path.renderId,
-					(camera.activeTexture != null));
-			}
+			renderPathContainer.OnPostRender(camera);
 		}
 	}
 
