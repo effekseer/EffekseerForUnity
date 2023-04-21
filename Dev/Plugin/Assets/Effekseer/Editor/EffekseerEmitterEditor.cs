@@ -113,6 +113,7 @@ namespace Effekseer.Editor
 			{
 				EffekseerSystem.Instance.UpdateTime(deltaFrames);
 				EffekseerSystem.Instance.ApplyLightingToNative();
+				EffekseerSystem.Instance.UpdateRendererState();
 			}
 
 			emitter.UpdateSelf();

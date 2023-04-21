@@ -580,6 +580,11 @@ namespace Effekseer
 		{
 			restFrames = 0;
 		}
+
+		public void UpdateRendererState()
+		{
+			GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+		}
 #endif
 
 		float restFrames = 0;
