@@ -120,12 +120,14 @@ namespace Effekseer.Internal
 			return null;
 		}
 
-		public void UpdateRenderPath(bool disableCullingMask, Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int mask)
+		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask)
 		{
 			path = null;
 
 			// check a culling mask
-			mask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
+			allEffectMask = Effekseer.Plugin.EffekseerGetCameraCullingMaskToShowAllEffects();
+			cameraMask = camera.cullingMask;
+			cameraMask = cameraMask & additionalMask;
 
 #if UNITY_EDITOR
 			var settings = EffekseerSettings.Instance;
@@ -142,12 +144,12 @@ namespace Effekseer.Internal
 #if UNITY_EDITOR
 			if (disableCullingMask)
 			{
-				mask = camera.cullingMask;
+				cameraMask = allEffectMask;
 			}
 #endif
 
 			// don't need to update because doesn't exists and need not to render
-			if ((camera.cullingMask & mask) == 0 && !renderPaths.ContainsKey(camera))
+			if ((allEffectMask & cameraMask) == 0 && !renderPaths.ContainsKey(camera))
 			{
 				return;
 			}
@@ -168,12 +170,12 @@ namespace Effekseer.Internal
 			if (hasDisposed)
 			{
 				List<Camera> removed = new List<Camera>();
-				foreach (var path_ in renderPaths)
+				foreach (var renderPath in renderPaths)
 				{
-					if (path_.Value.LifeTime >= 0) continue;
+					if (renderPath.Value.LifeTime >= 0) continue;
 
-					removed.Add(path_.Key);
-					Plugin.EffekseerAddRemovingRenderPath(path_.Value.renderId);
+					removed.Add(renderPath.Key);
+					Plugin.EffekseerAddRemovingRenderPath(renderPath.Value.renderId);
 				}
 
 				foreach (var r in removed)
@@ -228,7 +230,7 @@ namespace Effekseer.Internal
 
 			path.Update();
 			path.LifeTime = 60;
-			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, camera.cullingMask);
+			Plugin.EffekseerSetRenderingCameraCullingMask(path.renderId, cameraMask);
 		}
 
 		public void OnPostRender(Camera camera)

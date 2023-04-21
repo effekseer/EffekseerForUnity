@@ -128,7 +128,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.xrRendering = renderingData.cameraData.xrRendering;
 #endif
 			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null, blitter);
+			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, int.MaxValue, prop, null, blitter);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
 			if (commandBuffer != null)

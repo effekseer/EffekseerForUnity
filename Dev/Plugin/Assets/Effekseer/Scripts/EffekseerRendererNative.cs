@@ -220,22 +220,23 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, null, null, standardBlitter);
+				Render(camera, int.MaxValue, null, null, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
+		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
 		{
 			RenderPath path;
-			int mask;
-			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, renderTargetProperty, targetCommandBuffer, blitter, cameraEvent, out path, out mask);
+			int allEffectMask;
+			int cameraMask;
+			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, additionalMask, renderTargetProperty, targetCommandBuffer, blitter, cameraEvent, out path, out allEffectMask, out cameraMask);
 			if (path == null)
 			{
 				return;
 			}
 
 			// effects shown don't exists
-			if ((camera.cullingMask & mask) == 0)
+			if ((allEffectMask & cameraMask) == 0)
 			{
 				// Because rendering thread is asynchronous
 				SpecifyRenderingMatrix(camera, path);

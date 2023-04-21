@@ -258,7 +258,7 @@ namespace Effekseer.Internal
 
 		CommandBuffer GetCameraCommandBuffer(Camera camera);
 
-		void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter);
+		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter);
 
 		void OnPostRender(Camera camera);
 	}
