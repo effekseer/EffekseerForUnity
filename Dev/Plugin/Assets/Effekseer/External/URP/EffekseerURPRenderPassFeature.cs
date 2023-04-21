@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class UrpBlitter : IEffekseerBlitter
-{	
+{
 	public static readonly int sourceTex = Shader.PropertyToID("_SourceTex");
 	private Material blitMaterial;
 
@@ -17,7 +17,7 @@ public class UrpBlitter : IEffekseerBlitter
 
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
-		if(xrRendering)
+		if (xrRendering)
 		{
 			CoreUtils.SetRenderTarget(
 				cmd,
@@ -38,6 +38,8 @@ public class UrpBlitter : IEffekseerBlitter
 
 public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 {
+	public UnityEngine.LayerMask LayerMask = ~0;
+
 	class EffekseerRenderPassURP : UnityEngine.Rendering.Universal.ScriptableRenderPass
 	{
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
@@ -46,10 +48,12 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #endif
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 		private IEffekseerBlitter blitter = new UrpBlitter();
+		UnityEngine.LayerMask layerMask;
 
-		public EffekseerRenderPassURP(ScriptableRenderer renderer)
+		public EffekseerRenderPassURP(ScriptableRenderer renderer, UnityEngine.LayerMask layerMask)
 		{
 			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
+			this.layerMask = layerMask;
 		}
 
 		bool IsValidCameraDepthTarget(RenderTargetIdentifier cameraDepthTarget)
@@ -88,7 +92,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.colorTargetIdentifier = cameraColorTarget;
 			this.renderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.AfterRenderingTransparents;
 
-			if(isValidDepth)
+			if (isValidDepth)
 			{
 				this.cameraDepthTarget = cameraDepthTarget;
 				prop.depthTargetIdentifier = cameraDepthTarget;
@@ -118,7 +122,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 #endif
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-			
+
 			// Linear and native renderer makes a result white.
 			prop.colorTargetDescriptor.sRGB = false;
 
@@ -128,7 +132,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.xrRendering = renderingData.cameraData.xrRendering;
 #endif
 			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, int.MaxValue, prop, null, blitter);
+			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, layerMask.value, prop, null, blitter);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
 			if (commandBuffer != null)
@@ -149,14 +153,14 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if !EFFEKSEER_URP_DEPTHTARGET_FIX
 		if (m_ScriptablePass == null)
 		{
-			m_ScriptablePass = new EffekseerRenderPassURP(renderer);
+			m_ScriptablePass = new EffekseerRenderPassURP(renderer, LayerMask);
 		}
 
 		m_ScriptablePass.Setup(renderer.cameraColorTarget, renderer.cameraDepth);
 
 		renderer.EnqueuePass(m_ScriptablePass);
 #else
-		m_ScriptablePass = m_ScriptablePass ?? new EffekseerRenderPassURP(renderer);
+		m_ScriptablePass = m_ScriptablePass ?? new EffekseerRenderPassURP(renderer, LayerMask);
 		renderer.EnqueuePass(m_ScriptablePass);
 #endif
 	}
