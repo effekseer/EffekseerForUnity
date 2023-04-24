@@ -939,11 +939,6 @@ namespace Effekseer.Internal
 			renderPathContainer.CleanUp();
 		}
 
-		public CommandBuffer GetCameraCommandBuffer(Camera camera)
-		{
-			return renderPathContainer.GetCameraCommandBuffer(camera);
-		}
-
 		public void Render(Camera camera)
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)

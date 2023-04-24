@@ -6,6 +6,43 @@ using System.Runtime.InteropServices;
 
 namespace Effekseer.Internal
 {
+	internal class CameraWithMask
+	{
+		public Camera camera;
+		public int mask = int.MaxValue;
+
+		public CameraWithMask(Camera camera, int mask)
+		{
+			this.camera = camera;
+			this.mask = mask;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is CameraWithMask o)
+			{
+				return this == o;
+			}
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return camera.GetHashCode() + mask.GetHashCode();
+		}
+
+		public static bool operator ==(CameraWithMask v1, CameraWithMask v2)
+		{
+			return v1.camera == v2.camera && v1.mask == v2.mask;
+		}
+
+		public static bool operator !=(CameraWithMask v1, CameraWithMask v2)
+		{
+			return !(v1 == v2);
+		}
+	}
+
 	internal class RenderPathBase : IDisposable
 	{
 		public bool isCommandBufferFromExternal = false;
@@ -97,8 +134,10 @@ namespace Effekseer.Internal
 
 	internal class RenderPathContainer<T> where T : RenderPathBase, new()
 	{
-		Dictionary<Camera, T> renderPaths = new Dictionary<Camera, T>();
+		Dictionary<CameraWithMask, T> renderPaths = new Dictionary<CameraWithMask, T>();
 		int nextRenderID = 0;
+
+		CameraWithMask cameraWithMaskKey = new CameraWithMask(null, 0);
 
 		public void CleanUp()
 		{
@@ -109,15 +148,6 @@ namespace Effekseer.Internal
 				Plugin.EffekseerAddRemovingRenderPath(pair.Value.renderId);
 			}
 			renderPaths.Clear();
-		}
-
-		public CommandBuffer GetCameraCommandBuffer(Camera camera)
-		{
-			if (renderPaths.ContainsKey(camera))
-			{
-				return renderPaths[camera].commandBuffer;
-			}
-			return null;
 		}
 
 		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask)
@@ -147,9 +177,11 @@ namespace Effekseer.Internal
 				cameraMask = allEffectMask;
 			}
 #endif
+			cameraWithMaskKey.camera = camera;
+			cameraWithMaskKey.mask = additionalMask;
 
 			// don't need to update because doesn't exists and need not to render
-			if ((allEffectMask & cameraMask) == 0 && !renderPaths.ContainsKey(camera))
+			if ((allEffectMask & cameraMask) == 0 && !renderPaths.ContainsKey(cameraWithMaskKey))
 			{
 				return;
 			}
@@ -169,7 +201,7 @@ namespace Effekseer.Internal
 			// dispose renderpaths
 			if (hasDisposed)
 			{
-				List<Camera> removed = new List<Camera>();
+				List<CameraWithMask> removed = new List<CameraWithMask>();
 				foreach (var renderPath in renderPaths)
 				{
 					if (renderPath.Value.LifeTime >= 0) continue;
@@ -184,9 +216,9 @@ namespace Effekseer.Internal
 				}
 			}
 
-			if (renderPaths.ContainsKey(camera))
+			if (renderPaths.ContainsKey(cameraWithMaskKey))
 			{
-				path = renderPaths[camera];
+				path = renderPaths[cameraWithMaskKey];
 			}
 			else
 			{
@@ -217,7 +249,7 @@ namespace Effekseer.Internal
 				path.Init(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.ResetParameters(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
-				renderPaths.Add(camera, path);
+				renderPaths.Add(new CameraWithMask(camera, additionalMask), path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 
@@ -235,11 +267,13 @@ namespace Effekseer.Internal
 
 		public void OnPostRender(Camera camera)
 		{
-			if (renderPaths.ContainsKey(camera))
+			foreach (var rp in renderPaths)
 			{
-				var path = renderPaths[camera];
-				Plugin.EffekseerSetRenderSettings(path.renderId,
-					(camera.activeTexture != null));
+				if (rp.Key.camera == camera)
+				{
+					Plugin.EffekseerSetRenderSettings(rp.Value.renderId,
+						(camera.activeTexture != null));
+				}
 			}
 		}
 	}
