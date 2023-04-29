@@ -52,6 +52,7 @@ namespace Effekseer.Internal
 		// Singleton instance
 		public static EffekseerSoundPlayer Instance { get; private set; }
 		public static bool IsValid { get { return Instance != null; } }
+		private float soundScale = 1f;
 
 		// Pooled instances
 		private List<EffekseerSoundInstance> childInstances = new List<EffekseerSoundInstance>();
@@ -128,6 +129,11 @@ namespace Effekseer.Internal
 			Instance = null;
 		}
 
+		public void SetSoundScale(float scale)
+		{
+			soundScale = Mathf.Max(scale, 0f);
+		}
+
 		[AOT.MonoPInvokeCallback(typeof(Plugin.EffekseerSoundPlayerPlay))]
 		private static void SoundPlayerPlay(IntPtr tag,
 				IntPtr data, float volume, float pan, float pitch,
@@ -202,7 +208,7 @@ namespace Effekseer.Internal
 			if (optimalInstance != null)
 			{
 				optimalInstance.Stop();
-				optimalInstance.Play(tag.ToString(), resource, volume, pan, pitch, mode3D, x, y, z, distance);
+				optimalInstance.Play(tag.ToString(), resource, volume * soundScale, pan, pitch, mode3D, x, y, z, distance);
 			}
 		}
 		private void StopSound(IntPtr tag)
