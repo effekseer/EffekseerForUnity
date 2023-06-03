@@ -49,6 +49,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		Effekseer.Internal.RenderTargetProperty prop = new Effekseer.Internal.RenderTargetProperty();
 		private IEffekseerBlitter blitter = new UrpBlitter();
 		UnityEngine.LayerMask layerMask;
+		private const string RenderPassName = nameof(EffekseerRenderPassURP);
 
 		public EffekseerRenderPassURP(ScriptableRenderer renderer, UnityEngine.LayerMask layerMask)
 		{
@@ -131,14 +132,12 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 #if EFFEKSEER_URP_XRRENDERING
 			prop.xrRendering = renderingData.cameraData.xrRendering;
 #endif
-			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, layerMask.value, prop, null, blitter);
-			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
-			if (commandBuffer != null)
-			{
-				context.ExecuteCommandBuffer(commandBuffer);
-			}
+			var cmd = CommandBufferPool.Get(RenderPassName);
+			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
+			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, layerMask.value, prop, cmd, blitter);
+			context.ExecuteCommandBuffer(cmd);
+			CommandBufferPool.Release(cmd);
 		}
 	}
 
