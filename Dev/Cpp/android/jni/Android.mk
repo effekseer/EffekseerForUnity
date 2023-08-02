@@ -107,7 +107,6 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
