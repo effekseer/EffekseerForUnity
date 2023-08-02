@@ -24,13 +24,11 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPlugin.cpp \
 	$(LOCAL_PATH)/../common/MemoryFile.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererImplemented.cpp \
-	$(LOCAL_PATH)/../renderer/EffekseerRendererIndexBuffer.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererModelLoader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererMaterialLoader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererRenderState.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererShader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererTextureLoader.cpp \
-	$(LOCAL_PATH)/../renderer/EffekseerRendererVertexBuffer.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphics.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
@@ -97,9 +95,10 @@ LOCAL_SRC_FILES += \
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
+	$(LIB_SRC_PATH)/GraphicsDeviceCPU.cpp \
 	$(LIB_SRC_PATH)/TextureLoader.cpp \
 	$(LIB_SRC_PATH)/ModelLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.IndexBufferBase.cpp \
+	$(LIB_SRC_PATH)/VertexBuffer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer_Impl.cpp \
@@ -108,7 +107,6 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.VertexBufferBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
@@ -118,15 +116,12 @@ LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/Effeks
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.IndexBuffer.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRendererGL.GPUTimer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.MaterialLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.RenderState.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Shader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexArray.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.VertexBuffer.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.GPUTimer.cpp \
 	$(LIB_SRC_PATH)/GraphicsDevice.cpp
 
 include $(BUILD_SHARED_LIBRARY)

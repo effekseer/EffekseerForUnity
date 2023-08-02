@@ -231,8 +231,8 @@ class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effek
 
 protected:
 	int32_t m_squareMaxCount = 0;
-
-	VertexBuffer* m_vertexBuffer = nullptr;
+	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
+	Effekseer::Backend::VertexBufferRef vertexBuffer_ = nullptr;
 
 	std::unique_ptr<Shader> unlitShader_;
 	std::unique_ptr<Shader> backDistortedShader_;
@@ -398,16 +398,14 @@ public:
 	*/
 	void SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) override;
 
-	VertexBuffer* GetVertexBuffer();
-
-	IndexBuffer* GetIndexBuffer();
+	Effekseer::Backend::IndexBufferRef GetIndexBuffer() { return nullptr; }
 
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* GetStandardRenderer();
 
 	::EffekseerRenderer::RenderStateBase* GetRenderState();
 
-	void SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size);
-	void SetIndexBuffer(IndexBuffer* indexBuffer);
+	void SetVertexBuffer(const Effekseer::Backend::VertexBufferRef& vertexBuffer, int32_t size);
+	void SetIndexBuffer(const Effekseer::Backend::IndexBufferRef& indexBuffer);
 
 	void SetLayout(Shader* shader);
 	void DrawSprites(int32_t spriteCount, int32_t vertexOffset);

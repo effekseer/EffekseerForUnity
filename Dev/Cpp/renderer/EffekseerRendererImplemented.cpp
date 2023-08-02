@@ -1,9 +1,9 @@
 #include "EffekseerRendererImplemented.h"
-#include "EffekseerRendererIndexBuffer.h"
 #include "EffekseerRendererRenderState.h"
 #include "EffekseerRendererShader.h"
 #include "EffekseerRendererTextureLoader.h"
-#include "EffekseerRendererVertexBuffer.h"
+
+#include "GraphicsDeviceCPU.h"
 
 namespace EffekseerPlugin
 {
@@ -387,14 +387,25 @@ RendererImplemented::~RendererImplemented()
 {
 	ES_SAFE_DELETE(m_renderState);
 	ES_SAFE_DELETE(m_standardRenderer);
-	ES_SAFE_DELETE(m_vertexBuffer);
+	// ES_SAFE_DELETE(m_vertexBuffer);
 }
 
 bool RendererImplemented::Initialize(int32_t squareMaxCount)
 {
 	m_squareMaxCount = squareMaxCount;
 	m_renderState = new RenderState();
-	m_vertexBuffer = new VertexBuffer(EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, true);
+	graphicsDevice_ = Effekseer::MakeRefPtr<EffekseerRendererCPU::Backend::GraphicsDevice>();
+
+	// generate a vertex buffer
+	{
+		GetImpl()->InternalVertexBuffer = std::make_shared<EffekseerRenderer::VertexBufferRing>(
+			graphicsDevice_, EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, 1);
+		if (!GetImpl()->InternalVertexBuffer->GetIsValid())
+		{
+			GetImpl()->InternalVertexBuffer = nullptr;
+			return false;
+		}
+	}
 
 	unlitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Unlit));
 	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::BackDistortion));
@@ -500,17 +511,16 @@ void RendererImplemented::ResetRenderState() {}
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
 
-VertexBuffer* RendererImplemented::GetVertexBuffer() { return m_vertexBuffer; }
-
-IndexBuffer* RendererImplemented::GetIndexBuffer() { return nullptr; }
-
 EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer() { return m_standardRenderer; }
 
 ::EffekseerRenderer::RenderStateBase* RendererImplemented::GetRenderState() { return m_renderState; }
 
-void RendererImplemented::SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size) {}
+void RendererImplemented::SetVertexBuffer(const Effekseer::Backend::VertexBufferRef& vertexBuffer, int32_t size)
+{
+	vertexBuffer_ = vertexBuffer;
+}
 
-void RendererImplemented::SetIndexBuffer(IndexBuffer* indexBuffer) {}
+void RendererImplemented::SetIndexBuffer(const Effekseer::Backend::IndexBufferRef& indexBuffer) {}
 
 void RendererImplemented::SetLayout(Shader* shader) {}
 
@@ -621,7 +631,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		const auto& nativeMaterial = m_currentShader->GetMaterial();
 		assert(!nativeMaterial->GetIsSimpleVertex());
 
-		auto* origin = (uint8_t*)m_vertexBuffer->GetResource();
+		auto origin = const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data());
 
 		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
 
@@ -721,7 +731,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 		{
-			auto vs = (DynamicVertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<DynamicVertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -730,7 +742,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 		else
 		{
-			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -767,7 +781,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 		{
-			auto vs = (DynamicVertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<DynamicVertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -776,7 +792,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 		else
 		{
-			auto vs = (EffekseerRenderer::AdvancedLightingVertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				auto& v = vs[vi];
@@ -811,7 +829,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 
 		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
 		{
-			auto vs = (Vertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<Vertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				const auto& v = vs[vi];
@@ -820,7 +840,9 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		}
 		else
 		{
-			auto vs = (EffekseerRenderer::AdvancedSimpleVertex*)m_vertexBuffer->GetResource();
+			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedSimpleVertex*>(
+				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
 			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
 			{
 				const auto& v = vs[vi];
