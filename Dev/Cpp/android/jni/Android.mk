@@ -24,13 +24,11 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../common/EffekseerPlugin.cpp \
 	$(LOCAL_PATH)/../common/MemoryFile.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererImplemented.cpp \
-	$(LOCAL_PATH)/../renderer/EffekseerRendererIndexBuffer.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererModelLoader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererMaterialLoader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererRenderState.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererShader.cpp \
 	$(LOCAL_PATH)/../renderer/EffekseerRendererTextureLoader.cpp \
-	$(LOCAL_PATH)/../renderer/EffekseerRendererVertexBuffer.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphics.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsUnity.cpp \
 	$(LOCAL_PATH)/../graphicsAPI/EffekseerPluginGraphicsGL.cpp
