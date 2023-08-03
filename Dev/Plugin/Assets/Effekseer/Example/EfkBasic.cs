@@ -28,12 +28,14 @@ public class EfkBasic : MonoBehaviour
 		uiEffekseerEmitterB = GameObject.Find("uiPlayAtEmitterB").GetComponent<Button>();
 		uiPlayingEffects = GameObject.Find("uiPlayingEffects").GetComponent<Text>();
 
-		foreach (var effectAsset in effectAssets) {
-			if (effectAsset != null) {
+		foreach (var effectAsset in effectAssets)
+		{
+			if (effectAsset != null)
+			{
 				uiEffectList.options.Add(new Dropdown.OptionData(effectAsset.name));
 			}
 		}
-		
+
 		SetEffect(3);
 		uiEffectList.value = 3;
 	}
@@ -48,31 +50,39 @@ public class EfkBasic : MonoBehaviour
 		const float height = 15.0f;
 		cameraAngle += 30 * Mathf.Deg2Rad * Time.deltaTime;
 		Camera.main.transform.position = new Vector3(
-			distance * Mathf.Cos(cameraAngle), 
-			height, 
+			distance * Mathf.Cos(cameraAngle),
+			height,
 			distance * Mathf.Sin(cameraAngle));
 		Camera.main.transform.LookAt(Vector3.zero);
 
 		// Update Buttons Caption
-		if (uiEffekseerEmitterA) {
+		if (uiEffekseerEmitterA)
+		{
 			var uiTextA = uiEffekseerEmitterA.transform.Find("Text").GetComponent<Text>();
-			if (emitterA.exists) {
+			if (emitterA.exists)
+			{
 				uiTextA.text = "Stop EmitterA";
-			} else {
+			}
+			else
+			{
 				uiTextA.text = "Play At EmitterA";
 			}
 		}
 
-		if (uiEffekseerEmitterB) {
+		if (uiEffekseerEmitterB)
+		{
 			var uiTextB = uiEffekseerEmitterB.transform.Find("Text").GetComponent<Text>();
-			if (emitterB.exists) {
+			if (emitterB.exists)
+			{
 				uiTextB.text = "Stop EmitterB";
-			} else {
+			}
+			else
+			{
 				uiTextB.text = "Play At EmitterB";
 			}
 		}
 
-		if(uiPlayingEffectsInterval > 1.0f)
+		if (uiPlayingEffectsInterval > 1.0f)
 		{
 			VisualizePlayingEffects();
 			uiPlayingEffectsInterval = 0;
@@ -89,7 +99,7 @@ public class EfkBasic : MonoBehaviour
 	{
 		Vector3 position = new Vector3(
 			Random.Range(-10.0f, 10.0f),
-			Random.Range(  0.0f,  3.0f),
+			Random.Range(0.0f, 3.0f),
 			Random.Range(-10.0f, 10.0f));
 		Quaternion rotation = Quaternion.AngleAxis(
 			Random.Range(-180.0f, 180.0f),
@@ -101,18 +111,24 @@ public class EfkBasic : MonoBehaviour
 
 	public void PlayAtEmitterA()
 	{
-		if (emitterA.exists) {
+		if (emitterA.exists)
+		{
 			emitterA.StopRoot();
-		} else {
+		}
+		else
+		{
 			emitterA.Play(currentEffect);
 		}
 	}
 
 	public void PlayAtEmitterB()
 	{
-		if (emitterB.exists) {
+		if (emitterB.exists)
+		{
 			emitterB.StopRoot();
-		} else {
+		}
+		else
+		{
 			emitterB.Play(currentEffect);
 		}
 	}
@@ -138,7 +154,7 @@ public class EfkBasic : MonoBehaviour
 		{
 			var sb = new System.Text.StringBuilder();
 			var profiles = Effekseer.EffekseerRuntime.GetPlayingEffectProfiles();
-			foreach(var profile in profiles)
+			foreach (var profile in profiles)
 			{
 				sb.AppendLine($"{profile.Name} : {profile.ParticleCount}");
 			}
