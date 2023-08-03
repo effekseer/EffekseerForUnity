@@ -260,6 +260,7 @@ class MultiThreadedEffekseerManager
 
 	struct EffectState
 	{
+		Effekseer::EffectRef Effect;
 		bool Visible = true;
 		bool Paused = false;
 		float Speed = 1.0f;
@@ -317,6 +318,9 @@ public:
 	int GetRestInstanceCount();
 	int GetCameraCullingMaskToShowAllEffects();
 	float GetDynamicInput(int32_t handle, int index);
+	const char16_t* GetName(int32_t handle);
+
+	int GetEffectHandles(int* dst, int count);
 
 	Effekseer::ManagerRef& GetManager();
 
