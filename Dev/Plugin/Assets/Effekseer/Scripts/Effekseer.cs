@@ -265,6 +265,12 @@ namespace Effekseer
 		[DllImport(pluginName)]
 		public static extern void EffekseerSetDynamicInput(int handle, int index, float value);
 
+		[DllImport(pluginName)]
+		public static extern IntPtr Effekseer_Manager_GetName(int handle);
+
+		[DllImport(pluginName)]
+		public static extern int Effekseer_Manager_GetEffectHandles(int[] dst, int count);
+
 		public delegate int EffekseerGetUnityIdFromPath(IntPtr path);
 
 		[DllImport(pluginName)]

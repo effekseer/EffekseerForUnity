@@ -12,9 +12,13 @@ public class EfkBasic : MonoBehaviour
 	Dropdown uiEffectList;
 	Button uiEffekseerEmitterA;
 	Button uiEffekseerEmitterB;
+	Text uiPlayingEffects;
+
 	EffekseerEffectAsset currentEffect = null;
 	float cameraAngle = 0.0f;
-	
+
+	float uiPlayingEffectsInterval = 10.0f;
+
 	void Start()
 	{
 		emitterA = GameObject.Find("EffectEmitterA").GetComponent<EffekseerEmitter>();
@@ -22,7 +26,8 @@ public class EfkBasic : MonoBehaviour
 		uiEffectList = GameObject.Find("uiEffectList").GetComponent<Dropdown>();
 		uiEffekseerEmitterA = GameObject.Find("uiPlayAtEmitterA").GetComponent<Button>();
 		uiEffekseerEmitterB = GameObject.Find("uiPlayAtEmitterB").GetComponent<Button>();
-		
+		uiPlayingEffects = GameObject.Find("uiPlayingEffects").GetComponent<Text>();
+
 		foreach (var effectAsset in effectAssets) {
 			if (effectAsset != null) {
 				uiEffectList.options.Add(new Dropdown.OptionData(effectAsset.name));
@@ -66,6 +71,13 @@ public class EfkBasic : MonoBehaviour
 				uiTextB.text = "Play At EmitterB";
 			}
 		}
+
+		if(uiPlayingEffectsInterval > 1.0f)
+		{
+			VisualizePlayingEffects();
+			uiPlayingEffectsInterval = 0;
+		}
+		uiPlayingEffectsInterval += Time.deltaTime;
 	}
 
 	public void PlayAtZero()
@@ -119,4 +131,20 @@ public class EfkBasic : MonoBehaviour
 	{
 		currentEffect = effectAssets[index];
 	}
+
+	void VisualizePlayingEffects()
+	{
+		if (uiPlayingEffects != null)
+		{
+			var sb = new System.Text.StringBuilder();
+			var profiles = Effekseer.EffekseerRuntime.GetPlayingEffectProfiles();
+			foreach(var profile in profiles)
+			{
+				sb.AppendLine($"{profile.Name} : {profile.ParticleCount}");
+			}
+
+			uiPlayingEffects.text = sb.ToString();
+		}
+	}
+
 }

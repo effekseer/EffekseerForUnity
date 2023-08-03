@@ -83,3 +83,6 @@ EXPORTS
   EffekseerSetLightAmbientColor
 
   EffekseerGetUpdateStateFunc
+
+  Effekseer_Manager_GetName
+  Effekseer_Manager_GetEffectHandles

@@ -490,6 +490,28 @@ extern "C"
 		return manager->GetRestInstanceCount();
 	}
 
+	UNITY_INTERFACE_EXPORT const char16_t* UNITY_INTERFACE_API Effekseer_Manager_GetName(int handle)
+	{
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
+		{
+			return 0;
+		}
+
+		return manager->GetName(handle);
+	}
+
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API Effekseer_Manager_GetEffectHandles(int* dst, int count)
+	{
+		auto manager = MultiThreadedEffekseerManager::GetInstance();
+		if (manager == nullptr)
+		{
+			return 0;
+		}
+
+		return manager->GetEffectHandles(dst, count);
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerSendTrigger(int handle, int32_t index)
 	{
 		auto manager = MultiThreadedEffekseerManager::GetInstance();
@@ -973,6 +995,7 @@ extern "C"
 		{
 			std::lock_guard<std::mutex> lock(mtx_);
 			auto state = EffectState();
+			state.Effect = pinned;
 			state.DynamicInputs = pinned->GetDefaultDynamicInputs();
 			internalHandleStates_[handle] = state;
 		}
@@ -1258,6 +1281,42 @@ extern "C"
 			return it->second.DynamicInputs[index];
 		}
 		return 0;
+	}
+
+	const char16_t* MultiThreadedEffekseerManager::GetName(int32_t handle)
+	{
+		// to avoid to access out of memory.
+		static std::u16string name;
+
+		std::lock_guard<std::mutex> lock(mtx_);
+		auto it = internalHandleStates_.find(handle);
+		if (it != internalHandleStates_.end())
+		{
+			name = it->second.Effect->GetName();
+		}
+		return name.c_str();
+	}
+
+	int MultiThreadedEffekseerManager::GetEffectHandles(int* dst, int count)
+	{
+		int index = 0;
+		if (count == 0)
+		{
+			return 0;
+		}
+
+		std::lock_guard<std::mutex> lock(mtx_);
+		for (const auto it : internalHandleStates_)
+		{
+			dst[index] = it.first;
+			index++;
+			if (count == index)
+			{
+				break;
+			}
+		}
+
+		return index;
 	}
 
 	Effekseer::ManagerRef& MultiThreadedEffekseerManager::GetManager() { return manager_; }

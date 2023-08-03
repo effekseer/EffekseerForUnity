@@ -1,19 +1,19 @@
 ﻿using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace Effekseer
 {
-	using Internal;
+	public class PlayingEffectProfile
+	{
+		public string Name;
+		public int ParticleCount;
+	}
 
 	public class EffekseerRuntime : MonoBehaviour
 	{
 		[SerializeField]
 		private EffekseerSystem system;
 		[SerializeField]
-		private EffekseerSoundPlayer soundPlayer;
+		private Internal.EffekseerSoundPlayer soundPlayer;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		static void RuntimeInitializeOnLoad()
@@ -31,7 +31,7 @@ namespace Effekseer
 				system = new EffekseerSystem();
 			}
 			system.InitPlugin();
-			soundPlayer = new EffekseerSoundPlayer();
+			soundPlayer = new Internal.EffekseerSoundPlayer();
 			soundPlayer.Init(gameObject);
 		}
 
@@ -65,10 +65,26 @@ namespace Effekseer
 
 		void LateUpdate()
 		{
-
 			Plugin.UpdateNetwork();
 			soundPlayer.Update();
 			system.Update(Time.deltaTime, Time.unscaledDeltaTime);
+		}
+
+		public static PlayingEffectProfile[] GetPlayingEffectProfiles()
+		{
+			int[] handles = new int[1024];
+			var count = Plugin.Effekseer_Manager_GetEffectHandles(handles, handles.Length);
+
+			var profiles = new PlayingEffectProfile[count];
+
+			for (int i = 0; i < count; i++)
+			{
+				profiles[i] = new PlayingEffectProfile();
+				profiles[i].Name = System.Runtime.InteropServices.Marshal.PtrToStringUni(Plugin.Effekseer_Manager_GetName(handles[i]));
+				profiles[i].ParticleCount = Plugin.EffekseerGetInstanceCount(handles[i]);
+			}
+
+			return profiles;
 		}
 	}
 }
