@@ -373,7 +373,6 @@ namespace Effekseer
 					case GraphicsDeviceType.Vulkan:
 					case GraphicsDeviceType.XboxOne:
 					case GraphicsDeviceType.XboxOneD3D12:
-					case GraphicsDeviceType.PlayStation5:
 					case GraphicsDeviceType.PlayStation5NGGC:
 						if (RendererType == EffekseerRendererType.Native)
 						{
