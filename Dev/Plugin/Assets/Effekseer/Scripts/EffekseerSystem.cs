@@ -373,6 +373,8 @@ namespace Effekseer
 					case GraphicsDeviceType.Vulkan:
 					case GraphicsDeviceType.XboxOne:
 					case GraphicsDeviceType.XboxOneD3D12:
+					case GraphicsDeviceType.PlayStation5:
+					case GraphicsDeviceType.PlayStation5NGGC:
 						if (RendererType == EffekseerRendererType.Native)
 						{
 							RendererType = EffekseerRendererType.Unity;
@@ -390,6 +392,8 @@ namespace Effekseer
 				case GraphicsDeviceType.Direct3D12:
 				case GraphicsDeviceType.Metal:
 				case GraphicsDeviceType.PlayStation4:
+				case GraphicsDeviceType.PlayStation5:
+				case GraphicsDeviceType.PlayStation5NGGC:
 #if UNITY_2017_4_OR_NEWER
 				case GraphicsDeviceType.Switch:
 #endif
