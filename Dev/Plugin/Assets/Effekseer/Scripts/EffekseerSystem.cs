@@ -373,7 +373,9 @@ namespace Effekseer
 					case GraphicsDeviceType.Vulkan:
 					case GraphicsDeviceType.XboxOne:
 					case GraphicsDeviceType.XboxOneD3D12:
+#if UNITY_2021_1_OR_NEWER
 					case GraphicsDeviceType.PlayStation5NGGC:
+#endif
 						if (RendererType == EffekseerRendererType.Native)
 						{
 							RendererType = EffekseerRendererType.Unity;
@@ -392,7 +394,9 @@ namespace Effekseer
 				case GraphicsDeviceType.Metal:
 				case GraphicsDeviceType.PlayStation4:
 				case GraphicsDeviceType.PlayStation5:
+#if UNITY_2021_1_OR_NEWER
 				case GraphicsDeviceType.PlayStation5NGGC:
+#endif
 #if UNITY_2017_4_OR_NEWER
 				case GraphicsDeviceType.Switch:
 #endif
@@ -1142,6 +1146,6 @@ namespace Effekseer
 			}
 		}
 
-		#endregion
+#endregion
 	}
 }
