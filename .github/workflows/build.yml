@@ -14,7 +14,7 @@ jobs:
       - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
-          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/23.2.8568313
+          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/24.0.8215888
           cd Dev/Cpp/android
           $NDK_SDK_ROOT/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
           $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
