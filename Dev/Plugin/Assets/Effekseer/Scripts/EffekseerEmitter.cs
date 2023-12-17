@@ -324,7 +324,7 @@ namespace Effekseer
 		{
 			foreach (var handle in handles)
 			{
-				Plugin.EffekseerSendTrigger(handle.m_handle, index);
+				handle.SendTrigger(index);
 			}
 		}
 

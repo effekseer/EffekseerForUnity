@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace Effekseer
 {
@@ -169,6 +170,18 @@ namespace Effekseer
 		public void SetDynamicInput(int index, float value)
 		{
 			Plugin.EffekseerSetDynamicInput(m_handle, index, value);
+		}
+
+		/// <summary xml:lang="en">
+		/// Send a trigger signal
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// トリガーの信号を送信する。
+		/// </summary>
+		/// <param name="index"></param>
+		public void SendTrigger(int index)
+		{
+			Plugin.EffekseerSendTrigger(m_handle, index);
 		}
 
 		int layer_;
