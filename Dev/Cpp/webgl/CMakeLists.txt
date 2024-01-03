@@ -28,6 +28,7 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/IO/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Material/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Model/*.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Network/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Noise/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Parameter/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/SIMD/*.cpp
