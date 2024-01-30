@@ -343,6 +343,33 @@ extern "C"
 		g_removingRenderPathMutex.unlock();
 	}
 
+	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateState(int renderId)
+	{
+		{
+			auto manager = MultiThreadedEffekseerManager::GetInstance();
+			if (manager != nullptr)
+			{
+				manager->Apply();
+			}
+		}
+
+		{
+			auto instance = MaterialEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
+
+		{
+			auto instance = RenderThreadEvent::GetInstance();
+			if (instance != nullptr)
+			{
+				instance->Execute();
+			}
+		}
+	}
+
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerRender(int renderId)
 	{
 		if (!g_isRunning)
@@ -376,26 +403,9 @@ extern "C"
 		assert(g_graphics != nullptr);
 		// g_graphics->StartRender(g_EffekseerRenderer);
 
-		manager->Apply();
+		EffekseerUpdateState(renderId);
 
 		TryToRemoveRenderPathes();
-
-		// call events
-		{
-			auto instance = MaterialEvent::GetInstance();
-			if (instance != nullptr)
-			{
-				instance->Execute();
-			}
-		}
-
-		{
-			auto instance = RenderThreadEvent::GetInstance();
-			if (instance != nullptr)
-			{
-				instance->Execute();
-			}
-		}
 
 		// assign flipped
 		if (g_isTextureFlipped)
@@ -641,26 +651,9 @@ extern "C"
 		assert(g_graphics != nullptr);
 		// g_graphics->StartRender(g_EffekseerRenderer);
 
-		manager->Apply();
+		EffekseerUpdateState(renderId);
 
 		TryToRemoveRenderPathes();
-
-		// call events
-		{
-			auto instance = MaterialEvent::GetInstance();
-			if (instance != nullptr)
-			{
-				instance->Execute();
-			}
-		}
-
-		{
-			auto instance = RenderThreadEvent::GetInstance();
-			if (instance != nullptr)
-			{
-				instance->Execute();
-			}
-		}
 
 		// assign flipped
 		if (g_isTextureFlipped)
@@ -910,17 +903,6 @@ extern "C"
 		g_removingRenderPathMutex.lock();
 		g_removingRenderPathes.push_back(renderID);
 		g_removingRenderPathMutex.unlock();
-	}
-
-	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EffekseerUpdateState(int renderId)
-	{
-		auto manager = MultiThreadedEffekseerManager::GetInstance();
-		if (manager == nullptr)
-		{
-			return;
-		}
-
-		manager->Apply();
 	}
 
 	UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API EffekseerGetUpdateStateFunc() { return EffekseerUpdateState; }

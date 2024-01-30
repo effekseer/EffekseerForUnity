@@ -616,7 +616,7 @@ namespace Effekseer
 
 			ApplyLightingToNative();
 
-			GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+			UpdateRendererState();
 		}
 
 		/// <summary>
@@ -1146,6 +1146,6 @@ namespace Effekseer
 			}
 		}
 
-#endregion
+		#endregion
 	}
 }
