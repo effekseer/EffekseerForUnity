@@ -18,7 +18,8 @@ namespace Effekseer.Editor
 			if (string.IsNullOrEmpty(sourceFilePath))
 				return;
 
-			// 次回インポートする際に同じディレクトリを最初に選択してくれたほうが楽なので、今回選択したファイルのディレクトリを保存しておく
+			// Save the directory of the files you selected this time,
+			// because it is easier to select the same directory first the next time you import.
 			PlayerPrefs.SetString(OpenEfkFileDirectoryCacheKey, Path.GetDirectoryName(sourceFilePath));
 			PlayerPrefs.Save();
 
@@ -30,6 +31,7 @@ namespace Effekseer.Editor
 			var savePath = SelectSavePath(sourceFilePath);
 			if (string.IsNullOrEmpty(savePath))
 				return;
+			// Convert local path to absolute path, because not use Unity's function.
 			savePath = savePath.Replace("Assets", Application.dataPath);
 			var saveDirectory = Path.GetDirectoryName(savePath);
 
@@ -44,7 +46,7 @@ namespace Effekseer.Editor
 		}
 
 		/// <summary>
-		/// インポートするEfkファイルを選択する
+		///  Select the Efk file to be imported
 		/// </summary>
 		/// <returns></returns>
 		private static string SelectSourceFile()
@@ -54,7 +56,7 @@ namespace Effekseer.Editor
 		}
 
 		/// <summary>
-		/// 保存先のパスを選択
+		/// Select the save to path
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
@@ -65,7 +67,7 @@ namespace Effekseer.Editor
 		}
 
 		/// <summary>
-		/// Efkファイルで使用するリソースファイルの一覧をロードする
+		/// Load a list of resource files to be used in the Efk file.
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
@@ -75,9 +77,9 @@ namespace Effekseer.Editor
 			var data = File.ReadAllBytes(filePath);
 			var resourcePath = new EffekseerResourcePath();
 			if (!EffekseerEffectAsset.ReadResourcePath(data, ref resourcePath))
-				DisplayErrorDialog("Error", $"Failed to load {filePath}.");
+				DisplayErrorDialog($"Failed to load {filePath}.");
 
-			// 念の為、重複したファイルを排除したリストを返却する
+			// Remove duplicate files from the list, just to be safe.
 			var paths = new List<string>();
 			paths.AddRange(resourcePath.TexturePathList);
 			paths.AddRange(resourcePath.ModelPathList);
@@ -87,7 +89,7 @@ namespace Effekseer.Editor
 		}
 
 		/// <summary>
-		/// コピー対象のファイルがすべて存在しているか確認する
+		/// Verify that all files to be copied exist.
 		/// </summary>
 		/// <param name="sourceFilePath"></param>
 		/// <param name="sourceDirectory"></param>
@@ -100,11 +102,11 @@ namespace Effekseer.Editor
 				notFoundFiles.Add(sourceFilePath);
 			notFoundFiles.AddRange(resourcePaths.Where(path => !File.Exists(Path.Combine(sourceDirectory, path))));
 			if (notFoundFiles.Count > 0)
-				DisplayErrorDialog("エラー", $"These files are not found.\n{string.Join("\n", notFoundFiles)}");
+				DisplayErrorDialog($"These files are not found.\n{string.Join("\n", notFoundFiles)}");
 		}
 
 		/// <summary>
-		/// ファイルをコピーする
+		/// Copies the specified file to the specified path.
 		/// </summary>
 		/// <param name="sourceFilePath"></param>
 		/// <param name="destFilePath"></param>
@@ -127,18 +129,18 @@ namespace Effekseer.Editor
 			}
 			catch (Exception e)
 			{
-				DisplayErrorDialog("Error", e.Message);
+				DisplayErrorDialog(e.Message);
 			}
 		}
 
 		/// <summary>
-		/// エラーダイアログを表示する
+		/// Show an error dialog.
 		/// </summary>
 		/// <param name="title"></param>
 		/// <param name="message"></param>
-		private static void DisplayErrorDialog(string title, string message)
+		private static void DisplayErrorDialog(string message)
 		{
-			EditorUtility.DisplayDialog(title, message, "OK");
+			EditorUtility.DisplayDialog("Error!", message, "OK");
 			throw new Exception(message);
 		}
 	}
