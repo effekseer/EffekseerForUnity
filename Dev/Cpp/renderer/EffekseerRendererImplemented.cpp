@@ -242,7 +242,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		}
 		else
 		{
-			shader = m_renderer->GetShader(collector_.ShaderType);
+			shader = static_cast<Shader*>(m_renderer->GetImpl()->GetShader(collector_.ShaderType));
 		}
 
 		::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
@@ -407,13 +407,13 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 		}
 	}
 
-	unlitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Unlit));
-	backDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::BackDistortion));
-	litShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Lit));
+	GetImpl()->ShaderUnlit = std::unique_ptr<EffekseerRenderer::ShaderBase>(new Shader(EffekseerRenderer::RendererShaderType::Unlit));
+	GetImpl()->ShaderDistortion = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::BackDistortion));
+	GetImpl()->ShaderLit = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::Lit));
 
-	adUnlitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedUnlit));
-	adBackDistortedShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion));
-	adLitShader_ = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedLit));
+	GetImpl()->ShaderAdUnlit = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedUnlit));
+	GetImpl()->ShaderAdDistortion = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion));
+	GetImpl()->ShaderAdLit = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedLit));
 
 	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 	GetImpl()->isSoftParticleEnabled = true;
@@ -1028,37 +1028,6 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	}
 
 	renderParameters.push_back(rp);
-}
-
-Shader* RendererImplemented::GetShader(::EffekseerRenderer::RendererShaderType materialType) const
-{
-	if (materialType == ::EffekseerRenderer::RendererShaderType::BackDistortion)
-	{
-		return backDistortedShader_.get();
-	}
-	else if (materialType == ::EffekseerRenderer::RendererShaderType::Lit)
-	{
-		return litShader_.get();
-	}
-	else if (materialType == ::EffekseerRenderer::RendererShaderType::Unlit)
-	{
-		return unlitShader_.get();
-	}
-	if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
-	{
-		return adBackDistortedShader_.get();
-	}
-	else if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedLit)
-	{
-		return adLitShader_.get();
-	}
-	else if (materialType == ::EffekseerRenderer::RendererShaderType::AdvancedUnlit)
-	{
-		return adUnlitShader_.get();
-	}
-
-	// retuan as a default shader
-	return unlitShader_.get();
 }
 
 void RendererImplemented::BeginShader(Shader* shader) { m_currentShader = shader; }

@@ -7,7 +7,7 @@
 namespace EffekseerRendererUnity
 {
 
-class Shader final
+class Shader : public EffekseerRenderer::ShaderBase
 {
 private:
 	EffekseerRenderer::MaterialShaderParameterGenerator parameterGenerator_;
@@ -28,15 +28,18 @@ public:
 
 	~Shader();
 
-	void* GetVertexConstantBuffer() { return vertexConstantBuffer.data(); }
+	virtual void SetVertexConstantBufferSize(int32_t size) override {}
+	virtual void SetPixelConstantBufferSize(int32_t size) override {}
 
-	void* GetPixelConstantBuffer() { return pixelConstantBuffer.data(); }
+	void* GetVertexConstantBuffer() override { return vertexConstantBuffer.data(); }
+
+	void* GetPixelConstantBuffer() override { return pixelConstantBuffer.data(); }
 
 	template <typename T> T* GetVertexConstantBuffer() { return reinterpret_cast<T*>(vertexConstantBuffer.data()); }
 
 	template <typename T> T* GettPixelConstantBuffer() { return reinterpret_cast<T*>(pixelConstantBuffer.data()); }
 
-	void SetConstantBuffer() {}
+	void SetConstantBuffer() override {}
 
 	EffekseerRenderer::RendererShaderType GetType() const;
 

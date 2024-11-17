@@ -234,13 +234,6 @@ protected:
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
 	Effekseer::Backend::VertexBufferRef vertexBuffer_ = nullptr;
 
-	std::unique_ptr<Shader> unlitShader_;
-	std::unique_ptr<Shader> backDistortedShader_;
-	std::unique_ptr<Shader> litShader_;
-	std::unique_ptr<Shader> adUnlitShader_;
-	std::unique_ptr<Shader> adBackDistortedShader_;
-	std::unique_ptr<Shader> adLitShader_;
-
 	Shader* m_currentShader = nullptr;
 	RenderState* m_renderState = nullptr;
 
@@ -424,8 +417,6 @@ public:
 				   std::vector<int32_t>& times,
 				   std::vector<std::array<float, 4>>& customData1,
 				   std::vector<std::array<float, 4>>& customData2);
-
-	Shader* GetShader(::EffekseerRenderer::RendererShaderType materialType) const;
 
 	void BeginShader(Shader* shader);
 	void EndShader(Shader* shader);
