@@ -10,11 +10,12 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
-          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/24.0.8215888
+          ls $ANDROID_SDK_ROOT/ndk/
+          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.3.11579264
           cd Dev/Cpp/android
           $NDK_SDK_ROOT/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
           $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
@@ -26,20 +27,20 @@ jobs:
           $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
           cp libs/arm64-v8a/libEffekseerUnity.so ../../Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
       - name: Upload math result for android
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Android
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macOS-11
+    runs-on: macOS-13
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
       - name: Upload ios
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: mac_iOS
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -48,13 +49,13 @@ jobs:
     name: windows Build
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: scripts/clone_dependencies.bat
       - name: Build
         run: cd ./Dev/Cpp/windows && Build.bat
         shell: cmd
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Windows
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -63,7 +64,7 @@ jobs:
     name: WebGL Build with emsdk 1.38
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -91,7 +92,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: WebGL_1-38
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -100,7 +101,7 @@ jobs:
     name: WebGL Build with emsdk 2.0.19
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -128,7 +129,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: WebGL_2-0-19
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -137,7 +138,7 @@ jobs:
     name: WebGL Build with emsdk 3.1.8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -165,7 +166,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: WebGL_3-1-8
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -174,7 +175,7 @@ jobs:
     name: WebGL Build with emsdk 3.1.38
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -202,7 +203,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: WebGL_3-1-38
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -212,58 +213,79 @@ jobs:
     runs-on: ubuntu-latest
     needs: [android, mac_ios, windows, webgl_1-38,webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download Android
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: Android
+          path: Android
 
       - name: Download mac_ios
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: mac_iOS
+          path: mac_iOS
 
       - name: Download mac_ios
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: Windows
+          path: Windows
 
       - name: Download webgl 1.38
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: WebGL_1-38
+          path: WebGL_1-38
 
       - name: Download webgl 2.0.19
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: WebGL_2-0-19
+          path: WebGL_2-0-19
 
       - name: Download webgl 3.1.8
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: WebGL_3-1-8
+          path: WebGL_3-1-8
 
       - name: Download webgl 3.1.38
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: WebGL_3-1-38
+          path: WebGL_3-1-38
 
       - name: Copy
         run: |
+          ls -R Android
           mv Android/Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
           mv Android/Android/libs/armeabi-v7a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
           mv Android/Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
+
+          ls -R mac_iOS
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
           cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
+
+          ls -R WebGL_1-38
           mv WebGL_1-38/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
+
+          ls -R WebGL_2-0-19
           mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
+
+          ls -R WebGL_3-1-8
           mv WebGL_3-1-8/WebGL/3.1.8-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
+
+          ls -R WebGL_3-1-38
           mv WebGL_3-1-38/WebGL/3.1.38-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
+
+          ls -R Windows
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
+
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: merged
           path: Dev/Plugin/Assets/Effekseer
@@ -276,7 +298,7 @@ jobs:
 
 
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Effekseer.unitypackage
           path: dist
