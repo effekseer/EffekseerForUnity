@@ -252,9 +252,9 @@ jobs:
       - name: Copy
         run: |
           ls -R Android
-          mv Android/Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
-          mv Android/Android/libs/armeabi-v7a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
-          mv Android/Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
+          mv Android/libs/arm64-v8a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
+          mv Android/libs/armeabi-v7a/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/armeabi-v7a/
+          mv Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
 
           ls -R mac_iOS
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
