@@ -34,7 +34,7 @@ jobs:
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macOS-11
+    runs-on: macOS-12
     steps:
       - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
