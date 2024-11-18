@@ -26,7 +26,7 @@ jobs:
           $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_arm64-v8a.mk
           cp libs/arm64-v8a/libEffekseerUnity.so ../../Plugin/Assets/Effekseer/Plugins/Android/libs/arm64-v8a/
       - name: Upload math result for android
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: Android
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -39,7 +39,7 @@ jobs:
       - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
       - name: Upload ios
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: mac_iOS
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -54,7 +54,7 @@ jobs:
         run: cd ./Dev/Cpp/windows && Build.bat
         shell: cmd
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: Windows
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -91,7 +91,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: WebGL_1-38
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -128,7 +128,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: WebGL_2-0-19
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -165,7 +165,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: WebGL_3-1-8
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -202,7 +202,7 @@ jobs:
           make
           cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
       - name: Upload math result for webgl
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: WebGL_3-1-38
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
@@ -263,7 +263,7 @@ jobs:
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: merged
           path: Dev/Plugin/Assets/Effekseer
@@ -276,7 +276,7 @@ jobs:
 
 
       - name: Upload math result
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: Effekseer.unitypackage
           path: dist
