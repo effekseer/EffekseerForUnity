@@ -91,6 +91,9 @@ void ExtractTextures(const Effekseer::Effect* effect,
 					 std::array<Effekseer::TextureRef, ::Effekseer::TextureSlotMax>& textures,
 					 int32_t& textureCount)
 {
+	assert(effect != nullptr);
+	assert(param != nullptr);
+
 	if (param->MaterialType == Effekseer::RendererMaterialType::File)
 	{
 		auto materialParam = param->MaterialRenderDataPtr;
@@ -100,6 +103,7 @@ void ExtractTextures(const Effekseer::Effect* effect,
 		if (materialParam->MaterialTextures.size() > 0)
 		{
 			textureCount = Effekseer::Min(static_cast<int32_t>(materialParam->MaterialTextures.size()), ::Effekseer::UserTextureSlotMax);
+			assert(textureCount < textures.size());
 
 			for (size_t i = 0; i < textureCount; i++)
 			{
@@ -130,14 +134,13 @@ void ExtractTextures(const Effekseer::Effect* effect,
 	}
 }
 
-ModelRenderer::ModelRenderer(RendererImplemented* renderer) : m_renderer(renderer) {}
+ModelRenderer::ModelRenderer(RendererImplemented* renderer) : m_renderer(renderer) { assert(m_renderer != nullptr); }
 
 ModelRenderer::~ModelRenderer() {}
 
 ::Effekseer::ModelRendererRef ModelRenderer::Create(RendererImplemented* renderer)
 {
 	assert(renderer != NULL);
-
 	return Effekseer::MakeRefPtr<ModelRenderer>(renderer);
 }
 
@@ -157,6 +160,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		return;
 	if (parameter.ModelIndex < 0)
 		return;
+	assert(parameter.EffectPointer != nullptr);
 
 	Effekseer::ModelRef model;
 
@@ -170,7 +174,9 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 	}
 
 	if (model == nullptr)
+	{
 		return;
+	}
 
 	if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 	{
@@ -244,6 +250,8 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 		{
 			shader = static_cast<Shader*>(m_renderer->GetImpl()->GetShader(collector_.ShaderType));
 		}
+
+		assert(shader != nullptr);
 
 		::EffekseerRenderer::RenderStateBase::State& state = m_renderer->GetRenderState()->Push();
 		state.DepthTest = parameter.ZTest;
@@ -367,10 +375,10 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 
 int32_t RendererImplemented::AddInfoBuffer(const void* data, int32_t size)
 {
-	auto ret = static_cast<int32_t>(exportedInfoBuffer.size());
+	auto ret = static_cast<int32_t>(exportedInfoBuffer_.size());
 
-	exportedInfoBuffer.resize(exportedInfoBuffer.size() + size);
-	memcpy(exportedInfoBuffer.data() + ret, data, size);
+	exportedInfoBuffer_.resize(exportedInfoBuffer_.size() + size);
+	memcpy(exportedInfoBuffer_.data() + ret, data, size);
 	return ret;
 }
 
@@ -386,7 +394,7 @@ RendererImplemented::RendererImplemented()
 RendererImplemented::~RendererImplemented()
 {
 	ES_SAFE_DELETE(m_renderState);
-	ES_SAFE_DELETE(m_standardRenderer);
+	ES_SAFE_DELETE(standardRenderer_);
 	// ES_SAFE_DELETE(m_vertexBuffer);
 }
 
@@ -415,7 +423,7 @@ bool RendererImplemented::Initialize(int32_t squareMaxCount)
 	GetImpl()->ShaderAdDistortion = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion));
 	GetImpl()->ShaderAdLit = std::unique_ptr<Shader>(new Shader(EffekseerRenderer::RendererShaderType::AdvancedLit));
 
-	m_standardRenderer = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
+	standardRenderer_ = new EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>(this);
 	GetImpl()->isSoftParticleEnabled = true;
 	GetImpl()->isDepthReversed = true;
 
@@ -459,11 +467,11 @@ bool RendererImplemented::BeginRendering()
 	impl->CalculateCameraProjectionMatrix();
 
 	// Reset the renderer
-	m_standardRenderer->ResetAndRenderingIfRequired();
+	standardRenderer_->ResetAndRenderingIfRequired();
 
 	// exportedVertexBuffer.resize(0);
-	exportedInfoBuffer.resize(0);
-	renderParameters.resize(0);
+	exportedInfoBuffer_.resize(0);
+	renderParameters_.resize(0);
 
 	ClearStrideBuffers();
 
@@ -473,7 +481,7 @@ bool RendererImplemented::BeginRendering()
 bool RendererImplemented::EndRendering()
 {
 	// Reset the renderer
-	m_standardRenderer->ResetAndRenderingIfRequired();
+	standardRenderer_->ResetAndRenderingIfRequired();
 
 	// ForUnity
 	// AlignVertexBuffer(sizeof(UnityVertex));
@@ -511,7 +519,7 @@ void RendererImplemented::ResetRenderState() {}
 
 void RendererImplemented::SetDistortingCallback(::EffekseerRenderer::DistortingCallback* callback) {}
 
-EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer() { return m_standardRenderer; }
+EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* RendererImplemented::GetStandardRenderer() { return standardRenderer_; }
 
 ::EffekseerRenderer::RenderStateBase* RendererImplemented::GetRenderState() { return m_renderState; }
 
@@ -593,11 +601,264 @@ void StoreDistortionPixelConstantBuffer(UnityRenderParameter& rp,
 	rp.ReconstrcutionParam2 = constantBuffer->SoftParticleParam.reconstructionParam2;
 }
 
+void RendererImplemented::DrawSprites_Unlit(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset)
+{
+	rp.VertexBufferStride = sizeof(UnityVertex);
+	auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+	assert(strideBuffer != nullptr);
+
+	int32_t startOffset = strideBuffer->GetOffset();
+
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
+	{
+		auto vs = reinterpret_cast<Vertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			const auto& v = vs[vi];
+			AddVertexBufferAsVertex(v, *strideBuffer);
+		}
+	}
+	else
+	{
+		auto vs = reinterpret_cast<EffekseerRenderer::AdvancedSimpleVertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			const auto& v = vs[vi];
+			AddVertexBufferAsVertex(v, *strideBuffer);
+		}
+
+		auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+		rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			const auto& v = vs[vi];
+			AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
+		}
+	}
+
+	const auto vConstantBuffer = static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(current_shader_->GetVertexConstantBuffer());
+	auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(current_shader_->GetPixelConstantBuffer());
+	StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
+
+	rp.VertexBufferOffset = startOffset;
+	rp.MaterialPtr = nullptr;
+	rp.ElementCount = spriteCount;
+	renderParameters_.push_back(rp);
+}
+
+void RendererImplemented::DrawSprites_Distortion(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset)
+{
+	if (textures_[1] == nullptr)
+	{
+		return;
+	}
+
+	rp.VertexBufferStride = sizeof(UnityDynamicVertex);
+	auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+	assert(strideBuffer != nullptr);
+
+	int32_t startOffset = strideBuffer->GetOffset();
+
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
+	{
+		auto vs = reinterpret_cast<DynamicVertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsDynamicVertex(v, *strideBuffer);
+		}
+	}
+	else
+	{
+		auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsDynamicVertex(v, *strideBuffer);
+		}
+
+		auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+		rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
+		}
+	}
+
+	const auto vConstantBuffer = static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(current_shader_->GetVertexConstantBuffer());
+	auto constantBuffer = (EffekseerRenderer::PixelConstantBufferDistortion*)current_shader_->GetPixelConstantBuffer();
+	rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
+
+	StoreDistortionPixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
+
+	rp.VertexBufferOffset = startOffset;
+	rp.MaterialPtr = nullptr;
+	rp.ElementCount = spriteCount;
+	renderParameters_.push_back(rp);
+}
+
+void RendererImplemented::DrawSprites_Lit(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset)
+{
+	rp.VertexBufferStride = sizeof(UnityDynamicVertex);
+	auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+	assert(strideBuffer != nullptr);
+
+	int32_t startOffset = strideBuffer->GetOffset();
+
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Lit)
+	{
+		auto vs = reinterpret_cast<DynamicVertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsDynamicVertex(v, *strideBuffer);
+		}
+	}
+	else
+	{
+		auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
+			const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
+
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsDynamicVertex(v, *strideBuffer);
+		}
+
+		auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
+		rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
+		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+		{
+			auto& v = vs[vi];
+			AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
+		}
+	}
+
+	const auto vConstantBuffer = static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(current_shader_->GetVertexConstantBuffer());
+	auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(current_shader_->GetPixelConstantBuffer());
+	StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
+
+	rp.VertexBufferOffset = startOffset;
+	rp.MaterialPtr = nullptr;
+	rp.ElementCount = spriteCount;
+	renderParameters_.push_back(rp);
+}
+
+void RendererImplemented::DrawSprites_Material(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset)
+{
+	if (current_shader_->GetMaterial() == nullptr)
+	{
+		return;
+	}
+
+	const auto& nativeMaterial = current_shader_->GetMaterial();
+	assert(nativeMaterial != nullptr);
+	assert(!nativeMaterial->GetIsSimpleVertex());
+
+	rp.MaterialPtr = current_shader_->GetUnityMaterial();
+	rp.IsRefraction = current_shader_->GetIsRefraction() ? 1 : 0;
+
+	auto origin = const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data());
+
+	int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
+
+	rp.VertexBufferStride = sizeof(UnityDynamicVertex) + customDataStride;
+	auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
+	assert(strideBuffer != nullptr);
+
+	int32_t startOffset = strideBuffer->GetOffset();
+
+	const int32_t stride = sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
+	const int32_t unityStride = rp.VertexBufferStride;
+
+	EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
+	EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
+		origin + sizeof(EffekseerRenderer::DynamicVertex), stride, vertexOffset + spriteCount * 4);
+	EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom2(origin + sizeof(EffekseerRenderer::DynamicVertex) +
+																				sizeof(float) * nativeMaterial->GetCustomData1Count(),
+																			stride,
+																			vertexOffset + spriteCount * 4);
+
+	auto parameter_generator = current_shader_->GetParameterGenerator();
+	assert(parameter_generator != nullptr);
+
+	// Uniform
+	memcpy(rp.ReconstrcutionParam1.data(),
+		   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + parameter_generator->PixelReconstructionParam1Offset,
+		   sizeof(float) * 4);
+
+	memcpy(rp.ReconstrcutionParam2.data(),
+		   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + parameter_generator->PixelReconstructionParam2Offset,
+		   sizeof(float) * 4);
+
+	memcpy(rp.PredefinedUniform.data(),
+		   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + parameter_generator->PixelPredefinedOffset,
+		   sizeof(float) * 4);
+
+	auto uniformOffset = parameter_generator->PixelUserUniformOffset;
+	auto uniformBuffer = static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + uniformOffset;
+	const auto uniformSize = parameter_generator->PixelShaderUniformBufferSize - uniformOffset;
+	rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, uniformSize);
+
+	for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
+	{
+		auto& v = vs[vi];
+		UnityDynamicVertex unity_v;
+
+		unity_v.Pos = v.Pos;
+		unity_v.UV1[0] = v.UV1[0];
+		unity_v.UV1[1] = v.UV1[1];
+		unity_v.UV2[0] = v.UV2[0];
+		unity_v.UV2[1] = v.UV2[1];
+		unity_v.Col[0] = v.Col.R / 255.0f;
+		unity_v.Col[1] = v.Col.G / 255.0f;
+		unity_v.Col[2] = v.Col.B / 255.0f;
+		unity_v.Col[3] = v.Col.A / 255.0f;
+		unity_v.Tangent = UnpackVector3DF(v.Tangent);
+		unity_v.Normal = UnpackVector3DF(v.Normal);
+
+		strideBuffer->PushBuffer(&unity_v, sizeof(UnityDynamicVertex));
+
+		if (nativeMaterial->GetCustomData1Count() > 0)
+		{
+			std::array<float, 4> customData1;
+			auto c = (float*)(&custom1[vi]);
+			memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
+
+			strideBuffer->PushBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
+		}
+
+		if (nativeMaterial->GetCustomData2Count() > 0)
+		{
+			std::array<float, 4> customData2;
+			auto c = (float*)(&custom2[vi]);
+			memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
+			strideBuffer->PushBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
+		}
+	}
+
+	rp.VertexBufferOffset = startOffset;
+
+	rp.ElementCount = spriteCount;
+	renderParameters_.push_back(rp);
+}
+
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
 	UnityRenderParameter rp;
 	rp.RenderMode = 0;
-	rp.MaterialType = m_currentShader->GetType();
+	rp.MaterialType = current_shader_->GetType();
 	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
@@ -611,262 +872,32 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		rp.TextureWrapTypes[i] = (int)GetRenderState()->GetActiveState().TextureWrapTypes[i];
 	}
 
-	rp.TextureCount = static_cast<int32_t>(textures_.size());
-
-	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
+	assert(current_shader_ != nullptr);
+	if (current_shader_ == nullptr)
 	{
-		if (m_currentShader == nullptr)
-		{
-			return;
-		}
-
-		if (m_currentShader->GetMaterial() == nullptr)
-		{
-			return;
-		}
-
-		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
-		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
-
-		const auto& nativeMaterial = m_currentShader->GetMaterial();
-		assert(!nativeMaterial->GetIsSimpleVertex());
-
-		auto origin = const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data());
-
-		int32_t customDataStride = (nativeMaterial->GetCustomData1Count() + nativeMaterial->GetCustomData2Count()) * sizeof(float);
-
-		rp.VertexBufferStride = sizeof(UnityDynamicVertex) + customDataStride;
-		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
-		// AlignVertexBuffer(rp.VertexBufferStride);
-
-		// int32_t startOffset = static_cast<int32_t>(exportedVertexBuffer.size());
-		int32_t startOffset = strideBuffer->GetOffset();
-
-		const int32_t stride = sizeof(EffekseerRenderer::DynamicVertex) + customDataStride;
-		const int32_t unityStride = rp.VertexBufferStride;
-
-		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> vs(origin, stride, vertexOffset + spriteCount * 4);
-		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom1(
-			origin + sizeof(EffekseerRenderer::DynamicVertex), stride, vertexOffset + spriteCount * 4);
-		EffekseerRenderer::StrideView<EffekseerRenderer::DynamicVertex> custom2(origin + sizeof(EffekseerRenderer::DynamicVertex) +
-																					sizeof(float) * nativeMaterial->GetCustomData1Count(),
-																				stride,
-																				vertexOffset + spriteCount * 4);
-
-		// Uniform
-		memcpy(rp.ReconstrcutionParam1.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam1Offset,
-			   sizeof(float) * 4);
-
-		memcpy(rp.ReconstrcutionParam2.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam2Offset,
-			   sizeof(float) * 4);
-
-		memcpy(rp.PredefinedUniform.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelPredefinedOffset,
-			   sizeof(float) * 4);
-
-		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
-		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		const auto uniformSize = m_currentShader->GetParameterGenerator()->PixelShaderUniformBufferSize - uniformOffset;
-		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, uniformSize);
-
-		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-		{
-			auto& v = vs[vi];
-			UnityDynamicVertex unity_v;
-
-			unity_v.Pos = v.Pos;
-			unity_v.UV1[0] = v.UV1[0];
-			unity_v.UV1[1] = v.UV1[1];
-			unity_v.UV2[0] = v.UV2[0];
-			unity_v.UV2[1] = v.UV2[1];
-			unity_v.Col[0] = v.Col.R / 255.0f;
-			unity_v.Col[1] = v.Col.G / 255.0f;
-			unity_v.Col[2] = v.Col.B / 255.0f;
-			unity_v.Col[3] = v.Col.A / 255.0f;
-			unity_v.Tangent = UnpackVector3DF(v.Tangent);
-			unity_v.Normal = UnpackVector3DF(v.Normal);
-
-			strideBuffer->PushBuffer(&unity_v, sizeof(UnityDynamicVertex));
-
-			if (nativeMaterial->GetCustomData1Count() > 0)
-			{
-				std::array<float, 4> customData1;
-				auto c = (float*)(&custom1[vi]);
-				memcpy(customData1.data(), c, sizeof(float) * nativeMaterial->GetCustomData1Count());
-
-				strideBuffer->PushBuffer(customData1.data(), sizeof(float) * nativeMaterial->GetCustomData1Count());
-			}
-
-			if (nativeMaterial->GetCustomData2Count() > 0)
-			{
-				std::array<float, 4> customData2;
-				auto c = (float*)(&custom2[vi]);
-				memcpy(customData2.data(), c, sizeof(float) * nativeMaterial->GetCustomData2Count());
-				strideBuffer->PushBuffer(customData2.data(), sizeof(float) * nativeMaterial->GetCustomData2Count());
-			}
-		}
-
-		rp.VertexBufferOffset = startOffset;
-
-		rp.ElementCount = spriteCount;
-		renderParameters.push_back(rp);
 		return;
 	}
-	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
-			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
+
+	rp.TextureCount = static_cast<int32_t>(textures_.size());
+
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
-		if (textures_[1] == nullptr)
-		{
-			return;
-		}
-
-		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
-		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
-		int32_t startOffset = strideBuffer->GetOffset();
-
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
-		{
-			auto vs = reinterpret_cast<DynamicVertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
-			}
-		}
-		else
-		{
-			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
-			}
-
-			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
-			}
-		}
-
-		const auto vConstantBuffer =
-			static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(m_currentShader->GetVertexConstantBuffer());
-		auto constantBuffer = (EffekseerRenderer::PixelConstantBufferDistortion*)m_currentShader->GetPixelConstantBuffer();
-		rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
-
-		StoreDistortionPixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
-
-		rp.VertexBufferOffset = startOffset;
-		rp.MaterialPtr = nullptr;
-		rp.ElementCount = spriteCount;
-		renderParameters.push_back(rp);
+		DrawSprites_Material(rp, spriteCount, vertexOffset);
 	}
-	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
-			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
+	else if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
+			 current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
 	{
-		rp.VertexBufferStride = sizeof(UnityDynamicVertex);
-		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
-		int32_t startOffset = strideBuffer->GetOffset();
-
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit)
-		{
-			auto vs = reinterpret_cast<DynamicVertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
-			}
-		}
-		else
-		{
-			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedLightingVertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsDynamicVertex(v, *strideBuffer);
-			}
-
-			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
-			}
-		}
-
-		const auto vConstantBuffer =
-			static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(m_currentShader->GetVertexConstantBuffer());
-		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
-		StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
-
-		rp.VertexBufferOffset = startOffset;
-		rp.MaterialPtr = nullptr;
-		rp.ElementCount = spriteCount;
-		renderParameters.push_back(rp);
+		DrawSprites_Distortion(rp, spriteCount, vertexOffset);
 	}
-	else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
-			 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+	else if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
+			 current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 	{
-		rp.VertexBufferStride = sizeof(UnityVertex);
-		auto strideBuffer = GetStrideBuffer(rp.VertexBufferStride);
-		int32_t startOffset = strideBuffer->GetOffset();
-
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
-		{
-			auto vs = reinterpret_cast<Vertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				const auto& v = vs[vi];
-				AddVertexBufferAsVertex(v, *strideBuffer);
-			}
-		}
-		else
-		{
-			auto vs = reinterpret_cast<EffekseerRenderer::AdvancedSimpleVertex*>(
-				const_cast<uint8_t*>(vertexBuffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
-
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				const auto& v = vs[vi];
-				AddVertexBufferAsVertex(v, *strideBuffer);
-			}
-
-			auto strideAdvancedBuffer = GetStrideBuffer(sizeof(AdvancedVertexParameter));
-			rp.AdvancedBufferOffset = strideAdvancedBuffer->GetOffset();
-			for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
-			{
-				const auto& v = vs[vi];
-				AddVertexBufferAsAdvancedData(v, *strideAdvancedBuffer);
-			}
-		}
-
-		const auto vConstantBuffer =
-			static_cast<EffekseerRenderer::StandardRendererVertexBuffer*>(m_currentShader->GetVertexConstantBuffer());
-		auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
-		StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->flipbookParameter);
-
-		rp.VertexBufferOffset = startOffset;
-		rp.MaterialPtr = nullptr;
-		rp.ElementCount = spriteCount;
-		renderParameters.push_back(rp);
+		DrawSprites_Lit(rp, spriteCount, vertexOffset);
+	}
+	else if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
+			 current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+	{
+		DrawSprites_Unlit(rp, spriteCount, vertexOffset);
 	}
 }
 
@@ -885,9 +916,20 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 									std::vector<std::array<float, 4>>& customData1,
 									std::vector<std::array<float, 4>>& customData2)
 {
+	assert(current_shader_ != nullptr);
+	if (current_shader_ == nullptr)
+	{
+		return;
+	}
+
+	if (model == nullptr)
+	{
+		return;
+	}
+
 	UnityRenderParameter rp;
 	rp.RenderMode = 1;
-	rp.MaterialType = m_currentShader->GetType();
+	rp.MaterialType = current_shader_->GetType();
 	rp.ZTest = GetRenderState()->GetActiveState().DepthTest ? 1 : 0;
 	rp.ZWrite = GetRenderState()->GetActiveState().DepthWrite ? 1 : 0;
 	rp.Blend = (int)GetRenderState()->GetActiveState().AlphaBlend;
@@ -913,41 +955,38 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		rp.ModelPtr = nullptr;
 	}
 
-	if (model == nullptr)
-		return;
-
-	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
-		rp.MaterialPtr = m_currentShader->GetUnityMaterial();
-		rp.IsRefraction = m_currentShader->GetIsRefraction() ? 1 : 0;
+		rp.MaterialPtr = current_shader_->GetUnityMaterial();
+		rp.IsRefraction = current_shader_->GetIsRefraction() ? 1 : 0;
 	}
 	else
 	{
-		if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
-			m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
+		if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Lit ||
+			current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedLit)
 		{
-			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(current_shader_->GetPixelConstantBuffer());
 			const auto vConstantBuffer =
-				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(m_currentShader->GetVertexConstantBuffer());
+				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(current_shader_->GetVertexConstantBuffer());
 			StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter);
 		}
-		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
-				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
+		else if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
+				 current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
 		{
-			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBufferDistortion*>(m_currentShader->GetPixelConstantBuffer());
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBufferDistortion*>(current_shader_->GetPixelConstantBuffer());
 
 			rp.DistortionIntensity = constantBuffer->DistortionIntencity[0];
 
 			const auto vConstantBuffer =
-				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(m_currentShader->GetVertexConstantBuffer());
+				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(current_shader_->GetVertexConstantBuffer());
 			StoreDistortionPixelConstantBuffer(rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter);
 		}
-		else if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
-				 m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+		else if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Unlit ||
+				 current_shader_->GetType() == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
 		{
 			const auto vConstantBuffer =
-				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(m_currentShader->GetVertexConstantBuffer());
-			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(m_currentShader->GetPixelConstantBuffer());
+				static_cast<EffekseerRenderer::ModelRendererAdvancedVertexConstantBuffer<1>*>(current_shader_->GetVertexConstantBuffer());
+			auto constantBuffer = static_cast<EffekseerRenderer::PixelConstantBuffer*>(current_shader_->GetPixelConstantBuffer());
 
 			StorePixelConstantBuffer(rp, constantBuffer, vConstantBuffer->ModelFlipbookParameter);
 		}
@@ -958,7 +997,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 	rp.CustomData1BufferOffset = 0;
 	rp.CustomData2BufferOffset = 0;
 
-	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
+	rp.VertexBufferOffset = static_cast<int32_t>(exportedInfoBuffer_.size());
 
 	for (int i = 0; i < matrixes.size(); i++)
 	{
@@ -973,7 +1012,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter1));
 	}
 
-	rp.AdvancedBufferOffset = static_cast<int32_t>(exportedInfoBuffer.size());
+	rp.AdvancedBufferOffset = static_cast<int32_t>(exportedInfoBuffer_.size());
 
 	for (int i = 0; i < matrixes.size(); i++)
 	{
@@ -988,30 +1027,30 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
 	}
 
-	if (m_currentShader->GetType() == EffekseerRenderer::RendererShaderType::Material)
+	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Material)
 	{
-		const auto& nativeMaterial = m_currentShader->GetMaterial();
+		const auto& nativeMaterial = current_shader_->GetMaterial();
 		assert(!nativeMaterial->GetIsSimpleVertex());
 
 		// Uniform
 		memcpy(rp.ReconstrcutionParam1.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam1Offset,
+			   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) +
+				   current_shader_->GetParameterGenerator()->PixelReconstructionParam1Offset,
 			   sizeof(float) * 4);
 
 		memcpy(rp.ReconstrcutionParam2.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelReconstructionParam2Offset,
+			   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) +
+				   current_shader_->GetParameterGenerator()->PixelReconstructionParam2Offset,
 			   sizeof(float) * 4);
 
 		memcpy(rp.PredefinedUniform.data(),
-			   static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) +
-				   m_currentShader->GetParameterGenerator()->PixelPredefinedOffset,
+			   static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) +
+				   current_shader_->GetParameterGenerator()->PixelPredefinedOffset,
 			   sizeof(float) * 4);
 
-		auto uniformOffset = m_currentShader->GetParameterGenerator()->PixelUserUniformOffset;
-		auto uniformBuffer = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + uniformOffset;
-		const auto uniformSize = m_currentShader->GetParameterGenerator()->PixelShaderUniformBufferSize - uniformOffset;
+		auto uniformOffset = current_shader_->GetParameterGenerator()->PixelUserUniformOffset;
+		auto uniformBuffer = static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + uniformOffset;
+		const auto uniformSize = current_shader_->GetParameterGenerator()->PixelShaderUniformBufferSize - uniformOffset;
 		rp.UniformBufferOffset = AddInfoBuffer(uniformBuffer, uniformSize);
 
 		if (nativeMaterial->GetCustomData1Count() > 0)
@@ -1027,24 +1066,24 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		}
 	}
 
-	renderParameters.push_back(rp);
+	renderParameters_.push_back(rp);
 }
 
-void RendererImplemented::BeginShader(Shader* shader) { m_currentShader = shader; }
+void RendererImplemented::BeginShader(Shader* shader) { current_shader_ = shader; }
 
 void RendererImplemented::RendererImplemented::EndShader(Shader* shader) {}
 
 void RendererImplemented::SetVertexBufferToShader(const void* data, int32_t size, int32_t dstOffset)
 {
-	assert(m_currentShader != nullptr);
-	auto p = static_cast<uint8_t*>(m_currentShader->GetVertexConstantBuffer()) + dstOffset;
+	assert(current_shader_ != nullptr);
+	auto p = static_cast<uint8_t*>(current_shader_->GetVertexConstantBuffer()) + dstOffset;
 	memcpy(p, data, size);
 }
 
 void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size, int32_t dstOffset)
 {
-	assert(m_currentShader != nullptr);
-	auto p = static_cast<uint8_t*>(m_currentShader->GetPixelConstantBuffer()) + dstOffset;
+	assert(current_shader_ != nullptr);
+	auto p = static_cast<uint8_t*>(current_shader_->GetPixelConstantBuffer()) + dstOffset;
 	memcpy(p, data, size);
 }
 

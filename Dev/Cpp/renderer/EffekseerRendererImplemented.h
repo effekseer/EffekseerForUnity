@@ -234,21 +234,21 @@ protected:
 	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
 	Effekseer::Backend::VertexBufferRef vertexBuffer_ = nullptr;
 
-	Shader* m_currentShader = nullptr;
+	Shader* current_shader_ = nullptr;
 	RenderState* m_renderState = nullptr;
 
 	std::vector<void*> textures_;
 
-	std::vector<UnityRenderParameter> renderParameters;
+	std::vector<UnityRenderParameter> renderParameters_;
 
 	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
 
 	// std::vector<uint8_t> exportedVertexBuffer;
-	std::vector<uint8_t> exportedInfoBuffer;
+	std::vector<uint8_t> exportedInfoBuffer_;
 
 	Effekseer::TextureRef backgroundData_;
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* m_standardRenderer = nullptr;
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* standardRenderer_ = nullptr;
 
 	// int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
@@ -401,6 +401,10 @@ public:
 	void SetIndexBuffer(const Effekseer::Backend::IndexBufferRef& indexBuffer);
 
 	void SetLayout(Shader* shader);
+	void DrawSprites_Unlit(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset);
+	void DrawSprites_Distortion(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset);
+	void DrawSprites_Lit(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset);
+	void DrawSprites_Material(UnityRenderParameter& rp, int32_t spriteCount, int32_t vertexOffset);
 	void DrawSprites(int32_t spriteCount, int32_t vertexOffset);
 
 	void DrawModel(Effekseer::ModelRef model,
@@ -427,9 +431,8 @@ public:
 
 	void SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count);
 
-	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters; };
-	// std::vector<uint8_t>& GetRenderVertexBuffer() { return exportedVertexBuffer; }
-	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer; }
+	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters_; };
+	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer_; }
 
 	int32_t GetStrideBufferCount() const;
 	StrideBufferParameter GetStrideBufferParameter(int32_t index) const;
