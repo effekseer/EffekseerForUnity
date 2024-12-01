@@ -467,8 +467,16 @@ namespace Effekseer
 
 			// Finalize Effekseer library
 			Plugin.EffekseerTerm();
-			// For a platform that is releasing in render thread
-			GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
+
+			if (Instance.RendererType == EffekseerRendererType.Native)
+			{
+				// For a platform that is releasing in render thread
+				GL.IssuePluginEvent(Plugin.EffekseerGetRenderFunc(), 0);
+			}
+			else
+			{
+				Plugin.EffekseerUpdateState(0);
+			}
 
 			Instance = null;
 		}
@@ -590,7 +598,14 @@ namespace Effekseer
 
 		public void UpdateRendererState()
 		{
-			GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+			if (Instance.RendererType == EffekseerRendererType.Native)
+			{
+				GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+			}
+			else
+			{
+				Plugin.EffekseerUpdateState(0);
+			}
 		}
 #endif
 
@@ -616,7 +631,14 @@ namespace Effekseer
 
 			ApplyLightingToNative();
 
-			GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+			if (Instance.RendererType == EffekseerRendererType.Native)
+			{
+				GL.IssuePluginEvent(Plugin.EffekseerGetUpdateStateFunc(), 0);
+			}
+			else
+			{
+				Plugin.EffekseerUpdateState(0);
+			}
 		}
 
 		/// <summary>
