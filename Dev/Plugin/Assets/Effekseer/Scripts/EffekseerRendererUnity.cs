@@ -753,7 +753,9 @@ namespace Effekseer.Internal
 
 			List<DelayEvent> delayEvents = null;
 
-			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
+			bool _isScriptable;
+
+			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal, bool isScriptable)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
@@ -763,6 +765,7 @@ namespace Effekseer.Internal
 				materiaProps = new MaterialPropCollection();
 				modelBuffers = new ModelBufferCollection();
 				customDataBuffers = new CustomDataBufferCollection();
+				_isScriptable = isScriptable;
 			}
 
 			public void Init(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty)
@@ -770,16 +773,19 @@ namespace Effekseer.Internal
 				isDistortionEnabled = enableDistortion;
 				isDepthEnabled = enableDepth;
 
-				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDistortionEnabled, camera, renderTargetProperty);
-				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
-
 				// Create a command buffer that is effekseer renderer
 				if (!isCommandBufferFromExternal)
 				{
 					this.commandBuffer = new CommandBuffer();
 					this.commandBuffer.name = "Effekseer Rendering";
+				}
 
-					// register the command to a camera
+				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDistortionEnabled, camera, renderTargetProperty);
+				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
+
+				// register the command to a camera
+				if (!isCommandBufferFromExternal && !_isScriptable)
+				{
 					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 				}
 
@@ -795,7 +801,7 @@ namespace Effekseer.Internal
 
 			public void Dispose()
 			{
-				if (this.commandBuffer != null && !isCommandBufferFromExternal)
+				if (this.commandBuffer != null && !isCommandBufferFromExternal && !_isScriptable)
 				{
 					if (this.camera != null)
 					{
@@ -1024,11 +1030,11 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, null, null, standardBlitter);
+				Render(camera, null, null, false, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -1123,7 +1129,7 @@ namespace Effekseer.Internal
 					}
 				}
 
-				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
+				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null, isScriptable);
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty);
 				renderPaths.Add(camera, path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;

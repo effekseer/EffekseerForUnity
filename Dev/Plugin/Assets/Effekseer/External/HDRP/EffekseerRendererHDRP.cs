@@ -42,7 +42,7 @@ namespace Effekseer
 			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(hdCamera.actualWidth, hdCamera.actualHeight, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
-			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd, blitter);
+			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd, true, blitter);
 		}
 
 		protected override void Cleanup()

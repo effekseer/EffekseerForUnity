@@ -33,13 +33,15 @@ namespace Effekseer.Internal
 			bool isDistortionMakeDisabledForcely = false;
 
 			Material fakeMaterial = null;
+			bool _isScriptable;
 
-			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
+			public RenderPath(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal, bool isScriptable)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
 				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
+				_isScriptable = isScriptable;
 
 				var fakeShader = EffekseerDependentAssets.Instance.fakeMaterial;
 #if UNITY_EDITOR
@@ -88,7 +90,7 @@ namespace Effekseer.Internal
 				}
 
 				// register the command to a camera
-				if (!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal && !_isScriptable)
 				{
 					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 				}
@@ -106,7 +108,8 @@ namespace Effekseer.Internal
 					return;
 				}
 
-				Action copyBackground = () => {
+				Action copyBackground = () =>
+				{
 					if (this.renderTexture != null)
 					{
 						// Add a blit command that copy to the distortion texture
@@ -190,7 +193,7 @@ namespace Effekseer.Internal
 
 			public void Dispose()
 			{
-				if (this.commandBuffer != null && !isCommandBufferFromExternal)
+				if (this.commandBuffer != null && !isCommandBufferFromExternal && !_isScriptable)
 				{
 					if (this.camera != null)
 					{
@@ -229,7 +232,7 @@ namespace Effekseer.Internal
 				{
 					var targetSize = BackgroundRenderTexture.GetRequiredSize(this.camera, renderTargetProperty);
 
-					if(targetSize.x != this.depthTexture.width ||
+					if (targetSize.x != this.depthTexture.width ||
 						targetSize.y != this.depthTexture.height)
 					{
 						return false;
@@ -309,11 +312,11 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, null, null, standardBlitter);
+				Render(camera, null, null, false, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
+		public void Render(Camera camera, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter)
 		{
 			var settings = EffekseerSettings.Instance;
 
@@ -406,7 +409,7 @@ namespace Effekseer.Internal
 					}
 				}
 
-				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
+				path = new RenderPath(camera, cameraEvent, nextRenderID, targetCommandBuffer != null, isScriptable);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.Init(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
 				renderPaths.Add(camera, path);

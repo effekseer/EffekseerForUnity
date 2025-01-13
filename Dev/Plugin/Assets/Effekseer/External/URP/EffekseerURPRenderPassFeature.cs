@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class UrpBlitter : IEffekseerBlitter
-{	
+{
 	public static readonly int sourceTex = Shader.PropertyToID("_SourceTex");
 	private Material blitMaterial;
 
@@ -17,7 +17,7 @@ public class UrpBlitter : IEffekseerBlitter
 
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
-		if(xrRendering)
+		if (xrRendering)
 		{
 			CoreUtils.SetRenderTarget(
 				cmd,
@@ -127,7 +127,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 #endif
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-			
+
 			// Linear and native renderer makes a result white.
 			prop.colorTargetDescriptor.sRGB = false;
 
@@ -137,7 +137,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			prop.xrRendering = renderingData.cameraData.xrRendering;
 #endif
 			prop.canGrabDepth = renderingData.cameraData.requiresDepthTexture;
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null, blitter);
+			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, prop, null, true, blitter);
 			var commandBuffer = Effekseer.EffekseerSystem.Instance.renderer.GetCameraCommandBuffer(renderingData.cameraData.camera);
 
 			if (commandBuffer != null)
