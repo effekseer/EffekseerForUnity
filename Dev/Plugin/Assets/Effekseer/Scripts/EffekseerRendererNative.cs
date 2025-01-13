@@ -15,12 +15,13 @@ namespace Effekseer.Internal
 		{
 			Material fakeMaterial = null;
 
-			public override void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal)
+			public override void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal, bool isScriptable)
 			{
 				this.camera = camera;
 				this.renderId = renderId;
 				this.cameraEvent = cameraEvent;
 				this.isCommandBufferFromExternal = isCommandBufferFromExternal;
+				this._isScriptable = isScriptable;
 
 				var fakeShader = EffekseerDependentAssets.Instance.fakeMaterial;
 #if UNITY_EDITOR
@@ -68,7 +69,7 @@ namespace Effekseer.Internal
 				}
 
 				// register the command to a camera
-				if (!isCommandBufferFromExternal)
+				if (!isCommandBufferFromExternal && !_isScriptable)
 				{
 					this.camera.AddCommandBuffer(this.cameraEvent, this.commandBuffer);
 				}
@@ -215,16 +216,16 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, int.MaxValue, null, null, standardBlitter);
+				Render(camera, int.MaxValue, null, null, false, standardBlitter);
 			}
 		}
 
-		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter)
+		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter)
 		{
 			RenderPath path;
 			int allEffectMask;
 			int cameraMask;
-			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, additionalMask, renderTargetProperty, targetCommandBuffer, blitter, cameraEvent, out path, out allEffectMask, out cameraMask);
+			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, additionalMask, renderTargetProperty, targetCommandBuffer, isScriptable, blitter, cameraEvent, out path, out allEffectMask, out cameraMask);
 			if (path == null)
 			{
 				return;

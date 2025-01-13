@@ -55,13 +55,14 @@ namespace Effekseer.Internal
 		public DepthRenderTexture depthTexture;
 		protected bool isDistortionEnabled = false;
 		protected bool isDepthEnabled = false;
+		protected bool _isScriptable = false;
 
 		/// <summary>
 		/// Distortion is disabled forcely because of VR
 		/// </summary>
 		protected bool isDistortionMakeDisabledForcely = false;
 
-		public virtual void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal) { }
+		public virtual void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal, bool isScriptable) { }
 
 		public virtual void ResetParameters(bool enableDistortion, bool enableDepth, RenderTargetProperty renderTargetProperty,
 				IEffekseerBlitter blitter, StereoRendererUtil.StereoRenderingTypes stereoRenderingType = StereoRendererUtil.StereoRenderingTypes.None)
@@ -150,7 +151,7 @@ namespace Effekseer.Internal
 			renderPaths.Clear();
 		}
 
-		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask)
+		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask)
 		{
 			path = null;
 
@@ -246,7 +247,7 @@ namespace Effekseer.Internal
 				}
 
 				path = new T();
-				path.Init(camera, cameraEvent, nextRenderID, targetCommandBuffer != null);
+				path.Init(camera, cameraEvent, nextRenderID, targetCommandBuffer != null, isScriptable);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.ResetParameters(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
 				renderPaths.Add(new CameraWithMask(camera, additionalMask), path);

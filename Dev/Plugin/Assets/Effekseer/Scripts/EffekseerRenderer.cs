@@ -256,7 +256,7 @@ namespace Effekseer.Internal
 
 		void CleanUp();
 
-		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, IEffekseerBlitter blitter);
+		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter);
 
 		void OnPostRender(Camera camera);
 	}
