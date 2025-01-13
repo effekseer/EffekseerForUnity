@@ -168,6 +168,16 @@ namespace Effekseer.Editor.Utils
 
 				return true;
 			}
+
+			public override int GetHashCode()
+			{
+				if (ColorMarkers == null || AlphaMarkers == null)
+				{
+					return 0;
+				}
+
+				return ColorMarkers.GetHashCode() + AlphaMarkers.GetHashCode();
+			}
 		}
 
 		State _value = null;
