@@ -236,8 +236,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				});
 			}
 		}
-	}
 #endif
+	}
 
 	EffekseerRenderPassURP m_ScriptablePass;
 
