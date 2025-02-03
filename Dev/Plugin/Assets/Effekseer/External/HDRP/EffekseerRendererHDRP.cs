@@ -1,6 +1,7 @@
 ﻿#if EFFEKSEER_HDRP_SUPPORT
 
 using Effekseer.Internal;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -22,14 +23,9 @@ namespace Effekseer
 			base.Setup(renderContext, cmd);
 		}
 
-		protected override void Execute(ScriptableRenderContext renderContext, CommandBuffer cmd, HDCamera hdCamera, CullingResults cullingResult)
+		void Execute(RTHandle colorBuffer, RTHandle depthBuffer, CommandBuffer cmd, HDCamera hdCamera)
 		{
 			if (EffekseerSystem.Instance == null) return;
-
-			RTHandle colorBuffer;
-			RTHandle depthBuffer;
-			GetCameraBuffers(out colorBuffer, out depthBuffer);
-			
 			prop.colorTargetIdentifier = new RenderTargetIdentifier(colorBuffer);
 			prop.depthTargetIdentifier = new RenderTargetIdentifier(depthBuffer);
 			prop.colorTargetRenderTexture = (UnityEngine.RenderTexture)colorBuffer;
@@ -44,6 +40,24 @@ namespace Effekseer
 			prop.isRequiredToChangeViewport = true;
 			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, prop, cmd, true, blitter);
 		}
+
+#if UNITY_6000_0_OR_NEWER
+		protected override void Execute(CustomPassContext ctx)
+		{
+			Execute(ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ctx.cmd, ctx.hdCamera);
+			base.Execute(ctx);
+		}
+#else
+		protected override void Execute(ScriptableRenderContext renderContext, CommandBuffer cmd, HDCamera hdCamera, CullingResults cullingResult)
+		{
+			if (EffekseerSystem.Instance == null) return;
+
+			RTHandle colorBuffer;
+			RTHandle depthBuffer;
+			GetCameraBuffers(out colorBuffer, out depthBuffer);
+			Execute(colorBuffer, depthBuffer, cmd, hdCamera);
+		}
+#endif
 
 		protected override void Cleanup()
 		{
