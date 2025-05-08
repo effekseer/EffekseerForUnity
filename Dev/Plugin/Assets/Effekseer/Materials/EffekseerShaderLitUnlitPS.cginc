@@ -1,3 +1,4 @@
+#include <UnityInstancing.cginc>
 
 // cbuffer PS_ConstanBuffer : register(b0)
 // {
@@ -62,6 +63,8 @@ struct PS_Input
 	half3 WorldT : TEXCOORD3;
 #endif
 	float4 PosP : TEXCOORD4;
+	
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #include "EffekseerShaderSoftParticlePS.cginc"
@@ -70,6 +73,8 @@ struct PS_Input
 float4 frag(const PS_Input Input)
 	: SV_Target
 {
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(Input);
+	
 	bool convColorSpace = convertColorSpace != 0.0f;
 
 	float4 Output = ConvertFromSRGBTexture(_colorTex.Sample(sampler_colorTex, Input.UV), convColorSpace) * Input.Color;
