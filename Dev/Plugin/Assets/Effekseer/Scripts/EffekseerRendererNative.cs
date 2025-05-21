@@ -161,7 +161,7 @@ namespace Effekseer.Internal
 				{
 					if (renderTargetProperty != null)
 					{
-						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture);
+						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture, blitter);
 
 						if (renderTargetProperty.Viewport.width > 0)
 						{

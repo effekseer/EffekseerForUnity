@@ -1209,7 +1209,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 
@@ -1217,7 +1217,7 @@ namespace Effekseer.Internal
 			{
 				if (renderTargetProperty != null)
 				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture);
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture, blitter);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1230,7 +1230,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 
@@ -1261,7 +1261,7 @@ namespace Effekseer.Internal
 				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
 					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture, renderTargetProperty.xrRendering);
-					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, renderTargetProperty.colorBufferID.Value, renderTargetProperty.xrRendering);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1283,7 +1283,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 

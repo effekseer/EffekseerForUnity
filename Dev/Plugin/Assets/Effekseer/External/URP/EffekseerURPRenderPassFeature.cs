@@ -12,32 +12,32 @@ using UnityEngine.Rendering.RenderGraphModule;
 
 public class UrpBlitter : IEffekseerBlitter
 {
-	public static readonly int sourceTex = Shader.PropertyToID("_SourceTex");
-	private Material blitMaterial;
-
-	public UrpBlitter()
-	{
-		this.blitMaterial = CoreUtils.CreateEngineMaterial("Hidden/Universal Render Pipeline/Blit");
-	}
-
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
 		if (xrRendering)
 		{
-			CoreUtils.SetRenderTarget(
-				cmd,
-				dest,
-				RenderBufferLoadAction.Load,
-				RenderBufferStoreAction.Store,
-				ClearFlag.None,
-				Color.black);
-			cmd.SetGlobalTexture(sourceTex, source);
-			cmd.DrawProcedural(Matrix4x4.identity, blitMaterial, 0, MeshTopology.Quads, 4);
+			CoreUtils.SetRenderTarget(cmd, dest);
+			Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(TextureXR.dimension), 0);
 		}
 		else
 		{
 			cmd.Blit(source, dest);
 		}
+	}
+
+	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material, bool xrRendering)
+	{
+		cmd.Blit(source, dest, material);
+	}
+
+	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, bool xrRendering)
+	{
+		CoreUtils.SetRenderTarget(cmd, color);
+	}
+
+	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, bool xrRendering)
+	{
+		CoreUtils.SetRenderTarget(cmd, color, depth);
 	}
 }
 
