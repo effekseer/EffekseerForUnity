@@ -67,7 +67,7 @@ jobs:
 
       - name: Cache emsdk
         id: cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ./emsdk
           key: ${{ runner.os }}-emsdk-1_38-v1
@@ -104,7 +104,7 @@ jobs:
 
       - name: Cache emsdk
         id: cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ./emsdk
           key: ${{ runner.os }}-emsdk-2_0-19
@@ -141,7 +141,7 @@ jobs:
 
       - name: Cache emsdk
         id: cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ./emsdk
           key: ${{ runner.os }}-emsdk-3_1-8
@@ -178,7 +178,7 @@ jobs:
 
       - name: Cache emsdk
         id: cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ./emsdk
           key: ${{ runner.os }}-emsdk-3_1-38
