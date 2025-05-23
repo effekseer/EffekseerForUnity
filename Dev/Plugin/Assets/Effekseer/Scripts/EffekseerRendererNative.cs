@@ -128,7 +128,7 @@ namespace Effekseer.Internal
 							// to reset shader settings. SetRenderTarget is not applied until drawing
 							if (fakeMaterial != null)
 							{
-								cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
+								cmbBuf.DrawProcedural(Matrix4x4.identity, fakeMaterial, 0, MeshTopology.Triangles, 3);
 							}
 						}
 					}
@@ -140,7 +140,7 @@ namespace Effekseer.Internal
 				{
 					if (renderTargetProperty != null)
 					{
-						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture);
+						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture, blitter);
 
 						if (renderTargetProperty.Viewport.width > 0)
 						{
@@ -158,7 +158,7 @@ namespace Effekseer.Internal
 						// to reset shader settings. SetRenderTarget is not applied until drawing
 						if (fakeMaterial != null)
 						{
-							cmbBuf.DrawProcedural(new Matrix4x4(), fakeMaterial, 0, MeshTopology.Triangles, 3);
+							cmbBuf.DrawProcedural(Matrix4x4.identity, fakeMaterial, 0, MeshTopology.Triangles, 3);
 						}
 					}
 				}

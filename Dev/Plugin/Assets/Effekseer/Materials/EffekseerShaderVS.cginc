@@ -153,6 +153,7 @@ VS_Output vert(VS_Input i)
 #endif
 
 	Output.PosP = Output.PosVS;
+	Output.PosVS = UnityObjectToClipPos(worldPos);
 
 	return Output;
 }
@@ -249,6 +250,7 @@ VS_Output vert(VS_Input i)
 #endif
 
 	Output.PosP = Output.PosVS;
+    Output.PosVS = UnityObjectToClipPos(worldPos);
 
 	return Output;
 }

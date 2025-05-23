@@ -1023,7 +1023,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 
@@ -1031,7 +1031,7 @@ namespace Effekseer.Internal
 			{
 				if (renderTargetProperty != null)
 				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture);
+					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture, blitter);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1044,7 +1044,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 
@@ -1075,7 +1075,7 @@ namespace Effekseer.Internal
 				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
 				{
 					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture, renderTargetProperty.xrRendering);
-					path.commandBuffer.SetRenderTarget(renderTargetProperty.colorBufferID.Value, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, renderTargetProperty.colorBufferID.Value, renderTargetProperty.xrRendering);
 
 					if (renderTargetProperty.Viewport.width > 0)
 					{
@@ -1097,7 +1097,7 @@ namespace Effekseer.Internal
 					bool xrRendering = false;
 
 					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					path.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
 
@@ -1279,7 +1279,7 @@ namespace Effekseer.Internal
 					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
 				}
 
-				commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+				commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 			}
 			else
 			{
@@ -1293,7 +1293,7 @@ namespace Effekseer.Internal
 					prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 					prop.SetColor("fLightAmbient", EffekseerSystem.LightAmbientColor);
 
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 				else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
@@ -1302,12 +1302,12 @@ namespace Effekseer.Internal
 
 					if (background != null)
 					{
-						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 					}
 				}
 				else
 				{
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
+					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
 				}
 			}
 
@@ -1491,7 +1491,7 @@ namespace Effekseer.Internal
 						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
 					}
 
-					commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 				}
 				else
 				{
@@ -1504,7 +1504,7 @@ namespace Effekseer.Internal
 						prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
 						prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 						prop.SetColor("fLightAmbient", EffekseerSystem.LightAmbientColor);
-						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
@@ -1512,12 +1512,12 @@ namespace Effekseer.Internal
 						prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
 						if (background != null)
 						{
-							commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+							commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 						}
 					}
 					else
 					{
-						commandBuffer.DrawProcedural(new Matrix4x4(), material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
 					}
 				}
 
