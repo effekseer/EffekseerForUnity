@@ -17,6 +17,9 @@ public class UrpBlitter : IEffekseerBlitter
 		if (xrRendering)
 		{
 			CoreUtils.SetRenderTarget(cmd, dest);
+			// FIXME: Scaling is ignored.
+			//        The interface should take RTHandle instead of RenderTargetIdentifier and use Blitter.BlitCameraTexture.
+			//        However, this will cause issues in terms of compatibility with Built-in RP support.
 			Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(TextureXR.dimension), 0);
 		}
 		else
