@@ -10,7 +10,7 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
@@ -35,7 +35,7 @@ jobs:
     name: mac iOS Build
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
       - name: Upload ios
@@ -48,7 +48,7 @@ jobs:
     name: windows Build
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: scripts/clone_dependencies.bat
       - name: Build
         run: cd ./Dev/Cpp/windows && Build.bat
@@ -63,7 +63,7 @@ jobs:
     name: WebGL Build with emsdk 1.38
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -100,7 +100,7 @@ jobs:
     name: WebGL Build with emsdk 2.0.19
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -137,7 +137,7 @@ jobs:
     name: WebGL Build with emsdk 3.1.8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -174,7 +174,7 @@ jobs:
     name: WebGL Build with emsdk 3.1.38
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache emsdk
         id: cache
@@ -212,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [android, mac_ios, windows, webgl_1-38,webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download Android
         uses: actions/download-artifact@v4.1.7
         with:
