@@ -125,7 +125,7 @@ namespace Effekseer.Internal
 				{
 					if (canGrabDepth)
 					{
-						blitter.Blit(cb, RenderTargetIdentifier.Invalid, depthRenderTexture.renderTexture, grabDepthMat);
+						blitter.Blit(cb, new RenderTargetIdentifier(), depthRenderTexture.renderTexture, grabDepthMat);
 					}
 					else
 					{
