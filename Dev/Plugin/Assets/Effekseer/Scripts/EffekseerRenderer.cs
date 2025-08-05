@@ -406,6 +406,7 @@ namespace Effekseer.Internal
 			if (renderTexture != null)
 			{
 				renderTexture.Release();
+				UnityEngine.Object.Destroy(renderTexture);
 				renderTexture = null;
 				ptr = IntPtr.Zero;
 			}
@@ -453,6 +454,7 @@ namespace Effekseer.Internal
 			if (renderTexture != null)
 			{
 				renderTexture.Release();
+				UnityEngine.Object.Destroy(renderTexture);
 				renderTexture = null;
 				ptr = IntPtr.Zero;
 			}
