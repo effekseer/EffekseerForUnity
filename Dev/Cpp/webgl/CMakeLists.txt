@@ -1,8 +1,8 @@
 ﻿
 project(Effekseer)
 
-cmake_minimum_required(VERSION 3.4)
-set(CMAKE_CXX_STANDARD 14)
+cmake_minimum_required(VERSION 3.10)
+
 
 string(APPEND CMAKE_EXE_LINKER_FLAGS " -s WASM=1")
 
@@ -53,3 +53,4 @@ set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".bc")
 
 add_library(EffekseerUnity SHARED ${effekseer_src} )
+target_compile_features(EffekseerUnity PUBLIC cxx_std_17)
