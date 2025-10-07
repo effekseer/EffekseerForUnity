@@ -104,7 +104,7 @@ list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/EffekseerRendererCommon/)
 target_compile_definitions(EffekseerUnity PRIVATE __EFFEKSEER_FROM_MAIN_CMAKE__)
 target_include_directories(EffekseerUnity PRIVATE ${EFK_INCLUDES})
 target_link_directories(EffekseerUnity PRIVATE ${EFK_LIBRARY_DIRECTORIES})
-target_compile_features(EffekseerUnity PUBLIC cxx_std_14)
+target_compile_features(EffekseerUnity PUBLIC cxx_std_17)
 
 FilterFolder("${srcs}")
 
