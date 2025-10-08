@@ -1,7 +1,7 @@
 #pragma once
 
-#include <EffekseerRenderer.CommonUtils.h>
-#include <EffekseerRenderer.ShaderBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.CommonUtils.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.ShaderBase.h>
 #include <vector>
 
 namespace EffekseerRendererUnity
@@ -16,7 +16,7 @@ private:
 	EffekseerRenderer::RendererShaderType shaderType_{};
 	std::vector<uint8_t> vertexConstantBuffer;
 	std::vector<uint8_t> pixelConstantBuffer;
-	bool isRefraction_;
+	bool isRefraction_ = false;
 
 public:
 	/**
@@ -26,7 +26,7 @@ public:
 
 	Shader(EffekseerRenderer::RendererShaderType shaderType);
 
-	~Shader();
+	virtual ~Shader() override = default;
 
 	virtual void SetVertexConstantBufferSize(int32_t size) override {}
 	virtual void SetPixelConstantBufferSize(int32_t size) override {}

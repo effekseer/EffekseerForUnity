@@ -2,14 +2,14 @@
 #pragma once
 
 #include <Effekseer.h>
-#include <EffekseerRenderer.ModelRendererBase.h>
-#include <EffekseerRenderer.RenderStateBase.h>
-#include <EffekseerRenderer.Renderer.h>
-#include <EffekseerRenderer.RibbonRendererBase.h>
-#include <EffekseerRenderer.RingRendererBase.h>
-#include <EffekseerRenderer.SpriteRendererBase.h>
-#include <EffekseerRenderer.StandardRenderer.h>
-#include <EffekseerRenderer.TrackRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.Renderer.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.RibbonRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.RingRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.SpriteRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.TrackRendererBase.h>
 
 #include "../unity/IUnityInterface.h"
 #include <map>
@@ -145,8 +145,8 @@ class Model : public Effekseer::Model
 public:
 	Model(void* data, int32_t size) : Effekseer::Model(data, size) {}
 
-	Model(const Effekseer::CustomVector<Effekseer::Model::Vertex>& vertecies, const Effekseer::CustomVector<Effekseer::Model::Face>& faces)
-		: Effekseer::Model(vertecies, faces)
+	Model(const Effekseer::CustomVector<Effekseer::Model::Vertex>& vertices, const Effekseer::CustomVector<Effekseer::Model::Face>& faces)
+		: Effekseer::Model(vertices, faces)
 	{
 	}
 
@@ -166,7 +166,7 @@ typedef ::Effekseer::Vector3D efkVector3D;
 class ModelRenderer : public ::EffekseerRenderer::ModelRendererBase
 {
 private:
-	RendererImplemented* m_renderer;
+	RendererImplemented* renderer_ = nullptr;
 
 public:
 	ModelRenderer(RendererImplemented* renderer);
@@ -230,25 +230,25 @@ class RendererImplemented : public ::EffekseerRenderer::Renderer, public ::Effek
 	std::shared_ptr<StrideBuffer> GetStrideBuffer(int32_t stride);
 
 protected:
-	int32_t m_squareMaxCount = 0;
-	Effekseer::Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
-	Effekseer::Backend::VertexBufferRef vertexBuffer_ = nullptr;
+	int32_t square_max_count_ = 0;
+	Effekseer::Backend::GraphicsDeviceRef graphics_device_ = nullptr;
+	Effekseer::Backend::VertexBufferRef vertex_buffer_ = nullptr;
 
 	Shader* current_shader_ = nullptr;
-	RenderState* m_renderState = nullptr;
+	RenderState* render_state_ = nullptr;
 
 	std::vector<void*> textures_;
 
-	std::vector<UnityRenderParameter> renderParameters_;
+	std::vector<UnityRenderParameter> render_parameters_;
 
 	Effekseer::RendererMaterialType rendererMaterialType_ = Effekseer::RendererMaterialType::Default;
 
 	// std::vector<uint8_t> exportedVertexBuffer;
-	std::vector<uint8_t> exportedInfoBuffer_;
+	std::vector<uint8_t> exported_info_buffer_;
 
-	Effekseer::TextureRef backgroundData_;
+	Effekseer::TextureRef background_data_;
 
-	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* standardRenderer_ = nullptr;
+	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* standard_renderer_ = nullptr;
 
 	// int32_t AddVertexBuffer(const void* data, int32_t size);
 	int32_t AddInfoBuffer(const void* data, int32_t size);
@@ -431,8 +431,8 @@ public:
 
 	void SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count);
 
-	std::vector<UnityRenderParameter>& GetRenderParameters() { return renderParameters_; };
-	std::vector<uint8_t>& GetRenderInfoBuffer() { return exportedInfoBuffer_; }
+	std::vector<UnityRenderParameter>& GetRenderParameters() { return render_parameters_; };
+	std::vector<uint8_t>& GetRenderInfoBuffer() { return exported_info_buffer_; }
 
 	int32_t GetStrideBufferCount() const;
 	StrideBufferParameter GetStrideBufferParameter(int32_t index) const;

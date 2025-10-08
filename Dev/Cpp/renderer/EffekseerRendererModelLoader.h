@@ -11,7 +11,7 @@
 #endif
 
 #include "../common/EffekseerPluginCommon.h"
-#include <Effekseer/Model/ProceduralModelGenerator.h>
+#include <Effekseer/Model/Effekseer.ProceduralModelGenerator.h>
 
 #include <map>
 #include <memory>

@@ -1,6 +1,6 @@
 #include "EffekseerRendererShader.h"
-#include <EffekseerRenderer.ModelRendererBase.h>
-#include <EffekseerRenderer.StandardRenderer.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h>
 
 namespace EffekseerRendererUnity
 {
@@ -28,8 +28,6 @@ Shader::Shader(EffekseerRenderer::RendererShaderType shaderType)
 	pixelConstantBuffer.resize(
 		std::max(sizeof(EffekseerRenderer::PixelConstantBuffer), sizeof(EffekseerRenderer::PixelConstantBufferDistortion)));
 }
-
-Shader::~Shader() {}
 
 EffekseerRenderer::RendererShaderType Shader::GetType() const { return shaderType_; }
 

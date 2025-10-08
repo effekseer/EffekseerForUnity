@@ -11,7 +11,7 @@
 #include "Effekseer.h"
 #endif
 
-#include <Effekseer/Model/ProceduralModelGenerator.h>
+#include <Effekseer/Model/Effekseer.ProceduralModelGenerator.h>
 
 #include "../unity/IUnityInterface.h"
 

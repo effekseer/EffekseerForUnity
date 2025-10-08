@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EffekseerRenderer.RenderStateBase.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h>
 
 namespace EffekseerRendererUnity
 {
