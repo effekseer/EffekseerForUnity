@@ -7,6 +7,7 @@ LOCAL_PATH      := $(NDK_PROJECT_PATH)
 LOCAL_MODULE    := libEffekseerUnity
 LOCAL_CFLAGS    := -O2 -D__EFFEKSEER_RENDERER_GLES3__ -D__EFFEKSEER_RENDERER_INTERNAL_LOADER__ -D__EFFEKSEER_NETWORK_ENABLED__ -std=c++17
 LOCAL_LDLIBS    := -landroid -lEGL -lGLESv3
+LOCAL_LDFLAGS   += -Wl,-z,max-page-size=16384
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../Effekseer/Dev/Cpp/Effekseer \
