@@ -73,13 +73,13 @@ namespace Effekseer
 
 	internal static class Plugin
 	{
-#if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_WEBGL || UNITY_SWITCH)
+#if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_WEBGL || UNITY_SWITCH || UNITY_SWITCH2)
 			public const string pluginName = "__Internal";
 #else
 		public const string pluginName = "EffekseerUnity";
 #endif
 
-#if (UNITY_WEBGL || UNITY_IOS || UNITY_SWITCH) && !UNITY_EDITOR
+#if (UNITY_WEBGL || UNITY_IOS || UNITY_SWITCH || UNITY_SWITCH2) && !UNITY_EDITOR
 		[DllImport (pluginName)]
 		public static extern void RegisterPlugin();
 #endif
