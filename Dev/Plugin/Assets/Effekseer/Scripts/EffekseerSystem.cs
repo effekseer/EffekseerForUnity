@@ -400,6 +400,9 @@ namespace Effekseer
 #if UNITY_2017_4_OR_NEWER
 				case GraphicsDeviceType.Switch:
 #endif
+#if UNITY_6000_0_OR_NEWER
+				case GraphicsDeviceType.Switch2:
+#endif
 					reversedDepth = true;
 					break;
 			}
