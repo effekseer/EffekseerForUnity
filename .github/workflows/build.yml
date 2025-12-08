@@ -33,7 +33,7 @@ jobs:
 
   mac_ios:
     name: mac iOS Build
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
