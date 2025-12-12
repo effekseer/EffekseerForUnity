@@ -292,7 +292,7 @@ extern "C"
 		g_UnityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
 	}
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__EMSCRIPTEN__) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__EMSCRIPTEN__) || defined(_SWITCH) || defined(_SWITCH2)
 	// None
 #else
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
