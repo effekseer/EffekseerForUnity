@@ -102,7 +102,7 @@ bool g_maintainGammaColor = false;
 IUnityInterfaces* g_UnityInterfaces = NULL;
 IUnityGraphics* g_UnityGraphics = NULL;
 
-#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(_SWITCH)
+#if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(_SWITCH) || defined(_SWITCH2)
 // TODO adhoc code
 UnityGfxRenderer g_UnityRendererType = kUnityGfxRendererOpenGLES20;
 #else
@@ -263,7 +263,7 @@ extern "C"
 
 #if (defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR))
 		UnityRegisterRenderingPluginV5(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
-#elif defined(__EMSCRIPTEN__) || defined(_SWITCH)
+#elif defined(__EMSCRIPTEN__) || defined(_SWITCH) || defined(_SWITCH2)
 		UnityRegisterRenderingPlugin(EffekseerUnityPluginLoad, EffekseerUnityPluginUnload);
 #else
 		printf("Warning : Check preprocesser.\n");
