@@ -7,5 +7,5 @@ RenderState::RenderState() {}
 
 RenderState::~RenderState() {}
 
-void RenderState::Update(bool forced) { m_active = m_next; }
+void RenderState::Update(bool forced) { active_ = next_; }
 } // namespace EffekseerRendererUnity
