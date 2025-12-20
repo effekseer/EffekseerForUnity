@@ -70,7 +70,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
-	$(LIB_SRC_PATH)/ForceField/ForceFields.cpp \
+	$(LIB_SRC_PATH)/ForceField/Effekseer.ForceFields.cpp \
 	$(LIB_SRC_PATH)/IO/Effekseer.EfkEfcFactory.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
