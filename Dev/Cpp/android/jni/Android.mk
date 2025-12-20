@@ -104,18 +104,19 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/TextureLoader.cpp \
 	$(LIB_SRC_PATH)/ModelLoader.cpp \
 	$(LIB_SRC_PATH)/VertexBuffer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.GpuParticles.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer_Impl.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RenderStateBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RibbonRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
 LOCAL_SRC_FILES += \
