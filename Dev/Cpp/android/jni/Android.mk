@@ -98,7 +98,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/GLSLGenerator/ShaderGenerator.cpp \
 	$(LIB_SRC_PATH)/Common/ShaderGeneratorCommon.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/GraphicsDeviceCPU.cpp \
 	$(LIB_SRC_PATH)/TextureLoader.cpp \
