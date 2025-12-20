@@ -118,7 +118,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRendererGL
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
