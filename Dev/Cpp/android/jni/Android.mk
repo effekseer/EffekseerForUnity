@@ -75,14 +75,18 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialFile.cpp \
-	$(LIB_SRC_PATH)/Model/Model.cpp \
-	$(LIB_SRC_PATH)/Model/ModelLoader.cpp \
-	$(LIB_SRC_PATH)/Model/ProceduralModelGenerator.cpp \
-	$(LIB_SRC_PATH)/Model/SplineGenerator.cpp \
-	$(LIB_SRC_PATH)/Noise/CurlNoise.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.Model.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.ModelLoader.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.ProceduralModelGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.SplineGenerator.cpp \
+	$(LIB_SRC_PATH)/Noise/Effekseer.CurlNoise.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Collisions.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Easing.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.GpuParticlesParameter.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.KillRules.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
-	$(LIB_SRC_PATH)/Parameter/Easing.cpp \
-	$(LIB_SRC_PATH)/Parameter/Rotation.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Rotation.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Trigger.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat43f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat44f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
