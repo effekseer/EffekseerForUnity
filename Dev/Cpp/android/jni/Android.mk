@@ -78,6 +78,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Model/Effekseer.Model.cpp \
 	$(LIB_SRC_PATH)/Model/Effekseer.ModelLoader.cpp \
 	$(LIB_SRC_PATH)/Model/Effekseer.ProceduralModelGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.PointCacheGenerator.cpp \
 	$(LIB_SRC_PATH)/Model/Effekseer.SplineGenerator.cpp \
 	$(LIB_SRC_PATH)/Noise/Effekseer.CurlNoise.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Collisions.cpp \
