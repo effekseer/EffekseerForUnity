@@ -61,43 +61,6 @@ jobs:
           name: Windows
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
-  webgl_1-38:
-    name: WebGL Build with emsdk 1.38
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache emsdk
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ./emsdk
-          key: ${{ runner.os }}-emsdk-1_38-v1
-
-      - name: install emsdk 1.38
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          git clone https://github.com/emscripten-core/emsdk.git -b 3.1.19 --depth 1
-          cd emsdk
-          ./emsdk install sdk-fastcomp-tag-1.38.11-64bit
-          cd ..
-
-      - run: sh scripts/clone_dependencies.sh
-      - run: |
-          ./emsdk/emsdk activate sdk-fastcomp-tag-1.38.11-64bit
-          source ./emsdk/emsdk_env.sh
-          cd ./Dev/Cpp/webgl
-          mkdir build138
-          cd build138
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
-          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/
-      - name: Upload math result for webgl
-        uses: actions/upload-artifact@v4
-        with:
-          name: WebGL_1-38
-          path: ./Dev/Plugin/Assets/Effekseer/Plugins
-
   webgl_2-0-19:
     name: WebGL Build with emsdk 2.0.19
     runs-on: ubuntu-latest
@@ -212,7 +175,7 @@ jobs:
   merge:
     name: merge
     runs-on: ubuntu-latest
-    needs: [android, mac_ios, windows, webgl_1-38,webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
+    needs: [android, mac_ios, windows, webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
     steps:
       - uses: actions/checkout@v4
       - name: Download Android
@@ -233,12 +196,6 @@ jobs:
         with:
           name: Windows
           path: Windows
-
-      - name: Download webgl 1.38
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: WebGL_1-38
-          path: WebGL_1-38
 
       - name: Download webgl 2.0.19
         uses: actions/download-artifact@v4.1.7
@@ -266,7 +223,6 @@ jobs:
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
           cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
-          mv WebGL_1-38/WebGL/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/
           mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
           mv WebGL_3-1-8/WebGL/3.1.8-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
           mv WebGL_3-1-38/WebGL/3.1.38-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
