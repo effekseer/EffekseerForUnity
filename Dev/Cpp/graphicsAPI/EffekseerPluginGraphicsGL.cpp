@@ -5,7 +5,7 @@
 
 #ifdef __EFFEKSEER_FROM_MAIN_CMAKE__
 #else
-#include <EffekseerRenderer/EffekseerRendererGL.MaterialLoader.h>
+#include <EffekseerRendererGL/EffekseerRendererGL.MaterialLoader.h>
 #endif
 
 #include "../common/EffekseerPluginMaterial.h"
