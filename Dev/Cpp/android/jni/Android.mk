@@ -70,19 +70,24 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Vector2D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Vector3D.cpp \
 	$(LIB_SRC_PATH)/Effekseer.WorkerThread.cpp \
-	$(LIB_SRC_PATH)/ForceField/ForceFields.cpp \
+	$(LIB_SRC_PATH)/ForceField/Effekseer.ForceFields.cpp \
 	$(LIB_SRC_PATH)/IO/Effekseer.EfkEfcFactory.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.CompiledMaterial.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialCompiler.cpp \
 	$(LIB_SRC_PATH)/Material/Effekseer.MaterialFile.cpp \
-	$(LIB_SRC_PATH)/Model/Model.cpp \
-	$(LIB_SRC_PATH)/Model/ModelLoader.cpp \
-	$(LIB_SRC_PATH)/Model/ProceduralModelGenerator.cpp \
-	$(LIB_SRC_PATH)/Model/SplineGenerator.cpp \
-	$(LIB_SRC_PATH)/Noise/CurlNoise.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.Model.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.ModelLoader.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.ProceduralModelGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.PointCacheGenerator.cpp \
+	$(LIB_SRC_PATH)/Model/Effekseer.SplineGenerator.cpp \
+	$(LIB_SRC_PATH)/Noise/Effekseer.CurlNoise.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Collisions.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Easing.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.GpuParticlesParameter.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.KillRules.cpp \
 	$(LIB_SRC_PATH)/Parameter/Effekseer.Parameters.cpp \
-	$(LIB_SRC_PATH)/Parameter/Easing.cpp \
-	$(LIB_SRC_PATH)/Parameter/Rotation.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Rotation.cpp \
+	$(LIB_SRC_PATH)/Parameter/Effekseer.Trigger.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat43f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat44f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
@@ -94,30 +99,31 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/GLSLGenerator/ShaderGenerator.cpp \
 	$(LIB_SRC_PATH)/Common/ShaderGeneratorCommon.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/GraphicsDeviceCPU.cpp \
 	$(LIB_SRC_PATH)/TextureLoader.cpp \
 	$(LIB_SRC_PATH)/ModelLoader.cpp \
 	$(LIB_SRC_PATH)/VertexBuffer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.GpuParticles.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.ModelRendererBase.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.Renderer_Impl.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RenderStateBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RibbonRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.RingRendererBase.cpp \
 	$(LIB_SRC_PATH)/EffekseerRenderer.SpriteRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.CommonUtils.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.DDSTextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.PngTextureLoader.cpp \
-	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp
+	$(LIB_SRC_PATH)/EffekseerRenderer.TGATextureLoader.cpp \
+	$(LIB_SRC_PATH)/EffekseerRenderer.TrackRendererBase.cpp
 
-LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer
+LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRendererGL
 LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.DeviceObject.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.GLExtension.cpp \
-	$(LIB_SRC_PATH)/EffekseerRendererGL.GPUTimer.cpp \
+	$(LIB_SRC_PATH)/EffekseerRendererGL.GpuTimer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.MaterialLoader.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.ModelRenderer.cpp \
 	$(LIB_SRC_PATH)/EffekseerRendererGL.Renderer.cpp \

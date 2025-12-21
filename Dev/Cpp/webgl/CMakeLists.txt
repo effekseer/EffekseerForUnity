@@ -1,7 +1,5 @@
-﻿
-project(Effekseer)
-
-cmake_minimum_required(VERSION 3.10)
+﻿project(Effekseer)
+cmake_minimum_required(VERSION 3.15)
 
 
 string(APPEND CMAKE_EXE_LINKER_FLAGS " -s WASM=1")
@@ -52,5 +50,5 @@ list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Ef
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".bc")
 
-add_library(EffekseerUnity SHARED ${effekseer_src} )
+add_library(EffekseerUnity SHARED ${effekseer_src})
 target_compile_features(EffekseerUnity PUBLIC cxx_std_17)

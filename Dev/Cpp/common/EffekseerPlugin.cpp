@@ -36,7 +36,7 @@
 
 #else
 
-#include <EffekseerRenderer.Renderer.h>
+#include <EffekseerRendererCommon/EffekseerRenderer.Renderer.h>
 
 #endif
 
