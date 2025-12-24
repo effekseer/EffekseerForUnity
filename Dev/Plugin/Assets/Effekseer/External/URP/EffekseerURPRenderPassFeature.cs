@@ -192,7 +192,9 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				//passData.prop.colorTargetIdentifier = resourceData.activeColorTexture;
 				//passData.prop.depthTargetIdentifier = resourceData.activeDepthTexture;
 				passData.colorTexture = resourceData.activeColorTexture;
+				builder.UseTexture(passData.colorTexture, AccessFlags.ReadWrite);
 				passData.depthTexture = resourceData.activeDepthTexture;
+				builder.UseTexture(passData.depthTexture, AccessFlags.ReadWrite);
 				passData.prop.colorTargetDescriptor = cameraData.cameraTargetDescriptor;
 
 				// Linear and native renderer makes a result white.
