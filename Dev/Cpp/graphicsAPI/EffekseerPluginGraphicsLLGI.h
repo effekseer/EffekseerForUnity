@@ -11,9 +11,18 @@
 #include "EffekseerRendererPS4.h"
 #endif
 
+#ifdef _PS5
+#include "EffekseerRendererPS5.h"
+#endif
+
 #ifdef _SWITCH
 #include "EffekseerRendererSwitch.h"
 #endif
+
+#ifdef _SWITCH2
+#include "EffekseerRendererSwitch2.h"
+#endif
+
 namespace EffekseerPlugin
 {
 
