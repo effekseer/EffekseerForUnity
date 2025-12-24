@@ -18,8 +18,16 @@
 #include "../PS4/EffekseerPluginGraphicsPS4.h"
 #endif
 
+#ifdef _PS5
+#include "../PS5/EffekseerPluginGraphicsPS5.h"
+#endif
+
 #ifdef _SWITCH
 #include "../switch/EffekseerPluginGraphicsSwitch.h"
+#endif
+
+#ifdef _SWITCH2
+#include "../switch2/EffekseerPluginGraphicsSwitch2.h"
 #endif
 
 #ifdef _XBOXONE
@@ -55,9 +63,21 @@ Graphics* Graphics::Create(UnityGfxRenderer renderer, bool isUnityRenderer, bool
 	}
 #endif
 
+#ifdef _PS5
+	{
+		return new GraphicsPS5();
+	}
+#endif
+
 #ifdef _SWITCH
 	{
 		return new GraphicsSwitch();
+	}
+#endif
+
+#ifdef _SWITCH2
+	{
+		return new GraphicsSwitch2();
 	}
 #endif
 
