@@ -218,7 +218,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 						passData.prop.colorTargetIdentifier = passData.colorTexture;
 						passData.prop.depthTargetIdentifier = passData.depthTexture;
 
-						Effekseer.EffekseerSystem.Instance.renderer.Render(cameraData.camera, passData.prop, commandBuffer, true, passData.blitter);
+						Effekseer.EffekseerSystem.Instance.renderer.Render(cameraData.camera, layerMask.value, passData.prop, commandBuffer, true, passData.blitter);
 					}
 				});
 			}
