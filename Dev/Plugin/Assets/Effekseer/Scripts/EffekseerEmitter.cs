@@ -115,7 +115,25 @@ namespace Effekseer
 		/// </summary>
 		public EffekseerHandle Play(EffekseerEffectAsset effectAsset)
 		{
-			var h = EffekseerSystem.PlayEffect(effectAsset, transform.position);
+			var param = EffekseerPlayEffectParameters.Create(transform.position);
+			Vector3 axis;
+			float angle;
+			transform.rotation.ToAngleAxis(out angle, out axis);
+			if (float.IsNaN(axis.x) || float.IsInfinity(axis.x))
+			{
+				param.SetRotation(new Vector3(0.0f, -1.0f, 0.0f), 360.0f * Mathf.Deg2Rad);
+			}
+			else
+			{
+				param.SetRotation(axis, angle * Mathf.Deg2Rad);
+			}
+
+			var scale = (EmitterScale == EffekseerEmitterScale.Local) ? transform.localScale : transform.lossyScale;
+			param.SetScale(scale);
+			param.SetVisible(shown);
+			param.Speed = speed;
+
+			var h = EffekseerSystem.PlayEffect(effectAsset, param);
 
 			// must run after loading
 			cachedMagnification = effectAsset.Magnification;
@@ -123,9 +141,7 @@ namespace Effekseer
 			ApplyRotationAndScale(ref h);
 
 			h.layer = gameObject.layer;
-			if (speed != 1.0f) h.speed = speed;
 			if (paused) h.paused = paused;
-			if (shown) h.shown = shown;
 			handles.Add(h);
 			return h;
 		}
