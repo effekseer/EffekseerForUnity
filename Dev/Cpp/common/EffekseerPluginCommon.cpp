@@ -187,7 +187,7 @@ extern "C"
 		return 0.0f;
 	}
 
-	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerPlayEffect(Effect* effect, float x, float y, float z)
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API EffekseerPlayEffect(Effect* effect, const EffekseerPlugin::MultiThreadedEffekseerManager::PlayEffectParameters* param)
 	{
 		auto pinned = Effekseer::EffectRef::FromPinned(effect);
 
@@ -197,9 +197,9 @@ extern "C"
 			return -1;
 		}
 
-		if (effect != nullptr)
+		if (effect != nullptr && param != nullptr)
 		{
-			return manager->PlayEffect(effect, x, y, z);
+			return manager->PlayEffect(effect, *param);
 		}
 		return -1;
 	}
@@ -804,6 +804,11 @@ extern "C"
 			{
 				auto effect = ::Effekseer::RefPtr<::Effekseer::Effect>::FromPinned(cmd.Play.EffectPtr);
 				auto eid = manager_->Play(effect, cmd.Play.Position[0], cmd.Play.Position[1], cmd.Play.Position[2]);
+				manager_->SetShown(eid, cmd.Play.Visible != 0);
+				manager_->SetSpeed(eid, cmd.Play.Speed);
+				Vector3D axis(cmd.Play.Rotation[0], cmd.Play.Rotation[1], cmd.Play.Rotation[2]);
+				manager_->SetRotation(eid, axis, cmd.Play.Rotation[3]);
+				manager_->SetScale(eid, cmd.Play.Scale[0], cmd.Play.Scale[1], cmd.Play.Scale[2]);
 				internalHandleToHandle_[cmd.Handle] = eid;
 
 				::Effekseer::RefPtr<::Effekseer::Effect>::Unpin(cmd.Play.EffectPtr);
@@ -980,7 +985,7 @@ extern "C"
 		PushCommand(cmd);
 	}
 
-	int32_t MultiThreadedEffekseerManager::PlayEffect(void* effectPtr, float x, float y, float z)
+	int32_t MultiThreadedEffekseerManager::PlayEffect(void* effectPtr, const PlayEffectParameters& param)
 	{
 		if (effectPtr == nullptr)
 		{
@@ -996,6 +1001,8 @@ extern "C"
 			std::lock_guard<std::mutex> lock(mtx_);
 			auto state = EffectState();
 			state.Effect = pinned;
+			state.Visible = param.Visible != 0;
+			state.Speed = param.Speed;
 			state.DynamicInputs = pinned->GetDefaultDynamicInputs();
 			internalHandleStates_[handle] = state;
 		}
@@ -1006,9 +1013,11 @@ extern "C"
 		cmd.Type = CommandType::Play;
 		cmd.Handle = handle;
 		cmd.Play.EffectPtr = p;
-		cmd.Play.Position[0] = x;
-		cmd.Play.Position[1] = y;
-		cmd.Play.Position[2] = z;
+		cmd.Play.Position = param.Position;
+		cmd.Play.Rotation = param.Rotation;
+		cmd.Play.Scale = param.Scale;
+		cmd.Play.Visible = param.Visible;
+		cmd.Play.Speed = param.Speed;
 		PushCommand(cmd);
 		return handle;
 	}

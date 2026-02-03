@@ -36,6 +36,24 @@ namespace Effekseer
 		/// <returns>再生したエフェクトインスタンス</returns>
 		public static EffekseerHandle PlayEffect(EffekseerEffectAsset effectAsset, Vector3 location)
 		{
+			var param = EffekseerPlayEffectParameters.Create(location);
+			return PlayEffect(effectAsset, param);
+		}
+
+		/// <summary xml:lang="en">
+		/// Plays the effect with parameters.
+		/// </summary>
+		/// <param name="effectAsset" xml:lang="en">Effect asset</param>
+		/// <param name="param" xml:lang="en">Play parameters</param>
+		/// <returns>Played effect instance</returns>
+		/// <summary xml:lang="ja">
+		/// パラメータを指定してエフェクトを再生する。
+		/// </summary>
+		/// <param name="effectAsset" xml:lang="ja">エフェクトアセット</param>
+		/// <param name="param" xml:lang="ja">再生パラメータ</param>
+		/// <returns>再生したエフェクトインスタンス</returns>
+		public static EffekseerHandle PlayEffect(EffekseerEffectAsset effectAsset, EffekseerPlayEffectParameters param)
+		{
 			if (Instance == null)
 			{
 #if UNITY_EDITOR
@@ -61,7 +79,7 @@ namespace Effekseer
 			IntPtr nativeEffect;
 			if (Instance.nativeEffects.TryGetValue(effectAsset.GetInstanceID(), out nativeEffect))
 			{
-				int handle = Plugin.EffekseerPlayEffect(nativeEffect, location.x, location.y, location.z);
+				int handle = Plugin.EffekseerPlayEffect(nativeEffect, ref param);
 				return new EffekseerHandle(handle);
 			}
 			return new EffekseerHandle(-1);
