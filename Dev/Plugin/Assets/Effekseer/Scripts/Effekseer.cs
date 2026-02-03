@@ -64,6 +64,79 @@ namespace Effekseer
 		Unknown,
 	}
 
+	[StructLayout(LayoutKind.Sequential)]
+	public struct EffekseerPlayEffectParameters
+	{
+		public float PositionX;
+		public float PositionY;
+		public float PositionZ;
+		public float RotationAxisX;
+		public float RotationAxisY;
+		public float RotationAxisZ;
+		public float RotationAngle;
+		public float ScaleX;
+		public float ScaleY;
+		public float ScaleZ;
+		public int Visible;
+		public float Speed;
+
+		public static EffekseerPlayEffectParameters Default
+		{
+			get
+			{
+				return new EffekseerPlayEffectParameters
+				{
+					PositionX = 0.0f,
+					PositionY = 0.0f,
+					PositionZ = 0.0f,
+					RotationAxisX = 0.0f,
+					RotationAxisY = 0.0f,
+					RotationAxisZ = 1.0f,
+					RotationAngle = 0.0f,
+					ScaleX = 1.0f,
+					ScaleY = 1.0f,
+					ScaleZ = 1.0f,
+					Visible = 1,
+					Speed = 1.0f,
+				};
+			}
+		}
+
+		public static EffekseerPlayEffectParameters Create(Vector3 position)
+		{
+			var param = Default;
+			param.SetPosition(position);
+			return param;
+		}
+
+		public void SetPosition(Vector3 position)
+		{
+			PositionX = position.x;
+			PositionY = position.y;
+			PositionZ = position.z;
+		}
+
+		public void SetRotation(Vector3 axis, float angle)
+		{
+			RotationAxisX = axis.x;
+			RotationAxisY = axis.y;
+			RotationAxisZ = axis.z;
+			RotationAngle = angle;
+		}
+
+		public void SetScale(Vector3 scale)
+		{
+			ScaleX = scale.x;
+			ScaleY = scale.y;
+			ScaleZ = scale.z;
+		}
+
+		public void SetVisible(bool visible)
+		{
+			Visible = visible ? 1 : 0;
+		}
+	}
+
 	enum ExternalTextureType : int
 	{
 		Background,
@@ -176,7 +249,7 @@ namespace Effekseer
 		public static extern float EffekseerGetEffectMagnification(IntPtr effect);
 
 		[DllImport(pluginName)]
-		public static extern int EffekseerPlayEffect(IntPtr effect, float x, float y, float z);
+		public static extern int EffekseerPlayEffect(IntPtr effect, ref EffekseerPlayEffectParameters param);
 
 		[DllImport(pluginName)]
 		public static extern void EffekseerUpdateHandle(int handle, float deltaDrame);

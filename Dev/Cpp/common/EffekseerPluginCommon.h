@@ -171,6 +171,17 @@ public:
 
 class MultiThreadedEffekseerManager
 {
+public:
+	struct PlayEffectParameters
+	{
+		std::array<float, 3> Position;
+		std::array<float, 4> Rotation;
+		std::array<float, 3> Scale;
+		int32_t Visible;
+		float Speed;
+	};
+
+private:
 	enum class CommandType : int32_t
 	{
 		Update,
@@ -207,6 +218,10 @@ class MultiThreadedEffekseerManager
 			{
 				void* EffectPtr;
 				std::array<float, 3> Position;
+				std::array<float, 4> Rotation;
+				std::array<float, 3> Scale;
+				int32_t Visible;
+				float Speed;
 			} Play;
 
 			struct
@@ -293,7 +308,7 @@ public:
 	void SetPausedToAllEffects(bool paused);
 	void UpdateHandle(int handle, float deltaFrame);
 	void UpdateHandleToMoveToFrame(int handle, float frame);
-	int32_t PlayEffect(void* effectPtr, float x, float y, float z);
+	int32_t PlayEffect(void* effectPtr, const PlayEffectParameters& param);
 	void StopEffect(int32_t handle);
 	void StopRootEffect(int32_t handle);
 	void SendTrigger(int32_t handle, int32_t index);
