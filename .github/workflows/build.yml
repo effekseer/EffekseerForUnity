@@ -16,7 +16,13 @@ jobs:
       - run: sh scripts/clone_dependencies.sh
       - name: build script
         run: |
-          NDK_SDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.3.11579264
+          # Use the oldest available NDK on the runner to avoid hardcoding a missing version.
+          NDK_SDK_ROOT=$(ls -d "$ANDROID_SDK_ROOT"/ndk/* 2>/dev/null | sort -V | head -n 1)
+          if [ -z "$NDK_SDK_ROOT" ]; then
+            echo "NDK not found under $ANDROID_SDK_ROOT/ndk"
+            exit 1
+          fi
+          echo "Using NDK: $NDK_SDK_ROOT"
           cd Dev/Cpp/android
           $NDK_SDK_ROOT/ndk-build clean NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
           $NDK_SDK_ROOT/ndk-build -j4  NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=jni/Application_x86.mk
