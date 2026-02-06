@@ -1005,6 +1005,9 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
+            // Reset render target
+            renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
+
 			// copy back
 			if (EffekseerRendererUtils.IsDistortionEnabled)
 			{

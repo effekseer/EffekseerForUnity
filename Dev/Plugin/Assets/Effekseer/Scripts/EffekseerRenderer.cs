@@ -152,14 +152,7 @@ namespace Effekseer.Internal
 				}
 
 				// restore
-				if (depthTargetIdentifier.HasValue)
-				{
-					blitter.SetRenderTarget(cb, colorTargetIdentifier, depthTargetIdentifier.Value, xrRendering);
-				}
-				else
-				{
-					blitter.SetRenderTarget(cb, colorTargetIdentifier, xrRendering);
-				}
+	            SetDefaultRenderTarget(cb, blitter);
 			}
 		}
 
@@ -204,15 +197,21 @@ namespace Effekseer.Internal
 			}
 
 			// restore
-			if (depthTargetIdentifier.HasValue)
-			{
-				blitter.SetRenderTarget(cb, colorTargetIdentifier, depthTargetIdentifier.Value, xrRendering);
-			}
-			else
-			{
-				blitter.SetRenderTarget(cb, colorTargetIdentifier, xrRendering);
-			}
+            SetDefaultRenderTarget(cb, blitter);
+			
 		}
+
+        internal void SetDefaultRenderTarget(CommandBuffer cb, IEffekseerBlitter blitter)
+        {
+            if (depthTargetIdentifier.HasValue)
+            {
+                blitter.SetRenderTarget(cb, colorTargetIdentifier, depthTargetIdentifier.Value, xrRendering);
+            }
+            else
+            {
+                blitter.SetRenderTarget(cb, colorTargetIdentifier, xrRendering);
+            }
+        }
 
 		Material AllocateBlitArrayMaterial()
 		{
