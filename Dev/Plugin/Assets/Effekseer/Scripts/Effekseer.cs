@@ -67,6 +67,8 @@ namespace Effekseer
 	[StructLayout(LayoutKind.Sequential)]
 	public struct EffekseerPlayEffectParameters
 	{
+		public const int DynamicInputCount = 4;
+
 		public float PositionX;
 		public float PositionY;
 		public float PositionZ;
@@ -79,6 +81,11 @@ namespace Effekseer
 		public float ScaleZ;
 		public int Visible;
 		public float Speed;
+		public float DynamicInput0;
+		public float DynamicInput1;
+		public float DynamicInput2;
+		public float DynamicInput3;
+		public int DynamicInputFlags;
 
 		public static EffekseerPlayEffectParameters Default
 		{
@@ -98,6 +105,11 @@ namespace Effekseer
 					ScaleZ = 1.0f,
 					Visible = 1,
 					Speed = 1.0f,
+					DynamicInput0 = 0.0f,
+					DynamicInput1 = 0.0f,
+					DynamicInput2 = 0.0f,
+					DynamicInput3 = 0.0f,
+					DynamicInputFlags = 0,
 				};
 			}
 		}
@@ -134,6 +146,43 @@ namespace Effekseer
 		public void SetVisible(bool visible)
 		{
 			Visible = visible ? 1 : 0;
+		}
+
+		public void SetDynamicInput(int index, float value)
+		{
+			if (index < 0 || DynamicInputCount <= index)
+			{
+				Debug.LogWarningFormat("[Effekseer] Dynamic input index is out of range. index={0}, valid=0..{1}", index, DynamicInputCount - 1);
+				return;
+			}
+
+			if (index == 0) DynamicInput0 = value;
+			else if (index == 1) DynamicInput1 = value;
+			else if (index == 2) DynamicInput2 = value;
+			else if (index == 3) DynamicInput3 = value;
+
+			DynamicInputFlags |= 1 << index;
+		}
+
+		public bool TryGetDynamicInput(int index, out float value)
+		{
+			value = 0.0f;
+
+			if (index < 0 || DynamicInputCount <= index)
+			{
+				return false;
+			}
+
+			if ((DynamicInputFlags & (1 << index)) == 0)
+			{
+				return false;
+			}
+
+			if (index == 0) value = DynamicInput0;
+			else if (index == 1) value = DynamicInput1;
+			else if (index == 2) value = DynamicInput2;
+			else if (index == 3) value = DynamicInput3;
+			return true;
 		}
 	}
 

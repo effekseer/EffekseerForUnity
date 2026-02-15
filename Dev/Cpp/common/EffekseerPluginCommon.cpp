@@ -809,6 +809,16 @@ extern "C"
 				Vector3D axis(cmd.Play.Rotation[0], cmd.Play.Rotation[1], cmd.Play.Rotation[2]);
 				manager_->SetRotation(eid, axis, cmd.Play.Rotation[3]);
 				manager_->SetScale(eid, cmd.Play.Scale[0], cmd.Play.Scale[1], cmd.Play.Scale[2]);
+
+				constexpr int32_t DynamicInputCount = 4;
+				for (int32_t i = 0; i < DynamicInputCount; i++)
+				{
+					if ((cmd.Play.DynamicInputFlags & (1 << i)) != 0)
+					{
+						manager_->SetDynamicInput(eid, i, cmd.Play.DynamicInputs[i]);
+					}
+				}
+
 				internalHandleToHandle_[cmd.Handle] = eid;
 
 				::Effekseer::RefPtr<::Effekseer::Effect>::Unpin(cmd.Play.EffectPtr);
@@ -1004,6 +1014,18 @@ extern "C"
 			state.Visible = param.Visible != 0;
 			state.Speed = param.Speed;
 			state.DynamicInputs = pinned->GetDefaultDynamicInputs();
+
+			constexpr int32_t DynamicInputCount = 4;
+			const int32_t validDynamicInputFlags = (1 << DynamicInputCount) - 1;
+			const int32_t dynamicInputFlags = param.DynamicInputFlags & validDynamicInputFlags;
+			for (int32_t i = 0; i < DynamicInputCount; i++)
+			{
+				if ((dynamicInputFlags & (1 << i)) != 0)
+				{
+					state.DynamicInputs[i] = param.DynamicInputs[i];
+				}
+			}
+
 			internalHandleStates_[handle] = state;
 		}
 
@@ -1018,6 +1040,8 @@ extern "C"
 		cmd.Play.Scale = param.Scale;
 		cmd.Play.Visible = param.Visible;
 		cmd.Play.Speed = param.Speed;
+		cmd.Play.DynamicInputs = param.DynamicInputs;
+		cmd.Play.DynamicInputFlags = param.DynamicInputFlags;
 		PushCommand(cmd);
 		return handle;
 	}
@@ -1175,6 +1199,12 @@ extern "C"
 
 	void MultiThreadedEffekseerManager::SetDynamicInput(int32_t handle, int index, float value)
 	{
+		constexpr int32_t DynamicInputCount = 4;
+		if (index < 0 || DynamicInputCount <= index)
+		{
+			return;
+		}
+
 		Command cmd;
 		cmd.Type = CommandType::SetDynamicInput;
 		cmd.Handle = handle;
@@ -1283,6 +1313,12 @@ extern "C"
 
 	float MultiThreadedEffekseerManager::GetDynamicInput(int32_t handle, int index)
 	{
+		constexpr int32_t DynamicInputCount = 4;
+		if (index < 0 || DynamicInputCount <= index)
+		{
+			return 0.0f;
+		}
+
 		std::lock_guard<std::mutex> lock(mtx_);
 		auto it = internalHandleStates_.find(handle);
 		if (it != internalHandleStates_.end())

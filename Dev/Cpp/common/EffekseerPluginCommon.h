@@ -179,6 +179,8 @@ public:
 		std::array<float, 3> Scale;
 		int32_t Visible;
 		float Speed;
+		std::array<float, 4> DynamicInputs;
+		int32_t DynamicInputFlags;
 	};
 
 private:
@@ -222,6 +224,8 @@ private:
 				std::array<float, 3> Scale;
 				int32_t Visible;
 				float Speed;
+				std::array<float, 4> DynamicInputs;
+				int32_t DynamicInputFlags;
 			} Play;
 
 			struct
