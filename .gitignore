@@ -45,6 +45,7 @@ Dev/Cpp/webgl/MakeFile
 
 Dev/Plugin/*.sln
 Dev/Plugin/*.csproj
+Dev/build_linux/
 
 Sample/*/Build/
 Sample/*/Assets/Plugins/
