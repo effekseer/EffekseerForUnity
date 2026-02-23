@@ -1,11 +1,15 @@
 
-Currently, UnityPlugin for macOS cannot be notarized due to the circumstances of Unity.
+The macOS Unity plugin (`EffekseerUnity.dylib`) can be notarized in CI.
+In normal usage, users do not need to notarize because maintainers distribute notarized binaries.
+If you build the native plugin by yourself, notarization is required.
 
-現在、macOS向けのUnityPluginはUnityの都合により公証できない状態です。
+macOS向けUnityPlugin（`EffekseerUnity.dylib`）はCIで公証可能です。
+通常は開発側が公証済みバイナリを配布するため、ユーザー側で公証は不要です。
+ただし、ユーザー自身でネイティブプラグインをビルドする場合は、公証が必要です。
 
-Be sure to read this document before using EffekseerForUnity.
+If you need to notarize, please read the documents below.
 
-必ずこのドキュメントを読んだ後に、EffekseerForUnityを使用してください。
+公証をする場合は、下記のドキュメントを読んでください。
 
 - [English](https://github.com/effekseer/EffekseerForUnity/blob/master/docs/MacOS_En.md)
 
