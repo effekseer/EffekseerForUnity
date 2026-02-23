@@ -54,7 +54,8 @@ jobs:
 
   linux:
     name: linux Build
-    runs-on: ubuntu-latest
+    # Keep glibc requirement low for Unity Linux runtime compatibility.
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
