@@ -30,5 +30,7 @@ libtool -static -o libEffekseerUnity_ios_sim.a ../../build_ios_sim/Install/lib/l
 lipo -create libEffekseerUnity_ios.a libEffekseerUnity_ios_sim.a -output libEffekseerUnity.a
 
 # Copy to PluginProject
-cp -rf ../../build_macosx/Install/lib/EffekseerUnity.bundle ../../Plugin/Assets/Effekseer/Plugins/
+rm -rf ../../Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
+mkdir -p ../../Plugin/Assets/Effekseer/Plugins/macOS
+cp -f ../../build_macosx/Install/lib/EffekseerUnity.dylib ../../Plugin/Assets/Effekseer/Plugins/macOS/
 cp libEffekseerUnity.a ../../Plugin/Assets/Effekseer/Plugins/iOS/

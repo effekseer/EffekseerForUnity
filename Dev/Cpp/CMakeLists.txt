@@ -77,10 +77,11 @@ if(APPLE)
     else()
         list(APPEND srcs 
             ${effekseer_gl_src})
-        add_library(EffekseerUnity MODULE
+        add_library(EffekseerUnity SHARED
             ${srcs}
         )
-        set_target_properties(EffekseerUnity PROPERTIES BUNDLE TRUE)
+        # Keep the binary name as EffekseerUnity.dylib for Unity DllImport("EffekseerUnity").
+        set_target_properties(EffekseerUnity PROPERTIES PREFIX "")
     endif()
 
     target_link_libraries(EffekseerUnity PRIVATE
