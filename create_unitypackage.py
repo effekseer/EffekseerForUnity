@@ -5,6 +5,7 @@ import os
 import io
 import argparse
 import os.path
+import posixpath
 import tarfile
 import yaml
 import glob
@@ -32,8 +33,9 @@ def filter_tarinfo(tarinfo):
     return tarinfo
 
 def add_file(tar, metapath):
-    filepath = metapath[0:-5].replace('\\', '/')
-    print(filepath)
+    sourcepath = metapath[0:-5]
+    pathname = sourcepath.replace('\\', '/')
+    print(pathname)
     with open(metapath, 'r') as f:
         try:
             guid = yaml.safe_load(f)['guid']
@@ -44,22 +46,31 @@ def add_file(tar, metapath):
     # dir
     tarinfo = tarfile.TarInfo(guid)
     tarinfo.type = tarfile.DIRTYPE
+    tarinfo.mode = 0o755
+    filter_tarinfo(tarinfo)
     tar.addfile(tarinfo=tarinfo)
 
-    if os.path.isfile(filepath):
-        tar.add(filepath, arcname=os.path.join(guid, 'asset'), filter=filter_tarinfo)
-    tar.add(metapath, arcname=os.path.join(guid, 'asset.meta'), filter=filter_tarinfo)
+    if os.path.isfile(sourcepath):
+        tar.add(sourcepath, arcname=posixpath.join(guid, 'asset'), filter=filter_tarinfo)
+    tar.add(metapath, arcname=posixpath.join(guid, 'asset.meta'), filter=filter_tarinfo)
     # path: {guid}/pathname
     # text: path of asset
-    tarinfo = tarfile.TarInfo(os.path.join(guid, 'pathname'))
-    tarinfo.size= len(filepath)
-    tar.addfile(tarinfo=tarinfo, fileobj=io.BytesIO(filepath.encode('utf8')))
+    pathname_bytes = pathname.encode('utf-8')
+    tarinfo = tarfile.TarInfo(posixpath.join(guid, 'pathname'))
+    tarinfo.mode = 0o644
+    filter_tarinfo(tarinfo)
+    tarinfo.size = len(pathname_bytes)
+    tar.addfile(tarinfo=tarinfo, fileobj=io.BytesIO(pathname_bytes))
 
 with tarfile.open(args.output, 'w:gz') as tar:
     for target in args.targets:
-        add_file(tar, target + '.meta')
+        metapaths = [target + '.meta']
         if args.recursive:
-            for meta in glob.glob(os.path.join(target, '*.meta')):
-                add_file(tar, meta)
-            for meta in glob.glob(os.path.join(target, '**/*.meta'), recursive=True):
-                add_file(tar, meta)
+            metapaths.extend(glob.glob(os.path.join(target, '**/*.meta'), recursive=True))
+
+        seen = set()
+        for metapath in metapaths:
+            if metapath in seen:
+                continue
+            seen.add(metapath)
+            add_file(tar, metapath)
