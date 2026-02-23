@@ -97,6 +97,24 @@ if(APPLE)
     target_compile_options(EffekseerUnity PUBLIC -fembed-bitcode)
 endif()
 
+if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT EMSCRIPTEN)
+    set(srcs
+        ${effekseer_src}
+        ${effekseer_gl_src})
+
+    add_library(EffekseerUnity SHARED
+        ${srcs}
+    )
+
+    target_link_libraries(EffekseerUnity PRIVATE
+        Effekseer
+        EffekseerRendererGL)
+
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(EffekseerUnity PRIVATE
+        ${OPENGL_LIBRARIES})
+endif()
+
 list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/)
 list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/Effekseer/)
 list(APPEND EFK_INCLUDES ../Effekseer/Dev/Cpp/EffekseerRendererCommon/)

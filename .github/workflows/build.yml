@@ -52,6 +52,19 @@ jobs:
           name: mac_iOS
           path: ./Dev/Plugin/Assets/Effekseer/Plugins
 
+  linux:
+    name: linux Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Linux plugin in Docker
+        run: sh ci/build_linux_plugin_in_docker.sh
+      - name: Upload math result for linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux
+          path: ./Dev/Plugin/Assets/Effekseer/Plugins
+
   windows:
     name: windows Build
     runs-on: windows-latest
@@ -181,7 +194,7 @@ jobs:
   merge:
     name: merge
     runs-on: ubuntu-latest
-    needs: [android, mac_ios, windows, webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
+    needs: [android, mac_ios, linux, windows, webgl_2-0-19,webgl_3-1-8,webgl_3-1-38]
     steps:
       - uses: actions/checkout@v4
       - name: Download Android
@@ -196,6 +209,11 @@ jobs:
           name: mac_iOS
           path: mac_iOS
 
+      - name: Download Linux
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: Linux
+          path: Linux
 
       - name: Download mac_ios
         uses: actions/download-artifact@v4.1.7
@@ -232,6 +250,7 @@ jobs:
           mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
           mv WebGL_3-1-8/WebGL/3.1.8-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
           mv WebGL_3-1-38/WebGL/3.1.38-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
+          mv Linux/Linux/x86_64/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Linux/x86_64/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
       - name: Upload math result
