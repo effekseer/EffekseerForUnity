@@ -46,6 +46,8 @@ def add_file(tar, metapath):
     # dir
     tarinfo = tarfile.TarInfo(guid)
     tarinfo.type = tarfile.DIRTYPE
+    tarinfo.mode = 0o755
+    filter_tarinfo(tarinfo)
     tar.addfile(tarinfo=tarinfo)
 
     if os.path.isfile(sourcepath):
@@ -55,6 +57,8 @@ def add_file(tar, metapath):
     # text: path of asset
     pathname_bytes = pathname.encode('utf-8')
     tarinfo = tarfile.TarInfo(posixpath.join(guid, 'pathname'))
+    tarinfo.mode = 0o644
+    filter_tarinfo(tarinfo)
     tarinfo.size = len(pathname_bytes)
     tar.addfile(tarinfo=tarinfo, fileobj=io.BytesIO(pathname_bytes))
 
