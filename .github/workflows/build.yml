@@ -46,6 +46,41 @@ jobs:
       - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
+      - name: Validate notarization secrets on push
+        if: ${{ github.event_name == 'push' }}
+        env:
+          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERT_P12_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
+          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
+          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
+        run: |
+          set -eu
+          required=(
+            APPLE_CERT_P12_BASE64
+            APPLE_CERT_P12_PASSWORD
+            APPLE_SIGNING_IDENTITY
+            APPLE_NOTARY_APPLE_ID
+            APPLE_NOTARY_TEAM_ID
+            APPLE_NOTARY_APP_PASSWORD
+          )
+          for name in "${required[@]}"; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required notarization secret: ${name}"
+              exit 1
+            fi
+          done
+      - name: Sign and notarize macOS dylib
+        if: ${{ github.event_name == 'push' || (secrets.APPLE_CERT_P12_BASE64 != '' && secrets.APPLE_CERT_P12_PASSWORD != '' && secrets.APPLE_SIGNING_IDENTITY != '' && secrets.APPLE_NOTARY_APPLE_ID != '' && secrets.APPLE_NOTARY_TEAM_ID != '' && secrets.APPLE_NOTARY_APP_PASSWORD != '') }}
+        env:
+          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERT_P12_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
+          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
+          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
+        run: bash ci/notarize_macos_dylib.sh Dev/Plugin/Assets/Effekseer/Plugins/macOS/EffekseerUnity.dylib
       - name: Upload ios
         uses: actions/upload-artifact@v4
         with:
@@ -246,7 +281,7 @@ jobs:
           mv Android/Android/libs/x86/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Android/libs/x86/
           mv mac_iOS/iOS/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/iOS/libEffekseerUnity.a
           rm -rf Dev/Plugin/Assets/Effekseer/Plugins/EffekseerUnity.bundle
-          cp -f -r mac_iOS/EffekseerUnity.bundle Dev/Plugin/Assets/Effekseer/Plugins/
+          mv mac_iOS/macOS/EffekseerUnity.dylib Dev/Plugin/Assets/Effekseer/Plugins/macOS/EffekseerUnity.dylib
           mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
           mv WebGL_3-1-8/WebGL/3.1.8-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
           mv WebGL_3-1-38/WebGL/3.1.38-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
