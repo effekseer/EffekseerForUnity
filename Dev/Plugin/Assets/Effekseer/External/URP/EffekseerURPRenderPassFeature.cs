@@ -143,6 +143,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 #endif
 			prop.colorTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+			prop.Viewport = renderingData.cameraData.camera.pixelRect;
 
 			// Linear and native renderer makes a result white.
 			prop.colorTargetDescriptor.sRGB = false;
@@ -196,6 +197,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				passData.depthTexture = resourceData.activeDepthTexture;
 				builder.UseTexture(passData.depthTexture, AccessFlags.ReadWrite);
 				passData.prop.colorTargetDescriptor = cameraData.cameraTargetDescriptor;
+				passData.prop.Viewport = cameraData.camera.pixelRect;
 
 				// Linear and native renderer makes a result white.
 				passData.prop.colorTargetDescriptor.sRGB = false;

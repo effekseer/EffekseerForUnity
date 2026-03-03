@@ -60,28 +60,11 @@ void RenderPassDX12::Begin(RenderSettings& setting, RenderPass* backRenderPass)
 		if (dx12Interface->CommandRecordingState(&recordingState))
 		{
 			EffekseerRendererDX12::BeginCommandList(commandList_, recordingState.commandList);
-
-			// 2021 requires to specify vieports at least
-			D3D12_RECT rects[1];
-			D3D12_VIEWPORT viewports[1];
-			{
-				rects[0].top = 0;
-				rects[0].left = 0;
-				rects[0].right = setting.screenWidth;
-				rects[0].bottom = setting.screenHeight;
-
-				viewports[0].TopLeftX = 0.0f;
-				viewports[0].TopLeftY = 0.0f;
-				viewports[0].Width = static_cast<float>(setting.screenWidth);
-				viewports[0].Height = static_cast<float>(setting.screenHeight);
-				viewports[0].MinDepth = 0.0f;
-				viewports[0].MaxDepth = 1.0f;
-			}
-			recordingState.commandList->RSSetScissorRects(1, rects);
-			recordingState.commandList->RSSetViewports(1, viewports);
+			// Preserve viewport/scissor state set by Unity command buffers.
+			// Overriding here forces a full-screen viewport and breaks Camera.viewportRect.
 		}
 	}
-}
+	}
 
 void RenderPassDX12::End(RenderSettings& setting)
 {

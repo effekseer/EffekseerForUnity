@@ -940,6 +940,42 @@ namespace Effekseer.Internal
 			_renderPathContainer.CleanUp();
 		}
 
+		static bool TryGetViewport(Camera camera, RenderTargetProperty renderTargetProperty, out Rect viewport)
+		{
+			viewport = default;
+
+			if (renderTargetProperty != null &&
+				renderTargetProperty.Viewport.width > 0.0f &&
+				renderTargetProperty.Viewport.height > 0.0f)
+			{
+				viewport = renderTargetProperty.Viewport;
+				return true;
+			}
+
+			if (camera != null &&
+				camera.pixelRect.width > 0.0f &&
+				camera.pixelRect.height > 0.0f)
+			{
+				viewport = camera.pixelRect;
+				return true;
+			}
+
+			return false;
+		}
+
+		static void ApplyViewport(CommandBuffer commandBuffer, Camera camera, RenderTargetProperty renderTargetProperty)
+		{
+			if (commandBuffer == null)
+			{
+				return;
+			}
+
+			if (TryGetViewport(camera, renderTargetProperty, out var viewport))
+			{
+				commandBuffer.SetViewport(viewport);
+			}
+		}
+
 		public void Render(Camera camera)
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
@@ -1005,8 +1041,16 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
-            // Reset render target
-            renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
+			// Reset render target
+			if (renderTargetProperty != null)
+			{
+				renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
+			}
+			else
+			{
+				blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, false);
+			}
+			ApplyViewport(path.commandBuffer, camera, renderTargetProperty);
 
 			// copy back
 			if (EffekseerRendererUtils.IsDistortionEnabled)
@@ -1050,6 +1094,8 @@ namespace Effekseer.Internal
 					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
+
+			ApplyViewport(path.commandBuffer, camera, renderTargetProperty);
 
 			// generate render events on this thread
 			Plugin.EffekseerRenderBack(path.renderId);
@@ -1103,6 +1149,8 @@ namespace Effekseer.Internal
 					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
 				}
 			}
+
+			ApplyViewport(path.commandBuffer, camera, renderTargetProperty);
 
 			Plugin.EffekseerRenderFront(path.renderId);
 

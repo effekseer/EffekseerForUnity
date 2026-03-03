@@ -11,6 +11,42 @@ namespace Effekseer.Internal
 		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
 		private StandardBlitter standardBlitter = new StandardBlitter();
 
+		static bool TryGetViewport(Camera camera, RenderTargetProperty renderTargetProperty, out Rect viewport)
+		{
+			viewport = default;
+
+			if (renderTargetProperty != null &&
+				renderTargetProperty.Viewport.width > 0.0f &&
+				renderTargetProperty.Viewport.height > 0.0f)
+			{
+				viewport = renderTargetProperty.Viewport;
+				return true;
+			}
+
+			if (camera != null &&
+				camera.pixelRect.width > 0.0f &&
+				camera.pixelRect.height > 0.0f)
+			{
+				viewport = camera.pixelRect;
+				return true;
+			}
+
+			return false;
+		}
+
+		static void ApplyViewport(CommandBuffer commandBuffer, Camera camera, RenderTargetProperty renderTargetProperty)
+		{
+			if (commandBuffer == null)
+			{
+				return;
+			}
+
+			if (TryGetViewport(camera, renderTargetProperty, out var viewport))
+			{
+				commandBuffer.SetViewport(viewport);
+			}
+		}
+
 		private class RenderPath : RenderPathBase
 		{
 			Material fakeMaterial = null;
@@ -163,9 +199,11 @@ namespace Effekseer.Internal
 					}
 				}
 
+				ApplyViewport(cmbBuf, camera, renderTargetProperty);
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
 				copyBackground();
+				ApplyViewport(cmbBuf, camera, renderTargetProperty);
 
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 			}
