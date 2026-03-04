@@ -79,7 +79,8 @@ namespace Effekseer.Internal
 		public RenderTargetIdentifier colorTargetIdentifier;
 		public RenderTargetIdentifier? depthTargetIdentifier;
 		public RenderTextureDescriptor colorTargetDescriptor;
-		public Rect Viewport;
+		public Vector2? ActualScreenSize;
+		public Rect? Viewport;
 		public bool isRequiredToChangeViewport = false;
 		public RenderTexture colorTargetRenderTexture = null;
 		public RenderTexture depthTargetRenderTexture = null;
@@ -135,13 +136,15 @@ namespace Effekseer.Internal
 				}
 				else if (renderFeature == RenderFeature.HDRP)
 				{
+					var normalizedArea = new Vector4(
+						Viewport.Value.width / depthTargetRenderTexture.width,
+						Viewport.Value.height / depthTargetRenderTexture.height,
+						Viewport.Value.x / depthTargetRenderTexture.width,
+						Viewport.Value.y / depthTargetRenderTexture.height);
+
 					var m = AllocateBlitArrayMaterial();
 					m.SetTexture("_BackgroundTex", depthTargetRenderTexture);
-					m.SetVector("textureArea", new Vector4(
-						Viewport.width / depthTargetRenderTexture.width,
-						Viewport.height / depthTargetRenderTexture.height,
-						Viewport.x / depthTargetRenderTexture.width,
-						Viewport.y / depthTargetRenderTexture.height));
+					m.SetVector("textureArea", normalizedArea);
 					cb.SetRenderTarget(depthRenderTexture.renderTexture);
 					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
 					cb.Blit(null, depthRenderTexture.renderTexture, m);
@@ -152,7 +155,7 @@ namespace Effekseer.Internal
 				}
 
 				// restore
-	            SetDefaultRenderTarget(cb, blitter);
+				SetDefaultRenderTarget(cb, blitter);
 			}
 		}
 
@@ -160,15 +163,17 @@ namespace Effekseer.Internal
 		{
 			if (isRequiredToChangeViewport)
 			{
+				var normalizedArea = new Vector4(
+						Viewport.Value.width / colorTargetRenderTexture.width,
+						Viewport.Value.height / colorTargetRenderTexture.height,
+						Viewport.Value.x / colorTargetRenderTexture.width,
+						Viewport.Value.y / colorTargetRenderTexture.height);
+
 				if (colorTargetRenderTexture.dimension == TextureDimension.Tex2DArray)
 				{
 					var m = AllocateBlitArrayMaterial();
 					m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
-					m.SetVector("textureArea", new Vector4(
-						Viewport.width / colorTargetRenderTexture.width,
-						Viewport.height / colorTargetRenderTexture.height,
-						Viewport.x / colorTargetRenderTexture.width,
-						Viewport.y / colorTargetRenderTexture.height));
+					m.SetVector("textureArea", normalizedArea);
 					blitter.SetRenderTarget(cb, backgroundRenderTexture.renderTexture, xrRendering);
 					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
 					blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, m, xrRendering);
@@ -177,11 +182,7 @@ namespace Effekseer.Internal
 				{
 					var m = AllocateBlitMaterial();
 					m.SetTexture("_BackgroundTex", colorTargetRenderTexture);
-					m.SetVector("textureArea", new Vector4(
-						Viewport.width / colorTargetRenderTexture.width,
-						Viewport.height / colorTargetRenderTexture.height,
-						Viewport.x / colorTargetRenderTexture.width,
-						Viewport.y / colorTargetRenderTexture.height));
+					m.SetVector("textureArea", normalizedArea);
 					blitter.SetRenderTarget(cb, backgroundRenderTexture.renderTexture, xrRendering);
 					cb.ClearRenderTarget(true, true, new Color(0, 0, 0));
 					blitter.Blit(cb, colorTargetIdentifier, backgroundRenderTexture.renderTexture, m, xrRendering);
@@ -197,21 +198,21 @@ namespace Effekseer.Internal
 			}
 
 			// restore
-            SetDefaultRenderTarget(cb, blitter);
-			
+			SetDefaultRenderTarget(cb, blitter);
+
 		}
 
-        internal void SetDefaultRenderTarget(CommandBuffer cb, IEffekseerBlitter blitter)
-        {
-            if (depthTargetIdentifier.HasValue)
-            {
-                blitter.SetRenderTarget(cb, colorTargetIdentifier, depthTargetIdentifier.Value, xrRendering);
-            }
-            else
-            {
-                blitter.SetRenderTarget(cb, colorTargetIdentifier, xrRendering);
-            }
-        }
+		internal void SetDefaultRenderTarget(CommandBuffer cb, IEffekseerBlitter blitter)
+		{
+			if (depthTargetIdentifier.HasValue)
+			{
+				blitter.SetRenderTarget(cb, colorTargetIdentifier, depthTargetIdentifier.Value, ActualScreenSize, xrRendering);
+			}
+			else
+			{
+				blitter.SetRenderTarget(cb, colorTargetIdentifier, xrRendering);
+			}
+		}
 
 		Material AllocateBlitArrayMaterial()
 		{

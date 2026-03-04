@@ -34,10 +34,13 @@ namespace Effekseer
 			prop.depthTargetRenderTexture = depthBuffer;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.HDRP;
 
-			// TODO : It needs to support VR and override
-			prop.Viewport = hdCamera.camera.pixelRect;
+			var colorRT = colorBuffer.rt;
 
-			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(hdCamera.actualWidth, hdCamera.actualHeight, colorBuffer.rt.format, 0, colorBuffer.rt.mipmapCount);
+			// TODO : It needs to support VR and override
+			prop.ActualScreenSize = new Vector2Int(hdCamera.actualWidth, hdCamera.actualHeight);
+			prop.Viewport = new Rect(0, 0, hdCamera.camera.pixelRect.width, hdCamera.camera.pixelRect.height);
+
+			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(colorRT.width, colorRT.height, colorRT.format, 0, colorRT.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
 			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter);

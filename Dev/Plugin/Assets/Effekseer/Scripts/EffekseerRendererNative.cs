@@ -102,18 +102,18 @@ namespace Effekseer.Internal
 								blitter.Blit(cmbBuf, renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture, renderTargetProperty.xrRendering);
 								cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
 
-								if (renderTargetProperty.Viewport.width > 0)
+								if (renderTargetProperty.Viewport.HasValue)
 								{
-									cmbBuf.SetViewport(renderTargetProperty.Viewport);
+									cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
 								}
 							}
 							else
 							{
 								renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture, blitter);
 
-								if (renderTargetProperty.Viewport.width > 0)
+								if (renderTargetProperty.Viewport.HasValue)
 								{
-									cmbBuf.SetViewport(renderTargetProperty.Viewport);
+									cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
 								}
 							}
 						}
@@ -142,9 +142,9 @@ namespace Effekseer.Internal
 					{
 						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture, blitter);
 
-						if (renderTargetProperty.Viewport.width > 0)
+						if (renderTargetProperty.Viewport.HasValue)
 						{
-							cmbBuf.SetViewport(renderTargetProperty.Viewport);
+							cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
 						}
 					}
 					else
@@ -163,9 +163,19 @@ namespace Effekseer.Internal
 					}
 				}
 
+				if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
+				{
+					cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
+				}
+
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
 
 				copyBackground();
+
+				if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
+				{
+					cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
+				}
 
 				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
 			}

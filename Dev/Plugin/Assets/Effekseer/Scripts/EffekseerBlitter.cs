@@ -8,11 +8,11 @@ namespace Effekseer.Internal
 		void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering);
 		void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material, bool xrRendering);
 		void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, bool xrRendering);
-		void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, bool xrRendering);
+		void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, Vector2? actualScreenSize, bool xrRendering);
 	}
 
 	public class StandardBlitter : IEffekseerBlitter
-	{	
+	{
 		public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 		{
 			cmd.Blit(source, dest);
@@ -35,7 +35,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, bool xrRendering)
+		public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, Vector2? actualScreenSize, bool xrRendering)
 		{
 			if (xrRendering)
 			{
@@ -44,6 +44,11 @@ namespace Effekseer.Internal
 			else
 			{
 				cmd.SetRenderTarget(color, depth);
+
+				if (actualScreenSize.HasValue)
+				{
+					cmd.SetViewport(new Rect(0, 0, actualScreenSize.Value.x, actualScreenSize.Value.y));
+				}
 			}
 		}
 	}

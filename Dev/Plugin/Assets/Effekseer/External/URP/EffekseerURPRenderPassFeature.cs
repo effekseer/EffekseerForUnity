@@ -38,7 +38,7 @@ public class UrpBlitter : IEffekseerBlitter
 		CoreUtils.SetRenderTarget(cmd, color);
 	}
 
-	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, bool xrRendering)
+	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, RenderTargetIdentifier depth, Vector2? actualScreenSize, bool xrRendering)
 	{
 		CoreUtils.SetRenderTarget(cmd, color, depth);
 	}

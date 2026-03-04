@@ -1005,8 +1005,11 @@ namespace Effekseer.Internal
 			// Reset command buffer
 			path.ResetBuffers();
 
-            // Reset render target
-            renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
+			// Reset render target
+			if (renderTargetProperty != null)
+			{
+				renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
+			}
 
 			// copy back
 			if (EffekseerRendererUtils.IsDistortionEnabled)
@@ -1015,9 +1018,9 @@ namespace Effekseer.Internal
 				{
 					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
 
-					if (renderTargetProperty.Viewport.width > 0)
+					if (renderTargetProperty.Viewport.HasValue)
 					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
 					}
 				}
 				else
@@ -1036,9 +1039,9 @@ namespace Effekseer.Internal
 				{
 					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture, blitter);
 
-					if (renderTargetProperty.Viewport.width > 0)
+					if (renderTargetProperty.Viewport.HasValue)
 					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
 					}
 				}
 				else
@@ -1068,6 +1071,11 @@ namespace Effekseer.Internal
 				path.ReallocateComputeBuffer(maxmumSize);
 			}
 
+			if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
+			{
+				path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
+			}
+
 			RenderInternal(path.commandBuffer, path._computeBufferBack, path._materialProps, path._modelBuffers, path._customDataBuffers, path.renderTexture, path.depthTexture);
 
 			// Distortion
@@ -1080,18 +1088,18 @@ namespace Effekseer.Internal
 					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture, renderTargetProperty.xrRendering);
 					blitter.SetRenderTarget(path.commandBuffer, renderTargetProperty.colorBufferID.Value, renderTargetProperty.xrRendering);
 
-					if (renderTargetProperty.Viewport.width > 0)
+					if (renderTargetProperty.Viewport.HasValue)
 					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
 					}
 				}
 				else if (renderTargetProperty != null)
 				{
 					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
 
-					if (renderTargetProperty.Viewport.width > 0)
+					if (renderTargetProperty.Viewport.HasValue)
 					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport);
+						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
 					}
 				}
 				else
@@ -1118,6 +1126,11 @@ namespace Effekseer.Internal
 			while (Plugin.GetUnityRenderParameterCount() > 0 && maxmumSize > path._computeBufferFront.GetCPUData().Length)
 			{
 				path.ReallocateComputeBuffer(maxmumSize);
+			}
+
+			if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
+			{
+				path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
 			}
 
 			RenderInternal(path.commandBuffer, path._computeBufferFront, path._materialProps, path._modelBuffers, path._customDataBuffers, path.renderTexture, path.depthTexture);
