@@ -155,10 +155,6 @@ public:
 	void* InternalPtr = nullptr;
 };
 
-using Vertex = EffekseerRenderer::SimpleVertex;
-using VertexDistortion = EffekseerRenderer::LightingVertex;
-using DynamicVertex = EffekseerRenderer::DynamicVertex;
-
 typedef ::Effekseer::ModelRenderer::NodeParameter efkModelNodeParam;
 typedef ::Effekseer::ModelRenderer::InstanceParameter efkModelInstanceParam;
 typedef ::Effekseer::Vector3D efkVector3D;

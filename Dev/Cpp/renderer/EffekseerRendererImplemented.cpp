@@ -611,7 +611,7 @@ void RendererImplemented::DrawSprites_Unlit(UnityRenderParameter& rp, int32_t sp
 
 	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Unlit)
 	{
-		auto vs = reinterpret_cast<Vertex*>(
+		auto vs = reinterpret_cast<EffekseerRenderer::SimpleVertex*>(
 			const_cast<uint8_t*>(vertex_buffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -665,7 +665,7 @@ void RendererImplemented::DrawSprites_Distortion(UnityRenderParameter& rp, int32
 
 	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::BackDistortion)
 	{
-		auto vs = reinterpret_cast<DynamicVertex*>(
+		auto vs = reinterpret_cast<EffekseerRenderer::LightingVertex*>(
 			const_cast<uint8_t*>(vertex_buffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
@@ -716,7 +716,7 @@ void RendererImplemented::DrawSprites_Lit(UnityRenderParameter& rp, int32_t spri
 
 	if (current_shader_->GetType() == EffekseerRenderer::RendererShaderType::Lit)
 	{
-		auto vs = reinterpret_cast<DynamicVertex*>(
+		auto vs = reinterpret_cast<EffekseerRenderer::LightingVertex*>(
 			const_cast<uint8_t*>(vertex_buffer_.DownCast<EffekseerRendererCPU::Backend::VertexBuffer>()->GetBuffer().data()));
 
 		for (int32_t vi = vertexOffset; vi < vertexOffset + spriteCount * 4; vi++)
