@@ -412,33 +412,65 @@ namespace Effekseer.Internal
 		public Color VColor;
 	}
 
-	internal class EffekseerRendererUnity : IEffekseerRenderer
-	{
-		const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
-		private StandardBlitter standardBlitter = new StandardBlitter();
-
-		class MaterialPropCollection
+		internal class EffekseerRendererUnity : IEffekseerRenderer
 		{
-			List<MaterialPropertyBlock> materialPropBlocks = new List<MaterialPropertyBlock>();
-			int materialPropBlockOffset = 0;
+			const CameraEvent cameraEvent = CameraEvent.AfterForwardAlpha;
+			private StandardBlitter standardBlitter = new StandardBlitter();
 
-			public void Reset()
+			static bool IsScriptableRenderPipelineActive(RenderPipelineAsset currentRenderPipeline)
 			{
-				materialPropBlockOffset = 0;
+				return currentRenderPipeline != null;
 			}
 
-			public MaterialPropertyBlock GetNext()
+			static bool RequiresGlobalBufferFallback()
 			{
-				if (materialPropBlockOffset >= materialPropBlocks.Count)
+#if UNITY_6000_0_OR_NEWER
+				return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan &&
+					IsScriptableRenderPipelineActive(GraphicsSettings.currentRenderPipeline);
+#else
+				return false;
+#endif
+			}
+
+			static void SetBufferProperty(CommandBuffer commandBuffer, MaterialPropertyBlock prop, string name, ComputeBuffer buffer)
+			{
+				prop.SetBuffer(name, buffer);
+
+				// Workaround:
+				// On Unity 6 SRP rendering with Vulkan, buffers bound only through
+				// MaterialPropertyBlock can be treated as unbound for DrawProcedural.
+				// Mirror the binding to a global shader property as well.
+				// Keep this isolated here because it is likely compensating for a
+				// Unity-side issue affecting HDRP/URP paths and may be removable once
+				// Unity fixes it.
+				if (RequiresGlobalBufferFallback())
 				{
-					materialPropBlocks.Add(new MaterialPropertyBlock());
+					commandBuffer.SetGlobalBuffer(name, buffer);
+				}
+			}
+
+			class MaterialPropCollection
+			{
+				List<MaterialPropertyBlock> materialPropBlocks = new List<MaterialPropertyBlock>();
+				int materialPropBlockOffset = 0;
+
+				public void Reset()
+				{
+					materialPropBlockOffset = 0;
 				}
 
-				var ret = materialPropBlocks[materialPropBlockOffset];
-				materialPropBlockOffset++;
-				return ret;
+				public MaterialPropertyBlock GetNext()
+				{
+					if (materialPropBlockOffset >= materialPropBlocks.Count)
+					{
+						materialPropBlocks.Add(new MaterialPropertyBlock());
+					}
+
+					var ret = materialPropBlocks[materialPropBlockOffset];
+					materialPropBlockOffset++;
+					return ret;
+				}
 			}
-		}
 
 		[StructLayout(LayoutKind.Sequential)]
 		struct CustomDataBuffer
@@ -1203,14 +1235,14 @@ namespace Effekseer.Internal
 
 			Debug.Assert(computeBuffer.HasBuffer(parameter.VertexBufferStride));
 			var vertexBuffer = computeBuffer.Get(parameter.VertexBufferStride, false);
-			if (vertexBuffer == null)
+			if (vertexBuffer == null || !vertexBuffer.IsValid())
 			{
 				Debug.LogWarning("Invalid allocation");
 				return;
 			}
 			Debug.Assert(vertexBuffer.IsValid());
 
-			prop.SetBuffer("buf_vertex", vertexBuffer);
+			SetBufferProperty(commandBuffer, prop, "buf_vertex", vertexBuffer);
 
 			prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 			prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
@@ -1222,14 +1254,14 @@ namespace Effekseer.Internal
 			if (isAdvanced)
 			{
 				var bufAd = computeBuffer.Get(sizeof(Effekseer.Plugin.AdvancedVertexParameter), false);
-				if (bufAd == null)
+				if (bufAd == null || !bufAd.IsValid())
 				{
 					Debug.LogWarning("Invalid allocation");
 					return;
 				}
 				Debug.Assert(bufAd.IsValid());
 
-				prop.SetBuffer("buf_ad", bufAd);
+				SetBufferProperty(commandBuffer, prop, "buf_ad", bufAd);
 				prop.SetFloat("buf_ad_offset", parameter.AdvancedDataOffset / sizeof(Effekseer.Plugin.AdvancedVertexParameter));
 
 				ApplyAdvancedParameter(parameter, prop);
@@ -1409,17 +1441,44 @@ namespace Effekseer.Internal
 				ApplyReconstructionParameter(parameter, prop);
 				prop.SetVector("softParticleParam", parameter.SoftParticleParam);
 
-				prop.SetBuffer("buf_model_parameter", computeBuf1);
+				if (computeBuf1 == null || !computeBuf1.IsValid())
+				{
+					Debug.LogWarning("Invalid allocation");
+					offset += allocated;
+					count -= allocated;
+					continue;
+				}
+
+				SetBufferProperty(commandBuffer, prop, "buf_model_parameter", computeBuf1);
 
 				if (isAdvanced)
 				{
-					prop.SetBuffer("buf_model_parameter2", computeBuf2);
+					if (computeBuf2 == null || !computeBuf2.IsValid())
+					{
+						Debug.LogWarning("Invalid allocation");
+						offset += allocated;
+						count -= allocated;
+						continue;
+					}
+
+					SetBufferProperty(commandBuffer, prop, "buf_model_parameter2", computeBuf2);
 				}
 
-				prop.SetBuffer("buf_vertex", model.VertexBuffer);
-				prop.SetBuffer("buf_index", model.IndexBuffer);
-				prop.SetBuffer("buf_vertex_offsets", model.VertexOffsets);
-				prop.SetBuffer("buf_index_offsets", model.IndexOffsets);
+				if (model.VertexBuffer == null || !model.VertexBuffer.IsValid() ||
+					model.IndexBuffer == null || !model.IndexBuffer.IsValid() ||
+					model.VertexOffsets == null || !model.VertexOffsets.IsValid() ||
+					model.IndexOffsets == null || !model.IndexOffsets.IsValid())
+				{
+					Debug.LogWarning("Invalid allocation");
+					offset += allocated;
+					count -= allocated;
+					continue;
+				}
+
+				SetBufferProperty(commandBuffer, prop, "buf_vertex", model.VertexBuffer);
+				SetBufferProperty(commandBuffer, prop, "buf_index", model.IndexBuffer);
+				SetBufferProperty(commandBuffer, prop, "buf_vertex_offsets", model.VertexOffsets);
+				SetBufferProperty(commandBuffer, prop, "buf_index_offsets", model.IndexOffsets);
 
 				prop.SetVector("mUVInversed", new Vector4(1.0f, -1.0f, 0.0f, 0.0f));
 				prop.SetVector("mUVInversedBack", new Vector4(0.0f, 1.0f, 0.0f, 0.0f));
@@ -1491,7 +1550,7 @@ namespace Effekseer.Internal
 						ComputeBuffer cb = null;
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, count, ref cb);
 						if (all != allocated) throw new Exception();
-						prop.SetBuffer("buf_customData1", cb);
+						SetBufferProperty(commandBuffer, prop, "buf_customData1", cb);
 					}
 
 					if (efkMaterial.asset.CustomData2Count > 0)
@@ -1499,7 +1558,7 @@ namespace Effekseer.Internal
 						ComputeBuffer cb = null;
 						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, count, ref cb);
 						if (all != allocated) throw new Exception();
-						prop.SetBuffer("buf_customData2", cb);
+						SetBufferProperty(commandBuffer, prop, "buf_customData2", cb);
 					}
 
 					if (parameter.IsRefraction > 0 && background != null)
