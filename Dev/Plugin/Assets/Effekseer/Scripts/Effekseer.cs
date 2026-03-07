@@ -440,7 +440,8 @@ namespace Effekseer
 			public Vector3 Normal;
 			public Vector3 Binormal;
 			public Vector3 Tangent;
-			public Vector2 UV;
+			public Vector2 UV1;
+			public Vector2 UV2;
 			public Color32 VColor;
 		}
 

@@ -153,15 +153,15 @@ namespace Effekseer.Internal
 			for (int i = 0; i < verteciesCount; i++)
 			{
 				vertexBuffer.Add(
-					new Vertex
-					{
-						Position = vertecies[i].Position,
-						Normal = vertecies[i].Normal,
-						Binormal = vertecies[i].Binormal,
-						Tangent = vertecies[i].Tangent,
-						UV = vertecies[i].UV,
-						VColor = new Color(vertecies[i].VColor.r / 255.0f, vertecies[i].VColor.g / 255.0f, vertecies[i].VColor.b / 255.0f, vertecies[i].VColor.a / 255.0f)
-					});
+						new Vertex
+						{
+							Position = vertecies[i].Position,
+							Normal = vertecies[i].Normal,
+							Binormal = vertecies[i].Binormal,
+							Tangent = vertecies[i].Tangent,
+							UV = vertecies[i].UV1,
+							VColor = new Color(vertecies[i].VColor.r / 255.0f, vertecies[i].VColor.g / 255.0f, vertecies[i].VColor.b / 255.0f, vertecies[i].VColor.a / 255.0f)
+						});
 			}
 
 			for (int i = 0; i < facesCount; i++)
@@ -195,16 +195,20 @@ namespace Effekseer.Internal
 
 		public unsafe void Initialize(byte[] buffer)
 		{
-			int sizeEffekseerVertex = 4 * 15;
-
 			int version = 0;
 			int offset = 0;
 			version = BitConverter.ToInt32(buffer, offset);
 			offset += sizeof(int);
 
+			int sizeEffekseerVertex = Marshal.SizeOf<InternalVertexV1>();
+
 			if (version < 1)
 			{
-				sizeEffekseerVertex -= 4;
+				sizeEffekseerVertex = Marshal.SizeOf<InternalVertexV0>();
+			}
+			else if (version >= 6)
+			{
+				sizeEffekseerVertex = Marshal.SizeOf<InternalVertexV6>();
 			}
 
 			if (version == 2 || version >= 5)
@@ -295,17 +299,39 @@ namespace Effekseer.Internal
 						}
 					}
 				}
-				else
+				else if (version >= 6)
 				{
 					fixed (byte* vs_ = &buffer[offset])
 					{
-						InternalVertex* vs = (InternalVertex*)vs_;
+						InternalVertexV6* vs = (InternalVertexV6*)vs_;
 
 						for (int vi = 0; vi < vertexCount; vi++)
 						{
 							Vertex v;
 							v.Position = vs[vi].Position;
-							v.UV = vs[vi].UV;
+							v.UV = vs[vi].UV1;
+							v.Normal = vs[vi].Normal;
+							v.Tangent = vs[vi].Tangent;
+							v.Binormal = vs[vi].Binormal;
+							v.VColor.r = vs[vi].VColor.r / 255.0f;
+							v.VColor.g = vs[vi].VColor.g / 255.0f;
+							v.VColor.b = vs[vi].VColor.b / 255.0f;
+							v.VColor.a = vs[vi].VColor.a / 255.0f;
+							vertex.Add(v);
+						}
+					}
+				}
+				else
+				{
+					fixed (byte* vs_ = &buffer[offset])
+					{
+						InternalVertexV1* vs = (InternalVertexV1*)vs_;
+
+						for (int vi = 0; vi < vertexCount; vi++)
+						{
+							Vertex v;
+							v.Position = vs[vi].Position;
+							v.UV = vs[vi].UV1;
 							v.Normal = vs[vi].Normal;
 							v.Tangent = vs[vi].Tangent;
 							v.Binormal = vs[vi].Binormal;
@@ -381,13 +407,25 @@ namespace Effekseer.Internal
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	struct InternalVertex
+	struct InternalVertexV1
 	{
 		public Vector3 Position;
 		public Vector3 Normal;
 		public Vector3 Binormal;
 		public Vector3 Tangent;
-		public Vector2 UV;
+		public Vector2 UV1;
+		public Color32 VColor;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	struct InternalVertexV6
+	{
+		public Vector3 Position;
+		public Vector3 Normal;
+		public Vector3 Binormal;
+		public Vector3 Tangent;
+		public Vector2 UV1;
+		public Vector2 UV2;
 		public Color32 VColor;
 	}
 
