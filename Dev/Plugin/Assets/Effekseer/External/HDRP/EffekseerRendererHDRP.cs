@@ -18,7 +18,12 @@ namespace Effekseer
 
 		public EffekseerRenderPassHDRP()
 		{
-
+#if UNITY_6000_0_OR_NEWER
+			// Effekseer rebinds the camera depth explicitly during execution, so the
+			// HDRP custom pass itself doesn't need to declare Camera depth here.
+			targetColorBuffer = TargetBuffer.Camera;
+			targetDepthBuffer = TargetBuffer.None;
+#endif
 		}
 
 		protected override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
@@ -48,7 +53,15 @@ namespace Effekseer
 
 			// TODO : It needs to support VR and override
 			prop.ActualScreenSize = new Vector2Int(hdCamera.actualWidth, hdCamera.actualHeight);
+			prop.SourceViewport = hdCamera.camera.pixelRect;
+#if UNITY_6000_0_OR_NEWER
+			// HDRP keeps the full-resolution RT allocated and shrinks the active viewport when
+			// dynamic resolution is enabled, so keep the render viewport and the source
+			// sampling viewport separate.
+			prop.Viewport = new Rect(0, 0, hdCamera.actualWidth, hdCamera.actualHeight);
+#else
 			prop.Viewport = new Rect(0, 0, hdCamera.camera.pixelRect.width, hdCamera.camera.pixelRect.height);
+#endif
 
 			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(colorRT.width, colorRT.height, colorRT.format, 0, colorRT.mipmapCount);
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
