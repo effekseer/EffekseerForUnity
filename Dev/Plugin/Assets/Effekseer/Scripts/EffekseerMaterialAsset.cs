@@ -114,6 +114,9 @@ namespace Effekseer
 			Gradient = 0,
 			Noise = 1,
 			Light = 2,
+			LocalTime = 3,
+			Hsv = 4,
+			ParticleTime = 5,
 		}
 
 		public class ImportingAsset
@@ -381,13 +384,20 @@ namespace Effekseer
 			{
 				functions += ShaderGenerator.gradientTemplate;
 			}
-			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Noise))
+
+			if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Noise))
 			{
 				functions += ShaderGenerator.noiseTemplate;
 			}
-			else if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Light))
+
+			if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Light))
 			{
 				functions += lightTemplate;
+			}
+
+			if (importingAsset.MaterialRequiredFunctionTypes.Contains(MaterialRequiredFunctionType.Hsv))
+			{
+				functions += ShaderGenerator.hsvTemplate;
 			}
 
 			foreach (var gradient in importingAsset.FixedGradients)
@@ -467,14 +477,14 @@ namespace Effekseer
 			{
 				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float4> buf_customData1;"));
 				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD7;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD8;", importingAsset.CustomData1Count));
 			}
 
 			if (importingAsset.CustomData2Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float4> buf_customData2;"));
 				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD8;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD9;", importingAsset.CustomData2Count));
 			}
 
 			// change return codes
@@ -632,6 +642,19 @@ Cull[_Cull]
 			float4 Color;
 			int Time;
 		};
+
+		struct ModelParameter2
+		{
+			float4 AlphaUV;
+			float4 DistortionUV;
+			float4 BlendUV;
+			float4 BlendAlphaUV;
+			float4 BlendDistortionUV;
+			float FlipbookIndexAndNextRate;
+			float AlphaThreshold;
+			float ViewOffsetDistance;
+			float2 ParticleTime;
+		};
 	
 		//%CUSTOM_BUF1%
 		//%CUSTOM_BUF2%
@@ -640,6 +663,7 @@ Cull[_Cull]
 		StructuredBuffer<int> buf_index;
 	
 		StructuredBuffer<ModelParameter> buf_model_parameter;
+		StructuredBuffer<ModelParameter2> buf_model_parameter2;
 		StructuredBuffer<int> buf_vertex_offsets;
 		StructuredBuffer<int> buf_index_offsets;
 
@@ -653,6 +677,7 @@ Cull[_Cull]
 			float3 Tangent;
 			float2 UV1;
 			float2 UV2;
+			float2 ParticleTime;
 			//%CUSTOM_VS_INPUT1%
 			//%CUSTOM_VS_INPUT2%
 		};
@@ -673,6 +698,7 @@ Cull[_Cull]
 			float3 WorldT : TEXCOORD4;
 			float3 WorldB : TEXCOORD5;
 			float4 PosP : TEXCOORD6;
+			float2 ParticleTime : TEXCOORD7;
 			//float2 ScreenUV : TEXCOORD6;
 			//%CUSTOM_VSPS_INOUT1%
 			//%CUSTOM_VSPS_INOUT2%
@@ -726,6 +752,7 @@ Cull[_Cull]
 			float4x4 buf_matrix = buf_model_parameter[inst].Mat;
 			float4 buf_uv = buf_model_parameter[inst].UV;
 			float4 buf_color = buf_model_parameter[inst].Color;
+			float2 particleTime = buf_model_parameter2[inst].ParticleTime;
 			float buf_vertex_offset = buf_vertex_offsets[buf_model_parameter[inst].Time];
 			float buf_index_offset = buf_index_offsets[buf_model_parameter[inst].Time];
 	
@@ -796,6 +823,8 @@ Cull[_Cull]
 			float4 vcolor = Input.Color * buf_color;
 			@else
 			float4 vcolor = Input.Color;
+			Output.ParticleTime = Input.ParticleTime;
+			float2 particleTime = Input.ParticleTime;
 			@endif
 
 			// Dummy
@@ -816,6 +845,7 @@ Cull[_Cull]
 			Output.UV1 = uv1;
 			Output.UV2 = uv2;
 			Output.PosP = Output.Position;
+			Output.ParticleTime = particleTime;
 			// Output.ScreenUV = Output.Position.xy / Output.Position.w;
 			// Output.ScreenUV.xy = float2(Output.ScreenUV.x + 1.0, 1.0 - Output.ScreenUV.y) * 0.5;
 		
@@ -881,7 +911,7 @@ Cull[_Cull]
 		
 		@endif
 		
-		float4 frag(ps_input Input) : COLOR
+		float4 frag(ps_input Input, bool face : SV_IsFrontFace) : COLOR
 		{
 			// Unity
 			float4 cameraPosition = float4(_WorldSpaceCameraPos, 1.0);
@@ -899,6 +929,8 @@ Cull[_Cull]
 			float2 screenUV = Input.PosP.xy / Input.PosP.w;
 			float meshZ =  Input.PosP.z / Input.PosP.w;
 			screenUV.xy = float2(screenUV.x + 1.0, 1.0 - screenUV.y) * 0.5;
+			float2 particleTime = Input.ParticleTime;
+			bool isFrontFace = face;
 
 			float3 objectScale = float3(1.0, 1.0, 1.0);
 		

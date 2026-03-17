@@ -1466,6 +1466,7 @@ namespace Effekseer.Internal
 				var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedUnlit;
+				var requiresModelParameter2 = isAdvanced || parameter.MaterialType == Plugin.RendererMaterialType.Material;
 
 				if (isAdvanced)
 				{
@@ -1489,7 +1490,7 @@ namespace Effekseer.Internal
 
 				SetBufferProperty(commandBuffer, prop, "buf_model_parameter", computeBuf1);
 
-				if (isAdvanced)
+				if (requiresModelParameter2)
 				{
 					if (computeBuf2 == null || !computeBuf2.IsValid())
 					{
