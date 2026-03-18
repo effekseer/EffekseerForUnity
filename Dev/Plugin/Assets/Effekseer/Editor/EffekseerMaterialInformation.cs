@@ -49,15 +49,16 @@ namespace Effekseer.Editor.Utils
 		InvalidFormat,
 	}
 
-	public enum MaterialVersion : int
-	{
-		Version0 = 0,
-		Version15 = 3,
-		Version16 = 1610,
-		Version17Alpha2 = 1700,
-		Version17Alpha4 = 1703,
-		Version17 = 1710,
-	}
+		public enum MaterialVersion : int
+		{
+			Version0 = 0,
+			Version15 = 3,
+			Version16 = 1610,
+			Version17Alpha2 = 1700,
+			Version17Alpha4 = 1703,
+			Version17 = 1710,
+			Version18 = 1800,
+		}
 
 	public enum CompiledMaterialVersion : int
 	{
@@ -553,7 +554,7 @@ namespace Effekseer.Editor.Utils
 
 	public class MaterialInformation
 	{
-		const MaterialVersion LatestSupportVersion = MaterialVersion.Version17;
+		const MaterialVersion LatestSupportVersion = MaterialVersion.Version18;
 
 		public MaterialVersion Version = MaterialVersion.Version17;
 
@@ -654,19 +655,31 @@ namespace Effekseer.Editor.Utils
 
 					var reader = new BinaryReader(temp);
 
-					int count = 0;
-					reader.Get(ref count);
-
-					for (int i = 0; i < count; i++)
+					if (version >= (int)MaterialVersion.Version18)
 					{
-						int lang = 0;
 						string name = null;
 						string desc = null;
-						reader.Get(ref lang);
 						reader.Get(ref name, Encoding.UTF8);
 						reader.Get(ref desc, Encoding.UTF8);
-						Names.Add((Language)lang, name);
-						Descriptions.Add((Language)lang, desc);
+						Names[Language.English] = name;
+						Descriptions[Language.English] = desc;
+					}
+					else
+					{
+						int count = 0;
+						reader.Get(ref count);
+
+						for (int i = 0; i < count; i++)
+						{
+							int lang = 0;
+							string name = null;
+							string desc = null;
+							reader.Get(ref lang);
+							reader.Get(ref name, Encoding.UTF8);
+							reader.Get(ref desc, Encoding.UTF8);
+							Names.Add((Language)lang, name);
+							Descriptions.Add((Language)lang, desc);
+						}
 					}
 				}
 
@@ -850,6 +863,51 @@ namespace Effekseer.Editor.Utils
 
 						for (int j = 0; j < customDataCount; j++)
 						{
+							if (version >= (int)MaterialVersion.Version18)
+							{
+								string name = null;
+								string desc = null;
+								reader.Get(ref name, Encoding.UTF8);
+								reader.Get(ref desc, Encoding.UTF8);
+								CustomData[j].Summaries[Language.English] = name;
+								CustomData[j].Descriptions[Language.English] = desc;
+							}
+							else
+							{
+								int count = 0;
+								reader.Get(ref count);
+
+								for (int i = 0; i < count; i++)
+								{
+									int lang = 0;
+									string name = null;
+									string desc = null;
+									reader.Get(ref lang);
+									reader.Get(ref name, Encoding.UTF8);
+									reader.Get(ref desc, Encoding.UTF8);
+									CustomData[j].Summaries.Add((Language)lang, name);
+									CustomData[j].Descriptions.Add((Language)lang, desc);
+								}
+							}
+						}
+					}
+
+					int textureCount = 0;
+					reader.Get(ref textureCount);
+
+					for (int j = 0; j < textureCount; j++)
+					{
+						if (version >= (int)MaterialVersion.Version18)
+						{
+							string name = null;
+							string desc = null;
+							reader.Get(ref name, Encoding.UTF8);
+							reader.Get(ref desc, Encoding.UTF8);
+							Textures[j].Summaries[Language.English] = name;
+							Textures[j].Descriptions[Language.English] = desc;
+						}
+						else
+						{
 							int count = 0;
 							reader.Get(ref count);
 
@@ -861,30 +919,9 @@ namespace Effekseer.Editor.Utils
 								reader.Get(ref lang);
 								reader.Get(ref name, Encoding.UTF8);
 								reader.Get(ref desc, Encoding.UTF8);
-								CustomData[j].Summaries.Add((Language)lang, name);
-								CustomData[j].Descriptions.Add((Language)lang, desc);
+								Textures[j].Summaries.Add((Language)lang, name);
+								Textures[j].Descriptions.Add((Language)lang, desc);
 							}
-						}
-					}
-
-					int textureCount = 0;
-					reader.Get(ref textureCount);
-
-					for (int j = 0; j < textureCount; j++)
-					{
-						int count = 0;
-						reader.Get(ref count);
-
-						for (int i = 0; i < count; i++)
-						{
-							int lang = 0;
-							string name = null;
-							string desc = null;
-							reader.Get(ref lang);
-							reader.Get(ref name, Encoding.UTF8);
-							reader.Get(ref desc, Encoding.UTF8);
-							Textures[j].Summaries.Add((Language)lang, name);
-							Textures[j].Descriptions.Add((Language)lang, desc);
 						}
 					}
 
@@ -893,19 +930,31 @@ namespace Effekseer.Editor.Utils
 
 					for (int j = 0; j < uniformCount; j++)
 					{
-						int count = 0;
-						reader.Get(ref count);
-
-						for (int i = 0; i < count; i++)
+						if (version >= (int)MaterialVersion.Version18)
 						{
-							int lang = 0;
 							string name = null;
 							string desc = null;
-							reader.Get(ref lang);
 							reader.Get(ref name, Encoding.UTF8);
 							reader.Get(ref desc, Encoding.UTF8);
-							Uniforms[j].Summaries.Add((Language)lang, name);
-							Uniforms[j].Descriptions.Add((Language)lang, desc);
+							Uniforms[j].Summaries[Language.English] = name;
+							Uniforms[j].Descriptions[Language.English] = desc;
+						}
+						else
+						{
+							int count = 0;
+							reader.Get(ref count);
+
+							for (int i = 0; i < count; i++)
+							{
+								int lang = 0;
+								string name = null;
+								string desc = null;
+								reader.Get(ref lang);
+								reader.Get(ref name, Encoding.UTF8);
+								reader.Get(ref desc, Encoding.UTF8);
+								Uniforms[j].Summaries.Add((Language)lang, name);
+								Uniforms[j].Descriptions.Add((Language)lang, desc);
+							}
 						}
 					}
 
@@ -916,19 +965,31 @@ namespace Effekseer.Editor.Utils
 
 						for (int j = 0; j < gradientCount; j++)
 						{
-							int count = 0;
-							reader.Get(ref count);
-
-							for (int i = 0; i < count; i++)
+							if (version >= (int)MaterialVersion.Version18)
 							{
-								int lang = 0;
 								string name = null;
 								string desc = null;
-								reader.Get(ref lang);
 								reader.Get(ref name, Encoding.UTF8);
 								reader.Get(ref desc, Encoding.UTF8);
-								Gradients[j].Summaries.Add((Language)lang, name);
-								Gradients[j].Descriptions.Add((Language)lang, desc);
+								Gradients[j].Summaries[Language.English] = name;
+								Gradients[j].Descriptions[Language.English] = desc;
+							}
+							else
+							{
+								int count = 0;
+								reader.Get(ref count);
+
+								for (int i = 0; i < count; i++)
+								{
+									int lang = 0;
+									string name = null;
+									string desc = null;
+									reader.Get(ref lang);
+									reader.Get(ref name, Encoding.UTF8);
+									reader.Get(ref desc, Encoding.UTF8);
+									Gradients[j].Summaries.Add((Language)lang, name);
+									Gradients[j].Descriptions.Add((Language)lang, desc);
+								}
 							}
 						}
 					}

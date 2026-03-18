@@ -64,13 +64,17 @@ namespace Effekseer.Editor
 				{
 					EffekseerCurveAsset.CreateAsset(assetPath);
 				}
-				if (Path.GetExtension(assetPath) == ".efkmat")
-				{
-					EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
-					importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
-					importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
-					var info = new Effekseer.Editor.Utils.MaterialInformation();
-					info.Load(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath));
+					if (Path.GetExtension(assetPath) == ".efkmat")
+					{
+						EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
+						importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
+						importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
+						var info = new Effekseer.Editor.Utils.MaterialInformation();
+						if (!info.Load(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath)))
+						{
+							UnityEngine.Debug.LogError("Failed to load Effekseer material: " + assetPath);
+							continue;
+						}
 
 					importingAsset.CustomData1Count = info.CustomData1Count;
 					importingAsset.CustomData2Count = info.CustomData2Count;
