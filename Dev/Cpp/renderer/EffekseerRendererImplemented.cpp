@@ -1029,7 +1029,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
 		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
 		modelParameter.AlphaThreshold = alphaThresholds[i];
-		modelParameter.ViewOffsetDistance = viewOffsetDistances[i];
+		modelParameter.ViewOffsetDistance = 0.0f;
 		modelParameter.ParticleTime[0] = particleTimes[i][0];
 		modelParameter.ParticleTime[1] = particleTimes[i][1];
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
@@ -1128,3 +1128,6 @@ StrideBufferParameter RendererImplemented::GetStrideBufferParameter(int32_t inde
 }
 
 } // namespace EffekseerRendererUnity
+
+
+
