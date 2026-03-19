@@ -274,8 +274,8 @@ protected:
 		dst.UV1[1] = v.UV1[1];
 		dst.UV2[0] = v.UV2[0];
 		dst.UV2[1] = v.UV2[1];
-		dst.ParticleTime[0] = v.ParticleTimes[0];
-		dst.ParticleTime[1] = v.ParticleTimes[1];
+		dst.ParticleTime[0] = 0.0f;
+		dst.ParticleTime[1] = 0.0f;
 		dst.Col[0] = v.Col.R / 255.0f;
 		dst.Col[1] = v.Col.G / 255.0f;
 		dst.Col[2] = v.Col.B / 255.0f;

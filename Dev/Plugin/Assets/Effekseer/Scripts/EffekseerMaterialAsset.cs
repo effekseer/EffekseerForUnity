@@ -301,10 +301,12 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F2$", "float2");
 			baseCode = baseCode.Replace("$F3$", "float3");
 			baseCode = baseCode.Replace("$F4$", "float4");
-			baseCode = baseCode.Replace("$TIME$", "_Time.y");
-			baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
-			baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
-			baseCode = baseCode.Replace("$UV$", "uv");
+				baseCode = baseCode.Replace("$TIME$", "_Time.y");
+				baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
+				baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
+				baseCode = baseCode.Replace("$PARTICLE_TIME_NORMALIZED$", "particleTime.x");
+				baseCode = baseCode.Replace("$PARTICLE_TIME_SECONDS$", "particleTime.y");
+				baseCode = baseCode.Replace("$UV$", "uv");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
 
@@ -828,6 +830,7 @@ Cull[_Cull]
 			@endif
 
 			// Dummy
+			bool isFrontFace = false;
 			float2 screenUV = float2(0.0, 0.0);
 			float meshZ =  0.0f;
 
