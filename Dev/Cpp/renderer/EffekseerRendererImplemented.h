@@ -194,6 +194,7 @@ struct UnityDynamicVertex
 	::Effekseer::Vector3D Tangent;
 	float UV1[2];
 	float UV2[2];
+	float ParticleTime[2];
 };
 
 struct AdvancedVertexParameter
@@ -273,6 +274,8 @@ protected:
 		dst.UV1[1] = v.UV1[1];
 		dst.UV2[0] = v.UV2[0];
 		dst.UV2[1] = v.UV2[1];
+		dst.ParticleTime[0] = 0.0f;
+		dst.ParticleTime[1] = 0.0f;
 		dst.Col[0] = v.Col.R / 255.0f;
 		dst.Col[1] = v.Col.G / 255.0f;
 		dst.Col[2] = v.Col.B / 255.0f;
@@ -415,6 +418,7 @@ public:
 				   std::vector<float>& alphaThresholds,
 				   std::vector<Effekseer::Color>& colors,
 				   std::vector<int32_t>& times,
+				   std::vector<std::array<float, 2>>& particleTimes,
 				   std::vector<std::array<float, 4>>& customData1,
 				   std::vector<std::array<float, 4>>& customData2);
 
@@ -439,3 +443,5 @@ public:
 };
 
 } // namespace EffekseerRendererUnity
+
+

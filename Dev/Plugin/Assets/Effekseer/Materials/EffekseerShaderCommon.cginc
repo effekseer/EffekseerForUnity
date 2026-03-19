@@ -14,6 +14,7 @@ struct SpriteLitDistMatVertex
 	float3 Tangent;
 	float2 UV1;
 	float2 UV2;
+	float2 ParticleTime;
 };
 
 struct ModelVertex
@@ -44,6 +45,7 @@ struct ModelParameter2
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 	float ViewOffsetDistance;
+	float2 ParticleTime;
 };
 
 

@@ -668,6 +668,7 @@ namespace Effekseer
 			public float FlipbookIndexAndNextRate;
 			public float AlphaThreshold;
 			public float ViewOffsetDistance;
+			public Vector2 ParticleTime;
 		};
 
 		[DllImport(pluginName)]

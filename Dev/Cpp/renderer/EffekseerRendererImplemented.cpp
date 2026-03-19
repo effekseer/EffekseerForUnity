@@ -82,6 +82,7 @@ struct UnityModelParameter2
 	float FlipbookIndexAndNextRate;
 	float AlphaThreshold;
 	float ViewOffsetDistance;
+	float ParticleTime[2];
 };
 
 static int GetAlignedOffset(int offset, int size) { return ((offset + (size - 1)) / size) * size; }
@@ -364,6 +365,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 							 alphaThreshold_,
 							 colors_,
 							 times_,
+							 particleTimes_,
 							 customData1_,
 							 customData2_);
 
@@ -821,6 +823,8 @@ void RendererImplemented::DrawSprites_Material(UnityRenderParameter& rp, int32_t
 		unity_v.UV1[1] = v.UV1[1];
 		unity_v.UV2[0] = v.UV2[0];
 		unity_v.UV2[1] = v.UV2[1];
+		unity_v.ParticleTime[0] = v.ParticleTimes[0];
+		unity_v.ParticleTime[1] = v.ParticleTimes[1];
 		unity_v.Col[0] = v.Col.R / 255.0f;
 		unity_v.Col[1] = v.Col.G / 255.0f;
 		unity_v.Col[2] = v.Col.B / 255.0f;
@@ -913,6 +917,7 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 									std::vector<float>& alphaThresholds,
 									std::vector<Effekseer::Color>& colors,
 									std::vector<int32_t>& times,
+									std::vector<std::array<float, 2>>& particleTimes,
 									std::vector<std::array<float, 4>>& customData1,
 									std::vector<std::array<float, 4>>& customData2)
 {
@@ -1024,6 +1029,9 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.BlendDistortionUV = blendUVDistortionUVs[i];
 		modelParameter.FlipbookIndexAndNextRate = flipbookIndexAndNextRates[i];
 		modelParameter.AlphaThreshold = alphaThresholds[i];
+		modelParameter.ViewOffsetDistance = 0.0f;
+		modelParameter.ParticleTime[0] = particleTimes[i][0];
+		modelParameter.ParticleTime[1] = particleTimes[i][1];
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter2));
 	}
 
@@ -1120,3 +1128,6 @@ StrideBufferParameter RendererImplemented::GetStrideBufferParameter(int32_t inde
 }
 
 } // namespace EffekseerRendererUnity
+
+
+
