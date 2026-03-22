@@ -56,6 +56,8 @@ security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
 security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$APPLE_CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+security default-keychain -s "$KEYCHAIN_PATH"
+security list-keychains -d user -s "$KEYCHAIN_PATH"
 
 identity_list="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH")"
 echo "Available code signing identities in $KEYCHAIN_PATH:"
@@ -74,7 +76,7 @@ if ! printf '%s\n' "$identity_list" | grep -F -- "$APPLE_SIGNING_IDENTITY" >/dev
 fi
 
 echo "Signing $PLUGIN_PATH with identity hash $identity_hash"
-codesign --force --keychain "$KEYCHAIN_PATH" --sign "$identity_hash" --options runtime --timestamp "$PLUGIN_PATH"
+codesign --force --sign "$identity_hash" --options runtime --timestamp "$PLUGIN_PATH"
 codesign --verify --verbose=2 "$PLUGIN_PATH"
 
 ditto -c -k --keepParent "$PLUGIN_PATH" "$NOTARY_ARCHIVE_PATH"
