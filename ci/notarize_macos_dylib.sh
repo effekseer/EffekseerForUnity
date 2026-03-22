@@ -61,13 +61,20 @@ identity_list="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH")"
 echo "Available code signing identities in $KEYCHAIN_PATH:"
 printf '%s\n' "$identity_list"
 
+identity_hash="$(printf '%s\n' "$identity_list" | awk '/^[[:space:]]*[0-9]+\)/ {print $2; exit}')"
+
+if [ -z "$identity_hash" ]; then
+  echo "No code signing identity was found in the keychain."
+  exit 1
+fi
+
 if ! printf '%s\n' "$identity_list" | grep -F -- "$APPLE_SIGNING_IDENTITY" >/dev/null; then
   echo "Expected signing identity was not found in the keychain: $APPLE_SIGNING_IDENTITY"
   exit 1
 fi
 
-echo "Signing $PLUGIN_PATH"
-codesign --force --keychain "$KEYCHAIN_PATH" --sign "$APPLE_SIGNING_IDENTITY" --options runtime --timestamp "$PLUGIN_PATH"
+echo "Signing $PLUGIN_PATH with identity hash $identity_hash"
+codesign --force --keychain "$KEYCHAIN_PATH" --sign "$identity_hash" --options runtime --timestamp "$PLUGIN_PATH"
 codesign --verify --verbose=2 "$PLUGIN_PATH"
 
 ditto -c -k --keepParent "$PLUGIN_PATH" "$NOTARY_ARCHIVE_PATH"
