@@ -65,11 +65,6 @@ jobs:
             APPLE_NOTARY_TEAM_ID
             APPLE_NOTARY_APP_PASSWORD
           )
-          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping macOS signing on ${GITHUB_EVENT_NAME}; notarization secrets are only required for push builds."
-            exit 0
-          fi
 
           missing=()
           for name in "${required[@]}"; do
@@ -78,7 +73,7 @@ jobs:
             fi
           done
           if [ "${#missing[@]}" -ne 0 ]; then
-            echo "::error::Missing required notarization secrets for push build: ${missing[*]}"
+            echo "::error::Missing required notarization secrets for ${GITHUB_EVENT_NAME}: ${missing[*]}"
             echo "::error::Add these repository secrets, or remove the signing step if macOS notarization is not needed."
             exit 1
           fi
