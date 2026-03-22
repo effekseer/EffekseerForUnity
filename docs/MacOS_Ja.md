@@ -1,26 +1,12 @@
-# MacOSにおける警告について
+# macOSにおける警告について
 
-現在、MacOSでUnityを使用する場合、ネイティブの公証ができません。
-そのため、EffekseerForUnityを使用する場合は下記の方法で導入、もしくは取り扱う必要があります。
+macOS向けネイティブプラグイン（`EffekseerUnity.dylib`）の公証は、基本的に開発側で実施します。
+そのため、通常の利用ではユーザー側で公証は不要です。
+ただし、ユーザー自身でネイティブプラグインをビルドする場合は、公証が必要です。
 
-# Unity PackageManagerを使用する
+## CI公証設定（メンテナ向け）
 
-EffekseerをPackageManagerでインストールします。最も簡単な方法です。
+以下を参照してください。
 
-https://docs.unity3d.com/ja/2019.4/Manual/upm-ui-giturl.html
-
-```
-https://github.com/effekseer/EffekseerForUnity_Release.git?path=Assets/Effekseer
-```
-
-# チーム内でgitを用いてデータを共有する。
-
-Unity PackageManagerを使用しなくとも、gitで他のPCとデータを同期している限り、問題は発生しません。
-
-# xattr -rcを使用する。
-
-PackageManagerやgitを使用せずに、zip等に圧縮して複数PCでデータを共有する場合、Unityを起動する前に下記のコマンドを入力する必要があります。
-
-```
-xattr -rc Unityのプロジェクト
-```
+- `docs/Development/MacOSNotarizationCI.md`
+- `docs/Development/MacOSNotarizationCI_ja.md`
