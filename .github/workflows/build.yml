@@ -46,8 +46,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: sh scripts/clone_dependencies.sh
       - run: cd  ./Dev/Cpp/macosx/ && sh ./build_cmake.sh
-      - name: Validate notarization secrets on push
-        if: ${{ github.event_name == 'push' }}
+      - name: Decide whether to sign macOS dylib
+        id: notarize_config
         env:
           APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
           APPLE_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERT_P12_PASSWORD }}
@@ -65,14 +65,27 @@ jobs:
             APPLE_NOTARY_TEAM_ID
             APPLE_NOTARY_APP_PASSWORD
           )
+          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping macOS signing on ${GITHUB_EVENT_NAME}; notarization secrets are only required for push builds."
+            exit 0
+          fi
+
+          missing=()
           for name in "${required[@]}"; do
             if [ -z "${!name}" ]; then
-              echo "::error::Missing required notarization secret: ${name}"
-              exit 1
+              missing+=("$name")
             fi
           done
+          if [ "${#missing[@]}" -ne 0 ]; then
+            echo "::error::Missing required notarization secrets for push build: ${missing[*]}"
+            echo "::error::Add these repository secrets, or remove the signing step if macOS notarization is not needed."
+            exit 1
+          fi
+
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
       - name: Sign and notarize macOS dylib
-        if: ${{ github.event_name == 'push' || (secrets.APPLE_CERT_P12_BASE64 != '' && secrets.APPLE_CERT_P12_PASSWORD != '' && secrets.APPLE_SIGNING_IDENTITY != '' && secrets.APPLE_NOTARY_APPLE_ID != '' && secrets.APPLE_NOTARY_TEAM_ID != '' && secrets.APPLE_NOTARY_APP_PASSWORD != '') }}
+        if: ${{ steps.notarize_config.outputs.enabled == 'true' }}
         env:
           APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
           APPLE_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERT_P12_PASSWORD }}
