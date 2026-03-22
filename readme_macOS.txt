@@ -7,6 +7,7 @@ macOS向けUnityPlugin（`EffekseerUnity.dylib`）はCIで公証可能です。
 通常は開発側が公証済みバイナリを配布するため、ユーザー側で公証は不要です。
 ただし、ユーザー自身でネイティブプラグインをビルドする場合は、公証が必要です。
 
+
 If you need to notarize, please read the documents below.
 
 公証をする場合は、下記のドキュメントを読んでください。
