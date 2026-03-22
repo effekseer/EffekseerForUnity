@@ -57,6 +57,15 @@ security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$APPLE_CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
+identity_list="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH")"
+echo "Available code signing identities in $KEYCHAIN_PATH:"
+printf '%s\n' "$identity_list"
+
+if ! printf '%s\n' "$identity_list" | grep -F -- "$APPLE_SIGNING_IDENTITY" >/dev/null; then
+  echo "Expected signing identity was not found in the keychain: $APPLE_SIGNING_IDENTITY"
+  exit 1
+fi
+
 echo "Signing $PLUGIN_PATH"
 codesign --force --keychain "$KEYCHAIN_PATH" --sign "$APPLE_SIGNING_IDENTITY" --options runtime --timestamp "$PLUGIN_PATH"
 codesign --verify --verbose=2 "$PLUGIN_PATH"
