@@ -1,3 +1,6 @@
+env:
+  RELEASE_VERSION: 1.8.0.0-beta3
+
 on:
   push:
     branches:
@@ -308,9 +311,24 @@ jobs:
           python3 ../../create_unitypackage.py -r -o ../../dist/Effekseer.tar.gz Assets/Effekseer
           mv ../../dist/Effekseer.tar.gz ../../dist/Effekseer.unitypackage
 
+      - name: Create release zip
+        run: |
+          release_name="EffekseerForUnity${RELEASE_VERSION}"
+          mkdir -p "dist/${release_name}"
+          cp dist/Effekseer.unitypackage "dist/${release_name}/Effekseer.unitypackage"
+          cp Help.html LICENSE readme.txt readme_HDRP.txt readme_macOS.txt readme_URP.txt "dist/${release_name}/"
+          cd dist
+          zip -r "${release_name}.zip" "${release_name}"
+
 
       - name: Upload math result
         uses: actions/upload-artifact@v4
         with:
           name: Effekseer.unitypackage
-          path: dist
+          path: dist/Effekseer.unitypackage
+
+      - name: Upload release zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: EffekseerForUnity${{ env.RELEASE_VERSION }}
+          path: dist/EffekseerForUnity${{ env.RELEASE_VERSION }}
