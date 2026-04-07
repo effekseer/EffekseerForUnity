@@ -330,5 +330,5 @@ jobs:
       - name: Upload release zip
         uses: actions/upload-artifact@v4
         with:
-          name: EffekseerForUnity${{ env.RELEASE_VERSION }}.zip
-          path: dist/EffekseerForUnity${{ env.RELEASE_VERSION }}.zip
+          name: EffekseerForUnity${{ env.RELEASE_VERSION }}
+          path: dist/EffekseerForUnity${{ env.RELEASE_VERSION }}
