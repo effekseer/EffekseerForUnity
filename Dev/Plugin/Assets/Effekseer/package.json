@@ -1,7 +1,7 @@
 {
   "name": "org.effekseer.effekseerforunity",
   "description": "",
-  "version": "1.80.0-beta3",
+  "version": "1.80.0",
   "unity": "2019.4",
   "displayName": "EffekseerForUnity"
 }
