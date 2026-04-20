@@ -1,5 +1,5 @@
 env:
-  RELEASE_VERSION: 1.80.1
+  RELEASE_VERSION: 1.80.2
 
 on:
   push:
