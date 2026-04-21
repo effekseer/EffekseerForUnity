@@ -58,6 +58,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGlobal.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceGroup.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InstanceChunk.cpp \
+	$(LIB_SRC_PATH)/Effekseer.IntrusiveList.cpp \
 	$(LIB_SRC_PATH)/Effekseer.InternalScript.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Manager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Matrix43.cpp \
@@ -91,7 +92,9 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/SIMD/Mat43f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Mat44f.cpp \
 	$(LIB_SRC_PATH)/SIMD/Utils.cpp \
-	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp
+	$(LIB_SRC_PATH)/Utils/Effekseer.CustomAllocator.cpp \
+	$(LIB_SRC_PATH)/VectorField/Effekseer.VectorField.cpp \
+	$(LIB_SRC_PATH)/VectorField/Effekseer.VectorFieldLoader.cpp
 
 LIB_SRC_PATH := $(LOCAL_PATH)/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler
 LOCAL_SRC_FILES += \

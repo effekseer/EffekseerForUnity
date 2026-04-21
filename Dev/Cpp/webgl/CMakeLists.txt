@@ -31,8 +31,9 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Parameter/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/SIMD/*.cpp
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/Utils/*.cpp
-	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/*.cpp
-	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRenderer/*.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/Effekseer/Effekseer/VectorField/*.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon/*.cpp
+	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererGL/EffekseerRendererGL/*.cpp
 	${PROJECT_SOURCE_DIR}/../common/*.cpp
 	${PROJECT_SOURCE_DIR}/../renderer/*.cpp
 	${PROJECT_SOURCE_DIR}/../graphicsAPI/EffekseerPluginGraphics.cpp
@@ -43,8 +44,8 @@ file(GLOB effekseer_src
 	${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerMaterialCompiler/Common/ShaderGeneratorCommon.cpp)
 
 # INTERNAL_LOADER
-list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRenderer.DXTK.DDSTextureLoader.cpp")
-list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.cpp")
+list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon/EffekseerRenderer.DDSTextureLoader.cpp")
+list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.cpp")
 
 # Specify extentions
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
