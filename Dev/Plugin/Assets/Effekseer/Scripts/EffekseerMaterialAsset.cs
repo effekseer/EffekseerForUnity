@@ -68,6 +68,9 @@ namespace Effekseer
 
 			[SerializeField]
 			public string UniformName;
+
+			[SerializeField]
+			public int Index = -1;
 		}
 
 		[System.Serializable]
@@ -312,8 +315,9 @@ namespace Effekseer
 
 			for (int i = 0; i < actualTextureCount; i++)
 			{
-				var keyP = "$TEX_P" + i + "$";
-				var keyS = "$TEX_S" + i + "$";
+				var textureIndex = importingAsset.Textures[i].Index >= 0 ? importingAsset.Textures[i].Index : i;
+				var keyP = "$TEX_P" + textureIndex + "$";
+				var keyS = "$TEX_S" + textureIndex + "$";
 
 				var replacedP = string.Empty;
 				var replacedS = string.Empty;
@@ -343,8 +347,9 @@ namespace Effekseer
 			// invalid texture
 			for (int i = actualTextureCount; i < importingAsset.Textures.Count; i++)
 			{
-				var keyP = "$TEX_P" + i + "$";
-				var keyS = "$TEX_S" + i + "$";
+				var textureIndex = importingAsset.Textures[i].Index >= 0 ? importingAsset.Textures[i].Index : i;
+				var keyP = "$TEX_P" + textureIndex + "$";
+				var keyS = "$TEX_S" + textureIndex + "$";
 				baseCode = baseCode.Replace(keyP, "float4(");
 				baseCode = baseCode.Replace(keyS, ",0.0,1.0)");
 			}
