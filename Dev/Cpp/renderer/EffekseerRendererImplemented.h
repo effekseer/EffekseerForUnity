@@ -294,7 +294,7 @@ protected:
 		dst.UVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
 		dst.BlendUV = EffekseerRenderer::GetVertexBlendUV(v);
 		dst.BlendAlphaUV = EffekseerRenderer::GetVertexBlendAlphaUV(v);
-		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexBlendUVDistortionUV(v);
 		dst.FlipbookIndexAndNextRate = EffekseerRenderer::GetVertexFlipbookIndexAndNextRate(v);
 		dst.AlphaThreshold = EffekseerRenderer::GetVertexAlphaThreshold(v);
 		strideBuffer.PushBuffer(&dst, sizeof(AdvancedVertexParameter));

@@ -1454,6 +1454,9 @@ namespace Effekseer.Internal
 			if (model == null)
 				return;
 
+			if (model.IndexCounts == null || model.IndexCounts.Count == 0)
+				return;
+
 			var count = parameter.ElementCount;
 			var offset = 0;
 
@@ -1463,7 +1466,15 @@ namespace Effekseer.Internal
 				ComputeBuffer computeBuf1 = null;
 				ComputeBuffer computeBuf2 = null;
 
-				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, count, ref computeBuf1, ref computeBuf2);
+				var frameIndex = GetModelFrameIndex(modelParameters1[offset].Time, model.IndexCounts.Count);
+				var renderCount = 1;
+				while (renderCount < count && GetModelFrameIndex(modelParameters1[offset + renderCount].Time, model.IndexCounts.Count) == frameIndex)
+				{
+					renderCount++;
+				}
+
+				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, renderCount, ref computeBuf1, ref computeBuf2);
+				var indexCount = model.IndexCounts[frameIndex];
 
 				var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
@@ -1590,7 +1601,7 @@ namespace Effekseer.Internal
 					if (efkMaterial.asset.CustomData1Count > 0)
 					{
 						ComputeBuffer cb = null;
-						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, count, ref cb);
+						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, allocated, ref cb);
 						if (all != allocated) throw new Exception();
 						SetBufferProperty(commandBuffer, prop, "buf_customData1", cb);
 					}
@@ -1598,7 +1609,7 @@ namespace Effekseer.Internal
 					if (efkMaterial.asset.CustomData2Count > 0)
 					{
 						ComputeBuffer cb = null;
-						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, count, ref cb);
+						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, allocated, ref cb);
 						if (all != allocated) throw new Exception();
 						SetBufferProperty(commandBuffer, prop, "buf_customData2", cb);
 					}
@@ -1608,7 +1619,7 @@ namespace Effekseer.Internal
 						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(actualTextureCount), background, depth, DummyTextureType.White));
 					}
 
-					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 				}
 				else
 				{
@@ -1621,7 +1632,7 @@ namespace Effekseer.Internal
 						prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
 						prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 						prop.SetColor("fLightAmbient", EffekseerSystem.LightAmbientColor);
-						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 					}
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
@@ -1629,12 +1640,12 @@ namespace Effekseer.Internal
 						prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
 						if (background != null)
 						{
-							commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+							commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 						}
 					}
 					else
 					{
-						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 					}
 				}
 
@@ -1643,6 +1654,17 @@ namespace Effekseer.Internal
 				offset += allocated;
 				count -= allocated;
 			}
+		}
+
+		static int GetModelFrameIndex(int time, int frameCount)
+		{
+			var frameIndex = time % frameCount;
+			if (frameIndex < 0)
+			{
+				frameIndex += frameCount;
+			}
+
+			return frameIndex;
 		}
 
 		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType dummyTextureType)
@@ -1656,6 +1678,10 @@ namespace Effekseer.Internal
 			if (parameter.TextureWrapTypes[index] == 0)
 			{
 				texture.wrapMode = TextureWrapMode.Repeat;
+			}
+			else if (parameter.TextureWrapTypes[index] == 2)
+			{
+				texture.wrapMode = TextureWrapMode.Mirror;
 			}
 			else
 			{

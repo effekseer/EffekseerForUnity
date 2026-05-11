@@ -205,13 +205,23 @@ namespace Effekseer
 			// modifiy importing asset to avoid invalid name
 			foreach (var texture in importingAsset.Textures)
 			{
-				if (texture.Name == string.Empty)
+				if (string.IsNullOrEmpty(texture.UniformName))
 				{
-					texture.Name = texture.UniformName;
+					texture.UniformName = texture.Name;
 				}
 
 				// Escape
-				texture.Name = EscapePropertyName(texture.Name);
+				texture.Name = EscapePropertyName(texture.UniformName);
+			}
+
+			foreach (var uniform in importingAsset.Uniforms)
+			{
+				if (string.IsNullOrEmpty(uniform.UniformName))
+				{
+					uniform.UniformName = uniform.Name;
+				}
+
+				uniform.Name = uniform.UniformName;
 			}
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
@@ -984,7 +994,7 @@ Cull[_Cull]
 			if(opacityMask <= 0.0) discard;
 			if(opacity <= 0.0) discard;
 		
-			return Output;
+			return ConvertToScreen(Output);
 
 			@else
 
