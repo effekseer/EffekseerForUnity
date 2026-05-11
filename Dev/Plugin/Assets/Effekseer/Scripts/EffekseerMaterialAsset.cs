@@ -50,6 +50,9 @@ namespace Effekseer
 {
 	public partial class EffekseerMaterialAsset : ScriptableObject
 	{
+		public const int UserUniformSlotMax = 16;
+		public const int UserTextureSlotMax = 6;
+
 		[System.Serializable]
 		public enum TextureType
 		{
@@ -129,7 +132,7 @@ namespace Effekseer
 			public bool IsCacheFile = false;
 			public int CustomData1Count = 0;
 			public int CustomData2Count = 0;
-			public int UserTextureSlotMax = 6;
+			public int UserTextureSlotMax = EffekseerMaterialAsset.UserTextureSlotMax;
 			public bool HasRefraction = false;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
@@ -304,12 +307,13 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F2$", "float2");
 			baseCode = baseCode.Replace("$F3$", "float3");
 			baseCode = baseCode.Replace("$F4$", "float4");
-				baseCode = baseCode.Replace("$TIME$", "_Time.y");
-				baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
-				baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
-				baseCode = baseCode.Replace("$PARTICLE_TIME_NORMALIZED$", "particleTime.x");
-				baseCode = baseCode.Replace("$PARTICLE_TIME_SECONDS$", "particleTime.y");
-				baseCode = baseCode.Replace("$UV$", "uv");
+			baseCode = baseCode.Replace("$TIME$", "predefined_uniform.x");
+			baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
+			baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
+			baseCode = baseCode.Replace("$PARTICLE_TIME_NORMALIZED$", "particleTime.x");
+			baseCode = baseCode.Replace("$PARTICLE_TIME_SECONDS$", "particleTime.y");
+			baseCode = baseCode.Replace("$UV$", "uv");
+			baseCode = baseCode.Replace("$MOD", "fmod");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
 
@@ -409,7 +413,8 @@ namespace Effekseer
 
 			foreach (var gradient in importingAsset.FixedGradients)
 			{
-				functions += ShaderGenerator.GetFixedGradient(gradient.Name, gradient);
+				var gradientName = string.IsNullOrEmpty(gradient.UniformName) ? gradient.Name : gradient.UniformName;
+				functions += ShaderGenerator.GetFixedGradient(gradientName, gradient);
 			}
 
 			code += shaderTemplate;
@@ -420,6 +425,7 @@ namespace Effekseer
 			string codeUniforms = string.Empty;
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
+			int actualUniformCount = Math.Min(UserUniformSlotMax, importingAsset.Uniforms.Count);
 
 			for (int i = 0; i < actualTextureCount; i++)
 			{
@@ -427,9 +433,14 @@ namespace Effekseer
 				codeVariable += "sampler2D " + importingAsset.Textures[i].Name + ";" + nl;
 			}
 
-			for (int i = 0; i < importingAsset.Uniforms.Count; i++)
+			for (int i = 0; i < actualUniformCount; i++)
 			{
 				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
+			}
+
+			for (int i = actualUniformCount; i < importingAsset.Uniforms.Count; i++)
+			{
+				codeUniforms += "const float4 " + importingAsset.Uniforms[i].Name + " = float4(0,0,0,0);" + nl;
 			}
 
 			for (int i = 0; i < importingAsset.Gradients.Count; i++)

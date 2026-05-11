@@ -1346,10 +1346,11 @@ namespace Effekseer.Internal
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
-				prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 				prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
-				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
+				var actualTextureCount = Math.Min(EffekseerMaterialAsset.UserTextureSlotMax, efkMaterial.asset.textures.Length);
+				for (int ti = 0; ti < actualTextureCount; ti++)
 				{
 					var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 					if (texture != null)
@@ -1362,7 +1363,7 @@ namespace Effekseer.Internal
 
 				if (parameter.IsRefraction > 0 && background != null)
 				{
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(actualTextureCount), background, depth, DummyTextureType.White));
 				}
 
 				commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
@@ -1402,7 +1403,8 @@ namespace Effekseer.Internal
 		private static unsafe void AssignUniforms(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, MaterialPropertyBlock prop, UnityRendererMaterial efkMaterial)
 		{
 			int uniformOffset = 0;
-			for (int ui = 0; ui < efkMaterial.asset.uniforms.Length; ui++)
+			var actualUniformCount = Math.Min(EffekseerMaterialAsset.UserUniformSlotMax, efkMaterial.asset.uniforms.Length);
+			for (int ui = 0; ui < actualUniformCount; ui++)
 			{
 				var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
 				prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[uniformOffset + 0], f[uniformOffset + 1], f[uniformOffset + 2], f[uniformOffset + 3]));
@@ -1569,10 +1571,11 @@ namespace Effekseer.Internal
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 					prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
-					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
+					var actualTextureCount = Math.Min(EffekseerMaterialAsset.UserTextureSlotMax, efkMaterial.asset.textures.Length);
+					for (int ti = 0; ti < actualTextureCount; ti++)
 					{
 						var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 						if (texture != null)
@@ -1602,7 +1605,7 @@ namespace Effekseer.Internal
 
 					if (parameter.IsRefraction > 0 && background != null)
 					{
-						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(actualTextureCount), background, depth, DummyTextureType.White));
 					}
 
 					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
