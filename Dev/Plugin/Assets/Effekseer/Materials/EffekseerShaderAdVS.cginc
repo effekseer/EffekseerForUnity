@@ -501,6 +501,7 @@ VS_Output vert(VS_Input i)
 	Input_Internal.Alpha_Dist_UV.zw = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].UVDistortionUV;
 	Input_Internal.BlendUV = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].BlendUV;
 	Input_Internal.Blend_Alpha_Dist_UV.xy = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].BlendAlphaUV;
+	Input_Internal.Blend_Alpha_Dist_UV.zw = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].BlendUVDistortionUV;
 	Input_Internal.FlipbookIndex = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].FlipbookIndexAndNextRate;
 	Input_Internal.AlphaThreshold = buf_ad[buf_ad_offset + qind * 4 + v_offset[vind]].AlphaThreshold;
 

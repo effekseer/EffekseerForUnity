@@ -965,7 +965,7 @@ namespace Effekseer.Internal
 			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Keywords = new string[] { "_MODEL_", "ENABLE_DISTORTION" };
 
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerDependentAssets.Instance.fixedShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Keywords = new string[] { "_MODEL_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Keywords = new string[] { "ENABLE_LIGHTING" };
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerDependentAssets.Instance.fixedShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING" };
 
@@ -1559,20 +1559,11 @@ namespace Effekseer.Internal
 
 					if (parameter.IsRefraction > 0)
 					{
-						if (efkMaterial.materialsRefraction == null)
+						if (efkMaterial.materialsModelRefraction == null)
 						{
 							return;
 						}
 
-						material = efkMaterial.materialsRefraction.GetMaterial(ref key);
-					}
-					else
-					{
-						material = efkMaterial.materials.GetMaterial(ref key);
-					}
-
-					if (parameter.IsRefraction > 0)
-					{
 						material = efkMaterial.materialsModelRefraction.GetMaterial(ref key);
 					}
 					else

@@ -180,6 +180,24 @@ namespace Effekseer
 			return "_" + name + "_Tex";
 		}
 
+		static int ClampCustomDataCount(int count)
+		{
+			return Math.Min(4, Math.Max(0, count));
+		}
+
+		static string GetFloatType(int count)
+		{
+			return count <= 1 ? "float" : "float" + count.ToString();
+		}
+
+		static string GetElementSelector(int count)
+		{
+			if (count <= 1) return ".x";
+			if (count == 2) return ".xy";
+			if (count == 3) return ".xyz";
+			return ".xyzw";
+		}
+
 		/// <summary>
 		/// to avoid unity bug
 		/// </summary>
@@ -196,11 +214,8 @@ namespace Effekseer
 		public static void CreateAsset(string path, ImportingAsset importingAsset)
 		{
 			// modify
-			if (importingAsset.CustomData1Count > 0)
-				importingAsset.CustomData1Count = Math.Max(2, importingAsset.CustomData1Count);
-
-			if (importingAsset.CustomData2Count > 0)
-				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
+			importingAsset.CustomData1Count = ClampCustomDataCount(importingAsset.CustomData1Count);
+			importingAsset.CustomData2Count = ClampCustomDataCount(importingAsset.CustomData2Count);
 
 			// modifiy importing asset to avoid invalid name
 			foreach (var texture in importingAsset.Textures)
@@ -283,18 +298,18 @@ namespace Effekseer
 				if (importingAsset.CustomData1Count > 0)
 				{
 					baseCode += "#if _MODEL_\n";
-					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n");
+					baseCode += string.Format("{0} customData1 = buf_customData1[inst]{1};\n", GetFloatType(importingAsset.CustomData1Count), GetElementSelector(importingAsset.CustomData1Count));
 					baseCode += "#else\n";
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
+					baseCode += string.Format("{0} customData1 = Input.CustomData1;\n", GetFloatType(importingAsset.CustomData1Count));
 					baseCode += "#endif\n";
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
 					baseCode += "#if _MODEL_\n";
-					baseCode += string.Format("float4 customData2 = buf_customData2[inst];\n");
+					baseCode += string.Format("{0} customData2 = buf_customData2[inst]{1};\n", GetFloatType(importingAsset.CustomData2Count), GetElementSelector(importingAsset.CustomData2Count));
 					baseCode += "#else\n";
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
+					baseCode += string.Format("{0} customData2 = Input.CustomData2;\n", GetFloatType(importingAsset.CustomData2Count));
 					baseCode += "#endif\n";
 				}
 			}
@@ -302,12 +317,12 @@ namespace Effekseer
 			{
 				if (importingAsset.CustomData1Count > 0)
 				{
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
+					baseCode += string.Format("{0} customData1 = Input.CustomData1;", GetFloatType(importingAsset.CustomData1Count));
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
+					baseCode += string.Format("{0} customData2 = Input.CustomData2;", GetFloatType(importingAsset.CustomData2Count));
 				}
 			}
 
@@ -504,15 +519,15 @@ namespace Effekseer
 			if (importingAsset.CustomData1Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float4> buf_customData1;"));
-				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD8;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("{0} CustomData1;", GetFloatType(importingAsset.CustomData1Count)));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("{0} CustomData1 : TEXCOORD8;", GetFloatType(importingAsset.CustomData1Count)));
 			}
 
 			if (importingAsset.CustomData2Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float4> buf_customData2;"));
-				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD9;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("{0} CustomData2;", GetFloatType(importingAsset.CustomData2Count)));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("{0} CustomData2 : TEXCOORD9;", GetFloatType(importingAsset.CustomData2Count)));
 			}
 
 			// change return codes
