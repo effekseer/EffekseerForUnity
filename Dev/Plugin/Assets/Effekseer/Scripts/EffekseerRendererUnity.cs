@@ -965,7 +965,7 @@ namespace Effekseer.Internal
 			GetMaterialCollection(Plugin.RendererMaterialType.BackDistortion, true).Keywords = new string[] { "_MODEL_", "ENABLE_DISTORTION" };
 
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Shader = EffekseerDependentAssets.Instance.fixedShader;
-			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Keywords = new string[] { "_MODEL_" };
+			GetMaterialCollection(Plugin.RendererMaterialType.Lit, false).Keywords = new string[] { "ENABLE_LIGHTING" };
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Shader = EffekseerDependentAssets.Instance.fixedShader;
 			GetMaterialCollection(Plugin.RendererMaterialType.Lit, true).Keywords = new string[] { "_MODEL_", "ENABLE_LIGHTING" };
 
@@ -1346,10 +1346,11 @@ namespace Effekseer.Internal
 
 				prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 				prop.SetColor("lightColor", EffekseerSystem.LightColor);
-				prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+				prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 				prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
-				for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
+				var actualTextureCount = Math.Min(EffekseerMaterialAsset.UserTextureSlotMax, efkMaterial.asset.textures.Length);
+				for (int ti = 0; ti < actualTextureCount; ti++)
 				{
 					var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 					if (texture != null)
@@ -1362,7 +1363,7 @@ namespace Effekseer.Internal
 
 				if (parameter.IsRefraction > 0 && background != null)
 				{
-					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+					prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(actualTextureCount), background, depth, DummyTextureType.White));
 				}
 
 				commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, parameter.ElementCount * 2 * 3, 1, prop);
@@ -1402,7 +1403,8 @@ namespace Effekseer.Internal
 		private static unsafe void AssignUniforms(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, MaterialPropertyBlock prop, UnityRendererMaterial efkMaterial)
 		{
 			int uniformOffset = 0;
-			for (int ui = 0; ui < efkMaterial.asset.uniforms.Length; ui++)
+			var actualUniformCount = Math.Min(EffekseerMaterialAsset.UserUniformSlotMax, efkMaterial.asset.uniforms.Length);
+			for (int ui = 0; ui < actualUniformCount; ui++)
 			{
 				var f = ((float*)(((byte*)infoBuffer.ToPointer()) + parameter.UniformBufferOffset));
 				prop.SetVector(efkMaterial.asset.uniforms[ui].Name, new Vector4(f[uniformOffset + 0], f[uniformOffset + 1], f[uniformOffset + 2], f[uniformOffset + 3]));
@@ -1452,6 +1454,9 @@ namespace Effekseer.Internal
 			if (model == null)
 				return;
 
+			if (model.IndexCounts == null || model.IndexCounts.Count == 0)
+				return;
+
 			var count = parameter.ElementCount;
 			var offset = 0;
 
@@ -1461,7 +1466,15 @@ namespace Effekseer.Internal
 				ComputeBuffer computeBuf1 = null;
 				ComputeBuffer computeBuf2 = null;
 
-				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, count, ref computeBuf1, ref computeBuf2);
+				var frameIndex = GetModelFrameIndex(modelParameters1[offset].Time, model.IndexCounts.Count);
+				var renderCount = 1;
+				while (renderCount < count && GetModelFrameIndex(modelParameters1[offset + renderCount].Time, model.IndexCounts.Count) == frameIndex)
+				{
+					renderCount++;
+				}
+
+				var allocated = modelBufferCol1.Allocate(modelParameters1, modelParameters2, offset, renderCount, ref computeBuf1, ref computeBuf2);
+				var indexCount = model.IndexCounts[frameIndex];
 
 				var isAdvanced = parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion ||
 					parameter.MaterialType == Plugin.RendererMaterialType.AdvancedLit ||
@@ -1546,20 +1559,11 @@ namespace Effekseer.Internal
 
 					if (parameter.IsRefraction > 0)
 					{
-						if (efkMaterial.materialsRefraction == null)
+						if (efkMaterial.materialsModelRefraction == null)
 						{
 							return;
 						}
 
-						material = efkMaterial.materialsRefraction.GetMaterial(ref key);
-					}
-					else
-					{
-						material = efkMaterial.materials.GetMaterial(ref key);
-					}
-
-					if (parameter.IsRefraction > 0)
-					{
 						material = efkMaterial.materialsModelRefraction.GetMaterial(ref key);
 					}
 					else
@@ -1569,10 +1573,11 @@ namespace Effekseer.Internal
 
 					prop.SetVector("lightDirection", EffekseerSystem.LightDirection.normalized);
 					prop.SetColor("lightColor", EffekseerSystem.LightColor);
-					prop.SetColor("lightAmbient", EffekseerSystem.LightAmbientColor);
+					prop.SetColor("lightAmbientColor", EffekseerSystem.LightAmbientColor);
 					prop.SetVector("predefined_uniform", parameter.PredefinedUniform);
 
-					for (int ti = 0; ti < efkMaterial.asset.textures.Length; ti++)
+					var actualTextureCount = Math.Min(EffekseerMaterialAsset.UserTextureSlotMax, efkMaterial.asset.textures.Length);
+					for (int ti = 0; ti < actualTextureCount; ti++)
 					{
 						var texture = GetAndApplyParameterToTexture(parameter, ti, background, depth, DummyTextureType.White);
 						if (texture != null)
@@ -1587,7 +1592,7 @@ namespace Effekseer.Internal
 					if (efkMaterial.asset.CustomData1Count > 0)
 					{
 						ComputeBuffer cb = null;
-						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, count, ref cb);
+						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData1BufferOffset), offset, allocated, ref cb);
 						if (all != allocated) throw new Exception();
 						SetBufferProperty(commandBuffer, prop, "buf_customData1", cb);
 					}
@@ -1595,17 +1600,17 @@ namespace Effekseer.Internal
 					if (efkMaterial.asset.CustomData2Count > 0)
 					{
 						ComputeBuffer cb = null;
-						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, count, ref cb);
+						var all = customDataBuffers.Allocate((CustomDataBuffer*)((byte*)infoBuffer.ToPointer() + parameter.CustomData2BufferOffset), offset, allocated, ref cb);
 						if (all != allocated) throw new Exception();
 						SetBufferProperty(commandBuffer, prop, "buf_customData2", cb);
 					}
 
 					if (parameter.IsRefraction > 0 && background != null)
 					{
-						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(efkMaterial.asset.textures.Length), background, depth, DummyTextureType.White));
+						prop.SetTexture("_BackTex", GetCachedTexture(parameter.GetTexturePtr(actualTextureCount), background, depth, DummyTextureType.White));
 					}
 
-					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+					commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 				}
 				else
 				{
@@ -1618,7 +1623,7 @@ namespace Effekseer.Internal
 						prop.SetVector("fLightDirection", EffekseerSystem.LightDirection.normalized);
 						prop.SetColor("fLightColor", EffekseerSystem.LightColor);
 						prop.SetColor("fLightAmbient", EffekseerSystem.LightAmbientColor);
-						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 					}
 					else if (parameter.MaterialType == Plugin.RendererMaterialType.BackDistortion ||
 						parameter.MaterialType == Plugin.RendererMaterialType.AdvancedBackDistortion)
@@ -1626,12 +1631,12 @@ namespace Effekseer.Internal
 						prop.SetVector("g_scale", new Vector4(parameter.DistortionIntensity, 0.0f, 0.0f, 0.0f));
 						if (background != null)
 						{
-							commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+							commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 						}
 					}
 					else
 					{
-						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, model.IndexCounts[0], allocated, prop);
+						commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, indexCount, allocated, prop);
 					}
 				}
 
@@ -1640,6 +1645,17 @@ namespace Effekseer.Internal
 				offset += allocated;
 				count -= allocated;
 			}
+		}
+
+		static int GetModelFrameIndex(int time, int frameCount)
+		{
+			var frameIndex = time % frameCount;
+			if (frameIndex < 0)
+			{
+				frameIndex += frameCount;
+			}
+
+			return frameIndex;
 		}
 
 		unsafe Texture GetAndApplyParameterToTexture(in Plugin.UnityRenderParameter parameter, int index, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType dummyTextureType)
@@ -1653,6 +1669,10 @@ namespace Effekseer.Internal
 			if (parameter.TextureWrapTypes[index] == 0)
 			{
 				texture.wrapMode = TextureWrapMode.Repeat;
+			}
+			else if (parameter.TextureWrapTypes[index] == 2)
+			{
+				texture.wrapMode = TextureWrapMode.Mirror;
 			}
 			else
 			{

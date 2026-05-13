@@ -73,10 +73,10 @@ Effekseer::MaterialRef MaterialLoader::Load(const EFK_CHAR* path)
 
 		materialData->IsSimpleVertex = material->GetIsSimpleVertex();
 		materialData->IsRefractionRequired = material->GetHasRefraction();
-		materialData->CustomData1 = material->GetCustomData1Count();
-		materialData->CustomData2 = material->GetCustomData2Count();
+		materialData->CustomData1 = std::min(std::max(material->GetCustomData1Count(), 0), 4);
+		materialData->CustomData2 = std::min(std::max(material->GetCustomData2Count(), 0), 4);
 		materialData->TextureCount = std::min(material->GetTextureCount(), Effekseer::UserTextureSlotMax);
-		materialData->UniformCount = material->GetUniformCount();
+		materialData->UniformCount = std::min(material->GetUniformCount(), Effekseer::UserUniformSlotMax);
 		materialData->ShadingModel = material->GetShadingModel();
 
 		for (int32_t i = 0; i < materialData->TextureCount; i++)

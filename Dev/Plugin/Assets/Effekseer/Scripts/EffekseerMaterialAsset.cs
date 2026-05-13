@@ -50,6 +50,9 @@ namespace Effekseer
 {
 	public partial class EffekseerMaterialAsset : ScriptableObject
 	{
+		public const int UserUniformSlotMax = 16;
+		public const int UserTextureSlotMax = 6;
+
 		[System.Serializable]
 		public enum TextureType
 		{
@@ -68,6 +71,9 @@ namespace Effekseer
 
 			[SerializeField]
 			public string UniformName;
+
+			[SerializeField]
+			public int Index = -1;
 		}
 
 		[System.Serializable]
@@ -126,7 +132,7 @@ namespace Effekseer
 			public bool IsCacheFile = false;
 			public int CustomData1Count = 0;
 			public int CustomData2Count = 0;
-			public int UserTextureSlotMax = 6;
+			public int UserTextureSlotMax = EffekseerMaterialAsset.UserTextureSlotMax;
 			public bool HasRefraction = false;
 			public List<TextureProperty> Textures = new List<TextureProperty>();
 			public List<UniformProperty> Uniforms = new List<UniformProperty>();
@@ -174,6 +180,24 @@ namespace Effekseer
 			return "_" + name + "_Tex";
 		}
 
+		static int ClampCustomDataCount(int count)
+		{
+			return Math.Min(4, Math.Max(0, count));
+		}
+
+		static string GetFloatType(int count)
+		{
+			return count <= 1 ? "float" : "float" + count.ToString();
+		}
+
+		static string GetElementSelector(int count)
+		{
+			if (count <= 1) return ".x";
+			if (count == 2) return ".xy";
+			if (count == 3) return ".xyz";
+			return ".xyzw";
+		}
+
 		/// <summary>
 		/// to avoid unity bug
 		/// </summary>
@@ -190,22 +214,29 @@ namespace Effekseer
 		public static void CreateAsset(string path, ImportingAsset importingAsset)
 		{
 			// modify
-			if (importingAsset.CustomData1Count > 0)
-				importingAsset.CustomData1Count = Math.Max(2, importingAsset.CustomData1Count);
-
-			if (importingAsset.CustomData2Count > 0)
-				importingAsset.CustomData2Count = Math.Max(2, importingAsset.CustomData2Count);
+			importingAsset.CustomData1Count = ClampCustomDataCount(importingAsset.CustomData1Count);
+			importingAsset.CustomData2Count = ClampCustomDataCount(importingAsset.CustomData2Count);
 
 			// modifiy importing asset to avoid invalid name
 			foreach (var texture in importingAsset.Textures)
 			{
-				if (texture.Name == string.Empty)
+				if (string.IsNullOrEmpty(texture.UniformName))
 				{
-					texture.Name = texture.UniformName;
+					texture.UniformName = texture.Name;
 				}
 
 				// Escape
-				texture.Name = EscapePropertyName(texture.Name);
+				texture.Name = EscapePropertyName(texture.UniformName);
+			}
+
+			foreach (var uniform in importingAsset.Uniforms)
+			{
+				if (string.IsNullOrEmpty(uniform.UniformName))
+				{
+					uniform.UniformName = uniform.Name;
+				}
+
+				uniform.Name = uniform.UniformName;
 			}
 
 			string assetPath = Path.ChangeExtension(path, ".asset");
@@ -267,18 +298,18 @@ namespace Effekseer
 				if (importingAsset.CustomData1Count > 0)
 				{
 					baseCode += "#if _MODEL_\n";
-					baseCode += string.Format("float4 customData1 = buf_customData1[inst];\n");
+					baseCode += string.Format("{0} customData1 = buf_customData1[inst]{1};\n", GetFloatType(importingAsset.CustomData1Count), GetElementSelector(importingAsset.CustomData1Count));
 					baseCode += "#else\n";
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;\n", importingAsset.CustomData1Count);
+					baseCode += string.Format("{0} customData1 = Input.CustomData1;\n", GetFloatType(importingAsset.CustomData1Count));
 					baseCode += "#endif\n";
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
 					baseCode += "#if _MODEL_\n";
-					baseCode += string.Format("float4 customData2 = buf_customData2[inst];\n");
+					baseCode += string.Format("{0} customData2 = buf_customData2[inst]{1};\n", GetFloatType(importingAsset.CustomData2Count), GetElementSelector(importingAsset.CustomData2Count));
 					baseCode += "#else\n";
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;\n", importingAsset.CustomData2Count);
+					baseCode += string.Format("{0} customData2 = Input.CustomData2;\n", GetFloatType(importingAsset.CustomData2Count));
 					baseCode += "#endif\n";
 				}
 			}
@@ -286,12 +317,12 @@ namespace Effekseer
 			{
 				if (importingAsset.CustomData1Count > 0)
 				{
-					baseCode += string.Format("float{0} customData1 = Input.CustomData1;", importingAsset.CustomData1Count);
+					baseCode += string.Format("{0} customData1 = Input.CustomData1;", GetFloatType(importingAsset.CustomData1Count));
 				}
 
 				if (importingAsset.CustomData2Count > 0)
 				{
-					baseCode += string.Format("float{0} customData2 = Input.CustomData2;", importingAsset.CustomData2Count);
+					baseCode += string.Format("{0} customData2 = Input.CustomData2;", GetFloatType(importingAsset.CustomData2Count));
 				}
 			}
 
@@ -301,19 +332,21 @@ namespace Effekseer
 			baseCode = baseCode.Replace("$F2$", "float2");
 			baseCode = baseCode.Replace("$F3$", "float3");
 			baseCode = baseCode.Replace("$F4$", "float4");
-				baseCode = baseCode.Replace("$TIME$", "_Time.y");
-				baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
-				baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
-				baseCode = baseCode.Replace("$PARTICLE_TIME_NORMALIZED$", "particleTime.x");
-				baseCode = baseCode.Replace("$PARTICLE_TIME_SECONDS$", "particleTime.y");
-				baseCode = baseCode.Replace("$UV$", "uv");
+			baseCode = baseCode.Replace("$TIME$", "predefined_uniform.x");
+			baseCode = baseCode.Replace("$EFFECTSCALE$", "predefined_uniform.y");
+			baseCode = baseCode.Replace("$LOCALTIME$", "predefined_uniform.w");
+			baseCode = baseCode.Replace("$PARTICLE_TIME_NORMALIZED$", "particleTime.x");
+			baseCode = baseCode.Replace("$PARTICLE_TIME_SECONDS$", "particleTime.y");
+			baseCode = baseCode.Replace("$UV$", "uv");
+			baseCode = baseCode.Replace("$MOD", "fmod");
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
 
 			for (int i = 0; i < actualTextureCount; i++)
 			{
-				var keyP = "$TEX_P" + i + "$";
-				var keyS = "$TEX_S" + i + "$";
+				var textureIndex = importingAsset.Textures[i].Index >= 0 ? importingAsset.Textures[i].Index : i;
+				var keyP = "$TEX_P" + textureIndex + "$";
+				var keyS = "$TEX_S" + textureIndex + "$";
 
 				var replacedP = string.Empty;
 				var replacedS = string.Empty;
@@ -343,8 +376,9 @@ namespace Effekseer
 			// invalid texture
 			for (int i = actualTextureCount; i < importingAsset.Textures.Count; i++)
 			{
-				var keyP = "$TEX_P" + i + "$";
-				var keyS = "$TEX_S" + i + "$";
+				var textureIndex = importingAsset.Textures[i].Index >= 0 ? importingAsset.Textures[i].Index : i;
+				var keyP = "$TEX_P" + textureIndex + "$";
+				var keyS = "$TEX_S" + textureIndex + "$";
 				baseCode = baseCode.Replace(keyP, "float4(");
 				baseCode = baseCode.Replace(keyS, ",0.0,1.0)");
 			}
@@ -404,7 +438,8 @@ namespace Effekseer
 
 			foreach (var gradient in importingAsset.FixedGradients)
 			{
-				functions += ShaderGenerator.GetFixedGradient(gradient.Name, gradient);
+				var gradientName = string.IsNullOrEmpty(gradient.UniformName) ? gradient.Name : gradient.UniformName;
+				functions += ShaderGenerator.GetFixedGradient(gradientName, gradient);
 			}
 
 			code += shaderTemplate;
@@ -415,6 +450,7 @@ namespace Effekseer
 			string codeUniforms = string.Empty;
 
 			int actualTextureCount = Math.Min(importingAsset.UserTextureSlotMax, importingAsset.Textures.Count);
+			int actualUniformCount = Math.Min(UserUniformSlotMax, importingAsset.Uniforms.Count);
 
 			for (int i = 0; i < actualTextureCount; i++)
 			{
@@ -422,9 +458,14 @@ namespace Effekseer
 				codeVariable += "sampler2D " + importingAsset.Textures[i].Name + ";" + nl;
 			}
 
-			for (int i = 0; i < importingAsset.Uniforms.Count; i++)
+			for (int i = 0; i < actualUniformCount; i++)
 			{
 				codeUniforms += "float4 " + importingAsset.Uniforms[i].Name + ";" + nl;
+			}
+
+			for (int i = actualUniformCount; i < importingAsset.Uniforms.Count; i++)
+			{
+				codeUniforms += "const float4 " + importingAsset.Uniforms[i].Name + " = float4(0,0,0,0);" + nl;
 			}
 
 			for (int i = 0; i < importingAsset.Gradients.Count; i++)
@@ -478,15 +519,15 @@ namespace Effekseer
 			if (importingAsset.CustomData1Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF1%", string.Format("StructuredBuffer<float4> buf_customData1;"));
-				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("float{0} CustomData1;", importingAsset.CustomData1Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("float{0} CustomData1 : TEXCOORD8;", importingAsset.CustomData1Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT1%", string.Format("{0} CustomData1;", GetFloatType(importingAsset.CustomData1Count)));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT1%", string.Format("{0} CustomData1 : TEXCOORD8;", GetFloatType(importingAsset.CustomData1Count)));
 			}
 
 			if (importingAsset.CustomData2Count > 0)
 			{
 				code = code.Replace("//%CUSTOM_BUF2%", string.Format("StructuredBuffer<float4> buf_customData2;"));
-				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("float{0} CustomData2;", importingAsset.CustomData2Count));
-				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("float{0} CustomData2 : TEXCOORD9;", importingAsset.CustomData2Count));
+				code = code.Replace("//%CUSTOM_VS_INPUT2%", string.Format("{0} CustomData2;", GetFloatType(importingAsset.CustomData2Count)));
+				code = code.Replace("//%CUSTOM_VSPS_INOUT2%", string.Format("{0} CustomData2 : TEXCOORD9;", GetFloatType(importingAsset.CustomData2Count)));
 			}
 
 			// change return codes
@@ -968,7 +1009,7 @@ Cull[_Cull]
 			if(opacityMask <= 0.0) discard;
 			if(opacity <= 0.0) discard;
 		
-			return Output;
+			return ConvertToScreen(Output);
 
 			@else
 

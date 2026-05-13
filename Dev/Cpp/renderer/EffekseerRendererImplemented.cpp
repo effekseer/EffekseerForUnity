@@ -293,10 +293,7 @@ void ModelRenderer::EndRendering(const efkModelNodeParam& parameter, void* userD
 			state.TextureWrapTypes[i] = collector_.TextureWrapTypes[i];
 		}
 
-		if (textureCount > 0)
-		{
-			renderer_->SetTextures(nullptr, textures.data(), textureCount);
-		}
+		renderer_->SetTextures(nullptr, textures.data(), textureCount);
 
 		if (parameter.BasicParameterPtr->MaterialType == Effekseer::RendererMaterialType::File)
 		{
@@ -1014,6 +1011,10 @@ void RendererImplemented::DrawModel(Effekseer::ModelRef model,
 		modelParameter.VColor[2] = colors[i].B / 255.0f;
 		modelParameter.VColor[3] = colors[i].A / 255.0f;
 		modelParameter.Time = times[i] % model_->GetFrameCount();
+		if (modelParameter.Time < 0)
+		{
+			modelParameter.Time += model_->GetFrameCount();
+		}
 		AddInfoBuffer(&modelParameter, sizeof(UnityModelParameter1));
 	}
 
@@ -1097,10 +1098,11 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count)
 {
-	textures_.resize(count);
-	if (count > 0)
+	const auto textureCount = count < static_cast<int32_t>(Effekseer::TextureSlotMax) ? count : static_cast<int32_t>(Effekseer::TextureSlotMax);
+	textures_.resize(textureCount);
+	if (textureCount > 0)
 	{
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < textureCount; i++)
 		{
 			if (textures[i] != nullptr)
 			{

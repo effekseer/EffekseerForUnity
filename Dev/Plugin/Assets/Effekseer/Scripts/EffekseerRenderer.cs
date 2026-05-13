@@ -335,6 +335,18 @@ namespace Effekseer.Internal
 #endif
 			}
 		}
+
+		internal static void DestroyRenderTexture(RenderTexture renderTexture)
+		{
+#if UNITY_EDITOR
+			if (!Application.isPlaying)
+			{
+				UnityEngine.Object.DestroyImmediate(renderTexture);
+				return;
+			}
+#endif
+			UnityEngine.Object.Destroy(renderTexture);
+		}
 	}
 
 	internal class BackgroundRenderTexture
@@ -437,7 +449,7 @@ namespace Effekseer.Internal
 			if (renderTexture != null)
 			{
 				renderTexture.Release();
-				UnityEngine.Object.Destroy(renderTexture);
+				EffekseerRendererUtils.DestroyRenderTexture(renderTexture);
 				renderTexture = null;
 				ptr = IntPtr.Zero;
 			}
@@ -485,7 +497,7 @@ namespace Effekseer.Internal
 			if (renderTexture != null)
 			{
 				renderTexture.Release();
-				UnityEngine.Object.Destroy(renderTexture);
+				EffekseerRendererUtils.DestroyRenderTexture(renderTexture);
 				renderTexture = null;
 				ptr = IntPtr.Zero;
 			}

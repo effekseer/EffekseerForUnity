@@ -38,7 +38,7 @@ extern "C"
 
 	struct EdgeParameters
 	{
-		std::array<float, 4> Color;
+		std::array<float, 4> Color{};
 		float Threshold = 0;
 		float ColorScaling = 1;
 	};
@@ -46,8 +46,8 @@ extern "C"
 	struct FalloffParameter
 	{
 		int32_t ColorBlendType = 0;
-		std::array<float, 4> BeginColor;
-		std::array<float, 4> EndColor;
+		std::array<float, 4> BeginColor{};
+		std::array<float, 4> EndColor{};
 		float Pow = 1.0f;
 	};
 
@@ -87,12 +87,12 @@ extern "C"
 		float EmissiveScaling = 1;
 		EdgeParameters EdgeParams;
 
-		std::array<float, 4> SoftParticleParam;
-		std::array<float, 4> ReconstrcutionParam1;
-		std::array<float, 4> ReconstrcutionParam2;
+		std::array<float, 4> SoftParticleParam{};
+		std::array<float, 4> ReconstrcutionParam1{};
+		std::array<float, 4> ReconstrcutionParam2{};
 
 		//! For a material
-		std::array<float, 4> PredefinedUniform;
+		std::array<float, 4> PredefinedUniform{};
 
 		int ZTest = 0;
 
@@ -108,11 +108,11 @@ extern "C"
 		int IsRefraction = 0;
 
 		//! Texture ptr
-		std::array<void*, Effekseer::TextureSlotMax> TexturePtrs;
+		std::array<void*, Effekseer::TextureSlotMax> TexturePtrs{};
 
-		std::array<int, Effekseer::TextureSlotMax> TextureFilterTypes;
+		std::array<int, Effekseer::TextureSlotMax> TextureFilterTypes{};
 
-		std::array<int, Effekseer::TextureSlotMax> TextureWrapTypes;
+		std::array<int, Effekseer::TextureSlotMax> TextureWrapTypes{};
 
 		int32_t TextureCount = 0;
 
@@ -124,7 +124,7 @@ extern "C"
 	};
 
 	UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetUnityRenderParameter(UnityRenderParameter* dst, int index);
-	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderCount();
+	UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetUnityRenderParameterCount();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityVertexBuffer();
 	UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetUnityInfoBuffer();
 
@@ -294,7 +294,7 @@ protected:
 		dst.UVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
 		dst.BlendUV = EffekseerRenderer::GetVertexBlendUV(v);
 		dst.BlendAlphaUV = EffekseerRenderer::GetVertexBlendAlphaUV(v);
-		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexUVDistortionUV(v);
+		dst.BlendUVDistortionUV = EffekseerRenderer::GetVertexBlendUVDistortionUV(v);
 		dst.FlipbookIndexAndNextRate = EffekseerRenderer::GetVertexFlipbookIndexAndNextRate(v);
 		dst.AlphaThreshold = EffekseerRenderer::GetVertexAlphaThreshold(v);
 		strideBuffer.PushBuffer(&dst, sizeof(AdvancedVertexParameter));
