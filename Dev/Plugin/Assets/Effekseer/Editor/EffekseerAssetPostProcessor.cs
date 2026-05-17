@@ -109,15 +109,16 @@ namespace Effekseer.Editor
 		static void ImportMaterialAsset(string assetPath)
 		{
 			EffekseerMaterialAsset.ImportingAsset importingAsset = new EffekseerMaterialAsset.ImportingAsset();
-			importingAsset.Data = System.IO.File.ReadAllBytes(assetPath);
 			importingAsset.UserTextureSlotMax = EffekseerTool.Constant.UserTextureSlotCount;
 			var info = new Effekseer.Editor.Utils.MaterialInformation();
-			if (!info.Load(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath)))
+			var materialPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), assetPath);
+			if (!info.Load(materialPath))
 			{
-				UnityEngine.Debug.LogError("Failed to load Effekseer material: " + assetPath);
+				UnityEngine.Debug.LogWarning(CreateMaterialImportWarning(assetPath, info));
 				return;
 			}
 
+			importingAsset.Data = System.IO.File.ReadAllBytes(materialPath);
 			importingAsset.CustomData1Count = info.CustomData1Count;
 			importingAsset.CustomData2Count = info.CustomData2Count;
 			importingAsset.HasRefraction = info.HasRefraction;
@@ -165,6 +166,37 @@ namespace Effekseer.Editor
 			}
 
 			EffekseerMaterialAsset.CreateAsset(assetPath, importingAsset);
+		}
+
+		static string CreateMaterialImportWarning(string assetPath, Effekseer.Editor.Utils.MaterialInformation info)
+		{
+			string reason = "Unknown error.";
+			switch (info.LastErrorCode)
+			{
+				case Effekseer.Editor.Utils.MaterialInformationErrorCode.TooNewFormat:
+					reason = "The material format is newer than this importer supports.";
+					break;
+				case Effekseer.Editor.Utils.MaterialInformationErrorCode.NotFound:
+					reason = "The material file was not found.";
+					break;
+				case Effekseer.Editor.Utils.MaterialInformationErrorCode.FailedToOpen:
+					reason = "The material file could not be opened.";
+					break;
+				case Effekseer.Editor.Utils.MaterialInformationErrorCode.InvalidFormat:
+					reason = "The material file is invalid, truncated, or corrupted.";
+					break;
+			}
+
+			string detail = string.IsNullOrEmpty(info.LastErrorMessage) ? "No additional details." : info.LastErrorMessage;
+			string fileVersion = info.FileVersion == 0 ? "unknown" : info.FileVersion.ToString();
+
+			return string.Format(
+				"Failed to load Effekseer material: {0}. Reason: {1} Detail: {2} File version: {3}. Latest supported version: {4}.",
+				assetPath,
+				reason,
+				detail,
+				fileVersion,
+				info.LatestSupportedVersion);
 		}
 
 		static EffekseerMaterialAsset.GradientProperty CreateGradientProperty(Utils.MaterialInformation.GradientInformation g)
