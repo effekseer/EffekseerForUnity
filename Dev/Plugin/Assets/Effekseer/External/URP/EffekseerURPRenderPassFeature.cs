@@ -171,6 +171,29 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			system.renderer.Render(passData.camera, passData.layerMask, passData.prop, commandBuffer, true, passData.blitter);
 		}
 
+		static void ExecuteRasterRenderGraphPass(PassData passData, RasterGraphContext context)
+		{
+			var system = Effekseer.EffekseerSystem.Instance;
+			if (system == null || passData.camera == null)
+			{
+				return;
+			}
+
+			var commandBuffer = CommandBufferHelpers.GetNativeCommandBuffer(context.cmd);
+			passData.prop.colorTargetIdentifier = (RenderTargetIdentifier)passData.colorTexture;
+			passData.prop.depthTargetIdentifier = passData.depthTexture.IsValid() ? (RenderTargetIdentifier)passData.depthTexture : (RenderTargetIdentifier?)null;
+			system.renderer.Render(passData.camera, passData.layerMask, passData.prop, commandBuffer, true, passData.blitter, false);
+		}
+
+		bool CanUseRasterPass(UniversalCameraData cameraData)
+		{
+			var system = Effekseer.EffekseerSystem.Instance;
+			return Effekseer.EffekseerSettings.Instance.enableURPRasterPass &&
+				system != null &&
+				system.CanUseURPRasterPass &&
+				!cameraData.xrRendering;
+		}
+
 		public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
 		{
 			if (Effekseer.EffekseerSystem.Instance == null) return;
@@ -184,6 +207,30 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 
 			var xrRendering = cameraData.xrRendering;
+
+			if (CanUseRasterPass(cameraData))
+			{
+				using (var builder = renderGraph.AddRasterRenderPass<PassData>("Effekseer RasterPass", out var passData, profilingSampler))
+				{
+					passData.camera = cameraData.camera;
+					passData.layerMask = layerMask.value;
+					passData.blitter = this.blitter;
+					passData.colorTexture = colorTexture;
+					passData.depthTexture = resourceData.activeDepthTexture;
+					PrepareRenderTargetProperty(passData.prop, cameraData.cameraTargetDescriptor, cameraData.requiresDepthTexture, xrRendering);
+
+					builder.SetRenderAttachment(passData.colorTexture, 0, AccessFlags.ReadWrite);
+					if (passData.depthTexture.IsValid())
+					{
+						builder.SetRenderAttachmentDepth(passData.depthTexture, AccessFlags.ReadWrite);
+					}
+
+					builder.AllowPassCulling(false);
+					builder.AllowGlobalStateModification(true);
+					builder.SetRenderFunc(static (PassData passData, RasterGraphContext context) => ExecuteRasterRenderGraphPass(passData, context));
+				}
+				return;
+			}
 
 			using (var builder = renderGraph.AddUnsafePass<PassData>("EffekseerPass", out var passData, profilingSampler))
 			{

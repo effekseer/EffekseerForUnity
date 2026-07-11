@@ -287,7 +287,7 @@ namespace Effekseer.Internal
 
 		void CleanUp();
 
-		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter);
+		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, bool setDefaultRenderTarget = true);
 
 		void OnPostRender(Camera camera);
 	}

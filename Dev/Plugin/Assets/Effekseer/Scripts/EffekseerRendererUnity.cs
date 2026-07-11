@@ -1018,7 +1018,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter)
+		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, bool setDefaultRenderTarget = true)
 		{
 			RenderPath path;
 			int allEffectMask;
@@ -1076,7 +1076,7 @@ namespace Effekseer.Internal
 			path.ResetBuffers();
 
 			// Reset render target
-			if (renderTargetProperty != null)
+			if (renderTargetProperty != null && setDefaultRenderTarget)
 			{
 				renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
 			}

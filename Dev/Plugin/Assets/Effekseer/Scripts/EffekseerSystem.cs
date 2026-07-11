@@ -183,6 +183,19 @@ namespace Effekseer
 
 		internal Effekseer.EffekseerRendererType RendererType { get; private set; }
 
+		/// <summary>
+		/// Whether the current Unity renderer configuration can run in a URP raster pass.
+		/// </summary>
+		public bool CanUseURPRasterPass
+		{
+			get
+			{
+				return RendererType == EffekseerRendererType.Unity &&
+					!EffekseerRendererUtils.IsDistortionEnabled &&
+					!EffekseerRendererUtils.IsDepthEnabled;
+			}
+		}
+
 		private static CachedTextureContainer cachedTextures = new CachedTextureContainer();
 
 		private static CachedModelContainer cachedModels = new CachedModelContainer();

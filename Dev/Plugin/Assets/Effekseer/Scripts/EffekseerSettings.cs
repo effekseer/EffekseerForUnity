@@ -50,6 +50,17 @@ namespace Effekseer
 		public EffekseerRendererType RendererType = EffekseerRendererType.Native;
 
 		/// <summary xml:lang="en">
+		/// Enables the URP RenderGraph raster pass when the Unity renderer is used.
+		/// Unsupported rendering configurations automatically use the compatibility pass.
+		/// </summary>
+		/// <summary xml:lang="ja">
+		/// UnityRenderer 使用時に URP RenderGraph の RasterPass を有効にします。
+		/// 未対応の描画構成では自動的に互換パスを使用します。
+		/// </summary>
+		[SerializeField]
+		public bool enableURPRasterPass = false;
+
+		/// <summary xml:lang="en">
 		/// Maximum number of effect instances.
 		/// </summary>
 		/// <summary xml:lang="ja">
