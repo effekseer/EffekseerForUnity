@@ -10,21 +10,14 @@ public class EffekseerPluginSwitcher
 {
 	static readonly string tempFilePath = "Temp/EffekseerPluginSwitcher";
 
-#if UNITY_2023_2_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
+	static readonly string bcPath = "WebGL/4.0.19-64bit/libEffekseerUnity.bc";
+#elif UNITY_2023_2_OR_NEWER
 	static readonly string bcPath = "WebGL/3.1.38-64bit/libEffekseerUnity.bc";
-#elif UNITY_2022_2_OR_NEWER
+#else
 	static readonly string bcPath = "WebGL/3.1.8-64bit/libEffekseerUnity.bc";
-#elif UNITY_2021_2_OR_NEWER
-	static readonly string bcPath = "WebGL/2.0.19-64bit/libEffekseerUnity.bc";
-#else
-	static readonly string bcPath = string.Empty;
 #endif
-	static readonly bool webglSupported =
-#if UNITY_2021_2_OR_NEWER
-		true;
-#else
-		false;
-#endif
+	static readonly bool webglSupported = true;
 
 	static EffekseerPluginSwitcher()
 	{

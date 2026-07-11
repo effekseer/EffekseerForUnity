@@ -84,23 +84,12 @@ namespace Effekseer
 			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter);
 		}
 
-#if UNITY_6000_0_OR_NEWER
 		protected override void Execute(CustomPassContext ctx)
 		{
-			// Unity 6 HDRP executes custom passes through RenderGraph internally.
-			// Keep the RenderGraph entry point isolated from the legacy path so future
-			// HDRP changes stay localized in this file.
+			// CustomPassContext is available from HDRP 14 (Unity 2022.3) onward and
+			// remains the RenderGraph-compatible entry point in Unity 6.
 			Execute(ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ctx.cmd, ctx.hdCamera);
 		}
-#else
-		protected override void Execute(ScriptableRenderContext renderContext, CommandBuffer cmd, HDCamera hdCamera, CullingResults cullingResult)
-		{
-			RTHandle colorBuffer;
-			RTHandle depthBuffer;
-			GetCameraBuffers(out colorBuffer, out depthBuffer);
-			Execute(colorBuffer, depthBuffer, cmd, hdCamera);
-		}
-#endif
 
 		protected override void Cleanup()
 		{
