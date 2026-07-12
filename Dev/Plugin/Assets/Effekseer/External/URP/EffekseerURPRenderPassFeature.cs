@@ -14,23 +14,20 @@ public class UrpBlitter : IEffekseerBlitter
 {
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
-		if (xrRendering)
-		{
-			CoreUtils.SetRenderTarget(cmd, dest);
-			// FIXME: Scaling is ignored.
-			//        The interface should take RTHandle instead of RenderTargetIdentifier and use Blitter.BlitCameraTexture.
-			//        However, this will cause issues in terms of compatibility with Built-in RP support.
-			Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(TextureXR.dimension), 0);
-		}
-		else
-		{
-			cmd.Blit(source, dest);
-		}
+		// XR-WA-003 (English): CommandBuffer.Blit can change XR shader keywords and is not
+		// compatible with URP RenderGraph/NativeRenderPass. Always use the SRP Blitter here.
+		// Remove this workaround only if Unity documents cmd.Blit as XR and RenderGraph safe.
+		// XR-WA-003 (日本語): CommandBuffer.Blit は XR のシェーダーキーワードを変更する場合があり、
+		// URP RenderGraph/NativeRenderPass と互換ではないため、常に SRP Blitter を使用します。
+		// Unity が cmd.Blit の XR・RenderGraph 対応を明記した場合のみ削除してください。
+		CoreUtils.SetRenderTarget(cmd, dest);
+		Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(xrRendering ? TextureXR.dimension : TextureDimension.Tex2D), 0);
 	}
 
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material, bool xrRendering)
 	{
-		cmd.Blit(source, dest, material);
+		CoreUtils.SetRenderTarget(cmd, dest);
+		Blitter.BlitTexture(cmd, source, Vector2.one, material, 0);
 	}
 
 	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, bool xrRendering)
@@ -68,7 +65,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 
 		bool IsValidCameraDepthTarget(RenderTargetIdentifier cameraDepthTarget)
 		{
-			// HACK: When using URP, the depth might be either written to a DepthBuffer attached to
+			// XR-WA-007 (English): When using URP, the depth might be either written to a DepthBuffer attached to
 			//       - cameraColorTarget
 			//       OR
 			//       - cameraDepthTarget
@@ -89,6 +86,11 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			//       A RenderTargetIdentifier might point to a valid RenderTexture in many different ways
 			//       (including NameID or InstanceID), whether NameID or InstanceID is used to identify a valid
 			//       RenderTexture depends on the Unity Editor / URP package version.
+			//       Remove this when every supported URP version provides an authoritative valid-depth-target API.
+			// XR-WA-007 (日本語): URP の有効な Depth は Camera Color 側または Camera Depth 側にあり、
+			// Unity・URP・Camera Stack・MSAA・Depth Texture 設定により変わります。そのため Identifier の
+			// NameID / InstanceID から有効性を判定します。対応する全 URP 版で正式な有効 Depth Target API が
+			// 提供された場合のみ削除してください。
 			var identifierString = cameraDepthTarget.ToString();
 			return !identifierString.Contains("NameID -1") || !identifierString.Contains("InstanceID 0");
 		}
@@ -140,7 +142,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			}
 
 			var cmd = CommandBufferPool.Get(RenderPassName);
-			Effekseer.EffekseerSystem.Instance.renderer.Render(renderingData.cameraData.camera, layerMask.value, prop, cmd, true, blitter);
+			EffekseerRenderCoordinator.Render(Effekseer.EffekseerSystem.Instance.renderer,
+				new EffekseerRenderFrameInput(renderingData.cameraData.camera, layerMask.value, prop, cmd, true, blitter));
 			context.ExecuteCommandBuffer(cmd);
 			CommandBufferPool.Release(cmd);
 		}
@@ -168,7 +171,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			var commandBuffer = CommandBufferHelpers.GetNativeCommandBuffer(context.cmd);
 			passData.prop.colorTargetIdentifier = (RenderTargetIdentifier)passData.colorTexture;
 			passData.prop.depthTargetIdentifier = passData.depthTexture.IsValid() ? (RenderTargetIdentifier)passData.depthTexture : (RenderTargetIdentifier?)null;
-			system.renderer.Render(passData.camera, passData.layerMask, passData.prop, commandBuffer, true, passData.blitter);
+			EffekseerRenderCoordinator.Render(system.renderer,
+				new EffekseerRenderFrameInput(passData.camera, passData.layerMask, passData.prop, commandBuffer, true, passData.blitter));
 		}
 
 		static void ExecuteRasterRenderGraphPass(PassData passData, RasterGraphContext context)
@@ -179,10 +183,10 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				return;
 			}
 
-			var commandBuffer = CommandBufferHelpers.GetNativeCommandBuffer(context.cmd);
-			passData.prop.colorTargetIdentifier = (RenderTargetIdentifier)passData.colorTexture;
-			passData.prop.depthTargetIdentifier = passData.depthTexture.IsValid() ? (RenderTargetIdentifier)passData.depthTexture : (RenderTargetIdentifier?)null;
-			system.renderer.Render(passData.camera, passData.layerMask, passData.prop, commandBuffer, true, passData.blitter, false);
+			EffekseerRenderCoordinator.RenderExternal(system.renderer,
+				new EffekseerRenderFrameInput(passData.camera, passData.layerMask, passData.prop, null, true, passData.blitter,
+					usesExternalCommands: true),
+				new EffekseerURPRasterCommandBuffer(context.cmd));
 		}
 
 		bool CanUseRasterPass(UniversalCameraData cameraData)

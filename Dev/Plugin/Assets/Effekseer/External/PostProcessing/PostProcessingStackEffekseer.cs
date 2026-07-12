@@ -71,7 +71,8 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 		prop.canGrabDepth = true;
 		context.command.SetRenderTarget(context.destination, depthIdentifer);
 
-		Effekseer.EffekseerSystem.Instance.renderer.Render(context.camera, int.MaxValue, prop, context.command, false, standardBlitter);
+		Effekseer.Internal.EffekseerRenderCoordinator.Render(Effekseer.EffekseerSystem.Instance.renderer,
+			new Effekseer.Internal.EffekseerRenderFrameInput(context.camera, int.MaxValue, prop, context.command, false, standardBlitter));
 
 		context.command.ReleaseTemporaryRT(propertyId);
 	}

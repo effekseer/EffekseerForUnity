@@ -51,7 +51,6 @@ namespace Effekseer
 			prop.depthTargetRenderTexture = depthBuffer;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.HDRP;
 
-			// TODO : It needs to support VR and override
 			prop.ActualScreenSize = new Vector2Int(hdCamera.actualWidth, hdCamera.actualHeight);
 			prop.SourceViewport = hdCamera.camera.pixelRect;
 #if UNITY_6000_0_OR_NEWER
@@ -63,7 +62,14 @@ namespace Effekseer
 			prop.Viewport = new Rect(0, 0, hdCamera.camera.pixelRect.width, hdCamera.camera.pixelRect.height);
 #endif
 
-			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(colorRT.width, colorRT.height, colorRT.format, 0, colorRT.mipmapCount);
+			// XR-WA-005 (English): Preserve HDRP's authoritative camera descriptor so temporary
+			// Effekseer resources keep the XR dimension, view count and dynamic-resolution flags.
+			// Remove this only if HDRP exposes an equivalent descriptor-independent allocation API.
+			// XR-WA-005 (日本語): Effekseer の一時リソースへ XR dimension、view 数、動的解像度フラグを
+			// 引き継ぐため、HDRP のカメラ Descriptor を維持します。同等の Descriptor 非依存 Allocation API が
+			// HDRP に追加された場合のみ削除してください。
+			prop.colorTargetDescriptor = colorRT.descriptor;
+			prop.colorTargetDescriptor.depthBufferBits = 0;
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
 			return true;
@@ -81,7 +87,8 @@ namespace Effekseer
 				return;
 			}
 
-			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter);
+			EffekseerRenderCoordinator.Render(EffekseerSystem.Instance.renderer,
+				new EffekseerRenderFrameInput(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter));
 		}
 
 		protected override void Execute(CustomPassContext ctx)
