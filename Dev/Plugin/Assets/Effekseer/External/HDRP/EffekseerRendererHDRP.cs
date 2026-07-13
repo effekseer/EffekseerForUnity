@@ -51,24 +51,27 @@ namespace Effekseer
 			prop.depthTargetRenderTexture = depthBuffer;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.HDRP;
 
-			prop.ActualScreenSize = new Vector2Int(hdCamera.actualWidth, hdCamera.actualHeight);
-			prop.SourceViewport = hdCamera.camera.pixelRect;
-#if UNITY_6000_0_OR_NEWER
-			// HDRP keeps the full-resolution RT allocated and shrinks the active viewport when
-			// dynamic resolution is enabled, so keep the render viewport and the source
-			// sampling viewport separate.
-			prop.Viewport = new Rect(0, 0, hdCamera.actualWidth, hdCamera.actualHeight);
-#else
-			prop.Viewport = new Rect(0, 0, hdCamera.camera.pixelRect.width, hdCamera.camera.pixelRect.height);
-#endif
+			// HDRP-WA-DRS-001 (English): HDRP 14-17 keep camera RTHandles at their maximum allocation
+			// while Dynamic Resolution changes only the active viewport. camera.pixelRect is the
+			// unscaled GameView rectangle and copying that area also samples unused RTHandle pixels.
+			// Use the camera color RTHandle's current viewport for target binding and source sampling.
+			// Remove this only when HDRP exposes a camera color descriptor whose size is the active
+			// viewport rather than the backing allocation.
+			// HDRP-WA-DRS-001 (日本語): HDRP 14-17 は Camera RTHandle を最大サイズのまま確保し、
+			// Dynamic Resolution では有効 Viewport のみを変更します。camera.pixelRect は縮小前の
+			// GameView 領域なので、そのままコピーすると RTHandle の未使用領域まで参照します。
+			// Target の設定とコピー元の Sampling には Camera Color RTHandle の現在の Viewport を
+			// 使用します。HDRP が確保サイズではなく有効 Viewport サイズの Camera Color Descriptor を
+			// 提供するようになった場合のみ削除してください。
+			var activeViewportSize = colorBuffer.GetScaledSize(colorBuffer.rtHandleProperties.currentViewportSize);
+			activeViewportSize.x = Mathf.Clamp(activeViewportSize.x, 1, colorRT.width);
+			activeViewportSize.y = Mathf.Clamp(activeViewportSize.y, 1, colorRT.height);
+			prop.ActualScreenSize = activeViewportSize;
+			prop.SourceViewport = new Rect(0, 0, activeViewportSize.x, activeViewportSize.y);
+			prop.Viewport = new Rect(0, 0, activeViewportSize.x, activeViewportSize.y);
 
-			// XR-WA-005 (English): Preserve HDRP's authoritative camera descriptor so temporary
-			// Effekseer resources keep the XR dimension, view count and dynamic-resolution flags.
-			// Remove this only if HDRP exposes an equivalent descriptor-independent allocation API.
-			// XR-WA-005 (日本語): Effekseer の一時リソースへ XR dimension、view 数、動的解像度フラグを
-			// 引き継ぐため、HDRP のカメラ Descriptor を維持します。同等の Descriptor 非依存 Allocation API が
-			// HDRP に追加された場合のみ削除してください。
-			prop.colorTargetDescriptor = colorRT.descriptor;
+			prop.colorTargetDescriptor = EffekseerRenderTargetDescriptorUtils.CreateTemporaryColorDescriptor(
+				colorRT, hdCamera.camera);
 			prop.colorTargetDescriptor.depthBufferBits = 0;
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;

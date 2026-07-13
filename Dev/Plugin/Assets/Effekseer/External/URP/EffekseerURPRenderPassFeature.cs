@@ -14,20 +14,46 @@ public class UrpBlitter : IEffekseerBlitter
 {
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, bool xrRendering)
 	{
-		// XR-WA-003 (English): CommandBuffer.Blit can change XR shader keywords and is not
-		// compatible with URP RenderGraph/NativeRenderPass. Always use the SRP Blitter here.
-		// Remove this workaround only if Unity documents cmd.Blit as XR and RenderGraph safe.
-		// XR-WA-003 (日本語): CommandBuffer.Blit は XR のシェーダーキーワードを変更する場合があり、
-		// URP RenderGraph/NativeRenderPass と互換ではないため、常に SRP Blitter を使用します。
-		// Unity が cmd.Blit の XR・RenderGraph 対応を明記した場合のみ削除してください。
+		// XR-WA-003 (English): CommandBuffer.Blit is unsafe for XR and RenderGraph, so those
+		// paths use the SRP Blitter. Unity 2022.3-2023.2 non-XR keeps CommandBuffer.Blit because
+		// URP 16 SceneView can otherwise interpret editor target color channels incorrectly.
+		// Remove the legacy branch after all supported pre-Unity-6 SceneView formats are verified.
+		// XR-WA-003 (日本語): CommandBuffer.Blit はXR・RenderGraphでは安全でないためSRP Blitterを
+		// 使用します。一方Unity 2022.3-2023.2の非XRでは、URP 16 SceneViewのEditor Target形式で
+		// Color Channelの解釈が変わる場合があるためCommandBuffer.Blitを維持します。Unity 6未満の
+		// 全SceneView形式でSRP Blitterを検証できた場合のみLegacy分岐を削除してください。
+#if UNITY_6000_0_OR_NEWER
 		CoreUtils.SetRenderTarget(cmd, dest);
 		Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(xrRendering ? TextureXR.dimension : TextureDimension.Tex2D), 0);
+#else
+		if (xrRendering)
+		{
+			CoreUtils.SetRenderTarget(cmd, dest);
+			Blitter.BlitTexture(cmd, source, Vector2.one, Blitter.GetBlitMaterial(TextureXR.dimension), 0);
+		}
+		else
+		{
+			cmd.Blit(source, dest);
+		}
+#endif
 	}
 
 	public void Blit(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier dest, Material material, bool xrRendering)
 	{
+#if UNITY_6000_0_OR_NEWER
 		CoreUtils.SetRenderTarget(cmd, dest);
 		Blitter.BlitTexture(cmd, source, Vector2.one, material, 0);
+#else
+		if (xrRendering)
+		{
+			CoreUtils.SetRenderTarget(cmd, dest);
+			Blitter.BlitTexture(cmd, source, Vector2.one, material, 0);
+		}
+		else
+		{
+			cmd.Blit(source, dest, material);
+		}
+#endif
 	}
 
 	public void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier color, bool xrRendering)
@@ -95,7 +121,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			return !identifierString.Contains("NameID -1") || !identifierString.Contains("InstanceID 0");
 		}
 
-		void PrepareRenderTargetProperty(RenderTargetProperty renderTargetProperty, RenderTextureDescriptor colorTargetDescriptor, bool requiresDepthTexture, bool xrRendering)
+		void PrepareRenderTargetProperty(RenderTargetProperty renderTargetProperty, RenderTextureDescriptor colorTargetDescriptor,
+			bool requiresDepthTexture, bool xrRendering)
 		{
 			renderTargetProperty.colorBufferID = null;
 			renderTargetProperty.depthTargetIdentifier = null;
@@ -115,6 +142,11 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			renderTargetProperty.xrRendering = xrRendering;
 		}
 
+		// Unity 6000.5 / URP 17.5 removed ScriptableRenderPass.Execute. Unity 6000.0-6000.4
+		// still exposes it as an obsolete compatibility path, so keep it only for those versions.
+		// Unity 6000.5 / URP 17.5 では ScriptableRenderPass.Execute が削除されました。
+		// Unity 6000.0-6000.4 では旧互換経路として残っているため、それらのバージョンまで定義します。
+#if !UNITY_6000_5_OR_NEWER
 #if UNITY_6000_0_OR_NEWER
 		[Obsolete]
 #endif
@@ -122,7 +154,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 		{
 			if (Effekseer.EffekseerSystem.Instance == null) return;
 			var xrRendering = renderingData.cameraData.xrRendering;
-			PrepareRenderTargetProperty(prop, renderingData.cameraData.cameraTargetDescriptor, renderingData.cameraData.requiresDepthTexture, xrRendering);
+			PrepareRenderTargetProperty(prop, renderingData.cameraData.cameraTargetDescriptor,
+				renderingData.cameraData.requiresDepthTexture, xrRendering);
 			var renderer = renderingData.cameraData.renderer;
 			prop.colorTargetIdentifier = renderer.cameraColorTargetHandle;
 
@@ -147,6 +180,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			context.ExecuteCommandBuffer(cmd);
 			CommandBufferPool.Release(cmd);
 		}
+#endif
 
 #if UNITY_6000_0_OR_NEWER
 		class PassData
@@ -221,7 +255,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 					passData.blitter = this.blitter;
 					passData.colorTexture = colorTexture;
 					passData.depthTexture = resourceData.activeDepthTexture;
-					PrepareRenderTargetProperty(passData.prop, cameraData.cameraTargetDescriptor, cameraData.requiresDepthTexture, xrRendering);
+					PrepareRenderTargetProperty(passData.prop, cameraData.cameraTargetDescriptor,
+						cameraData.requiresDepthTexture, xrRendering);
 
 					builder.SetRenderAttachment(passData.colorTexture, 0, AccessFlags.ReadWrite);
 					if (passData.depthTexture.IsValid())
@@ -248,7 +283,8 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 				{
 					builder.UseTexture(passData.depthTexture, AccessFlags.ReadWrite);
 				}
-				PrepareRenderTargetProperty(passData.prop, cameraData.cameraTargetDescriptor, cameraData.requiresDepthTexture, xrRendering);
+				PrepareRenderTargetProperty(passData.prop, cameraData.cameraTargetDescriptor,
+					cameraData.requiresDepthTexture, xrRendering);
 
 				builder.AllowPassCulling(false);
 				builder.AllowGlobalStateModification(true);

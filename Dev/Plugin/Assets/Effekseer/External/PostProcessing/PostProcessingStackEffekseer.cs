@@ -64,7 +64,9 @@ class PostProcessingStackEffekseerRenderer<T> : PostProcessEffectRenderer<T> whe
 
 		context.command.Blit(context.source, depthIdentifer, grabDepthMat);
 
-		prop.colorTargetDescriptor = new RenderTextureDescriptor(context.width, context.height, context.sourceFormat);
+		prop.xrRendering = Effekseer.Internal.EffekseerRenderTargetDescriptorUtils.CanUseXREyeTextureDescriptor(context.camera);
+		prop.colorTargetDescriptor = Effekseer.Internal.EffekseerRenderTargetDescriptorUtils.CreatePostProcessingDescriptor(
+			context.camera, context.width, context.height, context.sourceFormat);
 		prop.colorTargetIdentifier = context.destination;
 		prop.depthTargetIdentifier = depthIdentifer;
 		prop.renderFeature = Effekseer.Internal.RenderFeature.PostProcess;

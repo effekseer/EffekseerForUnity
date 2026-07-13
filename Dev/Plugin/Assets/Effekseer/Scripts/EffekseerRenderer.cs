@@ -20,7 +20,9 @@ namespace Effekseer.Internal
 			{
 				var targetSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
 
-				depthRenderTexure = new DepthRenderTexture(targetSize.x, targetSize.y, renderTargetProperty);
+				depthRenderTexure = new DepthRenderTexture(
+					targetSize.x, targetSize.y, renderTargetProperty,
+					EffekseerRenderTargetDescriptorUtils.CanUseXREyeTextureDescriptor(camera));
 
 				// HACK for some smart phone
 				if (depthRenderTexure == null || !depthRenderTexure.Create())
@@ -47,7 +49,9 @@ namespace Effekseer.Internal
 #else
 				RenderTextureFormat format = (camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-				renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
+				renderTexture = new BackgroundRenderTexture(
+					targetSize.x, targetSize.y, 0, format, renderTargetProperty,
+					EffekseerRenderTargetDescriptorUtils.CanUseXREyeTextureDescriptor(camera));
 
 				// HACK for ZenPhone
 				if (renderTexture == null || !renderTexture.Create())
@@ -379,7 +383,8 @@ namespace Effekseer.Internal
 			return new Vector2Int();
 		}
 
-		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format, RenderTargetProperty renderTargetProperty)
+		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format,
+			RenderTargetProperty renderTargetProperty, bool xrRendering)
 		{
 			if (renderTargetProperty != null)
 			{
@@ -394,7 +399,7 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				if (XRSettings.enabled)
+				if (xrRendering)
 				{
 					renderTexture = new RenderTexture(XRSettings.eyeTextureDesc);
 				}
@@ -465,7 +470,7 @@ namespace Effekseer.Internal
 		internal RenderTexture renderTexture;
 		public IntPtr ptr = IntPtr.Zero;
 
-		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty)
+		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty, bool xrRendering)
 		{
 			if (renderTargetProperty != null)
 			{
@@ -489,7 +494,7 @@ namespace Effekseer.Internal
 				desc.depthBufferBits = 0;
 				desc.msaaSamples = 1;
 			}
-			else if (XRSettings.enabled)
+			else if (xrRendering)
 			{
 				desc = XRSettings.eyeTextureDesc;
 				desc.colorFormat = RenderTextureFormat.RHalf;
