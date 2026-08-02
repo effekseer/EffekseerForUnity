@@ -190,8 +190,7 @@ namespace Effekseer
 		{
 			get
 			{
-				return RendererType == EffekseerRendererType.Unity &&
-					!EffekseerRendererUtils.IsDistortionEnabled &&
+				return !EffekseerRendererUtils.IsDistortionEnabled &&
 					!EffekseerRendererUtils.IsDepthEnabled;
 			}
 		}

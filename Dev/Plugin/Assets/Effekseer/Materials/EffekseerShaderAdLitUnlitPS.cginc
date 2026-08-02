@@ -50,7 +50,17 @@ Texture2D _blendUVDistortionTex : register(t6);
 SamplerState sampler_blendUVDistortionTex : register(s6);
 
 #ifndef DISABLED_SOFT_PARTICLE
+// XR-WA-002 (English): SPI/Multiview depth is a texture array and must use the current eye slice.
+// XR-WA-002 (日本語): SPI/Multiview の深度は Texture Array のため現在の Eye Slice を参照します。
+// Remove only when Unity transparently binds and samples one texture type for every XR mode.
+// Unity が全 XR モードで単一の Texture 型を透過的に Bind/Sample する場合のみ削除してください。
+#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+Texture2DArray _depthTex : register(t7);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, float3(uv, unity_StereoEyeIndex))
+#else
 Texture2D _depthTex : register(t7);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, uv)
+#endif
 SamplerState sampler_depthTex : register(s7);
 #endif
 
@@ -75,7 +85,13 @@ Texture2D _blendUVDistortionTex : register(t5);
 SamplerState sampler_blendUVDistortionTex : register(s5);
 
 #ifndef DISABLED_SOFT_PARTICLE
+#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+Texture2DArray _depthTex : register(t6);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, float3(uv, unity_StereoEyeIndex))
+#else
 Texture2D _depthTex : register(t6);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, uv)
+#endif
 SamplerState sampler_depthTex : register(s6);
 #endif
 
@@ -103,6 +119,7 @@ struct PS_Input
 #ifndef DISABLED_SOFT_PARTICLE
 	float4 PosP : TEXCOORD7;
 #endif
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #include "EffekseerShaderAdCommonPS.cginc"
@@ -112,6 +129,7 @@ struct PS_Input
 float4 frag(const PS_Input Input)
 	: SV_Target
 {
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(Input);
 	bool convColorSpace = convertColorSpace != 0.0f;
 
 	float4 fCameraFrontDirection = -float4(UNITY_MATRIX_V[2].xyz, 1.0);
@@ -193,7 +211,7 @@ float4 frag(const PS_Input Input)
 
 	if (softParticleParam.w != 0.0f)
 	{
-		float backgroundZ = _depthTex.Sample(sampler_depthTex, screenUV).x;
+		float backgroundZ = EFK_SAMPLE_DEPTH(screenUV).x;
 		Output.a *= SoftParticle(
 			backgroundZ,
 			screenPos.z,

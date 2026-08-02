@@ -20,7 +20,9 @@ namespace Effekseer.Internal
 			{
 				var targetSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
 
-				depthRenderTexure = new DepthRenderTexture(targetSize.x, targetSize.y, renderTargetProperty);
+				depthRenderTexure = new DepthRenderTexture(
+					targetSize.x, targetSize.y, renderTargetProperty,
+					EffekseerRenderTargetDescriptorUtils.CanUseXREyeTextureDescriptor(camera));
 
 				// HACK for some smart phone
 				if (depthRenderTexure == null || !depthRenderTexure.Create())
@@ -47,7 +49,9 @@ namespace Effekseer.Internal
 #else
 				RenderTextureFormat format = (camera.allowHDR) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
 #endif
-				renderTexture = new BackgroundRenderTexture(targetSize.x, targetSize.y, 0, format, renderTargetProperty);
+				renderTexture = new BackgroundRenderTexture(
+					targetSize.x, targetSize.y, 0, format, renderTargetProperty,
+					EffekseerRenderTargetDescriptorUtils.CanUseXREyeTextureDescriptor(camera));
 
 				// HACK for ZenPhone
 				if (renderTexture == null || !renderTexture.Create())
@@ -287,7 +291,11 @@ namespace Effekseer.Internal
 
 		void CleanUp();
 
-		void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, bool setDefaultRenderTarget = true);
+		EffekseerPreparedFrame PrepareFrame(EffekseerRenderFrameInput input);
+
+		void RecordPhase(EffekseerPreparedFrame frame, EffekseerRenderPhase phase, IEffekseerCommandBuffer commandBuffer);
+
+		void EndFrame(EffekseerPreparedFrame frame);
 
 		void OnPostRender(Camera camera);
 	}
@@ -375,7 +383,8 @@ namespace Effekseer.Internal
 			return new Vector2Int();
 		}
 
-		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format, RenderTargetProperty renderTargetProperty)
+		public BackgroundRenderTexture(int width, int height, int depth, RenderTextureFormat format,
+			RenderTargetProperty renderTargetProperty, bool xrRendering)
 		{
 			if (renderTargetProperty != null)
 			{
@@ -390,7 +399,7 @@ namespace Effekseer.Internal
 			}
 			else
 			{
-				if (XRSettings.enabled)
+				if (xrRendering)
 				{
 					renderTexture = new RenderTexture(XRSettings.eyeTextureDesc);
 				}
@@ -461,7 +470,7 @@ namespace Effekseer.Internal
 		internal RenderTexture renderTexture;
 		public IntPtr ptr = IntPtr.Zero;
 
-		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty)
+		public DepthRenderTexture(int width, int height, RenderTargetProperty renderTargetProperty, bool xrRendering)
 		{
 			if (renderTargetProperty != null)
 			{
@@ -469,7 +478,33 @@ namespace Effekseer.Internal
 				height = renderTargetProperty.colorTargetDescriptor.height;
 			}
 
-			RenderTextureDescriptor desc = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
+			RenderTextureDescriptor desc;
+			if (renderTargetProperty != null)
+			{
+				// XR-WA-005 (English): Keep the pipeline camera descriptor's dimension, slice count,
+				// VR usage and dynamic-scale state. A plain 2D temporary texture cannot be sampled
+				// correctly by Single Pass Instanced or Multiview. Remove this only if Unity starts
+				// converting 2D effect depth textures to the active XR layout automatically.
+				// XR-WA-005 (日本語): パイプラインのカメラ Descriptor から dimension、slice 数、
+				// VR usage、dynamic-scale 状態を引き継ぎます。通常の 2D 一時テクスチャは Single Pass
+				// Instanced / Multiview から正しく参照できません。Unity が XR レイアウトへ自動変換する
+				// ようになった場合のみ削除してください。
+				desc = renderTargetProperty.colorTargetDescriptor;
+				desc.colorFormat = RenderTextureFormat.RHalf;
+				desc.depthBufferBits = 0;
+				desc.msaaSamples = 1;
+			}
+			else if (xrRendering)
+			{
+				desc = XRSettings.eyeTextureDesc;
+				desc.colorFormat = RenderTextureFormat.RHalf;
+				desc.depthBufferBits = 0;
+				desc.msaaSamples = 1;
+			}
+			else
+			{
+				desc = new RenderTextureDescriptor(width, height, RenderTextureFormat.RHalf);
+			}
 
 			renderTexture = new RenderTexture(desc);
 

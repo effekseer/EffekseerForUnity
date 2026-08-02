@@ -51,19 +51,28 @@ namespace Effekseer
 			prop.depthTargetRenderTexture = depthBuffer;
 			prop.renderFeature = Effekseer.Internal.RenderFeature.HDRP;
 
-			// TODO : It needs to support VR and override
-			prop.ActualScreenSize = new Vector2Int(hdCamera.actualWidth, hdCamera.actualHeight);
-			prop.SourceViewport = hdCamera.camera.pixelRect;
-#if UNITY_6000_0_OR_NEWER
-			// HDRP keeps the full-resolution RT allocated and shrinks the active viewport when
-			// dynamic resolution is enabled, so keep the render viewport and the source
-			// sampling viewport separate.
-			prop.Viewport = new Rect(0, 0, hdCamera.actualWidth, hdCamera.actualHeight);
-#else
-			prop.Viewport = new Rect(0, 0, hdCamera.camera.pixelRect.width, hdCamera.camera.pixelRect.height);
-#endif
+			// HDRP-WA-DRS-001 (English): HDRP 14-17 keep camera RTHandles at their maximum allocation
+			// while Dynamic Resolution changes only the active viewport. camera.pixelRect is the
+			// unscaled GameView rectangle and copying that area also samples unused RTHandle pixels.
+			// Use the camera color RTHandle's current viewport for target binding and source sampling.
+			// Remove this only when HDRP exposes a camera color descriptor whose size is the active
+			// viewport rather than the backing allocation.
+			// HDRP-WA-DRS-001 (日本語): HDRP 14-17 は Camera RTHandle を最大サイズのまま確保し、
+			// Dynamic Resolution では有効 Viewport のみを変更します。camera.pixelRect は縮小前の
+			// GameView 領域なので、そのままコピーすると RTHandle の未使用領域まで参照します。
+			// Target の設定とコピー元の Sampling には Camera Color RTHandle の現在の Viewport を
+			// 使用します。HDRP が確保サイズではなく有効 Viewport サイズの Camera Color Descriptor を
+			// 提供するようになった場合のみ削除してください。
+			var activeViewportSize = colorBuffer.GetScaledSize(colorBuffer.rtHandleProperties.currentViewportSize);
+			activeViewportSize.x = Mathf.Clamp(activeViewportSize.x, 1, colorRT.width);
+			activeViewportSize.y = Mathf.Clamp(activeViewportSize.y, 1, colorRT.height);
+			prop.ActualScreenSize = activeViewportSize;
+			prop.SourceViewport = new Rect(0, 0, activeViewportSize.x, activeViewportSize.y);
+			prop.Viewport = new Rect(0, 0, activeViewportSize.x, activeViewportSize.y);
 
-			prop.colorTargetDescriptor = new UnityEngine.RenderTextureDescriptor(colorRT.width, colorRT.height, colorRT.format, 0, colorRT.mipmapCount);
+			prop.colorTargetDescriptor = EffekseerRenderTargetDescriptorUtils.CreateTemporaryColorDescriptor(
+				colorRT, hdCamera.camera);
+			prop.colorTargetDescriptor.depthBufferBits = 0;
 			prop.colorTargetDescriptor.msaaSamples = hdCamera.msaaSamples == MSAASamples.None ? 1 : 2;
 			prop.isRequiredToChangeViewport = true;
 			return true;
@@ -81,7 +90,8 @@ namespace Effekseer
 				return;
 			}
 
-			EffekseerSystem.Instance.renderer.Render(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter);
+			EffekseerRenderCoordinator.Render(EffekseerSystem.Instance.renderer,
+				new EffekseerRenderFrameInput(hdCamera.camera, LayerMask.value, prop, cmd, true, blitter));
 		}
 
 		protected override void Execute(CustomPassContext ctx)

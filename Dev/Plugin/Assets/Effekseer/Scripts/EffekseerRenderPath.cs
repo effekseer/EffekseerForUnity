@@ -10,11 +10,13 @@ namespace Effekseer.Internal
 	{
 		public Camera camera;
 		public int mask = int.MaxValue;
+		public bool usesExternalCommands;
 
-		public CameraWithMask(Camera camera, int mask)
+		public CameraWithMask(Camera camera, int mask, bool usesExternalCommands = false)
 		{
 			this.camera = camera;
 			this.mask = mask;
+			this.usesExternalCommands = usesExternalCommands;
 		}
 
 		public override bool Equals(object obj)
@@ -29,12 +31,12 @@ namespace Effekseer.Internal
 
 		public override int GetHashCode()
 		{
-			return camera.GetHashCode() + mask.GetHashCode();
+			return camera.GetHashCode() + mask.GetHashCode() + usesExternalCommands.GetHashCode();
 		}
 
 		public static bool operator ==(CameraWithMask v1, CameraWithMask v2)
 		{
-			return v1.camera == v2.camera && v1.mask == v2.mask;
+			return v1.camera == v2.camera && v1.mask == v2.mask && v1.usesExternalCommands == v2.usesExternalCommands;
 		}
 
 		public static bool operator !=(CameraWithMask v1, CameraWithMask v2)
@@ -151,7 +153,7 @@ namespace Effekseer.Internal
 			renderPaths.Clear();
 		}
 
-		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask)
+		public void UpdateRenderPath(bool disableCullingMask, Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, CameraEvent cameraEvent, out T path, out int allEffectMask, out int cameraMask, bool useExternalCommandBuffer = false)
 		{
 			path = null;
 
@@ -180,6 +182,7 @@ namespace Effekseer.Internal
 #endif
 			cameraWithMaskKey.camera = camera;
 			cameraWithMaskKey.mask = additionalMask;
+			cameraWithMaskKey.usesExternalCommands = targetCommandBuffer != null || useExternalCommandBuffer;
 
 			// don't need to update because doesn't exists and need not to render
 			if ((allEffectMask & cameraMask) == 0 && !renderPaths.ContainsKey(cameraWithMaskKey))
@@ -247,10 +250,10 @@ namespace Effekseer.Internal
 				}
 
 				path = new T();
-				path.Init(camera, cameraEvent, nextRenderID, targetCommandBuffer != null, isScriptable);
+				path.Init(camera, cameraEvent, nextRenderID, targetCommandBuffer != null || useExternalCommandBuffer, isScriptable);
 				var stereoRenderingType = (camera.stereoEnabled) ? StereoRendererUtil.GetStereoRenderingType() : StereoRendererUtil.StereoRenderingTypes.None;
 				path.ResetParameters(EffekseerRendererUtils.IsDistortionEnabled, EffekseerRendererUtils.IsDepthEnabled, renderTargetProperty, blitter, stereoRenderingType);
-				renderPaths.Add(new CameraWithMask(camera, additionalMask), path);
+				renderPaths.Add(new CameraWithMask(camera, additionalMask, targetCommandBuffer != null || useExternalCommandBuffer), path);
 				nextRenderID = (nextRenderID + 1) % EffekseerRendererUtils.RenderIDCount;
 			}
 

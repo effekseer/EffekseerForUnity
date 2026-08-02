@@ -470,17 +470,16 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			static void SetBufferProperty(CommandBuffer commandBuffer, MaterialPropertyBlock prop, string name, ComputeBuffer buffer)
+			static void SetBufferProperty(IEffekseerCommandBuffer commandBuffer, MaterialPropertyBlock prop, string name, ComputeBuffer buffer)
 			{
 				prop.SetBuffer(name, buffer);
 
-				// Workaround:
-				// On Unity 6 SRP rendering with Vulkan, buffers bound only through
+				// UNITY-WA-VULKAN-GLOBAL-BUFFER (English): On Unity 6 SRP rendering with Vulkan, buffers bound only through
 				// MaterialPropertyBlock can be treated as unbound for DrawProcedural.
-				// Mirror the binding to a global shader property as well.
-				// Keep this isolated here because it is likely compensating for a
-				// Unity-side issue affecting HDRP/URP paths and may be removable once
-				// Unity fixes it.
+				// Mirror the binding globally. Remove this after all supported Unity versions bind it correctly.
+				// UNITY-WA-VULKAN-GLOBAL-BUFFER (日本語): Unity 6 の Vulkan SRP では MaterialPropertyBlock
+				// のみに設定した Buffer が DrawProcedural 時に未設定として扱われる場合があります。
+				// Global にも同じ Buffer を設定します。対応 Unity 全版で正しく Bind された後に削除してください。
 				if (RequiresGlobalBufferFallback())
 				{
 					commandBuffer.SetGlobalBuffer(name, buffer);
@@ -917,6 +916,11 @@ namespace Effekseer.Internal
 					commandBuffer.Clear();
 				}
 
+				ResetRenderingResources();
+			}
+
+			public void ResetRenderingResources()
+			{
 				_materialProps.Reset();
 				_modelBuffers.Reset();
 				_customDataBuffers.Reset();
@@ -1014,196 +1018,89 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, int.MaxValue, null, null, false, standardBlitter);
+				EffekseerRenderCoordinator.Render(this, new EffekseerRenderFrameInput(camera, int.MaxValue, null, null, false, standardBlitter));
 			}
 		}
 
-		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, bool setDefaultRenderTarget = true)
+		public EffekseerPreparedFrame PrepareFrame(EffekseerRenderFrameInput input)
 		{
 			RenderPath path;
 			int allEffectMask;
 			int cameraMask;
-			_renderPathContainer.UpdateRenderPath(disableCullingMask, camera, additionalMask, renderTargetProperty, targetCommandBuffer, isScriptable, blitter, cameraEvent, out path, out allEffectMask, out cameraMask);
+			_renderPathContainer.UpdateRenderPath(disableCullingMask, input.Camera, input.AdditionalMask,
+				input.RenderTargetProperty, input.TargetCommandBuffer, input.IsScriptable, input.Blitter,
+				cameraEvent, out path, out allEffectMask, out cameraMask, input.UsesExternalCommands);
 			if (path == null)
 			{
+				return null;
+			}
+
+			if (path.isCommandBufferFromExternal && input.TargetCommandBuffer != null)
+			{
+				path.AssignExternalCommandBuffer(input.TargetCommandBuffer);
+			}
+
+			if (path.commandBuffer != null && !path.isCommandBufferFromExternal)
+			{
+				path.commandBuffer.Clear();
+			}
+			path.ResetRenderingResources();
+
+			var frame = new EffekseerPreparedFrame
+			{
+				BackendPath = path,
+				CommandBuffer = path.commandBuffer,
+				Background = path.renderTexture,
+				Depth = path.depthTexture,
+				Camera = input.Camera,
+				HasVisibleEffects = (allEffectMask & cameraMask) != 0,
+			};
+
+			Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, path.renderTexture != null ? path.renderTexture.ptr : IntPtr.Zero);
+			Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, path.depthTexture != null ? path.depthTexture.ptr : IntPtr.Zero);
+			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(GL.GetGPUProjectionMatrix(input.Camera.projectionMatrix, false)));
+			Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(input.Camera.worldToCameraMatrix));
+			return frame;
+		}
+
+		public void RecordPhase(EffekseerPreparedFrame frame, EffekseerRenderPhase phase, IEffekseerCommandBuffer commandBuffer)
+		{
+			var path = frame.BackendPath as RenderPath;
+			if (path == null || commandBuffer == null)
+			{
 				return;
 			}
 
-			// effects shown don't exists
-			if ((allEffectMask & cameraMask) == 0)
+			if (phase == EffekseerRenderPhase.Back)
 			{
-				path.ResetBuffers();
-				return;
-			}
-
-			if (path.isCommandBufferFromExternal)
-			{
-				path.AssignExternalCommandBuffer(targetCommandBuffer);
-			}
-
-			// not assigned
-			if (path.commandBuffer == null)
-			{
-				return;
-			}
-
-			// assign a dinsotrion texture
-			if (path.renderTexture != null)
-			{
-				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, path.renderTexture.ptr);
+				Plugin.EffekseerRenderBack(path.renderId);
 			}
 			else
 			{
-				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, IntPtr.Zero);
+				Plugin.EffekseerRenderFront(path.renderId);
 			}
+			EnsureComputeBufferCapacity(path);
+			var buffers = phase == EffekseerRenderPhase.Back ? path._computeBufferBack : path._computeBufferFront;
+			RenderInternal(commandBuffer, buffers, path._materialProps, path._modelBuffers, path._customDataBuffers, frame.Background, frame.Depth);
+		}
 
-			if (path.depthTexture != null)
-			{
-				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, path.depthTexture.ptr);
-			}
-			else
-			{
-				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, IntPtr.Zero);
-			}
+		public void EndFrame(EffekseerPreparedFrame frame)
+		{
+		}
 
-			// update view matrixes
-			Plugin.EffekseerSetProjectionMatrix(path.renderId, Utility.Matrix2Array(
-				GL.GetGPUProjectionMatrix(camera.projectionMatrix, false)));
-			Plugin.EffekseerSetCameraMatrix(path.renderId, Utility.Matrix2Array(
-				camera.worldToCameraMatrix));
-
-			// Reset command buffer
-			path.ResetBuffers();
-
-			// Reset render target
-			if (renderTargetProperty != null && setDefaultRenderTarget)
-			{
-				renderTargetProperty.SetDefaultRenderTarget(path.commandBuffer, blitter);
-			}
-
-			// copy back
-			if (EffekseerRendererUtils.IsDistortionEnabled)
-			{
-				if (renderTargetProperty != null)
-				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
-
-					if (renderTargetProperty.Viewport.HasValue)
-					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-					}
-				}
-				else
-				{
-					// TODO : Fix
-					bool xrRendering = false;
-
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
-				}
-			}
-
-			if (path.depthTexture != null)
-			{
-				if (renderTargetProperty != null)
-				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.depthTexture, blitter);
-
-					if (renderTargetProperty.Viewport.HasValue)
-					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-					}
-				}
-				else
-				{
-					// TODO : Fix
-					bool xrRendering = false;
-
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.Depth, path.depthTexture.renderTexture, xrRendering);
-					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
-				}
-			}
-
-			// generate render events on this thread
-			Plugin.EffekseerRenderBack(path.renderId);
-
-			// if memory is lacked, reallocate memory
-			int maxmumSize = 0;
-
+		void EnsureComputeBufferCapacity(RenderPath path)
+		{
+			int maximumSize = 0;
 			for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
 			{
-				var buf = Plugin.GetUnityStrideBufferParameter(i);
-				maxmumSize = Math.Max(maxmumSize, buf.Size);
+				var buffer = Plugin.GetUnityStrideBufferParameter(i);
+				maximumSize = Math.Max(maximumSize, buffer.Size);
 			}
 
-			while (Plugin.GetUnityRenderParameterCount() > 0 && maxmumSize > path._computeBufferBack.GetCPUData().Length)
+			while (Plugin.GetUnityRenderParameterCount() > 0 && maximumSize > path._computeBufferBack.GetCPUData().Length)
 			{
-				path.ReallocateComputeBuffer(maxmumSize);
+				path.ReallocateComputeBuffer(maximumSize);
 			}
-
-			if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
-			{
-				path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-			}
-
-			RenderInternal(path.commandBuffer, path._computeBufferBack, path._materialProps, path._modelBuffers, path._customDataBuffers, path.renderTexture, path.depthTexture);
-
-			// Distortion
-			if (EffekseerRendererUtils.IsDistortionEnabled &&
-				(path.renderTexture != null || renderTargetProperty != null))
-			{
-				// Add a blit command that copy to the distortion texture
-				if (renderTargetProperty != null && renderTargetProperty.colorBufferID.HasValue)
-				{
-					blitter.Blit(path.commandBuffer, renderTargetProperty.colorBufferID.Value, path.renderTexture.renderTexture, renderTargetProperty.xrRendering);
-					blitter.SetRenderTarget(path.commandBuffer, renderTargetProperty.colorBufferID.Value, renderTargetProperty.xrRendering);
-
-					if (renderTargetProperty.Viewport.HasValue)
-					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-					}
-				}
-				else if (renderTargetProperty != null)
-				{
-					renderTargetProperty.ApplyToCommandBuffer(path.commandBuffer, path.renderTexture, blitter);
-
-					if (renderTargetProperty.Viewport.HasValue)
-					{
-						path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-					}
-				}
-				else
-				{
-					// TODO : Fix
-					bool xrRendering = false;
-
-					blitter.Blit(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, path.renderTexture.renderTexture, xrRendering);
-					blitter.SetRenderTarget(path.commandBuffer, BuiltinRenderTextureType.CameraTarget, xrRendering);
-				}
-			}
-
-			Plugin.EffekseerRenderFront(path.renderId);
-
-			maxmumSize = 0;
-
-			for (int i = 0; i < Plugin.GetUnityStrideBufferCount(); i++)
-			{
-				var buf = Plugin.GetUnityStrideBufferParameter(i);
-				maxmumSize = Math.Max(maxmumSize, buf.Size);
-			}
-
-			// if memory is lacked, reallocate memory
-			while (Plugin.GetUnityRenderParameterCount() > 0 && maxmumSize > path._computeBufferFront.GetCPUData().Length)
-			{
-				path.ReallocateComputeBuffer(maxmumSize);
-			}
-
-			if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
-			{
-				path.commandBuffer.SetViewport(renderTargetProperty.Viewport.Value);
-			}
-
-			RenderInternal(path.commandBuffer, path._computeBufferFront, path._materialProps, path._modelBuffers, path._customDataBuffers, path.renderTexture, path.depthTexture);
 		}
 
 		Texture GetCachedTexture(IntPtr key, BackgroundRenderTexture background, DepthRenderTexture depth, DummyTextureType type)
@@ -1220,7 +1117,7 @@ namespace Effekseer.Internal
 			return EffekseerSystem.GetCachedTexture(IntPtr.Zero, DummyTextureType.White);
 		}
 
-		unsafe void RenderInternal(CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background, DepthRenderTexture depth)
+		unsafe void RenderInternal(IEffekseerCommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol, CustomDataBufferCollection customDataBufferCol, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			var renderParameterCount = Plugin.GetUnityRenderParameterCount();
 			// var vertexBufferSize = Plugin.GetUnityRenderVertexBufferCount();
@@ -1259,7 +1156,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background, DepthRenderTexture depth)
+		unsafe void RenderSprite(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, IEffekseerCommandBuffer commandBuffer, ComputeBufferCollection computeBuffer, MaterialPropCollection matPropCol, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			var prop = matPropCol.GetNext();
 
@@ -1425,7 +1322,7 @@ namespace Effekseer.Internal
 			}
 		}
 
-		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, CommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background, DepthRenderTexture depth)
+		unsafe void RenderModdel(Plugin.UnityRenderParameter parameter, IntPtr infoBuffer, IEffekseerCommandBuffer commandBuffer, MaterialPropCollection matPropCol, ModelBufferCollection modelBufferCol1, CustomDataBufferCollection customDataBuffers, BackgroundRenderTexture background, DepthRenderTexture depth)
 		{
 			// Draw model
 			var modelParameters1 = ((Plugin.UnityRenderModelParameter1*)(((byte*)infoBuffer.ToPointer()) + parameter.VertexBufferOffset));

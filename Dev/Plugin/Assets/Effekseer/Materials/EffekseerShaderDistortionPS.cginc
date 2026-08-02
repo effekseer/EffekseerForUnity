@@ -6,7 +6,17 @@ SamplerState sampler_colorTex : register(s0);
 UNITY_DECLARE_SCREENSPACE_TEXTURE(_backTex);
 
 #ifndef DISABLED_SOFT_PARTICLE
+// XR-WA-002 (English): SPI/Multiview depth is a texture array and must use the current eye slice.
+// XR-WA-002 (日本語): SPI/Multiview の深度は Texture Array のため現在の Eye Slice を参照します。
+// Remove only when Unity transparently binds and samples one texture type for every XR mode.
+// Unity が全 XR モードで単一の Texture 型を透過的に Bind/Sample する場合のみ削除してください。
+#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+Texture2DArray _depthTex : register(t2);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, float3(uv, unity_StereoEyeIndex))
+#else
 Texture2D _depthTex : register(t2);
+#define EFK_SAMPLE_DEPTH(uv) _depthTex.Sample(sampler_depthTex, uv)
+#endif
 SamplerState sampler_depthTex : register(s2);
 #endif
 
@@ -78,7 +88,7 @@ float4 frag(const PS_Input Input)
 
 	if (softParticleParam.w != 0.0f)
 	{
-		float backgroundZ = _depthTex.Sample(sampler_depthTex, screenUV).x;
+		float backgroundZ = EFK_SAMPLE_DEPTH(screenUV).x;
 		Output.a *= SoftParticle(
 			backgroundZ,
 			screenPos.z,

@@ -13,7 +13,7 @@ namespace Effekseer.Internal
 
 		private class RenderPath : RenderPathBase
 		{
-			Material fakeMaterial = null;
+			public Material fakeMaterial = null;
 
 			public override void Init(Camera camera, CameraEvent cameraEvent, int renderId, bool isCommandBufferFromExternal, bool isScriptable)
 			{
@@ -63,11 +63,6 @@ namespace Effekseer.Internal
 				RendererUtils.SetupBackgroundBuffer(ref renderTexture, isDistortionEnabled, camera, renderTargetProperty);
 				RendererUtils.SetupDepthBuffer(ref depthTexture, isDepthEnabled, camera, renderTargetProperty);
 
-				if (!isCommandBufferFromExternal)
-				{
-					SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty, blitter);
-				}
-
 				// register the command to a camera
 				if (!isCommandBufferFromExternal && !_isScriptable)
 				{
@@ -75,117 +70,12 @@ namespace Effekseer.Internal
 				}
 			}
 
-			private void SetupEffekseerRenderCommandBuffer(
-				CommandBuffer cmbBuf,
-				bool enableDistortion,
-				RenderTargetProperty renderTargetProperty,
-				IEffekseerBlitter blitter)
-			{
-				// add a command to render effects.
-				if (cmbBuf == null)
-				{
-					return;
-				}
-
-				Action copyBackground = () =>
-				{
-					if (this.renderTexture != null)
-					{
-						// Add a blit command that copy to the distortion texture
-						// this.commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture);
-						// this.commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-						if (renderTargetProperty != null)
-						{
-							if (renderTargetProperty.colorBufferID.HasValue)
-							{
-								blitter.Blit(cmbBuf, renderTargetProperty.colorBufferID.Value, this.renderTexture.renderTexture, renderTargetProperty.xrRendering);
-								cmbBuf.SetRenderTarget(renderTargetProperty.colorBufferID.Value);
-
-								if (renderTargetProperty.Viewport.HasValue)
-								{
-									cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
-								}
-							}
-							else
-							{
-								renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.renderTexture, blitter);
-
-								if (renderTargetProperty.Viewport.HasValue)
-								{
-									cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
-								}
-							}
-						}
-						else
-						{
-							// TODO : Fix
-							bool xrRendering = false;
-
-							blitter.Blit(cmbBuf, BuiltinRenderTextureType.CameraTarget, this.renderTexture.renderTexture, xrRendering);
-							cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-							// to reset shader settings. SetRenderTarget is not applied until drawing
-							if (fakeMaterial != null)
-							{
-								cmbBuf.DrawProcedural(Matrix4x4.identity, fakeMaterial, 0, MeshTopology.Triangles, 3);
-							}
-						}
-					}
-				};
-
-				copyBackground();
-
-				if (this.depthTexture != null)
-				{
-					if (renderTargetProperty != null)
-					{
-						renderTargetProperty.ApplyToCommandBuffer(cmbBuf, this.depthTexture, blitter);
-
-						if (renderTargetProperty.Viewport.HasValue)
-						{
-							cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
-						}
-					}
-					else
-					{
-						// TODO : Fix
-						bool xrRendering = false;
-
-						blitter.Blit(cmbBuf, BuiltinRenderTextureType.Depth, this.depthTexture.renderTexture, xrRendering);
-						cmbBuf.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-						// to reset shader settings. SetRenderTarget is not applied until drawing
-						if (fakeMaterial != null)
-						{
-							cmbBuf.DrawProcedural(Matrix4x4.identity, fakeMaterial, 0, MeshTopology.Triangles, 3);
-						}
-					}
-				}
-
-				if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
-				{
-					cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
-				}
-
-				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderBackFunc(), this.renderId);
-
-				copyBackground();
-
-				if (renderTargetProperty != null && renderTargetProperty.Viewport.HasValue)
-				{
-					cmbBuf.SetViewport(renderTargetProperty.Viewport.Value);
-				}
-
-				cmbBuf.IssuePluginEvent(Plugin.EffekseerGetRenderFrontFunc(), this.renderId);
-			}
-
 			public override void Dispose()
 			{
 				base.Dispose();
 			}
 
-			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer, RenderTargetProperty renderTargetProperty, IEffekseerBlitter blitter)
+			public void AssignExternalCommandBuffer(CommandBuffer commandBuffer)
 			{
 				if (!isCommandBufferFromExternal)
 				{
@@ -193,7 +83,6 @@ namespace Effekseer.Internal
 				}
 
 				this.commandBuffer = commandBuffer;
-				SetupEffekseerRenderCommandBuffer(commandBuffer, this.isDistortionEnabled, renderTargetProperty, blitter);
 			}
 		}
 
@@ -226,40 +115,35 @@ namespace Effekseer.Internal
 		{
 			if (!EffekseerSettings.Instance.renderAsPostProcessingStack)
 			{
-				Render(camera, int.MaxValue, null, null, false, standardBlitter);
+				EffekseerRenderCoordinator.Render(this, new EffekseerRenderFrameInput(camera, int.MaxValue, null, null, false, standardBlitter));
 			}
 		}
 
-		public void Render(Camera camera, int additionalMask, RenderTargetProperty renderTargetProperty, CommandBuffer targetCommandBuffer, bool isScriptable, IEffekseerBlitter blitter, bool setDefaultRenderTarget = true)
+		public EffekseerPreparedFrame PrepareFrame(EffekseerRenderFrameInput input)
 		{
 			RenderPath path;
 			int allEffectMask;
 			int cameraMask;
-			renderPathContainer.UpdateRenderPath(disableCullingMask, camera, additionalMask, renderTargetProperty, targetCommandBuffer, isScriptable, blitter, cameraEvent, out path, out allEffectMask, out cameraMask);
+			renderPathContainer.UpdateRenderPath(disableCullingMask, input.Camera, input.AdditionalMask,
+				input.RenderTargetProperty, input.TargetCommandBuffer, input.IsScriptable, input.Blitter,
+				cameraEvent, out path, out allEffectMask, out cameraMask, input.UsesExternalCommands);
 			if (path == null)
 			{
-				return;
+				return null;
 			}
 
-			// effects shown don't exists
-			if ((allEffectMask & cameraMask) == 0)
+			if (path.isCommandBufferFromExternal && input.TargetCommandBuffer != null)
 			{
-				// Because rendering thread is asynchronous
-				SpecifyRenderingMatrix(camera, path);
-				return;
+				path.AssignExternalCommandBuffer(input.TargetCommandBuffer);
 			}
 
-			if (path.isCommandBufferFromExternal)
+			if (path.commandBuffer != null && !path.isCommandBufferFromExternal)
 			{
-				path.AssignExternalCommandBuffer(targetCommandBuffer, renderTargetProperty, blitter);
+				path.commandBuffer.Clear();
 			}
 
-			// if LWRP
-			if (renderTargetProperty != null)
+			if (input.RenderTargetProperty != null)
 			{
-				// flip a rendertaget
-				// Direct11 : OK (2019, LWRP 5.13)
-				// Android(OpenGL) : OK (2019, LWRP 5.13)
 				Plugin.EffekseerSetRenderSettings(path.renderId, true);
 				Plugin.EffekseerSetIsBackgroundTextureFlipped(0);
 			}
@@ -272,7 +156,6 @@ namespace Effekseer.Internal
 #endif
 			}
 
-			// assign a dinsotrion texture
 			if (path.renderTexture != null)
 			{
 				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Background, path.renderTexture.ptr);
@@ -291,11 +174,42 @@ namespace Effekseer.Internal
 				Plugin.EffekseerSetExternalTexture(path.renderId, ExternalTextureType.Depth, IntPtr.Zero);
 			}
 
-			// TODO : specify correct texture formats
-			var screenSize = BackgroundRenderTexture.GetRequiredSize(camera, renderTargetProperty);
+			var screenSize = BackgroundRenderTexture.GetRequiredSize(input.Camera, input.RenderTargetProperty);
 			Plugin.EffekseerSetRenderTargetProperty(path.renderId, TextureFormatType.R8G8B8A8_UNORM, TextureFormatType.D32S8, screenSize.x, screenSize.y);
 
-			SpecifyRenderingMatrix(camera, path);
+			SpecifyRenderingMatrix(input.Camera, path);
+
+			return new EffekseerPreparedFrame
+			{
+				BackendPath = path,
+				CommandBuffer = path.commandBuffer,
+				Background = path.renderTexture,
+				Depth = path.depthTexture,
+				TargetCommitMaterial = input.RenderTargetProperty == null && (path.renderTexture != null || path.depthTexture != null)
+					? path.fakeMaterial
+					: null,
+				IsNativeRenderer = true,
+				Camera = input.Camera,
+				HasVisibleEffects = (allEffectMask & cameraMask) != 0,
+			};
+		}
+
+		public void RecordPhase(EffekseerPreparedFrame frame, EffekseerRenderPhase phase, IEffekseerCommandBuffer commandBuffer)
+		{
+			var path = frame.BackendPath as RenderPath;
+			if (path == null || commandBuffer == null)
+			{
+				return;
+			}
+
+			var callback = phase == EffekseerRenderPhase.Back
+				? Plugin.EffekseerGetRenderBackFunc()
+				: Plugin.EffekseerGetRenderFrontFunc();
+			commandBuffer.IssuePluginEvent(callback, path.renderId);
+		}
+
+		public void EndFrame(EffekseerPreparedFrame frame)
+		{
 		}
 
 		private static void SpecifyRenderingMatrix(Camera camera, RenderPath path)
