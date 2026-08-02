@@ -1,0 +1,15 @@
+{
+  "name": "Effekseer.URPVR.EditorSetup",
+  "rootNamespace": "Effekseer.URPVR",
+  "references": [
+    "Unity.InputSystem",
+    "Unity.XR.Management",
+    "Unity.XR.Management.Editor",
+    "Unity.XR.OpenXR",
+    "Unity.XR.OpenXR.Editor",
+    "Unity.XR.OpenXR.Features.MockRuntime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}
