@@ -41,6 +41,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Network/Effekseer.Session.cpp \
 	$(LIB_SRC_PATH)/Network/Effekseer.Socket.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Color.cpp \
+	$(LIB_SRC_PATH)/Effekseer.CoordinateSystem.cpp \
 	$(LIB_SRC_PATH)/Effekseer.CurveLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultEffectLoader.cpp \
 	$(LIB_SRC_PATH)/Effekseer.DefaultFile.cpp \
@@ -65,6 +66,7 @@ LOCAL_SRC_FILES += \
 	$(LIB_SRC_PATH)/Effekseer.Matrix44.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Random.cpp \
 	$(LIB_SRC_PATH)/Effekseer.RectF.cpp \
+	$(LIB_SRC_PATH)/Effekseer.RenderingTransform.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Resource.cpp \
 	$(LIB_SRC_PATH)/Effekseer.ResourceManager.cpp \
 	$(LIB_SRC_PATH)/Effekseer.Setting.cpp \
