@@ -35,6 +35,7 @@ public:
 class TextureConverter
 {
 public:
+	virtual ~TextureConverter() = default;
 	virtual Effekseer::Backend::TextureRef Convert(void* texture) { return nullptr; }
 };
 
