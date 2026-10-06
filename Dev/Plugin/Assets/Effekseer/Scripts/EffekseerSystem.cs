@@ -195,6 +195,18 @@ namespace Effekseer
 			}
 		}
 
+		/// <summary>
+		/// Whether the URP raster pass can be used for XR cameras.
+		/// The native renderer is not allowed because it has not been tested in XR.
+		/// </summary>
+		public bool CanUseURPRasterPassInXR
+		{
+			get
+			{
+				return RendererType == EffekseerRendererType.Unity && CanUseURPRasterPass;
+			}
+		}
+
 		private static CachedTextureContainer cachedTextures = new CachedTextureContainer();
 
 		private static CachedModelContainer cachedModels = new CachedModelContainer();
