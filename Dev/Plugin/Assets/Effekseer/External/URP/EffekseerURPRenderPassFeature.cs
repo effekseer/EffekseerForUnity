@@ -228,8 +228,7 @@ public class EffekseerURPRenderPassFeature : ScriptableRendererFeature
 			var system = Effekseer.EffekseerSystem.Instance;
 			return Effekseer.EffekseerSettings.Instance.enableURPRasterPass &&
 				system != null &&
-				system.CanUseURPRasterPass &&
-				!cameraData.xrRendering;
+				(cameraData.xrRendering ? system.CanUseURPRasterPassInXR : system.CanUseURPRasterPass);
 		}
 
 		public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
