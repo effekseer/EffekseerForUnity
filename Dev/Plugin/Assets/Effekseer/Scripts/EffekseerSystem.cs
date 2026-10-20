@@ -1024,7 +1024,7 @@ namespace Effekseer
 			var pathstr = Marshal.PtrToStringUni(path);
 			var res = GetSoundFromPath(pathstr);
 
-			if (res != null)
+			if (res != null && res.clip != null)
 			{
 				return GetUnityObjectId(res.clip);
 			}
