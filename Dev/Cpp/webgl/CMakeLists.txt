@@ -47,9 +47,13 @@ file(GLOB effekseer_src
 list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon/EffekseerRenderer.DDSTextureLoader.cpp")
 list(REMOVE_ITEM effekseer_src "${PROJECT_SOURCE_DIR}/../../Effekseer/Dev/Cpp/EffekseerRendererCommon/EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.cpp")
 
-# Specify extentions
-set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
-set(CMAKE_SHARED_LIBRARY_SUFFIX ".bc")
-
-add_library(EffekseerUnity SHARED ${effekseer_src})
+# Keep older Unity output unchanged; Unity 6.5 static archives use .a.
+option(EFFEKSEER_WEBGL_STATIC_ARCHIVE "Build a .a archive for Unity 6.5 and later" OFF)
+if(EFFEKSEER_WEBGL_STATIC_ARCHIVE)
+    add_library(EffekseerUnity STATIC ${effekseer_src})
+else()
+    set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".bc")
+    add_library(EffekseerUnity SHARED ${effekseer_src})
+endif()
 target_compile_features(EffekseerUnity PUBLIC cxx_std_17)

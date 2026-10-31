@@ -265,9 +265,9 @@ jobs:
           cd ./Dev/Cpp/webgl
           mkdir build4-0-19
           cd build4-0-19
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release -DEFFEKSEER_WEBGL_STATIC_ARCHIVE=ON ..
           make
-          cp libEffekseerUnity.bc ../../../Plugin/Assets/Effekseer/Plugins/WebGL/4.0.19-64bit/
+          cp libEffekseerUnity.a ../../../Plugin/Assets/Effekseer/Plugins/WebGL/4.0.19-64bit/
       - name: Upload math result for webgl
         uses: actions/upload-artifact@v4
         with:
@@ -339,7 +339,7 @@ jobs:
           mv WebGL_2-0-19/WebGL/2.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/2.0.19-64bit/
           mv WebGL_3-1-8/WebGL/3.1.8-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.8-64bit/
           mv WebGL_3-1-38/WebGL/3.1.38-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/3.1.38-64bit/
-          mv WebGL_4-0-19/WebGL/4.0.19-64bit/libEffekseerUnity.bc Dev/Plugin/Assets/Effekseer/Plugins/WebGL/4.0.19-64bit/
+          mv WebGL_4-0-19/WebGL/4.0.19-64bit/libEffekseerUnity.a Dev/Plugin/Assets/Effekseer/Plugins/WebGL/4.0.19-64bit/
           mv Linux/Linux/x86_64/libEffekseerUnity.so Dev/Plugin/Assets/Effekseer/Plugins/Linux/x86_64/
           mv Windows/x86/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86/
           mv Windows/x86_64/EffekseerUnity.dll Dev/Plugin/Assets/Effekseer/Plugins/x86_64/
